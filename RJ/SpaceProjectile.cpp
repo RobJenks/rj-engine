@@ -31,17 +31,13 @@ SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : 
 		// Set an object code based upon the projectile definition
 		SetCode(concat("SpaceProjectile-")(m_definition->GetCode()).str());
 		
+		// Even though SpaceProjectiles are iObjects, default projectile size is derived (or rather overridden 
+		// by) the projectile definition
+		this->SetSize(m_definition->GetSize());
+
 		this->SetModel(m_definition->GetModel());
 		this->SetMass(m_definition->GetMass());
 		this->SetLifetime(m_definition->GetDefaultLifetime());
-	
-		// Projectile size is derived from the projectile model
-		if (m_model)
-		{
-			this->SetSize(XMLoadFloat3(&m_model->GetModelSize()));
-			FloorVector(m_size, 1.0f);
-		}
-			
 	}
 }
 

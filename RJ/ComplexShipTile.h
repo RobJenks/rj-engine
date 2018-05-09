@@ -12,9 +12,11 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
+#include "ModelData.h"
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
 #include "Model.h"
+#include "ModelInstance.h"
 #include "ComplexShipElement.h"
 #include "TileConnections.h"
 #include "Damage.h"
@@ -23,6 +25,7 @@
 #include "Power.h"
 #include "GameConsoleCommand.h"
 #include "ViewPortal.h"
+#include "CompoundElementModel.h"
 class TiXmlElement;
 class ComplexShip;
 class ComplexShipSection;
@@ -44,399 +47,15 @@ public:
 
 	// Method to generate a new unique ID, called for each new tile being instantiated
 	static Game::ID_TYPE					GenerateNewUniqueID(void)	{ return (++InstanceCreationCount); }
-
-	// Struct holding information on the individual models making up a tile
-	// Class is 16-bit aligned to allow use of SIMD member variables
-	__declspec(align(16))
-	struct TileModel : public ALIGN16<TileModel>
-	{ 
-		enum TileModelType 
-		{
-			Unknown = 0,
-			WallStraight,
-			WallCorner,
-			WallConnection
-		};
-
-		AXMMATRIX rotmatrix; AXMVECTOR offset; Model * model; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type;
-		TileModel(void) { model = NULL; offset = NULL_VECTOR; elementpos = NULL_INTVECTOR3; rotation = Rotation90Degree::Rotate0; type = TileModelType::Unknown; rotmatrix = ID_MATRIX; }
-		TileModel(Model *_model, INTVECTOR3 _elementpos, Rotation90Degree _rotation, TileModelType _type) 
-		{ 
-			// Set the supplied parameters
-			model = _model; 
-			elementpos = _elementpos; 
-			rotation = _rotation;
-			type = _type;
-
-			// Calculate derived parameters from this data
-			offset = Game::ElementLocationToPhysicalPosition(elementpos);
-
-			// Derive a rotation matrix for this part of the model
-			if (rotation == Rotation90Degree::Rotate0 || !model)
-			{
-				rotmatrix = ID_MATRIX;
-			}
-			else
-			{
-				// Calculate temporary translation matrices to translate the model to its centre, so we can then rotate, and then translate back
-				// Most tile models will be zero-centred, so this offset does nothing, however this also accomodates cases with a non-zero centre
-				XMVECTOR centrepoint = XMLoadFloat3(&model->GetModelCentre());
-				XMMATRIX off = XMMatrixTranslationFromVector(XMVectorNegate(centrepoint));
-				XMMATRIX invoff = XMMatrixTranslationFromVector(centrepoint);
-				
-				// Derive and store the rotation matrix for this model
-				rotmatrix = XMMatrixMultiply(XMMatrixMultiply(off, GetRotationMatrix(rotation)), invoff);
-			}
-		}
-	};
-
-	// Struct used to construct a linked list of model data
-	struct ModelLinkedList		
-	{ 
-		Model *model; Rotation90Degree rotation; TileModel::TileModelType type; ModelLinkedList *next; 
-
-		ModelLinkedList(void) { model = NULL; rotation = Rotation90Degree::Rotate0; type = TileModel::TileModelType::Unknown; next = NULL; }
-		ModelLinkedList(Model *_model, Rotation90Degree _rotation, TileModel::TileModelType _type) 
-					   { model = _model; rotation = _rotation; type = _type; next = NULL; }
-
-		void Add(Model *_model, Rotation90Degree _rotation, TileModel::TileModelType _type)
-		{
-			// If the model entry in this node is empty then simply add it here
-			if (!model) { model = _model; rotation = _rotation; type = _type; return; }
-
-			// Otherwise, traverse the linked list until we reach the next null item, or until we terminate due to a potential infinite loop
-			int its = 0;
-			ModelLinkedList *node = this->next;
-			while (node != NULL && ++its < 1000) node = node->next;
-
-			// Add a new node at this position, assuming we did reach a null item (and didn't get stuck in an infinite loop)
-			if (!node) node = new ModelLinkedList(_model, _rotation, _type);
-		}
-
-		bool __HasItem(Model *_model, Rotation90Degree _rotation, TileModel::TileModelType _type, bool testmodel, bool testrot, bool testtype)
-		{
-			// Traverse the linked list until we find the item, or until we terminate due to a potential infinite loop
-			int its = 0;
-			ModelLinkedList *node = this;
-			while (node != NULL && ++its < 1000) 
-			{
-				// Search based only on the specified criteria
-				if ( (!testmodel || node->model == _model) && 
-					 (!testrot || node->rotation == _rotation) && 
-					 (!testtype || node->type == _type) )				return true;
-
-				// Move to the next node
-				node = node->next;
-			}
-
-			// We did not find the item so return false
-			return false;
-		}
-
-		// Overriden methods to search based on specific criteria
-		bool HasItem(Model *_model) { return __HasItem(_model, Rotation90Degree::Rotate0, TileModel::TileModelType::Unknown, true, false, false); }
-		bool HasItem(Rotation90Degree _rot) { return __HasItem(NULL, _rot, TileModel::TileModelType::Unknown, false, true, false); }
-		bool HasItem(TileModel::TileModelType _type) { return __HasItem(NULL, Rotation90Degree::Rotate0, _type, false, false, true); }
-		bool HasItem(Model *_model, Rotation90Degree _rot) { return __HasItem(_model, _rot, TileModel::TileModelType::Unknown, true, true, false); }
-		bool HasItem(Rotation90Degree _rot, TileModel::TileModelType _type) { return __HasItem(NULL, _rot, _type, false, true, true); }
-		bool HasItem(Model *_model, Rotation90Degree _rot, TileModel::TileModelType _type) { return __HasItem(_model, _rot, _type, true, true, true); }
-
-		void RemoveItem(Model *_model, Rotation90Degree _rotation, TileModel::TileModelType _type)
-		{
-			// Traverse the linked list until we find the item, or until we terminate due to a potential infinite loop
-			int its = 0;
-			ModelLinkedList *node = this, *last = NULL;
-			while (node != NULL && ++its < 1000) 
-			{
-				if (node->model == _model && node->rotation == _rotation && node->type == _type) 
-				{
-					if (last) 
-					{
-						last->next = node->next;	// Link the previous element to the next, if we have one
-						delete node; return;		// Delete the current node and return
-					}
-					else
-					{
-						if (node->next)
-						{												// If we are first, and have a next node, then 
-							node->model = node->next->model;			// copy the model back to this node and
-							node->rotation = node->next->rotation;
-							node->type = node->next->type;
-							ModelLinkedList *tmp = node->next->next;	// get a link to this next node's next item (or NULL)
-							delete node->next;							// delete the next node, since we just skipped over it
-							node->next = tmp;							// set the link from current node to the next->next node, so we skip over it
-							return;										// return after successfully removing the item
-						}
-						else
-						{													// Otherwise, we are the only node (no previous or next node)
-							node->model = NULL;								// so simply set the current node model to NULL,
-							node->rotation = Rotation90Degree::Rotate0;		// reset the 
-							node->type = TileModel::TileModelType::Unknown;	// other parameters,
-							return;											// and return since we removed the model
-						}
-					}
-				}
-
-				// Record the last node, and move on to the next one
-				last = node;
-				node = node->next;
-			}
-
-			// We did not find and remove the item
-			return;
-		}
-
-		void RemoveAllItems(void)
-		{
-			int its = 0;
-
-			// First, keep removing the next node in the sequence until we have removed all but the first node
-			while (next != NULL && ++its < 1000)
-				this->RemoveItem(next->model, next->rotation, next->type);
-
-			// Then remove the first (this) node
-			model = NULL; next = NULL;
-			delete this;
-		}
-	};
-
-
-	// Struct holding all compound model data
-	// Class is 16-bit aligned to allow use of SIMD member variables
-	__declspec(align(16))
-	struct TileCompoundModelSet : public ALIGN16<TileCompoundModelSet>
-	{
-		// Struct to allow 16-byte alignment of TileModel instances in STL vector
-		typedef __declspec(align(16))TileModel ATileModel;	
-		typedef __declspec(align(16)) struct ATileModel_P_T : public ALIGN16<ATileModel_P_T> 
-		{ 
-			ATileModel value;
-			ATileModel_P_T(ATileModel & model) { value = model; }
-		} ATileModel_P;
-		
-		// Type definition for aligned collection of tile model instances 
-		typedef __declspec(align(16)) std::vector<ATileModel_P, AlignedAllocator<ATileModel_P, 16U>> TileModelCollection;
-
-		TileModelCollection		Models;					// Linear collection of all models, for rendering efficiency
-		ModelLinkedList	****	ModelLayout;			// Spatial layout of models, for efficient indexing into the collection.  ModelLinkedList*[x][y][z]	
-		INTVECTOR3				Size;					// Size of the compound model, in elements
-		AXMVECTOR				MinBounds, MaxBounds;	// Minimum and maximum bounds of the overall compound model, in world space
-		AXMVECTOR				CompoundModelSize;		// Actual size of the compound model in world space (max-min bounds)
-		AXMVECTOR				CompoundModelCentre;	// Centre point of the compound model in world space (max+min bounds / 2)
-		
-		// Default constructor
-		TileCompoundModelSet(void) { ModelLayout = NULL; Size = NULL_INTVECTOR3; MinBounds = MaxBounds = CompoundModelSize = CompoundModelCentre = NULL_VECTOR; }
-
-		// Allocate space for compound model data of the specified size
-		bool Allocate(const INTVECTOR3 & size)
-		{
-			// Store the new size, or reject entirely if it is not valid
-			if (size.x < 1 || size.y < 1 || size.z < 1) return false;
-			this->Size = size;
-
-			// Allocate the x dimension first
-			ModelLayout = new (std::nothrow) ModelLinkedList***[Size.x];
-			if (!ModelLayout) return false;
-
-			// Now allocate the y dimension within each x dimension
-			for (int x=0; x<Size.x; x++)
-			{
-				ModelLayout[x] = new (std::nothrow) ModelLinkedList**[Size.y];
-				if (!ModelLayout[x]) return false;
-
-				// Finally allocate the z dimension within each y dimension
-				for (int y=0; y<Size.y; y++)
-				{
-					// Allocate space
-					ModelLayout[x][y] = new (std::nothrow) ModelLinkedList*[Size.z];
-					if (!ModelLayout[x][y]) return false;
-
-					// Also initialise all elements to NULL
-					for (int z=0; z<Size.z; z++)
-						ModelLayout[x][y][z] = NULL;
-				}
-			}
-			
-			// Return success
-			return true;
-		}	
-
-		// Overriden method; apply a default model type if not specified.  Also apply default override parameter as below.
-		void AddModel(int x, int y, int z, Model *model, Rotation90Degree rot)
-		{
-			AddModel(x, y, z, model, rot, TileModel::TileModelType::Unknown, false);
-		}
-
-		// Overridden method; do not override existing models in this position by default when adding to the spatial collection
-		void AddModel(int x, int y, int z, Model *model, Rotation90Degree rot, TileModel::TileModelType type)
-		{
-			AddModel(x, y, z, model, rot, type, false);
-		}
-			
-		// Add a model to the location specified.  Overwrite flag determines whether we replace or append
-		void AddModel(int x, int y, int z, Model *model, Rotation90Degree rot, TileModel::TileModelType type, bool overwrite)
-		{
-			// If we currently have no entry in the spatial collection for this location, then simply add here
-			if (ModelLayout[x][y][z] == NULL)
-				ModelLayout[x][y][z] = new ModelLinkedList(model, rot, type);
-			else
-			{
-				// If we want to overwrite then remove the existing model first
-				if (overwrite) RemoveModels(x, y, z);
-				
-				// Add the new model to the spatial collection
-				ModelLayout[x][y][z]->Add(model, rot, type);
-			}
-
-			// Add to the linear collection
-			INTVECTOR3 location = INTVECTOR3(x, y, z);
-			Models.push_back(TileModel(model, location, rot, type));
-
-			// Test whether the compound model bounds have changed based on the addition of this one item
-			RecalculateBounds();
-		}
-
-		// Gets the model at the specified location
-		ModelLinkedList *GetModelAtLocation(int x, int y, int z)
-		{
-			if (x < Size.x && y < Size.y && z < Size.z)			return ModelLayout[x][y][z];
-			else												return NULL;
-		}	
-		
-		// Returns a flag determining whether storage has been allocated
-		bool AllocationPerformed(void) { return (Size.x > 0 || Size.y > 0 || Size.z > 0); }
-
-		// Resets storage to the point before allocation
-		void ResetModelSet(void)
-		{
-			// If we have allocated space then shut down now
-			if (AllocationPerformed()) Shutdown();
-
-			// Recalculate compound model bounds
-			RecalculateBounds();
-		}
-
-		// Copies the tile model set data from another instance
-		void CopyFrom(const TileCompoundModelSet *src)
-		{
-			// Reset this object to remove any existing model data
-			if (!src) return;
-			ResetModelSet();
-
-			// Allocate sufficient space to replicate the source data
-			Allocate(src->Size);
-
-			// Add each item in turn
-			const TileModel *m;
-			int modelcount = (int)src->Models.size();
-			for (int i=0; i<modelcount; ++i)
-			{
-				m = &(src->Models[i].value);
-				AddModel(m->elementpos.x, m->elementpos.y, m->elementpos.z, m->model, m->rotation, m->type, false);
-			}
-
-			// Recalculate compound model bounds
-			RecalculateBounds();
-		}
-
-		// Remove all the models at the specified index
-		void RemoveModels(int x, int y, int z)
-		{
-			int n = (int)Models.size();
-			for (int i = 0; i < n; ++i)
-			{
-				if (Models[i].value.elementpos.x == x && Models[i].value.elementpos.y == y && Models[i].value.elementpos.z == z)
-				{
-					RemoveFromVectorAtIndex<TileModel>(Models, i);	// Remove from the vector at this index
-					--i;											// Decrement the loop counter so we resume at the same location, which now contains the next element
-				}
-			}
-
-			// Also remove from the model layout collection
-			ModelLayout[x][y][z]->RemoveAllItems();
-
-			// Recalculate compound model bounds
-			RecalculateBounds();
-		}
-
-		void Shutdown(void)
-		{
-			// Deallocate storage in the spatial layout
-			if (ModelLayout)
-				for (int x = 0; x < Size.x; x++) 
-					for (int y = 0; y < Size.y; y++)
-						for (int z = 0; z < Size.z; z++)
-							if (ModelLayout[x][y][z] != NULL)
-								ModelLayout[x][y][z]->RemoveAllItems();
-
-			// Clear the linear model storage
-			Models.clear();
-
-			// Reset the size parameter; also indicates that the storage is not allocated
-			Size = NULL_INTVECTOR3;
-
-			// Recalculate compound model bounds
-			RecalculateBounds();
-		}
-
-		void RecalculateBounds(void)
-		{
-			// Initialise the min and max bounds before starting
-			MinBounds = LARGE_VECTOR_P;
-			MaxBounds = LARGE_VECTOR_N;
-			bool updated = false;
-
-			// Iterate over each model in turn
-			Model *model;
-			int n = (int)Models.size();
-			for (int i = 0; i < n; ++i)
-			{
-				// Check this model is valid
-				model = Models[i].value.model;
-				if (!model) continue;
-
-				// Check whether the min or max bounds for this model would push out the overall bounds
-				// Swap y and z coordinates since we are moving from element to world space
-				// D3DXVECTOR3 pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.x), _z_, _y_);
-				XMVECTOR position = XMVectorAdd(Game::ElementLocationToPhysicalPosition(Models[i].value.elementpos), Game::C_CS_ELEMENT_MIDPOINT_V);
-
-				// Update the model bounds if required
-				MinBounds = XMVectorMin(MinBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMinBounds())));	// MinBounds are usually -ve.  Add rather than subtract
-				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMaxBounds())));
-				updated = true;
-			}
-			
-			// Safety check; if no updates could be made, assign a default min/max bounds
-			if (!updated)
-			{
-				MinBounds = NULL_VECTOR; MaxBounds = XMVectorAdd(MinBounds, XMVectorReplicate(0.0f));
-			}
-
-			// Recalculate the model size and centre point based on these values
-			CompoundModelSize = XMVectorSubtract(MaxBounds, MinBounds);
-			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
-		}
-
-		// Indicates whether this compound model was built using any pre-geometry-loading models.  If this is 
-		// the case it will be post-processed after geometry is loaded in the load sequence
-		CMPINLINE bool RequiresPostProcessing(void) const
-		{
-			auto it_end = Models.end();
-			for (auto it = Models.begin(); it != it_end; ++it)
-				if ((*it).value.model && (*it).value.model->IsGeometryLoaded() == false) return true;
-
-			return false;
-		}
-	};
 		
 	// Abstract method to return the type of tile this is.  Must be implemented by all subclasses
-	virtual D::TileClass				GetClass(void) const			= 0;
+	virtual D::TileClass					GetClass(void) const			= 0;
 
 	// Abstract method to make a copy of the tile and return it.  Must be implemented by all subclasses
-	virtual ComplexShipTile *			Copy(void) const				= 0;
+	virtual ComplexShipTile		*			Copy(void) const				= 0;
 
 	// Method to return the unique ID of this tile 
-	CMPINLINE Game::ID_TYPE				GetID(void) const				{ return m_id; }
+	CMPINLINE Game::ID_TYPE					GetID(void) const				{ return m_id; }
 
 	// Retrieves or sets the simulation state for this tile
 	CMPINLINE iObject::ObjectSimulationState		GetSimulationState(void) const								{ return m_simulationstate; }
@@ -527,6 +146,9 @@ public:
 	CMPINLINE unsigned int				GetElementCount(void) const { return m_elementcount; }
 	CMPINLINE XMVECTOR					GetWorldSize(void) const { return m_worldsize; }
 	
+	// Method which recalculates derived size data following a change to the element size (e.g. world size)
+	void								ElementSizeChanged(void);
+
 	// Methods to get and set the string code of this tile
 	CMPINLINE std::string				GetCode(void) const { return m_code; }
 	CMPINLINE void						SetCode(std::string code) { m_code = code; }
@@ -540,7 +162,7 @@ public:
 	CMPINLINE void						SetStandardTile(bool standard) { m_standardtile = standard; }
 
 	// Methods to access and set the geometry of this ship tile
-	CMPINLINE Model *					GetModel(void) const { return m_model; }
+	CMPINLINE ModelInstance				GetModel(void) const { return m_model; }
 
 	// Set the tile to use a single (specified) tile model, and perform any dependent initialisation
 	void								SetSingleModel(Model *model);
@@ -558,15 +180,13 @@ public:
 
 	// Methods to get and set the tile class type
 	CMPINLINE D::TileClass				GetTileClass(void) const		{ return m_classtype; }
+	CMPINLINE int						GetTileClassIndex(void) const	{ return static_cast<int>(m_classtype); }
 	CMPINLINE void						SetTileClass(D::TileClass cls)	{ m_classtype = cls; }
 
 	// Methods to access compound model data
-	CMPINLINE bool						HasCompoundModel(void) const		{ return m_multiplemodels; }
-	CMPINLINE TileCompoundModelSet *	GetCompoundModelSet(void)			{ return &m_models; }
-	CMPINLINE const TileCompoundModelSet *	GetCompoundModelSet(void) const	{ return &m_models; }
-
-	// Indicates whether this tile has compound model data requiring post-processing with full model geometry
-	bool								RequiresCompoundModelPostProcessing(void) const;
+	CMPINLINE bool							HasCompoundModel(void) const		{ return m_multiplemodels; }
+	CMPINLINE CompoundElementModel & 		GetCompoundModelSet(void)			{ return m_models; }
+	CMPINLINE const CompoundElementModel &	GetCompoundModelSet(void) const		{ return m_models; }
 
 	// Recalculate compound model data, including geometry-dependent calculations that are performed during the post-processing load sequence
 	void								RecalculateCompoundModelData(void);
@@ -668,12 +288,12 @@ public:
 
 	// Handle the import of additional collision data from the models that comprise this tile
 	// Import collision data from the single specified model, with no location or rotation offset required
-	void								AddCollisionDataFromModel(Model *model);
+	void								AddCollisionDataFromModel(const ModelInstance & model);
 
 	// Handle the import of additional collision data from the models that comprise this tile
 	// Import collision data from the single specified model, with the given element location
 	// and rotation offsets applied during calculation of the collision volumes
-	void								AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset);
+	void								AddCollisionDataFromModel(const ModelInstance & model, const UINTVECTOR3 & element_offset, Rotation90Degree rotation_offset);
 
 
 	// Get the approximate radius of a bounding sphere that encompasses this tile
@@ -745,7 +365,7 @@ public:
 
 	// Set the single model data for this tile.  Should not be used directly by callers; model should be instantiated via either
 	// SetSingleModel() or SetMultipleModels()
-	CMPINLINE void						SetModel(Model *m) { m_model = m; }
+	CMPINLINE void						SetModel(Model *m) { m_model.SetModel(m); }
 
 	// Set the flag indicating whether this tile uses a compound or single model set.  Should not be used directly by callers; model 
 	// should be instantiated via either SetSingleModel() or SetMultipleModels()
@@ -853,8 +473,8 @@ protected:
 
 	// The geometry associated with this ship tile
 	bool						m_multiplemodels;
-	Model *						m_model;
-	TileCompoundModelSet		m_models;
+	ModelInstance				m_model;
+	CompoundElementModel		m_models;
 
 	// Flag indicating whether the tile has been rendered this frame
 	FrameFlag					m_rendered;
@@ -937,6 +557,5 @@ public:
 	#endif
 
 };
-
 
 #endif

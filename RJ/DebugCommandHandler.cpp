@@ -11,6 +11,7 @@
 #include "RJMain.h"
 #include "UserInterface.h"
 #include "Logging.h"
+#include "FrameProfiler.h"
 
 // Debug command handler needs to include the full object & tile hierarchies to support per-object command handling
 #include "Actor.h"
@@ -325,7 +326,7 @@ void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameC
 
 	// Return error since we cannot currently handle this tile class
 	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidTileClass,
-		concat("Failed to execute debug command; unrecognised tile class with index ")(tile->GetTileClass()).str().c_str());
+		concat("Failed to execute debug command; unrecognised tile class with index ")(static_cast<int>(tile->GetTileClass())).str().c_str());
 }
 
 // Debug spawn a set of ships near the player

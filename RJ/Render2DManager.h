@@ -8,6 +8,7 @@
 
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "Rendering.h"
 #include "Render2DGroup.h"
 
 class TextureShader;
@@ -39,7 +40,7 @@ public:
 
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 
-	Result XM_CALLCONV Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd,
+	Result RJ_XM_CALLCONV Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
 					  int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix);
 
 	void Render(void);
@@ -48,8 +49,8 @@ public:
 private:
 	RenderGroupCollection	m_rendergroups;
 
-	ID3D11Device*			m_device;
-	ID3D11DeviceContext*	m_devicecontext;
+	Rendering::RenderDeviceType *			m_device;
+	Rendering::RenderDeviceContextType *	m_devicecontext;
 	HWND					m_hwnd;
 	int						m_screenwidth, m_screenheight;
 

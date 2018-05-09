@@ -82,9 +82,9 @@ void GameConsole::ProcessCommand(GameConsoleCommand & command)
 // Parses the raw text input of a command and populates the input parameters
 void GameConsole::ParseCommandRawInput(GameConsoleCommand & command)
 {
-	// Split the entire command string by a ' ' delimiter, and populate in the input parameters
+	// Split the entire command string around spaces, and populate in the input parameters
 	command.InputParameters.clear();
-	SplitString(command.RawTextInput, ' ', true, command.InputParameters);
+	SplitStringQuoted(command.RawTextInput, command.InputParameters);
 
 	// The first element of the string should always be the command itself.  Assuming we do 
 	// have >= 1 element, take that first element and make it the command name instead

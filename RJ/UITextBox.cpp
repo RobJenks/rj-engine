@@ -10,8 +10,8 @@
 #include "UITextBox.h"
 
 UITextBox::UITextBox(std::string code,
-						Image2DRenderGroup::InstanceReference framecomponent, 
-						Image2DRenderGroup::InstanceReference framefocuscomponent, 
+						Image2D *framecomponent, 
+						Image2D *framefocuscomponent, 
 						TextBlock *textcomponent,
 						INTVECTOR2 pos, INTVECTOR2 size, bool render )
 {
@@ -24,13 +24,13 @@ UITextBox::UITextBox(std::string code,
 
 	// Also populate the component collection with these pointers
 	m_components.clear();
-	m_components.push_back(m_framecomponent.instance);
-	m_components.push_back(m_framefocuscomponent.instance);
+	m_components.push_back(m_framecomponent);
+	m_components.push_back(m_framefocuscomponent);
 	m_components.push_back(m_textcomponent);
 
 	// Calculate the offset between textbox location and text location, to be maintained in any further position changes
-	if (m_textcomponent && m_framecomponent.instance)
-		m_textoffset = (m_textcomponent->GetPosition() - m_framecomponent.instance->position);
+	if (m_textcomponent && m_framecomponent)
+		m_textoffset = (m_textcomponent->GetPosition() - INTVECTOR2(m_framecomponent->GetPosition()));
 	else
 		m_textoffset = INTVECTOR2(0, 0);
 
@@ -48,7 +48,7 @@ void UITextBox::SetPosition(INTVECTOR2 pos)
 	m_position = pos;
 
 	// Set the position of all components to match
-	if (m_framecomponent.instance) m_framecomponent.instance->position = pos;
+	if (m_framecomponent) m_framecomponent->SetPosition(pos.ToFloat());
 
 	// Also incorporate the text offset when positioning the text block
 	if (m_textcomponent) 
@@ -66,7 +66,7 @@ void UITextBox::SetSize(INTVECTOR2 size)
 	m_size = size;
 
 	// Set the size of all components to match
-	if (m_framecomponent.instance) m_framecomponent.instance->size = size;
+	if (m_framecomponent) m_framecomponent->SetSize(size.ToFloat());
 }
 
 void UITextBox::SetRenderActive(bool render)
@@ -77,14 +77,14 @@ void UITextBox::SetRenderActive(bool render)
 	// Set the render value of each component according to the overall button render state
 	if (m_render)
 	{
-		if (m_framecomponent.instance) m_framecomponent.instance->render = m_render;
-		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
+		if (m_framecomponent) m_framecomponent->SetRenderActive(m_render);
+		if (m_framefocuscomponent) m_framefocuscomponent->SetRenderActive(false);
 		if (m_textcomponent) m_textcomponent->SetRenderActive(true);
 	}
 	else 
 	{
-		if (m_framecomponent.instance) m_framecomponent.instance->render = false;
-		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
+		if (m_framecomponent) m_framecomponent->SetRenderActive(false);
+		if (m_framefocuscomponent) m_framefocuscomponent->SetRenderActive(false);
 		if (m_textcomponent) m_textcomponent->SetRenderActive(false);
 	}
 }
@@ -148,54 +148,52 @@ bool UITextBox::WithinControlBounds(INTVECTOR2 point)
 }
 
 // Handles changes in control state in response to a mouse hover event over the control
-void UITextBox::HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UITextBox::HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 }
 
 // Handles changes in control state in response to a mouse down event over the control
-void UITextBox::HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UITextBox::HandleMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 }
 
 // Handles changes in control state in response to a right mouse down event over the control
-void UITextBox::HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UITextBox::HandleRightMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 }
 
 // Handles changes in control state in response to a mouse up event
-void UITextBox::HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UITextBox::HandleMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 }
 
 // Handles changes in control state in response to a right mouse up event
-void UITextBox::HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UITextBox::HandleRightMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 }
 
 // Event handler for left mouse clicks on the components making up this control
-void UITextBox::HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									  INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UITextBox::HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
 }
 
 // Event handler for right mouse clicks on the components making up this control
-void UITextBox::HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-										   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UITextBox::HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
 }
 
 void UITextBox::RenderControl(void) 
 {
 	// Render the normal textures for this control when it is not in focus
-	m_framecomponent.instance->render = m_render;
-	m_framefocuscomponent.instance->render = false;
+	m_framecomponent->SetRenderActive(m_render);
+	m_framefocuscomponent->SetRenderActive(false);
 }
 
 void UITextBox::RenderControlInFocus(void)
 {
 	// Render the focus textures for this control when it is the active control in focus
-	m_framecomponent.instance->render = false;
-	m_framefocuscomponent.instance->render = m_render;
+	m_framecomponent->SetRenderActive(false);
+	m_framefocuscomponent->SetRenderActive(m_render);
 }
 
 void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)

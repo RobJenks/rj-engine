@@ -17,7 +17,7 @@ class ComplexShipTile;
 class ComplexShip;
 class Hardpoint;
 class Hardpoints;
-class Texture;
+class TextureDX11;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -140,8 +140,8 @@ public:
 	void										ShipTileRemoved(ComplexShipTile *tile);		// When a tile is removed.  Virtual inherited from interface.
 
 	// Methods to get and set the preview image for this section
-	CMPINLINE Texture *							GetPreviewImage(void) { return m_previewimage; }
-	void										SetPreviewImage(const std::string & filename);
+	CMPINLINE TextureDX11 *						GetPreviewImage(void) { return m_previewimage; }
+	void										SetPreviewImage(const std::string & name);
 
 	// Event triggered upon destruction of the object
 	void										DestroyObject(void);
@@ -192,7 +192,7 @@ private:
 
 	bool							m_forcerenderinterior;		// Flag that indicates whether the section interior should ALWAYS be rendered, even if criteria are not met
 
-	Texture *						m_previewimage;				// Preview texture for this section; pointer into a central static collection
+	TextureDX11 *					m_previewimage;				// Preview texture for this section; pointer into a central static collection
 
 };
 

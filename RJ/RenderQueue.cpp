@@ -15,8 +15,7 @@ void RenderQueue::RegisterModelBuffer(size_t shader, size_t slot, ModelBuffer *m
 	assert(model != NULL);
 
 	model->AssignRenderSlot(shader, slot);
-	Get(shader).ModelData[slot].ModelBufferInstance = model;
-	Get(shader).ModelData[slot].CurrentInstanceCount = 0U;
+	Get(shader).ModelData[slot].AssignModel(model);
 }
 
 // Clears the specified model data following a successful render, unregistering any 
@@ -26,6 +25,5 @@ void RenderQueue::UnregisterModelBuffer(size_t shader, size_t slot)
 	assert(Get(shader).ModelData[slot].ModelBufferInstance != NULL);
 
 	Get(shader).ModelData[slot].ModelBufferInstance->ClearRenderSlot(shader);
-	Get(shader).ModelData[slot].ModelBufferInstance = NULL;
-	Get(shader).ModelData[slot].CurrentInstanceCount = 0U;
+	Get(shader).ModelData[slot].ClearModel();
 }

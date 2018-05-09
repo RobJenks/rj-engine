@@ -257,6 +257,10 @@ protected:
 	// Validates a tile based on its hard stop requirements
 	Result							ValidateTileHardStop(ComplexShipTile *tile) const;
 
+	// Returns a unit-element-scale model instance for the given Model, for use when generating compound tile geometry
+	// TODO: All compound tile components are currently restricted to 1x1x1 element; may need to make this more flexible
+	static ModelInstance			UnitModelInstance(Model *model);
+
 };
 
 

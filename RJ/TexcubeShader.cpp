@@ -17,7 +17,7 @@ TexcubeShader::TexcubeShader(void)
 	m_sampleState = 0;
 }
 
-Result TexcubeShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result TexcubeShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -34,7 +34,7 @@ Result TexcubeShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result TexcubeShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result TexcubeShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -59,7 +59,7 @@ Result TexcubeShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 
 
 // Initialise shader
-Result TexcubeShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result TexcubeShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -90,7 +90,7 @@ void TexcubeShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV TexcubeShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result RJ_XM_CALLCONV TexcubeShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

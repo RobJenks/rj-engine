@@ -72,9 +72,15 @@ namespace Game {
 	INTVECTOR2 ScreenCentre = INTVECTOR2(Game::ScreenWidth / 2, Game::ScreenHeight / 2);
 	INTVECTOR2 FullWindowSize = NULL_INTVECTOR2;
 	INTVECTOR2 WindowPosition = NULL_INTVECTOR2;
+	float FOV = (PI / 4.0f);
+	float NearClipPlane = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
+	float FarClipPlane = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
 	bool FullScreen = false;
+	bool VSync = true;	// TODO: Render output is flickering when vsync == false, need to determine why
 	bool ForceWARPRenderDevice = false;
 
+	// Indicates whether the primary data load & initialisation process has been completed on startup
+	bool GameDataLoaded = false;
 
 	// Central scheduler for all scheduled jobs
 	CentralScheduler 				Scheduler = CentralScheduler();
@@ -125,7 +131,9 @@ namespace Game {
 	const int C_CONFIG_LOAD_RECURSION_LIMIT = 25;			// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
-	const unsigned int C_INSTANCED_RENDER_LIMIT = 1000U;	// The maximum number of instances that can be rendered in any one draw call by the engine
+	const bool C_RENDER_DEBUG_LAYER = true;					// Flag indicating whether we should attempt to load a debug layer for the current rendering 
+															// engine (e.g D3D_DEVICE_DEBUG). Only available in debug builds regardless of the state of this flag
+	const size_t C_INSTANCED_RENDER_LIMIT = 1000U;			// The maximum number of instances that can be rendered in any one draw call by the engine
 	const float C_MODEL_SIZE_LIMIT = 10000.0f;				// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values
 	const int C_MAX_ARTICULATED_MODEL_SIZE = 128;			// The maximum number of components within any articulated model
 	const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL = 1000U;		// Time (ms) between pre-optimisation checks of the render queue

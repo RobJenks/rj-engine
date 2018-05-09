@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef __UI_ShipDesignerH__
-#define __UI_ShipDesignerH__
+#if 0
 
 #include <vector>
 #include "iUIController.h"
@@ -12,6 +11,7 @@ class Render2DGroup;
 class iUIControl;
 class UIButton;
 class CoreEngine;
+class TextureDX11;
 class Image2D;
 class UserInterface;
 class SDGridItem;
@@ -400,7 +400,7 @@ private:
 	UIButton *					m_panel_tabs[8];	
 
 	// Set of image data collections for rendering each type of complex ship section; maps from the ship image to the I2DRG that covers it
-	typedef std::unordered_map<const Texture*, Image2DRenderGroup*> CSSectionImageCollection;
+	typedef std::unordered_map<const TextureDX11*, Image2DRenderGroup*> CSSectionImageCollection;
 	CSSectionImageCollection	m_css_images;
 	
 	// Set of references that link ship sections to image instances for rendering in the SD

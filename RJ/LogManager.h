@@ -4,12 +4,16 @@
 #define __LogManagerH__
 
 #include <fstream>
+#include <sstream>
 #include "CompilerSettings.h"
 #include "GlobalFlags.h"
 #include "ScheduledObject.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
 #include "DataPorts.h"
+
+// Indicates that logging is supported in the current compilation context if defined
+#define LOGGING_AVAILABLE
 
 // Common body of a log prefix
 #define LOG_PREFIX_BODY "[" << (unsigned int)timeGetTime() << "|" << __FILE__ << ":" << __LINE__ << "] "
@@ -19,6 +23,10 @@
 #define LOG_WARN "WARNING: " << LOG_PREFIX_BODY
 #define LOG_ERROR "ERROR: " << LOG_PREFIX_BODY
 #define LOG_DEBUG "DEBUG: " << LOG_PREFIX_BODY
+
+// Preprocessor define which will mirror all log output to the developer console if set
+#define REPLICATE_LOG_TO_DEVELOPER_CONSOLE
+
 
 // This class has no special alignment requirements
 class LogManager : public ScheduledObject
@@ -37,6 +45,13 @@ public:
 	{
 		m_stream << data;
 		if (m_alwaysflush) m_stream.flush();
+
+		#if defined( REPLICATE_LOG_TO_DEVELOPER_CONSOLE) && defined(_DEBUG)
+			std::ostringstream stringstream;
+			stringstream << data;
+			OutputDebugString(stringstream.str().c_str());
+#		endif
+
 		return (*this);
 	}
 
@@ -112,7 +127,7 @@ protected:
 	#ifdef RJ_PROFILER_ACTIVE
 		std::ofstream			m_profilingstream;
 	#endif
-	
+
 	// Flag indicating whether the primary log should flush after every stream operation.  Used during initialisation
 	// to make sure that all data is output before any potential crash
 	bool						m_alwaysflush;

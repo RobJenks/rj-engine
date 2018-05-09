@@ -1,4 +1,5 @@
 #include "GameVarsExtern.h"
+#include "ModelInstance.h"
 #include "Model.h"
 #include "ArticulatedModelComponent.h"
 
@@ -39,13 +40,15 @@ ArticulatedModel::ArticulatedModel(int componentcount)
 }
 
 // Set the definition of a particular model component.  Returns a value indicating whether the definition could be set
-bool ArticulatedModel::SetComponentDefinition(int index, Model *model)
+bool ArticulatedModel::SetComponentDefinition(int index, Model *model, const VariableSizeValue & size)
 {
 	// Parameter check
 	if (index < 0 || index >= m_componentcount || !m_components[index]) return false;
+	if (!model) return false;
 
 	// Set the model definition and return success
-	m_components[index]->Model = model;
+	m_components[index]->Model.SetModel(model);
+	size.ApplyToObject(&(m_components[index]->Model));
 	return true;
 }
 
@@ -180,15 +183,13 @@ void ArticulatedModel::PerformPostLoadInitialisation(void)
 	for (int i = 0; i < m_componentcount; ++i)
 	{
 		// Add component extents to the consolidate terrain bounding box
-		Model *model = m_components[i]->Model;
-		if (model)
-		{
-			XMVECTOR largest_bound = XMVectorMax(
-				XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), XMLoadFloat3(&model->GetModelMinBounds()))),
-				XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), XMLoadFloat3(&model->GetModelMaxBounds()))));
+		const ModelInstance & model = m_components[i]->Model;
 
-			extent = XMVectorMax(extent, largest_bound);
-		}
+		XMVECTOR largest_bound = XMVectorMax(
+			XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), model.DetermineModelInstanceMinBounds())),
+			XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), model.DetermineModelInstanceMaxBounds())));
+
+		extent = XMVectorMax(extent, largest_bound);
 
 		// Also attempt to determine the root component for this model
 		if (!m_components[i]->HasParentAttachment())

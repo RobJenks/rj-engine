@@ -12,6 +12,7 @@
 #include "Render2DManager.h"
 #include "Render2DGroup.h"
 #include "iUIController.h"
+#include "iUIComponent.h"
 #include "iUIControl.h"
 #include "UI_Console.h"
 #include "UI_ShipDesigner.h"
@@ -41,7 +42,7 @@ UserInterface::UserInterface(void)
 	m_controller = NULL;
 	m_mouselocation.x = m_mouselocation.y = 0;
 	m_mousepreviouslocation.x = m_mousepreviouslocation.y = 0;
-	m_mousecurrenthovercomponent = Image2DRenderGroup::InstanceReference(NULL, NULL, -1, "");
+	m_mousecurrenthovercomponent = NULL;
 	m_console_active = false;
 	m_pre_console_controller = NULL;
 
@@ -67,13 +68,14 @@ Result UserInterface::BuildUILayouts(void)
 {
 	Result result, overallresult = ErrorCodes::NoError;
 
+	/* Ship designer UI is currently disabled; expected to be replaced by the ShipBuilder UI*/
 	// Perform post-load initialisation of the ship designer UI
-	result = InitialiseShipDesignerUI();
+	/*result = InitialiseShipDesignerUI();
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result; 
 		Game::Log << LOG_ERROR << "Error building ship designer UI layout\n";
-	}
+	}*/
 
 	// Initialise the model builder UI
 	result = InitialiseModelBuilderUI();
@@ -175,7 +177,7 @@ Result UserInterface::InitialiseUIComponentSets(void)
 
 Result UserInterface::InitialiseShipDesignerUI(void)
 {
-	Result result;
+	/*Result result;
 
 	// Make sure this ship designer UI was loaded with the game data
 	Render2DGroup *ui = Game::Engine->Get2DRenderManager()->GetRenderGroup(UserInterface::UI_SHIPDESIGNER);
@@ -190,7 +192,7 @@ Result UserInterface::InitialiseShipDesignerUI(void)
 	if (result != ErrorCodes::NoError) return result;
 
 	// Add to the collection of controllers
-	m_ui_controllers.push_back((iUIController**)&m_shipdesigner);
+	m_ui_controllers.push_back((iUIController**)&m_shipdesigner);*/
 
 	// Return succeess
 	return ErrorCodes::NoError;
@@ -283,29 +285,6 @@ std::string UserInterface::GetActiveUIControllerCode(void) const
 {
 	if (m_controller)	return m_controller->GetCode();
 	else				return NullString;
-}
-
-Image2D *UserInterface::NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height)
-{
-	// Create a new component and initialise with the supplied data
-	Image2D *item = new Image2D();
-	Result result = item->Initialize(Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
-									 filename, width, height);
-
-	// Return NULL if the initialisation failed
-	if (result != ErrorCodes::NoError || !item)
-	{
-		if (item) delete item;
-		return NULL;
-	}
-
-	// Set properties and the initial position
-	item->SetCode(code);
-	item->SetPosition(x, y);
-	item->SetZOrder(z);
-
-	// Return the new component
-	return item;
 }
 
 // Activates a UI state based on its uniquely-identifying code
@@ -414,7 +393,7 @@ void UserInterface::DeactivateAllUIComponents(void)
 void UserInterface::Terminate(void)
 {
 	// Terminate all major UI components in turn
-	if (m_shipdesigner)		{ m_shipdesigner->Terminate(); SafeDelete(m_shipdesigner); }
+	//if (m_shipdesigner)		{ m_shipdesigner->Terminate(); SafeDelete(m_shipdesigner); }
 	if (m_modelbuilder)		{ m_modelbuilder->Terminate(); SafeDelete(m_modelbuilder); }
 	if (m_console)			{ m_console->Terminate(); SafeDelete(m_console); }
 
@@ -534,17 +513,17 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 				m_controller->ProcessMouseMoveEvent(m_mouselocation);
 
 				// Also test whether this is a component at this new location
-				m_mousecurrenthovercomponent = m_controller->GetRenderGroup()->GetComponentInstanceAtLocation(m_mouselocation, true);
+				m_mousecurrenthovercomponent = m_controller->GetRenderGroup()->GetComponentAtLocation(m_mouselocation.ToFloat(), true);
 			}
 
 			// If there IS a component at this location (either cached or new) then raise a mouse hover event for the component
-			if (m_mousecurrenthovercomponent.instance)
+			if (m_mousecurrenthovercomponent)
 			{
 				m_controller->ProcessMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation, m_lmb, m_rmb);
 
 				// Also pass control to any managed component to update its appearance based on a mouse hover event
-				if (m_mousecurrenthovercomponent.instance->control)
-					m_mousecurrenthovercomponent.instance->control->HandleMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation);
+				if (m_mousecurrenthovercomponent->GetParentControl())
+					m_mousecurrenthovercomponent->GetParentControl()->HandleMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation);
 			}
 
 			// Now generate LMB events
@@ -554,8 +533,8 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 				m_controller->ProcessMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
 
 				// If the mouse is over a managed component then also pass it control to update its own appearance
-				if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
-					m_mousecurrenthovercomponent.instance->control->HandleMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
+				if (m_mousecurrenthovercomponent && m_mousecurrenthovercomponent->GetParentControl())
+					m_mousecurrenthovercomponent->GetParentControl()->HandleMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
 
 				// Also report whether this is the first press of the button
 				if (mouse->LMBFirstDown())
@@ -577,18 +556,18 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
 					// end location are both within a particular control. 
 					// First, test whether the current (mouse up) location is within a component, and whether began the mouse event within the same component
-					if (m_mousecurrenthovercomponent.instance && 
-						PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size))
+					if (m_mousecurrenthovercomponent && 
+						PointWithinBounds(startloc, INTVECTOR2(m_mousecurrenthovercomponent->GetPosition()), INTVECTOR2(m_mousecurrenthovercomponent->GetSize())))
 					{
 						// If it did, raise a mouse click event for this component
 						m_controller->ProcessMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
 
 						// Also raise a control-click method (both at the controller and the control itself) if this is a managed control
-						if (m_mousecurrenthovercomponent.instance->control)
+						if (m_mousecurrenthovercomponent->GetParentControl())
 						{
-							m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent.instance->control);
-							m_mousecurrenthovercomponent.instance->control->HandleMouseClickEvent(
-								m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
+							m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent->GetParentControl());
+							m_mousecurrenthovercomponent->GetParentControl()->HandleMouseClickEvent(
+								m_mousecurrenthovercomponent, m_mouselocation, startloc);
 						}
 						else
 						{
@@ -614,8 +593,8 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 				m_controller->ProcessRightMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
 
 				// If the mouse is over a managed component then also pass it control to update its own appearance
-				if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
-					m_mousecurrenthovercomponent.instance->control->HandleRightMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
+				if (m_mousecurrenthovercomponent && m_mousecurrenthovercomponent->GetParentControl())
+					m_mousecurrenthovercomponent->GetParentControl()->HandleRightMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
 
 				// Also report whether this is the first press of the button
 				if (mouse->RMBFirstDown())
@@ -637,20 +616,20 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
 					// end location are both within a particular control. 
 					// First, test whether the current (mouse up) location is within a component
-					if (m_mousecurrenthovercomponent.instance) {
+					if (m_mousecurrenthovercomponent) {
 
 						// If the mouse IS within a component then test whether it also began the mouse event within the same component
-						if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
-
+						if (PointWithinBounds(startloc, INTVECTOR2(m_mousecurrenthovercomponent->GetPosition()), INTVECTOR2(m_mousecurrenthovercomponent->GetSize())))
+						{
 							// If it did, raise a right mouse click event for this component
 							m_controller->ProcessRightMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
 
 							// Also raise a control-right-click method if this is a managed control
-							if (m_mousecurrenthovercomponent.instance->control)
+							if (m_mousecurrenthovercomponent->GetParentControl())
 							{
-								m_controller->ProcessControlRightClickEvent(m_mousecurrenthovercomponent.instance->control);
-								m_mousecurrenthovercomponent.instance->control->HandleMouseRightClickEvent(
-									m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
+								m_controller->ProcessControlRightClickEvent(m_mousecurrenthovercomponent->GetParentControl());
+								m_mousecurrenthovercomponent->GetParentControl()->HandleMouseRightClickEvent(
+									m_mousecurrenthovercomponent, m_mouselocation, startloc);
 							}
 						}
 					}
@@ -667,7 +646,7 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 }
 
 // Broadcasts a mouse up event to any control not currently in its default state
-void UserInterface::BroadcastMouseUpEvent(bool lmb, bool rmb, Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UserInterface::BroadcastMouseUpEvent(bool lmb, bool rmb, iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	// Get a reference to the current render group.  NOTE: assumes that m_controller and the render group are valid
 	Render2DGroup *group = m_controller->GetRenderGroup();
@@ -677,7 +656,7 @@ void UserInterface::BroadcastMouseUpEvent(bool lmb, bool rmb, Image2DRenderGroup
 }
 
 // Broadcasts a mouse up event within a class of iUIControl-derived components.  Internal private method.
-void UserInterface::BroadcastMouseUpEventToClass(RenderComponentGroup<iUIControl*> *cclass, bool lmb, bool rmb, Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UserInterface::BroadcastMouseUpEventToClass(RenderComponentGroup<iUIControl*> *cclass, bool lmb, bool rmb, iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	RenderComponentGroup<iUIControl*>::ItemCollection::const_iterator it_end = cclass->Items()->end();
 	for (RenderComponentGroup<iUIControl*>::ItemCollection::const_iterator it = cclass->Items()->begin(); it != it_end; ++it)

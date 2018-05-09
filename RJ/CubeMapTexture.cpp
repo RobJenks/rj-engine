@@ -1,8 +1,10 @@
-#include "DirectXTK\Inc\DDSTextureLoader.h"
+/*#include "DirectXTK\Inc\DDSTextureLoader.h"
+#include "ErrorCodes.h"
+#include "Utility.h"
 
 #include "CubeMapTexture.h"
 
-Result CubeMapTexture::Initialise(ID3D11Device *device, const char *filename)
+Result CubeMapTexture::Initialise(Rendering::RenderDeviceType  *device, const char *filename)
 {
 	HRESULT result;
 
@@ -44,3 +46,4 @@ CubeMapTexture::CubeMapTexture(void)
 CubeMapTexture::~CubeMapTexture(void)
 {
 }
+*/

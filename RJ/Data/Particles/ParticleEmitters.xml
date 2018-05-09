@@ -1,0 +1,45 @@
+<gamedata>
+
+  <!-- Dust particles -->
+  <Texture code="dust_particle" dimension="Texture2D" filename="Particles/dust_particle.dds" />
+  
+  <ParticleEmitter>
+    <Code>DEBUG_SPARKLE</Code>
+    <ParticleLimit>250</ParticleLimit>
+    <ParticleTexture>dust_particle</ParticleTexture>
+    <EmissionFrequency min="0.001000" max="0.002000" />
+    <InitialLifetime min="3.000000" max="5.000000" />
+    <InitialPosition.min x="-5.000000" y="0.000000" z="-5.000000" />
+    <InitialPosition.max x="5.000000" y="0.000000" z="5.000000" />
+    <InitialColour.min x="0.000000" y="0.000000" z="0.000000" w="1.000000" />
+    <InitialColour.max x="1.000000" y="1.000000" z="1.000000" w="1.000000" />
+    <InitialSize min="3.000000" max="5.000000" />
+    <InitialVelocity.min x="-3.000000" y="-3.000000" z="25.000000" />
+    <InitialVelocity.max x="3.000000" y="3.000000" z="50.000000" />
+    <UpdateColour.min x="0.000000" y="0.000000" z="0.000000" w="-0.600000" />
+    <UpdateColour.max x="0.000000" y="0.000000" z="0.000000" w="-0.300000" />
+  </ParticleEmitter>
+
+
+  <!-- Engine thrust particles -->
+  <Texture code="engine_particle" dimension="Texture2D" filename="Particles/engine_particle.dds" />
+  
+  <ParticleEmitter>
+    <Code>Ion_Engine_Thrust_01</Code>
+    <ParticleLimit>100</ParticleLimit>
+    <ParticleTexture>engine_particle</ParticleTexture>
+    <EmissionFrequency min="0.005000" max="0.010000" />
+    <InitialLifetime min="0.15000" max="0.200000" />
+    <InitialPosition.min x="-3.000000" y="0.000000" z="-0.500000" />
+    <InitialPosition.max x="3.000000" y="0.000000" z="0.500000" />
+    <InitialColour.min x="0.569000" y="1.000000" z="0.957000" w="0.400000" />
+    <InitialColour.max x="0.702000" y="1.000000" z="0.973000" w="0.900000" />
+    <InitialSize min="2.000000" max="4.000000" />
+    <InitialVelocity.min x="-1.000000" y="-1.000000" z="-60.000000" />
+    <InitialVelocity.max x="1.000000" y="1.000000" z="-80.000000" />
+    <UpdateColour.min x="0.000000" y="0.000000" z="0.000000" w="-5.000000" />
+    <UpdateColour.max x="0.000000" y="0.000000" z="0.000000" w="-4.000000" />
+    <UpdateSize min="2.0000000" max="4.000000" />
+  </ParticleEmitter>
+  
+</gamedata>

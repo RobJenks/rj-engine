@@ -16,8 +16,12 @@
 // Enable strict access to XMMATRIX structures to prevent inefficient per-component access
 #define XM_STRICT_XMMATRIX
 
+// Alias the RJ_XM_CALLCONV calling convention to __vectorcall or others if needed.  For now, not required
+#define RJ_XM_CALLCONV 
+
 // Include core DX11 headers for basic functionality
-#include <d3d11.h>
+//#include <d3d11.h>
+#include <d3d11_2.h>
 #include <DirectXMath.h>
 #include <dxgi.h>
 
@@ -25,6 +29,7 @@
 #pragma comment(lib, "dxgi.lib")
 //#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 //#pragma comment(lib, "directxmath.lib")
 #pragma comment(lib, "windowscodecs.lib")
 

@@ -10,8 +10,12 @@
 
   <!-- Load modifier data -->
   <include file="Modifiers\Modifiers.xml" />
-  
-  <!-- Load static model data -->
+
+  <!-- General rendering resources -->
+  <include file="Rendering\emissive_materials.xml" />
+  <include file="Rendering\misc_rendering_materials.xml" />
+
+  <!-- Load shared static model data -->
   <include file="Models\BasicModels.xml" />
   <include file="Ships\ShipModels.xml" />
   <include file="Ships\TileModels.xml" />
@@ -29,22 +33,6 @@
   <!-- Load all dynamic terrain definitions.  Must be loaded after basic terrain -->
   <include file="DynamicTerrain\DynamicTerrain.xml" />
   
-  <!-- Load simple ship data -->
-	<include file="Ships\SimpleShips.xml" />
-
-  <!-- Load the set of ship tile classes, then the set of tile definitions -->
-  <include file="Ships\ComplexShipTileClasses.xml" />
-  <include file="Ships\ComplexShipTileDefinitions.xml" />
-  
-  <!-- Load the set of all standard complex ship sections -->
-  <include file="Ships\ComplexShipSections.xml" />
-  
-  <!-- Load all complex ships in the game and their associated sections -->
-  <include file="Ships\ComplexShips.xml" />
-
-  <!-- Load all custom user ships from the relevant source directory -->
-  <include file="Ships\CustomDesigns" />
-
   <!-- Load turret object data (must load Projectiles > Launchers > Turrets due to dependencies) -->
   <include file="Projectiles\ProjectileDefinitions.xml" />
   <include file="Turrets\ProjectileLaunchers.xml" />
@@ -54,8 +42,30 @@
   <include file="Engines.xml" />
 
   <!-- Load effects and particle emitter data -->
-  <include file="Effects.xml" />
-  <include file="ParticleEmitters.xml" />
+  <include file="Effects\Effects.xml" />
+  <include file="Particles\ParticleEmitters.xml" />
+
+  <!-- Load fonts -->
+  <include file="Fonts\Fonts.xml" />
+
+  <!-- Load overlay renderer resources -->
+  <include file="Overlay\OverlayResources.xml" />
+  
+  <!-- Load ship data -->
+  <include file="Ships\Ships.xml" />
+
+  <!-- Load the set of ship tile classes, then the set of tile definitions -->
+  <include file="Ships\ComplexShipTileClasses.xml" />
+  <include file="Ships\ComplexShipTileDefinitions.xml" />
+
+  <!-- Load the set of all standard complex ship sections -->
+  <include file="Ships\ComplexShipSections.xml" />
+
+  <!-- Load all complex ships in the game and their associated sections -->
+  <include file="Ships\ComplexShips.xml" />
+
+  <!-- Load all custom user ships from the relevant source directory -->
+  <include file="Ships\CustomDesigns" />
 
   <!-- Load ship loadouts, after both the ships and equipement/objects to be mapped -->
   <include file="Ships\SimpleShipLoadouts.xml" />

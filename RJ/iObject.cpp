@@ -166,14 +166,10 @@ void iObject::InitialiseCopiedObject(iObject *source)
 void iObject::SetModel(Model *model)
 {
 	// Store the new model
-	m_model = model;
+	m_model.SetModel(model);
 
-	// Derive additional data from the model if it was provided
-	if (model)
-	{
-		// Update the object size to match the model bounds
-		SetSize(XMLoadFloat3(&model->GetModelSize()));
-	}
+	// Attempt to default the model to our object size, maintaining proportions if not equal between the two
+	m_model.SetSize(GetSize());
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 
@@ -362,7 +358,7 @@ iObject::~iObject(void)
 }
 
 // Set the size of this object.  Recalculates any dependent fields, e.g. those involved in collision detection
-void iObject::SetSize(const FXMVECTOR size)
+void iObject::SetSize(const FXMVECTOR size, bool preserve_proportions)
 {
 	// Store the size parameter
 	m_size = size;
@@ -377,6 +373,10 @@ void iObject::SetSize(const FXMVECTOR size)
 	// Store the local float representation to allow us to perform per-component tests at runtime
 	XMStoreFloat3(&m_sizef, m_size);
 
+	// Update the model geometry to match this new size; this will override any scaling factor applied
+	// to the model at its original size
+	m_model.SetSize(m_size, preserve_proportions);
+	
 	// Recalculate the object fast mover threshold
 	m_fastmoverthresholdsq = (min(m_sizef.x, min(m_sizef.y, m_sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
 	m_fastmoverthresholdsq *= m_fastmoverthresholdsq;
@@ -396,6 +396,27 @@ void iObject::SetSize(const FXMVECTOR size)
 	{
 		CollisionOBB.UpdateExtentFromSize(m_size);
 	}
+}
+
+// We can set the object size with a single parameter; the largest object dimension will be scaled
+// to this value, maintaining proportions, based on the underlying model size.  If the object has no 
+// model then the size will be uniformly scaled by this value
+void iObject::SetSize(float max_dimension)
+{
+	// Apply uniform scaling if we have no model geometry
+	if (!m_model.GetModel())
+	{
+		SetSize(XMVectorReplicate(max_dimension));
+		return;
+	}
+
+	// Set the size of the underlying model, which will cause a recalculation of the required object proportions 
+	m_model.SetSize(max_dimension);
+
+	// Now call the primary object SetSize method using these calculated dimensions; these will exist
+	// in the scale diagonal of the world matrix
+	XMMATRIX world = m_model.GetWorldMatrix();
+	SetSize(XMVectorSet(XMVectorGetX(world.r[0]), XMVectorGetY(world.r[1]), XMVectorGetZ(world.r[2]), 0.0f));
 }
 
 // Set a new collision sphere radius, recalcuating all derived fieds
@@ -708,7 +729,7 @@ void iObject::DebugRenderRayIntersectionTest(const BasicRay & world_ray)
 	}
 
 	Game::Engine->RenderVolumetricLine(VolumetricLine(world_ray.Origin, XMVectorAdd(world_ray.Origin, world_ray.Direction), 
-		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"))));
+		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, Game::Engine->GetAssets().GetMaterial("ui_intersection_test_trajectory")));
 #endif
 }
 
@@ -873,6 +894,7 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetAsSimulationHub)
 	REGISTER_DEBUG_FN(RemoveSimulationHub)
 	REGISTER_DEBUG_FN(SetSize, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
+	REGISTER_DEBUG_FN(SetMaxSize, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(SetFaction, (Faction::F_ID)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(SetCollisionMode, (Game::CollisionMode)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(SetColliderType, (Game::ColliderType)command.ParameterAsInt(2))

@@ -16,6 +16,7 @@ class ComplexShip;
 class SpaceProjectile;
 class SpaceTurret;
 class TurretController;
+class LightSource;
 
 
 // This class has no special alignment requirements
@@ -116,6 +117,7 @@ public:
 	void RunAllTests(void);
 
 	// *** DEBUG ***
+	Ship * InitialiseTemporaryPlayerShip(void);
 	void __CreateDebugScenario(void);
 	void DEBUGDisplayInfo(void);
 	void DebugRenderSpaceCollisionBoxes(void);
@@ -173,6 +175,7 @@ public:
 	ObjectReference<ComplexShip> cs, cs2;
 	ObjectReference<Actor> a1;
 	ObjectReference<SpaceProjectile> proj;
+	ObjectReference<LightSource> lt, lt2;
 
 	ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
 	UINT					m_vertexcount;

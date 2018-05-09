@@ -1,4 +1,9 @@
 <gamedata>
+
+  <!-- Include any resources specific to this UI layout -->
+  <include file="UI/ShipBuilder/shipbuilder_resources.xml" />
+
+  <!-- Shipbuilder UI layout -->
   <uilayout>
     <Code>UI_SHIPBUILDER</Code>
     <Description>Ship Builder</Description>
@@ -8,14 +13,14 @@
     <!-- =============================== -->
     
     <!-- Textbox components -->
-    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame" texture="textbox_normal" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_shipname_fr" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projmass_fr" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projvel_fr" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projradius_fr" x="1000" y="128" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projhardness_fr" x="1000" y="176" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame_focus" texture="textbox_focus" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_shipname_frf" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projmass_frf" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projvel_frf" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
@@ -24,13 +29,13 @@
     </Image2DGroup>
 
     <!-- Button type 1 components -->
-    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="button1_up" texture="button1" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="btn_save_up" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_up" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_reset_up" x="1160" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_tile_revert_up" x="1192" y="186" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="button1_down" texture="button1_down" texturemode="Normal" render="true">
       <Instance code="btn_save_down" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_down" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_reset_down" x="1160" y="128" z="0.01" width="64" height="32" render="true" />

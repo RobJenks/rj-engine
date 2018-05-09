@@ -33,34 +33,50 @@ class SkinnedModel;
 class ActorBase;
 class DynamicTileSet;
 
-// This file contains no objects with special alignment requirements
-namespace D {
+// This class contains no objects with special alignment requirements
+class D
+{
+public:
 
-	// Primary data collections
-	extern DataRegister<SimpleShip>						SimpleShips;				// The details of all simple ship classes in the game
-	extern DataRegister<SimpleShipLoadout>				SSLoadouts;					// The details of all simple ship loadouts in the game
-	extern DataRegister<class Equipment>				Equipment;					// The details of all equipment in the game
+	// General templated method to uniquely return a data register based on its type
+	template <typename T>
+	static CMPINLINE DataRegister<T> &						GetDataRegister(void)
+	{
+		static_assert(false, "Data register not available for given type");
+		return DataRegister<T>();
+	}
 
-	extern DataRegister<ComplexShip>					ComplexShips;				// The details of all complex ships in the game
-	extern DataRegister<ComplexShipSection>				ComplexShipSections;		// The details of all complex ship sections in the game
-	extern DataRegister<ComplexShipTileDefinition>		ComplexShipTiles;			// The details of all complex ship tiles in the game
-	extern DataRegister<ComplexShipTileClass>			ComplexShipTileClasses;		// The details of all complex ship tile classes in the game
-	extern DataRegister<DynamicTileSet>					DynamicTileSets;			// Details of all dynamic tile sets in the game
-	extern DataRegister<ComplexShipObjectClass>			ComplexShipObjectClasses;	// The details of all object classes in the game
+	// Declare a data register and add a type-indexed method to retrieve the collection
+#define DeclareDataRegister(Type, Name) \
+	static DataRegister<class Type>							Name; \
+	template<> static CMPINLINE DataRegister<class Type> &	GetDataRegister(void) { return Name; }
+	
+		// Primary data collections
+		DeclareDataRegister(SimpleShip, SimpleShips);								// The details of all simple ship classes in the game
+		DeclareDataRegister(SimpleShipLoadout, SSLoadouts);							// The details of all simple ship loadouts in the game
+		DeclareDataRegister(Equipment, Equipment);									// The details of all equipment in the game
 
-	extern DataRegister<TerrainDefinition>				TerrainDefinitions;			// The details of all static terrain classes in the game
-	extern DataRegister<DynamicTerrainDefinition>		DynamicTerrainDefinitions;	// The details of all dynamic terrain classes in the game
+		DeclareDataRegister(ComplexShip, ComplexShips);								// The details of all complex ships in the game
+		DeclareDataRegister(ComplexShipSection, ComplexShipSections);				// The details of all complex ship sections in the game
+		DeclareDataRegister(ComplexShipTileDefinition, ComplexShipTiles);			// The details of all complex ship tiles in the game
+		DeclareDataRegister(ComplexShipTileClass, ComplexShipTileClasses);			// The details of all complex ship tile classes in the game
+		DeclareDataRegister(DynamicTileSet, DynamicTileSets);						// Details of all dynamic tile sets in the game
+		DeclareDataRegister(ComplexShipObjectClass, ComplexShipObjectClasses);		// The details of all object classes in the game
 
-	extern DataRegister<Resource>						Resources;					// The details of each resource in the game
+		DeclareDataRegister(TerrainDefinition, TerrainDefinitions);					// The details of all static terrain classes in the game
+		DeclareDataRegister(DynamicTerrainDefinition, DynamicTerrainDefinitions);	// The details of all dynamic terrain classes in the game
 
-	extern DataRegister<SpaceTurret>					Turrets;					// The details of each turret type in the game
-	extern DataRegister<ProjectileLauncher>				ProjectileLaunchers;		// The details of each projectile launcher in the game
-	extern DataRegister<BasicProjectileDefinition>		BasicProjectiles;			// The details of each basic projectile type in the game
-	extern DataRegister<SpaceProjectileDefinition>		SpaceProjectiles;			// The details of each space projectile type in the game
+		DeclareDataRegister(Resource, Resources);									// The details of each resource in the game
 
-	extern DataRegister<SkinnedModel>					SkinnedModels;				// The details of all skinned models in the game
-	extern DataRegister<ActorBase>						Actors;						// The details of all actor base objects in the game
+		DeclareDataRegister(SpaceTurret, Turrets);									// The details of each turret type in the game
+		DeclareDataRegister(ProjectileLauncher, ProjectileLaunchers);				// The details of each projectile launcher in the game
+		DeclareDataRegister(BasicProjectileDefinition, BasicProjectiles);			// The details of each basic projectile type in the game
+		DeclareDataRegister(SpaceProjectileDefinition, SpaceProjectiles);			// The details of each space projectile type in the game
 
+		DeclareDataRegister(SkinnedModel, SkinnedModels);							// The details of all skinned models in the game
+		DeclareDataRegister(ActorBase, Actors);										// The details of all actor base objects in the game
+
+#undef DeclareDataRegister
 
 	// Enumeration of possible complex ship tile types
 	enum TileClass 
@@ -77,70 +93,69 @@ namespace D {
 	};
 
 	// The user interface
-	extern UserInterface					*UI;
+	static UserInterface						* UI;
 
 	// Primary game regions
-	namespace Regions
+	struct Regions
 	{
-		extern ImmediateRegion				*Immediate;
-		extern SystemRegion					*System;
-	}
+		static ImmediateRegion					* Immediate;
+		static SystemRegion						* System;
+	};
 
 	// String constant data for loading external game data
-	extern const char *DATA;
-	extern std::string DATA_S;
-	extern const char *IMAGE_DATA;
-	extern std::string IMAGE_DATA_S;
+	static const char *DATA;
+	static std::string DATA_S;
+	static const char *IMAGE_DATA;
+	static std::string IMAGE_DATA_S;
 
-	extern const char *NODE_GameData;
-	extern const char *NODE_Config;
-	extern const char *NODE_FileIndex;
-	extern const char *NODE_SimpleShip;
-	extern const char *NODE_SimpleShipLoadout;
-	extern const char *NODE_Engine;
-	extern const char *NODE_System;
-	extern const char *NODE_FireEffect;
-	extern const char *NODE_ParticleEmitter;
-	extern const char *NODE_UILayout;
-	extern const char *NODE_Image2DGroup;
-	extern const char *NODE_ComplexShip;
-	extern const char *NODE_ComplexShipElement;
-	extern const char *NODE_Hardpoint;
-	extern const char *NODE_ComplexShipSection;
-	extern const char *NODE_ComplexShipSectionInstance;
-	extern const char *NODE_ComplexShipTileClass;
-	extern const char *NODE_ComplexShipTileDefinition;
-	extern const char *NODE_ComplexShipTile;
-	extern const char *NODE_ComplexShipTileBaseData;
-	extern const char *NODE_Model;
-	extern const char *NODE_ArticulatedModel;
-	extern const char *NODE_UIManagedControlDefinition;
-	extern const char *NODE_Resource;
-	extern const char *NODE_BasicProjectileDefinition; 
-	extern const char *NODE_SpaceProjectileDefinition;
-	extern const char *NODE_SkinnedModel;
-	extern const char *NODE_ActorAttributeGeneration;
-	extern const char *NODE_ActorBase;
-	extern const char *NODE_Terrain;
-	extern const char *NODE_TerrainDefinition;
-	extern const char *NODE_DynamicTerrain;
-	extern const char *NODE_DynamicTerrainDefinition;
-	extern const char *NODE_Faction;
-	extern const char *NODE_Turret;
-	extern const char *NODE_ProjectileLauncher;
-	extern const char *NODE_DynamicTileSet;
-	extern const char *NODE_ModifierDetails;
-	extern const char *NODE_Damage;
-	extern const char *NODE_DamageSet;
-	extern const char *NODE_DamageResistance;
-	extern const char *NODE_DamageResistanceSet;
-	extern const char *NODE_Audio;
+	static const char *NODE_GameData;
+	static const char *NODE_Config;
+	static const char *NODE_FileIndex;
+	static const char *NODE_SimpleShip;
+	static const char *NODE_SimpleShipLoadout;
+	static const char *NODE_Engine;
+	static const char *NODE_System;
+	static const char *NODE_FireEffect;
+	static const char *NODE_ParticleEmitter;
+	static const char *NODE_UILayout;
+	static const char *NODE_Image2DGroup;
+	static const char *NODE_ComplexShip;
+	static const char *NODE_ComplexShipElement;
+	static const char *NODE_Hardpoint;
+	static const char *NODE_ComplexShipSection;
+	static const char *NODE_ComplexShipSectionInstance;
+	static const char *NODE_ComplexShipTileClass;
+	static const char *NODE_ComplexShipTileDefinition;
+	static const char *NODE_ComplexShipTile;
+	static const char *NODE_ComplexShipTileBaseData;
+	static const char *NODE_Model;
+	static const char *NODE_ArticulatedModel;
+	static const char *NODE_UIManagedControlDefinition;
+	static const char *NODE_Resource;
+	static const char *NODE_BasicProjectileDefinition; 
+	static const char *NODE_SpaceProjectileDefinition;
+	static const char *NODE_SkinnedModel;
+	static const char *NODE_ActorAttributeGeneration;
+	static const char *NODE_ActorBase;
+	static const char *NODE_Portal;
+	static const char *NODE_Terrain;
+	static const char *NODE_TerrainDefinition;
+	static const char *NODE_DynamicTerrain;
+	static const char *NODE_DynamicTerrainDefinition;
+	static const char *NODE_Faction;
+	static const char *NODE_Turret;
+	static const char *NODE_ProjectileLauncher;
+	static const char *NODE_DynamicTileSet;
+	static const char *NODE_ModifierDetails;
+	static const char *NODE_Damage;
+	static const char *NODE_DamageSet;
+	static const char *NODE_DamageResistance;
+	static const char *NODE_DamageResistanceSet;
+	static const char *NODE_Audio;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
-	extern const char *FILE_ComplexShipRegister;
+	static const char *FILE_ComplexShipRegister;
 
-}
-
-
+};
 
 #endif

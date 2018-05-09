@@ -9,10 +9,14 @@
 #include "CameraClass.h"
 #include "Material.h"
 #include "InputLayoutDesc.h"
-#include "Data\\Shaders\\light_definition.h"
-#include "Data\\Shaders\\standard_ps_const_buffer.h"
+#include "LightData.hlsl.h"
 
 #include "ShaderManager.h"
+
+
+// Initialise static data
+ShaderMacros ShaderManager::GlobalMacros;
+
 
 // Loads a compiled shader object (*.cso) and returns the byte data
 Result ShaderManager::LoadCompiledShader(const std::string & filename, byte **ppOutShader, SIZE_T *pOutBufferSize)
@@ -48,7 +52,7 @@ Result ShaderManager::LoadCompiledShader(const std::string & filename, byte **pp
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::string & filename, InputLayoutDesc *layout_desc,
+Result ShaderManager::CreateVertexShader(Rendering::RenderDeviceType  *device, const std::string & filename, InputLayoutDesc *layout_desc,
 											ID3D11VertexShader **ppOutShader, ID3D11InputLayout **ppOutInputLayout)
 {
 	// Paramter check
@@ -87,7 +91,7 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string & filename, ID3D11PixelShader **ppOutShader)
+Result ShaderManager::CreatePixelShader(Rendering::RenderDeviceType *device, const std::string & filename, ID3D11PixelShader **ppOutShader)
 {
 	// Paramter check
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
@@ -113,7 +117,7 @@ Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string 
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreateGeometryShader(ID3D11Device *device, const std::string & filename, ID3D11GeometryShader **ppOutShader)
+Result ShaderManager::CreateGeometryShader(Rendering::RenderDeviceType *device, const std::string & filename, ID3D11GeometryShader **ppOutShader)
 {
 	// Paramter check
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
@@ -181,7 +185,7 @@ Result ShaderManager::GetStandardSamplerDescription(DefinedSamplerState type, D3
 }
 
 // Return a standard defined sampler state for use in shader initialisation
-Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, ID3D11Device *device, ID3D11SamplerState **ppOutSamplerState)
+Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, Rendering::RenderDeviceType *device, ID3D11SamplerState **ppOutSamplerState)
 {
 	// Parameter check
 	if (!device || !ppOutSamplerState) return ErrorCodes::ShaderManagerCannotCreateSamplerWithNullInput;
@@ -208,14 +212,14 @@ Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, ID3D1
 
 // Create a standard dynamic constant buffer of the specified size (Usage=Dynamic, BindFlags=ConstantBuffer, CPUAccessFlags=Write, 
 // MiscFlags = 0, StructureByteStride = 0, ByteWidth = @bytewidth)
-Result ShaderManager::CreateStandardDynamicConstantBuffer(UINT bytewidth, ID3D11Device *device, ID3D11Buffer **ppOutConstantBuffer)
+Result ShaderManager::CreateStandardDynamicConstantBuffer(UINT bytewidth, Rendering::RenderDeviceType *device, ID3D11Buffer **ppOutConstantBuffer)
 {
 	return CreateBuffer(D3D11_USAGE_DYNAMIC, bytewidth, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, 0, 0, device, ppOutConstantBuffer);
 }
 
 // Create a buffer based on the specified parameters
 Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bindflags, UINT cpuaccessflags, UINT miscflags, UINT structurebytestride, 
-									ID3D11Device *device, ID3D11Buffer **ppOutBuffer)
+									Rendering::RenderDeviceType *device, ID3D11Buffer **ppOutBuffer)
 {
 	// Parameter check
 	if (!device || !ppOutBuffer) return ErrorCodes::ShaderManagerCannotCreateBufferWithNullInput;
@@ -239,34 +243,5 @@ Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bind
 	}
 
 	// We have created the buffer so return success
-	return ErrorCodes::NoError;
-}
-
-
-// Populate one of the standard constant buffer objects with appropriate data
-Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
-{
-	// Parameter check
-	if (!buffer) return ErrorCodes::CannotPopulateNullConstantBuffer;
-
-	// Populate each field in turn
-	buffer->EyeWorldPos = Game::Engine->GetCamera()->GetPositionF();
-
-	// Populate lighting data
-	unsigned int light_count = (unsigned int)Game::Engine->LightingManager.GetLightSourceCount(); 
-	buffer->LightCount = light_count; 
-
-	// Copy all lighting data into the buffer
-	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
-
-	// Copy all material data into the buffer
-	if (Game::Engine->GetCurrentModelBuffer())
-	{
-		unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
-		buffer->MaterialCount = material_count;
-		memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
 }

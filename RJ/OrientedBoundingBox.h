@@ -175,7 +175,7 @@ public:
 	}
 
 	// Updates the matrix to offset this OBB from its parent.  Accepts an offset matrix as its parameter
-	void XM_CALLCONV			UpdateOffset(const FXMMATRIX offset)
+	void RJ_XM_CALLCONV			UpdateOffset(const FXMMATRIX offset)
 	{
 		Offset = offset;
 		SetOffsetFlag(true);
@@ -183,7 +183,7 @@ public:
 	}
 
 	// Updates the matrix to offset this OBB from its parent.  Accepts a position offset for a non-rotated offset
-	void XM_CALLCONV			UpdateOffset(const FXMVECTOR offset)
+	void RJ_XM_CALLCONV			UpdateOffset(const FXMVECTOR offset)
 	{
 		UpdateOffset(XMMatrixTranslationFromVector(offset));
 	}

@@ -83,8 +83,15 @@ namespace Game {
 	extern INTVECTOR2 ScreenCentre;
 	extern INTVECTOR2 FullWindowSize;
 	extern INTVECTOR2 WindowPosition;
+	extern float FOV;
+	extern float NearClipPlane;
+	extern float FarClipPlane;
 	extern bool FullScreen;
+	extern bool VSync;
 	extern bool ForceWARPRenderDevice;
+
+	// Indicates whether the primary data load & initialisation process has been completed on startup
+	extern bool GameDataLoaded;
 
 	// Central scheduler for all scheduled jobs
 	extern CentralScheduler Scheduler;
@@ -147,8 +154,10 @@ namespace Game {
 	extern const int C_CONFIG_LOAD_RECURSION_LIMIT;		// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
-	typedef UINT32 LIGHT_CONFIG;							// Bitstring representing a particular lighting configuration
-	extern const unsigned int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine
+	extern const bool C_RENDER_DEBUG_LAYER;					// Flag indicating whether we should attempt to load a debug layer for the current rendering
+															// engine (e.g D3D_DEVICE_DEBUG). Only available in debug builds regardless of the state of this flag
+	//typedef UINT32 LIGHT_CONFIG;							// Bitstring representing a particular lighting configuration
+	extern const size_t C_INSTANCED_RENDER_LIMIT;			// The maximum number of instances that can be rendered in any one draw call by the engine
 	extern const float C_MODEL_SIZE_LIMIT;					// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values
 	extern const int C_MAX_ARTICULATED_MODEL_SIZE;			// The maximum number of components within any articulated model
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL;		// Time (ms) between pre-optimisation checks of the render queue
@@ -318,10 +327,11 @@ namespace Game {
 										{ return ((float)location * Game::C_CS_ELEMENT_SCALE); }
 	
 	// Convert from three dimensional element location to position in 3D space
-	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const INTVECTOR3 & location)
+	template <typename T>
+	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const IntegralVector3<T> & location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return XMVectorMultiply(XMVectorSet((float)location.x, (float)location.z, (float)location.y, 0.0f), Game::C_CS_ELEMENT_SCALE_V);
+		return XMVectorMultiply(XMVectorSet(static_cast<float>(location.x), static_cast<float>(location.z), static_cast<float>(location.y), 0.0f), Game::C_CS_ELEMENT_SCALE_V);
 	}
 
 	// Convert from three dimensional element location to position in 3D space, returning a float representation of the resulting vector

@@ -9,6 +9,7 @@
 #include "Image2DRenderGroup.h"
 class UIManagedControlDefinition;
 class GameInputDevice;
+class Image2D;
 
 class iUIControl : public iUIComponent
 {
@@ -36,17 +37,15 @@ public:
 	virtual void RenderControlInFocus(void) = 0;		// Called to render the control that is currently in focus
 
 	// Methods to handle mouse events on the components making up this control
-	virtual void HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) = 0;
-	virtual void HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) = 0;
-	virtual void HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) = 0;
-	virtual void HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) = 0;
-	virtual void HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) = 0;
+	virtual void HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation) = 0;
+	virtual void HandleMouseDownEvent(iUIComponent * component, INTVECTOR2 mouselocation) = 0;
+	virtual void HandleRightMouseDownEvent(iUIComponent * component, INTVECTOR2 mouselocation) = 0;
+	virtual void HandleMouseUpEvent(iUIComponent * component, INTVECTOR2 mouselocation) = 0;
+	virtual void HandleRightMouseUpEvent(iUIComponent * component, INTVECTOR2 mouselocation) = 0;
 
 	// Methods to handle mouse clicks on the components making up this control
-	virtual void HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation) = 0;
-	virtual void HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-											INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation) = 0;
+	virtual void HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation) = 0;
+	virtual void HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation) = 0;
 
 	// Methods for processing UI input
 	virtual bool CanAcceptKeyboardInput(void) = 0;
@@ -61,11 +60,11 @@ public:
 	// Generates a new unique control ID
 	static int iUIControl::GenerateControlID(void);
 
+
 protected:
 
 	// Method to initialise an image component for this control with default parameters
-	Result InitialiseImageComponentDefault(UIManagedControlDefinition *def, Image2DRenderGroup **component,
-		std::string componentname, int instancecount, float zorder);
+	Image2D *InitialiseImageComponentDefault(UIManagedControlDefinition *def, const std::string & componentname, float zorder);
 
 };
 

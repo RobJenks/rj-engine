@@ -9,7 +9,9 @@
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
 #include "DX11_Core.h"
-#include "D3DMain.h"
+#include "Rendering.h"
+#include "RenderDeviceDX11.h"
+#include "RenderAssetsDX11.h"
 
 #include "Profiler.h"
 #include "CameraClass.h"
@@ -17,13 +19,15 @@
 #include "RenderQueue.h"
 #include "RenderQueueShaders.h"
 #include "RenderQueueOptimiser.h"
-#include "LightingManagerObject.h"
 #include "ShaderManager.h"
 #include "Model.h"
 #include "ModelBuffer.h"
 #include "Frustum.h"
 #include "ViewPortal.h"
 #include "BasicColourDefinition.h"
+#include "ShaderRenderPredicate.h"
+#include "ModelRenderPredicate.h"
+#include "PipelineStateDX11.h"
 class iShader;
 class ModelBuffer;
 class LightShader;
@@ -38,7 +42,7 @@ class FireShader;
 class SkinnedNormalMapShader;
 class Frustum;
 class Light;
-class LightingManager;
+class LightingManagerObject;
 class FontShader;
 class AudioManager;
 class TextManager;
@@ -61,10 +65,6 @@ class EnvironmentTree;
 struct GameConsoleCommand;
 struct VolumetricLine;
 struct SentenceType;
-
-// Constant engine rendering values
-const float SCREEN_DEPTH = 5000.0f;
-const float SCREEN_NEAR = 0.1f;
 
 // Debug rendering compiler flags
 #define ENABLE_PORTAL_RENDERING_DEBUG_MODE
@@ -119,14 +119,14 @@ public:
 	// Initialise all components of the game engine
 	Result					InitialiseGameEngine(HWND hwnd);
 
+	// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+	Result					PerformPostDataLoadInitialisation(void);
+
 	// Release all components of the game engine as part of a controlled shutdown
 	void					ShutdownGameEngine();
-
-	// Key game engine components
-	LightingManagerObject	LightingManager;
 	
 	// Accessor/modifier methods for key game engine components
-	CMPINLINE D3DMain		*GetDirect3D()				{ return m_D3D; }
+	CMPINLINE RenderDeviceDX11 * GetRenderDevice()		{ return m_renderdevice; }
 	CMPINLINE CameraClass	*GetCamera()				{ return m_camera; }
 	CMPINLINE Frustum		*GetViewFrustrum()			{ return m_frustrum; }
 	CMPINLINE TextManager	*GetTextManager()			{ return m_textmanager; }
@@ -136,23 +136,13 @@ public:
 	CMPINLINE OverlayRenderer *GetOverlayRenderer()		{ return m_overlayrenderer; }
 	CMPINLINE AudioManager	  *GetAudioManager()		{ return m_audiomanager; }
 
-	// Methods to retrieve a reference to key shaders implemented by the engine
-	CMPINLINE	FireShader *				GetFireShader(void)						{ return m_fireshader; }
-	CMPINLINE	FontShader *				GetFontShader(void)						{ return m_fontshader; }
-	CMPINLINE	LightShader *				GetLightShader(void)					{ return m_lightshader; }
-	CMPINLINE	LightFadeShader *			GetLightFadeShader(void)				{ return m_lightfadeshader; }
-	CMPINLINE	LightHighlightShader *		GetLightHighlightShader(void)			{ return m_lighthighlightshader; }
-	CMPINLINE	LightHighlightFadeShader *	GetLightHighlightFadeShader(void)		{ return m_lighthighlightfadeshader; }
-	CMPINLINE	ParticleShader *			GetParticleShader(void)					{ return m_particleshader; }
-	CMPINLINE	TexcubeShader *				GetTexcubeShader(void)					{ return m_texcubeshader; }
-	CMPINLINE	TextureShader *				GetTextureShader(void)					{ return m_textureshader; }	
-	CMPINLINE	VolLineShader *				GetVolLineShader(void)					{ return m_vollineshader; }
-
 	// Methods to retrieve the key render matrices from the engine
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewMatrix(void) const					{ return r_invview; }
 	CMPINLINE const XMMATRIX & GetRenderProjectionMatrix(void) const					{ return r_projection; }
+	CMPINLINE const XMMATRIX & GetRenderInverseProjectionMatrix(void) const				{ return r_invproj; }
 	CMPINLINE const XMMATRIX & GetRenderOrthographicMatrix(void) const					{ return r_orthographic; }
+	CMPINLINE const XMMATRIX & GetRenderInverseOrthographicMatrix(void) const			{ return r_invorthographic; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrix(void) const				{ return r_viewproj; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionMatrix(void) const			{ return r_invviewproj; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionScreenMatrix(void) const			{ return r_viewprojscreen; }
@@ -160,24 +150,44 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewMatrixF(void) const						{ return r_view_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewMatrixF(void) const				{ return r_invview_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void) const					{ return r_projection_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseProjectionMatrixF(void) const			{ return r_invproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void) const				{ return r_orthographic_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseOrthographicMatrixF(void) const		{ return r_invorthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const				{ return r_viewproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
 
 	// Pass-through accessor methods for key engine components
-	CMPINLINE ID3D11Device *		GetDevice(void)			{ return m_D3D->GetDevice(); }
-	CMPINLINE ID3D11DeviceContext *	GetDeviceContext(void)	{ return m_D3D->GetDeviceContext(); }
+	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
+	CMPINLINE Rendering::RenderDeviceContextType *		GetDeviceContext(void)	{ return m_renderdevice->GetDeviceContext(); }
+
+	// Pass-through accessor for engine assets, since they are used so frequently
+	CMPINLINE RenderAssetsDX11 &						GetAssets(void) { return m_renderdevice->Assets; }
 
 	// Validation method to determine whether the engine has all critical frame-generatation components available
-	CMPINLINE bool			Operational()				{ return ( m_D3D && m_D3D->GetDevice() ); }
+	CMPINLINE bool			Operational()				{ return (m_renderdevice && m_renderdevice->GetDevice() ); }
 
-	// Pass-through methods to begin and end a scene; passes control directly through to the equivalent D3D methods
-	CMPINLINE void			BeginFrame()				{ m_D3D->BeginScene(); }
-	CMPINLINE void			EndFrame()					{ m_D3D->EndScene(); }
+	// Methods to perform initialisation/tear-down for a frame; not currently used
+	CMPINLINE void			BeginFrame()				{ }
+	CMPINLINE void			EndFrame()					{ }
 
 
 	/* *** Main rendering function *** */
 	void					Render(void);
+
+	// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
+	// will be rendered through the given rendering pipeline
+	template <class TShaderRenderPredicate = ShaderRenderPredicate::RenderAll, class TModelRenderPredicate = ModelRenderPredicate::RenderAll>
+	void					ProcessRenderQueue(PipelineStateDX11 *pipeline);
+
+	// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
+	// invoked by other processes (e.g. for deferred light volume rendering).  A material can be supplied that will override
+	// the material specified in the model buffer; a null material will fall back to the default model buffer material
+	void					RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count);
+
+	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
+	// queue items multiple times through e.g. different shader pipelines
+	void					ClearRenderQueue(void);
+
 
 	// Method to render the system region
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SystemRegion, 
@@ -245,61 +255,80 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world, RM_Instance::CalculateSortKey(position));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, std::move(
+			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, highlight, RM_Instance::CalculateSortKey(position));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, std::move(
+			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, float alpha, const CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams.x = alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams.x = alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
+		
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT3 & highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = colour_alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = colour_alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModelFlat(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT3 & highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 	
 	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModelFlat(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = colour_alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = colour_alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
-	// Returns a reference to the model buffer currently being rendered
-	CMPINLINE ModelBuffer *	GetCurrentModelBuffer(void) const			{ return m_current_modelbuffer; }
+	// Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
+	void RJ_XM_CALLCONV						RenderMaterialToScreen(	MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, 
+																	float rotation = 0.0f, float opacity = 1.0f, float zorder = 0.0f);
+
+	// Primitive topology is managed by the render queue in an attempt to minimise state changes
+	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
+	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
+	void									ChangePrimitiveTopologyIfRequired(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
+
 
 	// Performs rendering of debug/special data
 	void RenderDebugData(void);
@@ -358,11 +387,11 @@ public:
 	CMPINLINE HWND GetHWND(void) const			{ return m_hwnd; }
 	CMPINLINE bool VsyncEnabled(void) const		{ return m_vsync; }
 
-	// Returns the alpha blending state.  Passthrough method to the D3D component
-	CMPINLINE D3DMain::AlphaBlendState GetAlphaBlendState(void) const		{ return m_D3D->GetAlphaBlendState(); }
-
 	// Central shader manager for the engine
 	ShaderManager			ShaderManager;
+
+	// Manager for all lighting data
+	LightingManagerObject *	LightingManager;
 
 	// Return a flag indicating whether a particular render stage is active this cycle
 	CMPINLINE bool RenderStageActive(RenderStage stage) { return m_renderstages[(int)stage]; }
@@ -434,70 +463,47 @@ public:
 private:
 	
 	// Private methods to initialise each component in turn
-	Result					InitialiseDirect3D(HWND hwnd);
+	Result					InitialiseRenderDevice(HWND hwnd);
 	Result					InitialiseDirectXMath(void);
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
-	Result					InitialiseLightingManager(void);
 	Result					InitialiseShaderSupport(void);
-	Result					InitialiseLightShader(void);
-	Result					InitialiseLightFadeShader(void);
-	Result					InitialiseLightHighlightShader(void);
-	Result					InitialiseLightHighlightFadeShader(void);
-	Result					InitialiseLightFlatHighlightFadeShader(void);
-	Result					InitialiseParticleShader(void);
-	Result					InitialiseTextureShader(void);
 	Result					InitialiseFrustrum(void);
-	Result					InitialiseFontShader(void);
 	Result					InitialiseAudioManager(void);
+	Result					InitialiseLightingManager(void);
 	Result					InitialiseTextRendering(void);
-	Result					InitialiseFonts(void);
-	Result					InitialiseTexcubeShader(void);
-	Result					InitialiseFireShader(void);
 	Result					InitialiseEffectManager(void);
-	Result					InitialiseSkinnedNormalMapShader(void);
-	Result					InitialiseVolLineShader(void);
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
 	Result					InitialiseOverlayRenderer(void);
 	Result					InitialiseEnvironmentRendering(void);
 
 	// Private methods to release each component in turn
-	void					ShutdownDirect3D(void);
+	void					ShutdownRenderDevice(void);
 	void					ShutdownDXMath(void);
 	void					ShutdownRenderQueue(void);
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
-	void					ShutdownLightingManager(void);
 	void					ShutdownShaderSupport(void);
-	void					ShutdownLightShader(void);
-	void					ShutdownLightFadeShader(void);
-	void					ShutdownLightHighlightShader(void);
-	void					ShutdownLightHighlightFadeShader(void);
-	void					ShutdownLightFlatHighlightFadeShader(void);
-	void					ShutdownParticleShader(void);
-	void					ShutdownTextureShader(void);
 	void					ShutdownFrustrum(void);
-	void					ShutdownFontShader(void);
 	void					ShutdownAudioManager(void);
+	void					ShutdownLightingManager(void);
 	void					ShutdownTextRendering(void);
-	void					ShutdownFonts(void);
-	void					ShutdownTexcubeShader(void);
-	void					ShutdownFireShader(void);
 	void					ShutdownEffectManager(void);
-	void					ShutdownSkinnedNormalMapShader(void);
-	void					ShutdownVolLineShader(void);
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
 	void					ShutdownOverlayRenderer(void);
 	void					ShutdownEnvironmentRendering(void);
 
+	// Post-data load initialisation for the core engine component itself
+	Result					PerformInternalEnginePostDataLoadInitialisation(void);
+
 	// Update window size details based on these parameters, recalculating for windowed mode as required
 	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
 	// Pointer to each component that makes up this game engine
-	D3DMain							*m_D3D;
+	RenderDeviceDX11 *				m_renderdevice;
 	CameraClass						*m_camera;
 	LightShader						*m_lightshader;
 	LightFadeShader					*m_lightfadeshader;
@@ -525,11 +531,14 @@ private:
 
 	// Render-cycle-specific parameters; denoted by r_*, these are valid for the current render cycle only 
 	// and are used for reasons of render efficiency
-	ID3D11DeviceContext *	r_devicecontext;		// The device context in use for this render cycle
+	Rendering::RenderDeviceContextType *	
+							r_devicecontext;		// The device context in use for this render cycle
 	AXMMATRIX				r_view;					// View matrix for the current render cycle
 	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
-	AXMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
+	AXMMATRIX				r_invview;				// We will also store the inverse view matrix
+	AXMMATRIX				r_invproj;				// We will also store the inverse projection matrix
+	AXMMATRIX				r_invorthographic;		// We will also store the inverse orthographic matrix
 	AXMMATRIX				r_viewproj;				// Store the combined (view * proj) matrix
 	AXMMATRIX				r_invviewproj;			// Also store the inverse viewproj matrix, i.e. (view * proj)^-1
 	AXMMATRIX				m_projscreen;			// Adjustment matrix from projection to screen coordinates (only recalculated when screen parameters change)
@@ -539,80 +548,50 @@ private:
 	XMFLOAT4X4				r_projection_f;			// Local float representation of the current frame projection matrix
 	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
 	XMFLOAT4X4				r_invview_f;			// Local float representation of the current frame inverse view matrix
+	XMFLOAT4X4				r_invproj_f;			// Local float representation of the current frame inverse projection matrix
+	XMFLOAT4X4				r_invorthographic_f;	// Local float representation of the current frame inverse orthographic matrix
 	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 
 
-	ID3D11Buffer *				m_instancebuffer;
+	VertexBufferDX11 *			m_instancebuffer;
 	RenderQueue					m_renderqueue;
 	RM_ShaderCollection			m_renderqueueshaders;
-	ID3D11Buffer *				m_instancedbuffers[2];
+	const ID3D11Buffer *		m_instancedbuffers[2];
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
 	D3D_PRIMITIVE_TOPOLOGY		m_current_topology;
 
 	// Optimiser performs periodic maintenance on the engine render queue
 	RenderQueueOptimiser		m_rq_optimiser;
 
-	// Process the full render queue for all shaders in scope
-	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ProcessRenderQueue, 
-		void, ProcessRenderQueue, void, );
+	// Cached reference to unit quad model, used for direct screen-space rendering of materials
+	Model *						m_unit_quad_model;
 
-	// Clear the render queue ready for the next frame
+	// Clear the render queue.  Not required per-frame; invoked on shutdown to clear down resources
 	void								DeallocateRenderingQueue(void);
 
 	// Performs an intermediate z-sorting of instances before rendering via the render queue.  Used only for shaders/techniques (e.g. alpha
 	// blending) that require instances to be z-sorted
 	void								PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader);
 
-	// Submit a model buffer to the render queue manager for rendering this frame
-	void XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance);
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, RM_Instance && instance) 
+	
+	// Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
+	// overrides any default material specified in the model buffer.  A material of NULL will use the default 
+	// material in the model buffer
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance);
+	CMPINLINE void RJ_XM_CALLCONV		SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance)
 	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), std::move(instance));
-	}
-
-	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
-	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, RM_Instance::RM_SortKey sort_key)
-	{
-		SubmitForRendering(shader, model, std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), sort_key)));
-	}
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, RM_Instance::RM_SortKey sort_key) 
-	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), transform, sort_key);
-	}
-
-	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
-	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const XMFLOAT4 & params, RM_Instance::RM_SortKey sort_key)
-	{
-		SubmitForRendering(shader, model, std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params, sort_key)));
-	}
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const XMFLOAT4 & params, RM_Instance::RM_SortKey sort_key)
-	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), transform, params, sort_key);
-	}
-	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
-	// objects.  Performance overhead; should be used only where specifically required
-	void XM_CALLCONV				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position);
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
-	{
-		if (model) SubmitForZSortedRendering(shader, model->GetModelBuffer(), std::move(instance), position);
+		if (model) SubmitForRendering(shader, &(model->Data), material, std::move(instance));
 	}
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(	RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
-																const XMFLOAT4 & params, const CXMVECTOR position)
+	void RJ_XM_CALLCONV					SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position);
+	CMPINLINE void RJ_XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
 	{
-		SubmitForZSortedRendering(shader, model,
-			std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params, RM_Instance::SORT_KEY_RENDER_LAST)), position);
-	}	
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const FXMMATRIX transform,
-																const XMFLOAT4 & params, const CXMVECTOR position)
-	{
-		if (model) SubmitForZSortedRendering(shader, model->GetModelBuffer(), transform, params, position);
+		if (model) SubmitForZSortedRendering(shader, &(model->Data), std::move(instance), position);
 	}
+
 
 	/* Method to render the interior of an object environment including any tiles, for an environment
 	   which supports portal rendering
@@ -667,7 +646,8 @@ private:
 	void					RunPreRenderDebugProcesses(void);
 	void					RunPostRenderDebugProcesses(void);
 
-	// Lighting configuration is stored within the core engine and set for each object being rendered
+	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
+	void					RetrieveRenderCycleData(void);
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
 	AXMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
@@ -678,9 +658,6 @@ private:
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
 	XMFLOAT4				m_instanceparams;
-
-	// Reference to the model buffer currently being rendered by the render queue
-	ModelBuffer *			m_current_modelbuffer;
 
 	// Vector used to queue up actors for rendering.  This allows us to render them all at once, avoiding multiple state changes
 	std::vector<Actor*>		m_queuedactors;
@@ -717,6 +694,10 @@ private:
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
 								m_debug_renderobjid_text;						// Vector of text objects for debug render object identifiers
+
+	// Counter for allowable render device failures before application will consider it unrecoverable and terminate
+	unsigned int				m_render_device_failure_count;
+	static const unsigned int	ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT = 10U;
 
 	// Enumeration of possible debug terain render modes
 	enum DebugTerrainRenderMode { Normal = 0, Solid };

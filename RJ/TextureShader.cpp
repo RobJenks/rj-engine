@@ -17,7 +17,7 @@ TextureShader::TextureShader(void)
 	m_sampleState = 0;
 }
 
-Result TextureShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result TextureShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -34,7 +34,7 @@ Result TextureShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result TextureShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result TextureShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -60,7 +60,7 @@ Result TextureShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 
 
 // Initialise shader
-Result TextureShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result TextureShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -91,7 +91,7 @@ void TextureShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result RJ_XM_CALLCONV TextureShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

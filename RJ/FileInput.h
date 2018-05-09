@@ -48,9 +48,9 @@ namespace IO
 	XMFLOAT4		GetFloat4FromAttr(TiXmlElement *node);
 	void			GetFloat4FromAttr(TiXmlElement *node, XMFLOAT4 *out);
 
-	XMVECTOR		GetColourVectorFromAttr(TiXmlElement *node);
-	XMFLOAT4		GetColourFloatFromAttr(TiXmlElement *node);
-	void			GetColourFloatFromAttr(TiXmlElement *node, XMFLOAT4 *out);
+	CMPINLINE XMVECTOR	GetColourVectorFromAttr(TiXmlElement *node)					{ return GetVector4FromAttr(node); }
+	CMPINLINE XMFLOAT4	GetColourFloatFromAttr(TiXmlElement *node)					{ return GetFloat4FromAttr(node); }
+	CMPINLINE void		GetColourFloatFromAttr(TiXmlElement *node, XMFLOAT4 *out)	{ return GetFloat4FromAttr(node, out); }
 
 	CMPINLINE XMVECTOR	GetQuaternionFromAttr(TiXmlElement *node)					{ return GetVector4FromAttr(node); }
 	CMPINLINE XMFLOAT4	GetQuaternionFromAttrF(TiXmlElement *node)					{ return GetFloat4FromAttr(node); }
@@ -62,18 +62,28 @@ namespace IO
 	void			GetInt2CoordinatesFromAttr(TiXmlElement *node, int *x, int *y);
 	void			GetInt3CoordinatesFromAttr(TiXmlElement *node, int *x, int *y, int *z);
 
-	// Get the specified integer attribute, returning 0 if the attribute does not exist.  "node" must exist or exception is thrown
+	// Get the specified float attribute
+	float			GetFloatAttribute(TiXmlElement *node, const char *attribute);
+	float			GetFloatAttribute(TiXmlElement *node, const char *attribute, float defaultvalue);
+
+	// Get the specified bool attribute
+	bool			GetBoolAttribute(TiXmlElement *node, const char *attribute, bool defaultvalue = false);
+
+	// Get the specified attribute and return as a std::string, or the default value if no attribute with that key exisfts
+	std::string		GetStringAttribute(TiXmlElement *node, const char *attribute, const std::string & defaultValue = NullString);
+
+	// Get the specified integer attribute, returning 0 if the attribute does not exist.  "node" must exist
 	int				GetIntegerAttribute(TiXmlElement *node, const char *attribute);
 
-	// Get the specified integer attribute, returning 'defaultvalue' if the attribute does not exist.  "node" must exist or exception is thrown
+	// Get the specified integer attribute, returning 'defaultvalue' if the attribute does not exist.  "node" must exist
 	int				GetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue);
 
 	// Attempt to get the specified integer attribute, returning 0 and an error code != NoError if the attribute does not exist
-	// "node" must exist or exception is thrown
+	// "node" must exist
 	Result			TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int & outValue);
 
 	// Attempt to get the specified integer attribute, returning 'defaultvalue' and an error code != NoError if the attribute does not exist
-	// "node" must exist or exception is thrown
+	// "node" must exist
 	Result			TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue, int & outValue);
 
 	// Read a Direction attribute, which will either be the string name of the direction (preferred) or the integer index (secondary)

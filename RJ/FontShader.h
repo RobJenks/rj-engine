@@ -27,15 +27,15 @@ public:
 	FontShader(void);
 	~FontShader(void);
 
-	Result Initialise(ID3D11Device* device, HWND hwnd);
+	Result Initialise(Rendering::RenderDeviceType * device, HWND hwnd);
 
 	// Methods to initialise each shader in the pipeline in turn
-	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
-	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
+	Result							InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename);
 
 	void Shutdown();
 
-	Result XM_CALLCONV Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+	Result Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 						  const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 						  XMFLOAT4 pixelColor);
 

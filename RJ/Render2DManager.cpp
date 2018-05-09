@@ -20,7 +20,7 @@ Render2DManager::~Render2DManager(void)
 {
 }
 
-Result XM_CALLCONV Render2DManager::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd,
+Result RJ_XM_CALLCONV Render2DManager::Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
 								   int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix)
 {
 	// Store references to the key supplied parameters
@@ -90,7 +90,7 @@ void Render2DManager::Render(void)
 		if (!group || !(group->GetRenderActive())) continue;
 
 		// Call the render function for this group
-		group->Render(m_baseviewmatrix);
+		group->Render();
 	}
 }
 

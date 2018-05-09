@@ -85,6 +85,7 @@
 #include "Render2DManager.h"
 #include "Render2DGroup.h"
 #include "RenderMouseEvent.h"
+#include "Image2D.h"
 #include "Image2DRenderGroup.h"
 #include "Image2DRenderGroupInstance.h"
 #include "iUIComponent.h"
@@ -99,6 +100,11 @@
 
 #include "DataInput.h"
 
+
+std::string IO::Data::FileBeingProcessed;
+bool IO::Data::AllowReloadOfExistingEntities = false;
+HashVal IO::Data::ReloadOnlyType;
+std::string IO::Data::ReloadOnlyCode;
 
 std::vector<ComplexShipSection*> IO::Data::__TemporaryCSSLoadingBuffer;
 
@@ -121,12 +127,15 @@ Result IO::Data::LoadGameDataFile(const std::string &filename) { return LoadGame
 
 Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 {
-	// Record the time taken to process this file; store the start time before beginning
-	unsigned int processtime = (unsigned int)timeGetTime();
-
 	// Build full filename
 	if (file == NullString) return ErrorCodes::NullFilenamePointer;
-	std::string & filename = BuildStrFilename(D::DATA, file);
+	std::string filename = (D::DATA_S + "\\" + file);
+
+	// Always maintain a record of the file currently being processed
+	SetFileCurrentlyBeingProcessed(file);
+
+	// Record the time taken to process this file; store the start time before beginning
+	unsigned int processtime = (unsigned int)timeGetTime();
 
 	// Locate the file system object and make sure it is valid
 	FileSystem::FileSystemObjectType fso_type = FileSystem::GetFileSystemObjectType(filename.c_str());
@@ -167,77 +176,87 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 		if (!(rname == D::NODE_GameData)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
 
 		// Now iterate through each child element in turn; these elements at level one should denote the type of object
-		std::string name = "";
+		std::string name = ""; HashVal hash;
 		TiXmlElement *child = root->FirstChildElement();
 		for (child; child; child = child->NextSiblingElement())
 		{
+			name = child->Value(); StrLowerC(name);
+			hash = HashString(name);
+
+			// Perform early-rejection if we have a reload restriction currently in place and this is not the desired entity type
+			if (ReloadOnlyType != 0U && hash != ReloadOnlyType) continue;
+
 			// Test the type of this node
 			// TODO: Add error handling if a function returns =/= 0
-			name = child->Value(); StrLowerC(name);
-
-			if (name == D::NODE_FileIndex) {
+			if (hash == HashedStrings::H_Include) {
 				res = IO::Data::LoadXMLFileIndex(child);
 
 				// If we caught and terminated an infinite file loop we need to propogate the error backwards to stop it simply repeating
 				if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
 					return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 			}
-			else if (name == D::NODE_SimpleShip) {
+			else if (hash == HashedStrings::H_SimpleShip) {
 				res = IO::Data::LoadSimpleShip(child);
-			} else if (name == D::NODE_SimpleShipLoadout) {
+			} else if (hash == HashedStrings::H_SimpleShipLoadout) {
 				res = IO::Data::LoadSimpleShipLoadout(child);
-			} else if (name == D::NODE_ComplexShip) {
+			} else if (hash == HashedStrings::H_ComplexShip) {
 				res = IO::Data::LoadComplexShip(child);
-			} else if (name == D::NODE_ComplexShipSection) {
+			} else if (hash == HashedStrings::H_ComplexShipSection) {
 				res = IO::Data::LoadComplexShipSection(child);
-			} else if (name == D::NODE_Engine) {
+			} else if (hash == HashedStrings::H_Engine) {
 				res = IO::Data::LoadEngine(child);
-			} else if (name == D::NODE_System) {
+			} else if (hash == HashedStrings::H_System) {
 				res = IO::Data::LoadSystem(child);
-			} else if (name == D::NODE_FireEffect) {
+			} else if (hash == HashedStrings::H_FireEffect) {
 				res = IO::Data::LoadFireEffect(child);
-			} else if (name == D::NODE_ParticleEmitter) {
+			} else if (hash == HashedStrings::H_ParticleEmitter) {
 				res = IO::Data::LoadParticleEmitter(child);
-			} else if (name == D::NODE_UILayout) {
+			} else if (hash == HashedStrings::H_UILayout) {
 				res = IO::Data::LoadUILayout(child);
-			} else if (name == D::NODE_Model) {
+			} else if (hash == HashedStrings::H_Model) {
 				res = IO::Data::LoadModelData(child);
-			} else if (name == D::NODE_ArticulatedModel) {
+			} else if (hash == HashedStrings::H_ArticulatedModel) {
 				res = IO::Data::LoadArticulatedModel(child);
-			} else if (name == D::NODE_UIManagedControlDefinition) {
+			} else if (hash == HashedStrings::H_UIManagedControlDefinition) {
 				res = IO::Data::LoadUIManagedControlDefinition(child);
-			} else if (name == D::NODE_ComplexShipTileClass) {
+			} else if (hash == HashedStrings::H_ComplexShipTileClass) {
 				res = IO::Data::LoadComplexShipTileClass(child);
-			} else if (name == D::NODE_ComplexShipTileDefinition) {
+			} else if (hash == HashedStrings::H_ComplexShipTileDefinition) {
 				res = IO::Data::LoadComplexShipTileDefinition(child);
-			} else if (name == D::NODE_Resource) {
+			} else if (hash == HashedStrings::H_Resource) {
 				res = IO::Data::LoadResource(child);
-			} else if (name == D::NODE_SkinnedModel) {
+			} else if (hash == HashedStrings::H_SkinnedModel) {
 				res = IO::Data::LoadSkinnedModel(child);
-			} else if (name == D::NODE_ActorAttributeGeneration) {
+			} else if (hash == HashedStrings::H_ActorAttributeGeneration) {
 				res = IO::Data::LoadActorAttributeGenerationData(child);
-			} else if (name == D::NODE_ActorBase) {
+			} else if (hash == HashedStrings::H_ActorBase) {
 				res = IO::Data::LoadActor(child);
-			} else if (name == D::NODE_TerrainDefinition) {
+			} else if (hash == HashedStrings::H_TerrainDefinition) {
 				res = IO::Data::LoadTerrainDefinition(child);
-			} else if (name == D::NODE_DynamicTerrainDefinition) { 
+			} else if (hash == HashedStrings::H_DynamicTerrainDefinition) {
 				res = IO::Data::LoadDynamicTerrainDefinition(child);
-			} else if (name == D::NODE_Faction) {
+			} else if (hash == HashedStrings::H_Faction) {
 				res = IO::Data::LoadFaction(child);
-			} else if (name == D::NODE_Turret) {
+			} else if (hash == HashedStrings::H_Turret) {
 				res = IO::Data::LoadTurret(child);
-			} else if (name == D::NODE_ProjectileLauncher) {
+			} else if (hash == HashedStrings::H_ProjectileLauncher) {
 				res = IO::Data::LoadProjectileLauncher(child);
-			} else if (name == D::NODE_BasicProjectileDefinition) {
+			} else if (hash == HashedStrings::H_BasicProjectileDefinition) {
 				res = IO::Data::LoadBasicProjectileDefinition(child);
-			} else if (name == D::NODE_SpaceProjectileDefinition) {
+			} else if (hash == HashedStrings::H_SpaceProjectileDefinition) {
 				res = IO::Data::LoadSpaceProjectileDefinition(child);
-			} else if (name == D::NODE_DynamicTileSet) {
+			} else if (hash == HashedStrings::H_DynamicTileSet) {
 				res = IO::Data::LoadDynamicTileSet(child);
-			} else if (name == D::NODE_ModifierDetails) {
+			} else if (hash == HashedStrings::H_ModifierDetails) {
 				res = IO::Data::LoadModifier(child);
-			} else if (name == D::NODE_Audio) { 
+			} else if (hash == HashedStrings::H_Audio) {
 				res = IO::Data::LoadAudioItem(child);
+			} else if (hash == HashedStrings::H_Texture) {
+				res = IO::Data::LoadTextureData(child);
+			} else if (hash == HashedStrings::H_Material) {
+				res = IO::Data::LoadMaterialData(child);
+			} else if (hash == HashedStrings::H_Font) {
+				res = IO::Data::LoadFont(child);
 			} else {
 				// Unknown level one node type
 				res = ErrorCodes::UnknownDataNodeType;
@@ -329,14 +348,15 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 	}
 
 	// Now iterate through each child element in turn and pull the relevant configuration
-	std::string name = "";
+	std::string name = ""; HashVal hash;
 	TiXmlElement *child = root->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
 		// Test the type of this node
 		name = child->Value(); StrLowerC(name);
+		hash = HashString(name);
 
-		if (name == D::NODE_FileIndex) {
+		if (hash == HashedStrings::H_Include) {
 			const char *file = child->Attribute("file"); if (!file) continue;
 			std::string sfile = file;
 			res = IO::Data::LoadConfigFile(sfile);
@@ -345,7 +365,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 			if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
 				return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 		}
-		else if (name == "data") {
+		else if (hash == HashedStrings::H_Data) {
 			const char *path = child->Attribute("path");
 			if (path && FileSystem::DirectoryExists(path))
 			{
@@ -353,7 +373,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 				D::DATA_S = std::string(path);
 			}
 		}
-		else if (name == "screenresolution") {
+		else if (hash == HashedStrings::H_ScreenResolution) {
 			int x = 1024, y = 768, hz = 0;
 			child->Attribute("x", &x);
 			child->Attribute("y", &y);
@@ -362,7 +382,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 			Game::ScreenHeight = y;
 			if (hz > 0) Game::ScreenRefresh = hz;
 		}
-		else if (name == "softwarerasterizeroverride")
+		else if (hash == HashedStrings::H_SoftwareRasterizerOverride)
 		{
 			const char *enabled = child->Attribute("enable");
 			if (enabled && strcmp(enabled, "true") == 0)
@@ -384,18 +404,12 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
-	Model *model;
-	Model::ModelClass mclass;
-	std::string key, code, type, fname, tex, val;
-	XMFLOAT3 acteffsize, effsize;
-	INTVECTOR3 elsize; bool no_centre = false;
+	std::string key, code, filename, material;
 	std::vector<CollisionSpatialDataF> collision;
 	HashVal hash;
 
 	// Set defaults before loading the model
-	code = type = fname = tex = "";
-	acteffsize = effsize = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	elsize = NULL_INTVECTOR3;
+	code = filename = material = NullString;
 
 	// Look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -410,30 +424,12 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 			code = child->GetText();
 			StrLowerC(code);
 		}
-		else if (hash == HashedStrings::H_Type) {							/* The model class for this object */
-			type = child->GetText();
-			StrLowerC(type);
-		}
 		else if (hash == HashedStrings::H_Filename) {						/* Filename of the ship model file */
-			fname = child->GetText();
-			StrLowerC(fname);
+			filename = child->GetText();
 		}
-		else if (hash == HashedStrings::H_Texture) {						/* Filename of the associated model texture */
-			tex = child->GetText();
-			StrLowerC(tex);
-		}
-		else if (hash == HashedStrings::H_NoModelCentering) {				/* Flag that overrides the default behaviour of centring all models about the origin */
-			val = child->GetText(); StrLowerC(val);
-			no_centre = (val == "true");
-		}
-		else if (hash == HashedStrings::H_EffectiveSize) {					/* Effective size (i.e. not just vertex max-min) for the model */
-			effsize = IO::GetFloat3FromAttr(child);
-		}
-		else if (hash == HashedStrings::H_ActualEffectiveSize) {			/* Actual (i.e. in-game) effective size.  Determines scaling if set */
-			acteffsize = IO::GetFloat3FromAttr(child);
-		}
-		else if (hash == HashedStrings::H_ElementSize) {					/* Mapping to element dimensions; optional, and used to scale to fit elements by load post-processing */
-			elsize = IO::GetInt3CoordinatesFromAttr(child);	
+		else if (hash == HashedStrings::H_Material) {						/* String code of the associated material */
+			material = child->GetText();
+			StrLowerC(material);
 		}
 		else if (hash == HashedStrings::H_Collision) {						/* List of collision objects attached to this model */
 			collision.push_back(IO::Data::LoadCollisionSpatialData(child));
@@ -441,61 +437,167 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	}
 
 	// Make sure we have all mandatory fields 
-	if (code == NullString || type == NullString || fname == NullString || tex == NullString) return ErrorCodes::InsufficientDataToLoadModel;
-
-	// We need to take action depending on the type of model, so identify the model class here
-	mclass = Model::DetermineModelClass(type);
+	if (code == NullString || filename == NullString)
+	{
+		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; missing mandatory data\n";
+		return ErrorCodes::InsufficientDataToLoadModel;
+	}
 
 	// Check whether we have an existing model; if we do, return an error since we will not load the same model twice
-	model = Model::GetModel(code);
-	if (model != NULL) return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
+	Model *model = Model::GetModel(code);
+	if (model != NULL)
+	{
+		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; model already exists\n";
+		return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
+	}
 	
 	// Construct full filenames from the info specified
-	std::string filename = BuildStrFilename(D::DATA, fname);
-	std::string texture = BuildStrFilename(D::IMAGE_DATA, tex);
+	std::string full_filename = BuildStrFilename(D::DATA, filename);
 
 	// Otherwise create a new model here
 	model = new Model();
-	model->SetCode(code);
-	model->SetModelClass(mclass);
-	model->SetFilename(filename);
-	model->SetTextureFilename(texture);
-	model->SetEffectiveModelSize(effsize);
-	model->SetElementSize(elsize);
-	model->SetCentredAboutOrigin(!no_centre);
+	model->Initialise(code, full_filename, material);
+	
+	// Set other loaded properties after initialisation if required
 	model->SetCollisionData(std::move(collision));
-
-	// Mark as a 'standard' model, i.e. one that will be shared as a template
-	// between multiple entities for performance reasons.  The entity only acquires an individual model
-	// if its geometry is changed / deformed in some way.  Setting this flag means that when an object
-	// with the model is deallocated it will not attempt to deallocate the model data, preserving it for
-	// other entities
-	model->SetStandardModel(true);
-	
-	// If an effective model size is not specified, take the actual extent calculated from vertex data as a default
-	if (effsize.x <= Game::C_EPSILON || effsize.y <= Game::C_EPSILON || effsize.z <= Game::C_EPSILON)
-		model->SetEffectiveModelSize(model->GetModelSize());
-	
-	// Attempt to set the actual model size; method will handle missing/incomplete parameters itself, so pass whatever we have (incl 0,0,0 as default)
-	model->SetActualModelSize(acteffsize);
-
-	// Load the model geometry immediately
-	Result result = LoadModelGeometry(model);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_WARN << "Could not load geometry for model \"" << model->GetCode() << "\" [" << result << "]\n";
-	}
-
-	// Test whether this model has an element size specified; if so, override all size data from the xml data or geometry
-	elsize = model->GetElementSize();
-	if (elsize.x > 0 && elsize.y > 0 && elsize.z > 0)
-	{
-		// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
-		model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
-	}
 
 	// Add this model to the relevant static collection and return success
 	Model::AddModel(model);
+
+	Game::Log << LOG_INFO << "Loaded model \"" << code << "\"\n";
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::LoadTextureData(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadTextureWithNullData;
+
+	// All required data should exist in attributes
+	const char *ccode = node->Attribute("code");
+	const char *cdimension = node->Attribute("dimension");
+	const char *cfilename = node->Attribute("filename");
+
+	// Assert mandatory parameters
+	if (!ccode || !cfilename)
+	{
+		Game::Log << LOG_WARN << "Cannot load texture \"" << ccode << "\"; missing mandatory parameters\n";
+		return ErrorCodes::CannotLoadTextureWithMissingData;
+	}
+
+	// Attempt to resolve the dimension type
+	Texture::Dimension dimension = (cdimension ? Texture::TranslateDimensionFromString(cdimension) : Texture::Dimension::Texture2D);
+	if (dimension == Texture::Dimension::_COUNT)
+	{
+		Game::Log << LOG_WARN << "Cannot load texture \"" << ccode << "\" with invalid dimension specifier \"" << cdimension << "\"\n";
+		return ErrorCodes::CannotInstantiateTexture;
+	}
+
+	// Attempt to create the new texture resource
+	TextureDX11 *texture = Game::Engine->GetAssets().CreateTexture(ccode);
+	if (!texture)
+	{
+		Game::Log << LOG_WARN << "Failed to instantiate new texture \"" << ccode << "\", aborting loading of this item\n";
+		return ErrorCodes::CannotInstantiateTexture;
+	}
+
+	// Now attempt to load the texture data
+	std::string filename = D::IMAGE_DATA_S + "\\" + cfilename;
+	bool loadresult = texture->LoadTexture(ConvertStringToWString(filename), dimension);
+	if (!loadresult)
+	{
+		Game::Log << LOG_WARN << "Failed to load texture resources for \"" << ccode << "\" from \"" << filename << "\"\n";
+		Game::Engine->GetAssets().DeleteTexture(ccode);
+		return ErrorCodes::CannotLoadTextureResources;
+	}
+
+	// Return success
+	Game::Log << LOG_INFO << "Loaded texture \"" << ccode << "\"\n";
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::LoadMaterialData(TiXmlElement *node)
+{
+	std::string key; HashVal hash;
+	if (!node) return ErrorCodes::CannotLoadMaterialWithNullData;
+
+	// Validate material code and create the underlying resource before loading details
+	const char *ccode = node->Attribute("code");
+	if (!ccode) return ErrorCodes::CannotLoadMaterialWithoutCode;
+
+	// This entity type supports hot-reloading.  Make sure it therefore complies with any restriction, if one exists
+	if (!ReloadOnlyCode.empty() && ReloadOnlyCode != ccode) return ErrorCodes::NoError;
+
+	// Either create a new resource, or use an existing one (if we are allowing updates to existing resources here)
+	std::string operation = "Loaded";
+	MaterialDX11 * material = NULL;
+	if (Game::Engine->GetAssets().AssetExists<MaterialDX11>(ccode))
+	{
+		material = Game::Engine->GetAssets().GetMaterial(ccode);
+		if (ReloadOfExistingResourcesIsPermitted())
+		{
+			material->ResetMaterialData();
+			operation = "Reloaded";
+		}
+		else
+		{
+			Game::Log << LOG_WARN << "Cannot load material \"" << ccode << "\"; resource with that name already exists\n";
+			return ErrorCodes::CannotCreateMaterialAsset;
+		}
+	}
+	else // Material does not exist, so create a new one
+	{
+		material = Game::Engine->GetAssets().CreateMaterial(ccode);
+		if (material == NULL)
+		{
+			Game::Log << LOG_WARN << "Failed to load material \"" << ccode << "\"\n";
+			return ErrorCodes::CannotCreateMaterialAsset;
+		}
+	}
+
+	// Suspend material updates until all properties are loaded
+	material->SuspendUpdates();
+
+	// Store the filename that this material is defined in, for reloading in future if required
+	material->SetFilename(GetFileCurrentlyBeingProcessed());
+
+	// Look at each child element in turn and pull data from them
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Retrieve the xml node key and hash it for more efficient comparison
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		// Load properties
+		if (hash == HashedStrings::H_GlobalAmbient) material->SetGlobalAmbient(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_AmbientColor) material->SetAmbientColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_EmissiveColor) material->SetEmissiveColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_DiffuseColor) material->SetDiffuseColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_SpecularColor) material->SetSpecularColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_Reflectance) material->SetReflectance(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_Opacity) material->SetOpacity(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_SpecularPower) material->SetSpecularPower(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_SpecularScale) material->SetSpecularScale(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_IndexOfRefraction) material->SetIndexOfRefraction(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_BumpIntensity) material->SetBumpIntensity(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_AlphaThreshold) material->SetAlphaThreshold(IO::GetFloatValue(child));
+
+		else if (hash == HashedStrings::H_AmbientTexture) material->SetTexture(Material::TextureType::Ambient, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_EmissiveTexture) material->SetTexture(Material::TextureType::Emissive, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_DiffuseTexture) material->SetTexture(Material::TextureType::Diffuse, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_SpecularTexture) material->SetTexture(Material::TextureType::Specular, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_SpecularPowerTexture) material->SetTexture(Material::TextureType::SpecularPower, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_NormalTexture) material->SetTexture(Material::TextureType::Normal, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_BumpTexture) material->SetTexture(Material::TextureType::Bump, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_OpacityTexture) material->SetTexture(Material::TextureType::Opacity, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		
+	}
+
+	// Resume updates and compile the material
+	material->ResumeUpdates();
+	
+	// Return success
+	Game::Log << LOG_INFO << operation << " material \"" << ccode << "\"\n";
 	return ErrorCodes::NoError;
 }
 
@@ -510,9 +612,10 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_Orientation)					object->SetOrientation(IO::GetQuaternionFromAttr(node));
 	else if (hash == HashedStrings::H_Model)
 	{
-		___tmp_loading_string = node->GetText(); StrLowerC(___tmp_loading_string);
-		object->SetModel(Model::GetModel(___tmp_loading_string));
+		std::string modelcode = node->GetText(); StrLowerC(modelcode);
+		object->SetModel(Model::GetModel(modelcode));
 	}
+	else if (hash == HashedStrings::H_Size)							IO::Data::LoadSizeValue(node).ApplyToObject(object);
 	else if (hash == HashedStrings::H_Visible)						object->SetIsVisible(GetBoolValue(node));
 	//else if (hash == HashedStrings::H_VisibilityTestingMode)		object->SetVisibilityTestingMode(TranslateVisibilityModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
@@ -685,11 +788,50 @@ bool IO::Data::LoadHardpointContainerData(TiXmlElement *node, HashVal hash, iCon
 
 Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 {
-	// Create a new SimpleShip instance to hold the data
+	// Create a new object and load all data from XML
+	if (!root) return ErrorCodes::CannotLoadFromNullDataNode;
 	SimpleShip *object = new SimpleShip();
-	object->SetShipClass(Ship::ShipClass::Simple);
+	object = LoadSimpleShipData(root, object);
+
+	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
+	if (object->GetCode() == NullString || D::SimpleShips.Exists(object->GetCode()))
+	{
+		SafeDelete(object);
+		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
+	}
+
+	// Otherwise store in the central collection and return success
+	D::SimpleShips.Store(object);
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::ReloadSimpleShip(TiXmlElement *root)
+{
+	if (!root) return ErrorCodes::CannotLoadFromNullDataNode;
+
+	std::string code = LookaheadNodeTextField(root, "code");
+	if (code.empty()) return ErrorCodes::CannotReloadObjectWithMissingCode;
+
+	SimpleShip *object = D::SimpleShips.Get(code);
+	if (!object)
+	{
+		Game::Log << LOG_WARN << "Cannot reload object \"" << code << "\"; object does not exist\n";
+		return ErrorCodes::CannotReloadObjectWithUnrecognisedCode;
+	}
+
+	object = LoadSimpleShipData(root, object);
+	Game::Log << LOG_INFO << "Reloaded object \"" << code << "\" from file\n";
+
+	return ErrorCodes::NoError;
+}
+
+
+SimpleShip * IO::Data::LoadSimpleShipData(TiXmlElement *root, SimpleShip *object)
+{
+	if (!root || !object) return NULL;
 
 	// Suspend updates while loading the data
+	object->SetShipClass(Ship::ShipClass::Simple);
 	object->GetHardpoints().SuspendUpdates();
 
 	// Now look at each child element in turn
@@ -719,23 +861,31 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 			}
 		}
 	}
-
-	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
-	if (object->GetCode() == NullString || D::SimpleShips.Exists(object->GetCode()))
-	{
-		SafeDelete(object);
-		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
-	}
-
-	// Otherwise, resume updates, recalculate the ship data and store in the central collection
+	// Resume updates and recalculate the ship data
 	object->GetHardpoints().ResumeUpdates();
 	object->RecalculateAllShipData();
-	D::SimpleShips.Store(object);
-
-	// Return success
-	return ErrorCodes::NoError;
+	
+	// Return the ship
+	return object;
 }
 
+/****** TODO: Implement fully-templated model for Load<T>, Reload<T> which both rely on LoadData<T>.  Do as part of refactor DataInput.cpp -> proper central class ******/
+
+ComplexShip *						IO::Data::LoadComplexShipData(TiXmlElement *root, ComplexShip *object) { /* Not yet implemented */ return NULL; }
+ComplexShipSection *				IO::Data::LoadComplexShipSectionData(TiXmlElement *root, ComplexShipSection *object) { /* Not yet implemented */ return NULL; }
+Faction *							IO::Data::LoadFactionData(TiXmlElement *node, Faction *object) { /* Not yet implemented */ return NULL; }
+SpaceTurret *						IO::Data::LoadTurretData(TiXmlElement *node, SpaceTurret *object) { /* Not yet implemented */ return NULL; }
+BasicProjectileDefinition *			IO::Data::LoadBasicProjectileDefinitionData(TiXmlElement *node, BasicProjectileDefinition *object) { /* Not yet implemented */ return NULL; }
+SpaceProjectileDefinition *			IO::Data::LoadSpaceProjectileDefinitionData(TiXmlElement *node, SpaceProjectileDefinition *object) { /* Not yet implemented */ return NULL; }
+Engine *							IO::Data::LoadEngineData(TiXmlElement *node, Engine *object) { /* Not yet implemented */ return NULL; }
+
+Result								IO::Data::ReloadComplexShip(TiXmlElement *root) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadComplexShipSection(TiXmlElement *root) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadFaction(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadTurret(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadBasicProjectileDefinition(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadSpaceProjectileDefinition(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadEngine(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
 
 Result IO::Data::LoadComplexShip(TiXmlElement *root)
 {
@@ -986,6 +1136,27 @@ void IO::Data::LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds
 	}
 	else { delete obj; }	// If not a valid bounding object type then deallocate the memory
 
+}
+
+// Look ahead within a node definition to locate the given string property
+std::string IO::Data::LookaheadNodeTextField(TiXmlElement *node, const std::string & field)
+{
+	if (!node) return NULL;
+	HashVal hash = HashString(StrLower(field));
+	std::string key;
+
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		if (HashString(key) == hash)
+		{
+			return child->GetText();
+		}
+	}
+
+	return NullString;
 }
 
 
@@ -1445,7 +1616,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 		SafeDelete(tile);
 		return compilation_result;
 	}
-	
+
 	// Set a pointer to the new tile and return success to indicate that the tile was created successfully
 	(*pOutShipTile) = tile;
 	return compilation_result;
@@ -1976,6 +2147,17 @@ Result IO::Data::LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTe
 	return ErrorCodes::NoError;
 }
 
+VariableSizeValue IO::Data::LoadSizeValue(TiXmlElement *node)
+{
+	if (!node)													return VariableSizeValue();
+	if (node->Attribute("max"))									return VariableSizeValue(IO::GetFloatAttribute(node, "max"));
+	else
+	{
+		bool exact = IO::GetBoolAttribute(node, "exact", false);
+		return VariableSizeValue(IO::GetVector3FromAttr(node), exact);
+	}
+}
+
 // Load a single view portal definition and return it
 ViewPortal IO::Data::LoadViewPortal(TiXmlElement *node)
 {
@@ -2410,14 +2592,10 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 			XMFLOAT4 vec = IO::GetColourFloatFromAttr(child);
 			proj->SetProjectileColour(vec);
 		}
-		else if (hash == HashedStrings::H_Texture)
+		else if (hash == HashedStrings::H_Material)
 		{
 			val = child->GetText();
-			if (val != NullString)
-			{
-				// Note: not testing return code of this method at the moment
-				proj->SetTexture(BuildStrFilename(D::IMAGE_DATA_S, val));
-			}
+			proj->SetMaterial(val);
 		}
 		else if (hash == HashedStrings::H_DamageSet)
 		{
@@ -2482,6 +2660,10 @@ Result IO::Data::LoadSpaceProjectileDefinition(TiXmlElement *node)
 			const char *cmass = child->GetText();
 			float fmass = (float)atof(cmass); fmass = clamp(fmass, 1.0f, 10000000.0f);
 			proj->SetMass(fmass);
+		}
+		else if (hash == HashedStrings::H_Size)
+		{
+			proj->SetSize(IO::GetVector3FromAttr(child));
 		}
 		else if (hash == HashedStrings::H_ProjectileType)
 		{
@@ -3060,36 +3242,6 @@ CollisionSpatialDataF IO::Data::LoadCollisionSpatialData(TiXmlElement *node)
 	return data;
 }
 
-// Loads the geometry for the specified model
-Result IO::Data::LoadModelGeometry(Model *model)
-{
-	// Exit immediately if the geometry data has already been loaded
-	if (model->IsGeometryLoaded()) return ErrorCodes::NoError;
-
-	// Load the model geometry and textures
-	Result r = model->Initialise(model->GetFilename().c_str(), model->GetTextureFilename().c_str());
-
-	// Test the return code to see if the model could be successfully loaded
-	if (r == ErrorCodes::NoError)	model->SetGeometryLoaded(true); 
-	else							model->SetGeometryLoaded(false);
-
-	// If we did succeed in loading the model, scale the model to its target actual size now.  Actual size may already be 
-	// set, but this will actually initiate the scaling of model vertices since they were not previously loaded
-	if (model->IsGeometryLoaded())	
-	{
-		// If no effective model size was specified in the xml data, calculate a default now by exactly fitting bounds around the mesh data	
-		XMFLOAT3 size = model->GetEffectiveModelSize();
-		if (size.x < Game::C_EPSILON || size.y < Game::C_EPSILON || size.z < Game::C_EPSILON)
-			model->SetEffectiveModelSize(model->GetModelSize());
-
-		// Set the actual size now.  Method will take care of deriving missing parameters if required, so no validation needed here
-		model->SetActualModelSize(model->GetActualModelSize());
-	}
-
-	// Return the result of the model loading operation
-	return r;
-}
-
 Result IO::Data::PostProcessResources(void)
 {
 	Result result;
@@ -3231,16 +3383,13 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 			e->SetEffectModel(child->GetText());							// The underlying effect model used for rendering
 		}
 		else if (key == "firetexture") {
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
-			e->SetFireTexture(filename.c_str());				
+			e->SetFireTexture(child->GetText());				
 		}
 		else if (key ==	"noisetexture") { 
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
-			e->SetNoiseTexture(filename.c_str());				
+			e->SetNoiseTexture(child->GetText());
 		}
 		else if (key == "alphatexture") {
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
-			e->SetAlphaTexture(filename.c_str());				
+			e->SetAlphaTexture(child->GetText());
 		}
 		else if (key == "noisescrollspeed") {
 			e->SetScrollSpeeds(IO::GetFloat3FromAttr(child));				// 3x scroll speeds for the texture translation
@@ -3299,7 +3448,7 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			e->SetParticleLimit(atoi(child->GetText()));					
 		}
 		else if (key == "particletexture") {
-			e->LoadTexture(Game::Engine->GetDevice(), BuildStrFilename(D::IMAGE_DATA, child->GetText()).c_str());
+			e->SetParticleTexture(child->GetText());
 		}
 		else if (key == "emissionfrequency") {
 			const char *mn = child->Attribute("min");
@@ -3367,6 +3516,37 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 	}
 }
 
+Result IO::Data::LoadFont(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadNullFontData;
+
+	// Look at each child node in turn
+	std::string key, code, datafilename, texturename; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Hash the value for more efficient lookups
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		// Test for each required field
+		if (hash == HashedStrings::H_Code)
+		{
+			code = child->GetText();
+			StrLowerC(code);
+		}
+		else if (hash == HashedStrings::H_Data)		datafilename = child->GetText();
+		else if (hash == HashedStrings::H_Texture)	texturename = child->GetText();
+	}
+
+	// Make sure we have all mandatory parameters
+	if (code.empty() || datafilename.empty() || texturename.empty()) return ErrorCodes::CannotLoadFontWithMissingData;
+
+	// Attempt to initialise the new font and return the result
+	std::string fullDataFilename = DataRelativeFile(datafilename);
+	Result result = Game::Engine->GetTextManager()->InitializeFont(code, fullDataFilename, texturename);
+	return result;
+}
 
 Result IO::Data::LoadUILayout(TiXmlElement *node)
 {
@@ -3399,39 +3579,28 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		else if (key == "image2d") 
 		{
 			// Attempt to retrieve all the required data for an Image2D component
-			std::string code = child->Attribute("code");
-			std::string texture = child->Attribute("texture");
+			std::string code = IO::GetStringAttribute(child, "code", NullString);
+			std::string material = IO::GetStringAttribute(child, "material", NullString);
 			XMFLOAT3 pos = IO::GetFloat3FromAttr(child);
-			const char *cwidth = child->Attribute("width");
-			const char *cheight = child->Attribute("height");
-			std::string brender = child->Attribute("render");
+			float width = IO::GetFloatAttribute(child, "width", 1.0f);
+			float height = IO::GetFloatAttribute(child, "height", 1.0f);
+			float rot = IO::GetFloatAttribute(child, "rotation", 0.0f);
+			float opacity = IO::GetFloatAttribute(child, "opacity", 1.0f);
+			bool render = IO::GetBoolAttribute(child, "render", true);
+			bool acceptsmouse = IO::GetBoolAttribute(child, "acceptsmouse", false);
 
 			// Make sure we were able to retrieve all required information
-			if (code == NullString || texture == NullString || !cwidth || !cheight) continue;
-
-			// Process relevant fields to get the correct format
-			StrLowerC(code); 
-			std::string texfile = BuildStrFilename(D::IMAGE_DATA, texture);
-			int width = (int)floor(atof(cwidth));
-			int height = (int)floor(atof(cheight));
-
-			// Initialise a new component using this data
-			Image2D *item = D::UI->NewComponent(code, texfile.c_str(), (int)floor(pos.x), (int)floor(pos.y), pos.z, width, height);
-			if (!item) continue;
-			
-			// Only process the render flag if it has been set, otherwise use the Image2D object default
-			if (brender != NullString) 
-			{
-				StrLowerC(brender);
-				item->SetRenderActive(brender == "true");
-			}
+			if (code.empty() || material.empty()) continue;
+	
+			// Create the new component
+			Image2D *component = new Image2D(code, Game::Engine->GetAssets().GetMaterial(material),
+				XMFLOAT2(pos.x, pos.y), XMFLOAT2(width, height), rot, opacity, pos.z);
+			component->SetRenderActive(render);
+			component->SetAcceptsMouseInput(acceptsmouse);
 
 			// Add this new component to the render group
-			group->Components.Image2D.AddItem(code, item);
-			group->RegisterRenderableComponent(item);
-		}
-		else if (key == D::NODE_Image2DGroup) {
-			result = IO::Data::LoadImage2DGroup(child, group);
+			group->Components.Image2D.AddItem(code, component);
+			group->RegisterRenderableComponent(component);
 		}
 		else if (key == "constant")
 		{
@@ -3619,84 +3788,59 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		{
 			// Pull required fields for a button control
 			const char *code = child->Attribute("code");
-			const char *upcomp = child->Attribute("up");
-			const char *upkey = child->Attribute("up_key");
-			const char *downcomp = child->Attribute("down");
-			const char *downkey = child->Attribute("down_key");
-			const char *textcomp = child->Attribute("text");
-			const char *crender = child->Attribute("render");
+			const char *upcode = child->Attribute("up");
+			const char *downcode = child->Attribute("down");
+			const char *textcode = child->Attribute("text");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 
 			// Make sure we have all required fields
-			if (!code || !upcomp || !upkey || !downcomp || !downkey) continue;
-
-			// Convert data to the format we require
-			bool render = true;
-			if (crender && strcmp(crender, "false") == 0) render = false;
+			if (!code || !upcode || !downcode) continue;
 
 			// Attempt to get a reference to each component group
-			Image2DRenderGroup *upgroup = group->Components.Image2DGroup.GetItem(upcomp);
-			Image2DRenderGroup *downgroup = group->Components.Image2DGroup.GetItem(downcomp);
-			if (!upgroup || !downgroup) continue;
+			auto *up = group->Components.Image2D.GetItem(upcode);
+			auto *down = group->Components.Image2D.GetItem(downcode);
+			TextBlock *text = (textcode ? group->Components.TextBlocks.GetItem(textcode) : NULL);
 
-			// Now make sure the key is valid, and if so get references to the specific instances
-			Image2DRenderGroup::InstanceReference upinst = upgroup->GetInstanceReferenceByCode(upkey);
-			Image2DRenderGroup::InstanceReference downinst = downgroup->GetInstanceReferenceByCode(downkey);
-			if (!upinst.instance || !downinst.instance) continue;
+			if (!up || !down) continue;
 
-			// Also get a reference to the button text component, if one has been specified
-			TextBlock *textinst = NULL;
-			if (textcomp) textinst = group->Components.TextBlocks.GetItem(textcomp);
-
-			// Create a new button component and add links to these components.  Note derived properties are taken from the up componnet
-			UIButton *button = new UIButton(code, upinst, downinst, textinst, upinst.instance->position, upinst.instance->size, render);
+			// Create a new button component and add links to these components.  Note derived properties are taken from the up component
+			UIButton *button = new UIButton(code, up, down, text, up->GetPosition(), up->GetSize(), render);
 			group->Components.Buttons.AddItem(code, button);
 
 			// Also add links from the individual components back to this button, for more efficient event handling
-			upinst.instance->control = button;
-			downinst.instance->control = button;
+			up->SetParentControl(button);
+			down->SetParentControl(button);
 		}
 		else if (key == "textbox")
 		{
 			// Pull required fields for a button control
 			const char *code = child->Attribute("code");
-			const char *framecomp = child->Attribute("frame");
-			const char *framekey = child->Attribute("frame_key");
-			const char *framefocuscomp = child->Attribute("frame_focus");
-			const char *framefocuskey = child->Attribute("frame_focus_key");
-			const char *textcomp = child->Attribute("text");
-			const char *crender = child->Attribute("render");
+			const char *framecode = child->Attribute("frame");
+			const char *framefocuscode = child->Attribute("frame_focus");
+			const char *textcode = child->Attribute("text");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 
 			// Make sure we have all required fields
-			if (!code || !framecomp || !framekey || !textcomp) continue;
+			if (!code || !framecode || !textcode) continue;
 
 			// If we don't have a distinct 'focus' appearance then copy the normal appearance
-			if (!framefocuscomp) { framefocuscomp = framecomp; framefocuskey = framekey; }
+			if (!framefocuscode) framefocuscode = framecode;
 
-			// Convert data to the format we require
-			bool render = true;
-			if (crender && strcmp(crender, "false") == 0) render = false;
+			// Attempt to get a reference to each component 
+			auto *frame = group->Components.Image2D.GetItem(framecode);
+			auto *framefocus = group->Components.Image2D.GetItem(framefocuscode);
+			auto *text = group->Components.TextBlocks.GetItem(textcode);
 
-			// Attempt to get a reference to each component group
-			Image2DRenderGroup *frgroup = group->Components.Image2DGroup.GetItem(framecomp);
-			Image2DRenderGroup *frfocusgroup = group->Components.Image2DGroup.GetItem(framefocuscomp);
-			if (!frgroup || !frfocusgroup) continue;
-
-			// Now make sure the key is valid, and if so get references to the specific instances
-			Image2DRenderGroup::InstanceReference frinst = frgroup->GetInstanceReferenceByCode(framekey);
-			Image2DRenderGroup::InstanceReference frfocusinst = frfocusgroup->GetInstanceReferenceByCode(framefocuskey);
-			if (!frinst.instance || !frfocusinst.instance) continue;
-
-			// Also get a reference to the button text component, if one has been specified
-			TextBlock *textinst = NULL;
-			if (textcomp) textinst = group->Components.TextBlocks.GetItem(textcomp);
+			if (!frame || !framefocus || !text) continue;
 
 			// Create a new textbox component and add links to these components.  Derived properties are taken from the frame component
-			UITextBox *tbox = new UITextBox(code, frinst, frfocusinst, textinst, frinst.instance->position, frinst.instance->size, render);
+			UITextBox *tbox = new UITextBox(code, frame, framefocus, text, frame->GetPosition(), frame->GetSize(), render);
 			group->Components.TextBoxes.AddItem(code, tbox);
 
 			// Also add links from the individual components back to this button, for more efficient event handling
-			frinst.instance->control = tbox;
-			frfocusinst.instance->control = tbox;
+			frame->SetParentControl(tbox);
+			framefocus->SetParentControl(tbox);
+			text->SetParentControl(tbox);
 		}
 		else if (key == "combobox")
 		{
@@ -3709,7 +3853,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			const char *swidth = child->Attribute("width");
 			const char *sheight = child->Attribute("height");
 			const char *sexpandsize = child->Attribute("expandsize");
-			const char *crender = child->Attribute("render");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 	
 			// Make sure all mandatory fields exist
 			if (!cdef || !code || !sx || !sy || !sz || !swidth || !sheight) continue;
@@ -3721,7 +3865,6 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			int height = atoi(sheight);
 
 			// Convert optional fields or default as necessary
-			bool render = true; if (crender && strcmp(crender, "false") == 0) render = false;
 			int expandsize = UIComboBox::DEFAULT_EXPAND_SIZE; if (sexpandsize) expandsize = atoi(sexpandsize);
 
 			// Make sure this is a valid definition 
@@ -3761,98 +3904,10 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
-// Loads a 2D image group and, if successful, registers with the specified render group
-Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
-{
-	std::string key;
-	Result result;
-
-	// Parameter check 
-	if (!node || !group) return ErrorCodes::CannotLoadImage2DGroupWithNullParameters;
-
-	// This top-level node should contain all the info required to instantiate the render group
-	const char *code = node->Attribute("code");
-	const char *texture = node->Attribute("texture");
-	const char *tmode = node->Attribute("texturemode");
-	const char *brender = node->Attribute("render");
-	const char *smouse = node->Attribute("acceptsmouse");
-	const char *czorder = node->Attribute("z");
-
-	// Make sure we were able to retrieve all required information
-	if (!code || !texture || !tmode) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
-
-	// Process the parameters and convert as required
-	std::string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
-	const char *texfile = stexfile.c_str();
-	std::string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
-	std::string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
-
-	// Create the new 2D image group object and attempt to initialise it
-	Image2DRenderGroup *igroup = new Image2DRenderGroup();
-	result = igroup->Initialize( Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
-								 texfile, Texture::TranslateTextureMode(tmode) );
-	if (result != ErrorCodes::NoError) return result;
-
-	// Set other properties at the group level
-	igroup->SetCode(code);
-	igroup->SetRenderActive( (grouprender == "true") );
-	igroup->SetAcceptsMouseInput( (acceptsmouse == "true") );
-	
-	// Attempt to convert the z value for this group
-	float z = 0.0f; if (czorder) z = (float)atof(czorder);
-	igroup->SetZOrder(z);
-
-	// Now look at each child element in turn (each should correspond to an instance) and pull data from them
-	TiXmlElement *child = node->FirstChildElement();
-	for (child; child; child=child->NextSiblingElement())
-	{
-		// Extract data from the node
-		key = child->Value(); StrLowerC(key);
-
-		// If this is a new instance
-		if (key == "instance")
-		{
-			// Pull data on this instance
-			INTVECTOR2 pos = IO::GetInt2CoordinatesFromAttr(child);
-			const char *cz = child->Attribute("z");
-			const char *cwidth = child->Attribute("width");
-			const char *cheight = child->Attribute("height");
-			const char *instrender = child->Attribute("render");
-			const char *rotate = child->Attribute("rotation");
-			const char *instcode = child->Attribute("code");
-			
-			// Make sure we have all required data
-			if (!cwidth || !cheight) continue;
-
-			// Convert data if required
-			std::string srender = (instrender ? instrender : "");
-			std::string srotate = (rotate ? rotate : "");
-			INTVECTOR2 size = INTVECTOR2( atoi(cwidth), atoi(cheight) );
-			float zorder = (cz ? (float)atof(cz) : 0.0f);
-			Rotation90Degree rot = TranslateRotation90Degree(srotate);
-			StrLowerC(srender);
-
-			// Create a new instance with this data
-			Image2DRenderGroup::Instance *i = igroup->AddInstance(INTVECTOR2(pos.x, pos.y), zorder, size, (srender == "true"), rot );			
-
-			// Add any additional properties
-			i->code = (instcode ? instcode : "");
-		}
-	}
-
-	// Add this image group to the render group now that we have created it successfully
-	group->Components.Image2DGroup.AddItem(code, igroup);
-	group->RegisterRenderableComponent(igroup);
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 // Loads a component grouping into a UI layout
 Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 {
 	std::string key;
-	const char *citemcode, *citemkey;
 	std::string itemcode, itemkey;
 
 	// Parameter check 
@@ -3877,15 +3932,12 @@ Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 		if (key == "include")
 		{
 			// Pull data on this item
-			citemcode = child->Attribute("code");
-			citemkey = child->Attribute("key");
-
-			// Make sure the required parameters exist
-			if (!citemcode) continue; else itemcode = citemcode;
-			if (!citemkey) itemkey = ""; else itemkey = citemkey;
+			const char *citemcode = child->Attribute("code");
+			if (!citemcode) continue; 
+			itemcode = citemcode;
 
 			// Attempt to locate the item in the render group
-			iUIComponent *component = group->FindUIComponent(itemcode, itemkey);
+			iUIComponent *component = group->FindUIComponent(itemcode);
 			if (component) 
 			{
 				// If we have found a matching component then add it now
@@ -3930,17 +3982,14 @@ Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 		{
 			// Pull data on this item
 			citemkey = child->Attribute("key");
-			citemval = child->Attribute("file");
+			citemval = child->Attribute("value");
 
 			// Make sure the required parameters exist
 			if (!citemkey) continue; else itemkey = citemkey;
 			if (!citemval) continue; else itemval = citemval;
 
-			// Build a complete filename from the relative path supplied
-			std::string filename = BuildStrFilename(D::DATA, itemval);
-
 			// Add this mapping to the collection
-			def->AddComponent(itemkey, filename);
+			def->AddComponent(itemkey, itemval);
 		}
 	}
 
@@ -4171,27 +4220,10 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_Component)
 		{
-			// Pull data from each required attribute
-			const char *cindex = child->Attribute("index");
-			const char *cmodel = child->Attribute("model");
-			if (!cindex || !cmodel)
+			if (Result result = LoadArticulatedModelComponent(child, *model); result != ErrorCodes::NoError)
 			{
-				SafeDelete(model);
-				return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+				Game::Log << LOG_WARN << "Failed to load articulated model component for \"" << model->GetCode() << "\"; component definition is invalid\n";
 			}
-
-			// Validate the parameters
-			int index = atoi(cindex);
-			std::string smodel = cmodel; StrLowerC(smodel);
-			if (index < 0 || index >= count)
-			{
-				SafeDelete(model);
-				return ErrorCodes::ArticulatedModelContainsInvalidComponentDef;
-			}
-
-			// Set the component definition
-			Model *m = Model::GetModel(smodel);
-			model->SetComponentDefinition(index, m);
 		}
 		else if (hash == HashedStrings::H_Attachment)
 		{
@@ -4280,6 +4312,33 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
+Result IO::Data::LoadArticulatedModelComponent(TiXmlElement *node, ArticulatedModel & parent_model)
+{
+	if (!node) return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+
+	if (!node->Attribute("index")) return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+	int index = IO::GetIntegerAttribute(node, "index");
+
+	Model *model = NULL; VariableSizeValue size;
+	std::string key; 
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		key = child->Value(); StrLowerC(key);
+
+		if (key == "model")			model = Model::GetModel(child->GetText());
+		else if (key == "size")		size = IO::Data::LoadSizeValue(child);
+	}
+
+	bool result = parent_model.SetComponentDefinition(index, model, size);
+	if (!result)
+	{
+		return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+	}
+
+	return ErrorCodes::NoError;
+}
+
 // Loads modifier data from the specified node
 Result IO::Data::LoadModifier(TiXmlElement *node)
 {
@@ -4335,7 +4394,7 @@ Result IO::Data::LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet)
 	for (child; child; child = child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == D::NODE_Damage)
+		if (key == "damage")
 		{
 			res = LoadDamage(child, damage);
 			if (res == ErrorCodes::NoError) outDamageSet.push_back(damage);
@@ -4377,7 +4436,7 @@ Result IO::Data::LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet
 	for (child; child; child = child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == D::NODE_DamageResistance)
+		if (key == "damageresistance")
 		{
 			res = LoadDamageResistance(child, dr);
 			if (res == ErrorCodes::NoError) outDRSet.push_back(dr);
@@ -4432,6 +4491,29 @@ AudioParameters IO::Data::LoadAudioParameters(TiXmlElement *node)
 		
 	return AudioParameters(audio_name, (audio_volume ? (float)atof(audio_volume) : 0.0f));
 }
+
+
+// Attempt to reload the single entity with given type/code, from the specified file.  All other definitions
+// in data file will be ignored.  File indices will not be followed
+Result IO::Data::ReloadEntityData(const std::string & filename, HashVal type, const std::string & code)
+{
+	// Set details for the reload of this single entity
+	AllowReloadOfExistingEntities = true;
+	ReloadOnlyType = type;
+	ReloadOnlyCode = code;
+
+	// Load the specified game data file with these restrictions in place
+	Result result = IO::Data::LoadGameDataFile(filename, false);
+
+	// Revert all single-entity reload restrictions
+	AllowReloadOfExistingEntities = false;
+	ReloadOnlyType = (HashVal)0U;
+	ReloadOnlyCode = NullString;
+
+	// Return result of the single-reload operation
+	return result;
+}
+
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)

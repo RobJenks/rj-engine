@@ -728,39 +728,26 @@ void ComplexShip::CalculateShipSizeData(void)
 	}
 	 
 	// Otherwise we want to determine the min and max bounds of the ship based on each section
-	this->MinBounds = LARGE_VECTOR_P;
-	this->MaxBounds = LARGE_VECTOR_N;
-	XMVECTOR bmin, bmax;
+	INTVECTOR3 elmin = INTVECTOR3(+1, +1, +1);		// Deliberate; we will validate that
+	INTVECTOR3 elmax = INTVECTOR3(-1, -1, -1);		// (min < max) before accepting the result
 	
 	// Iterate over each ship section in turn
-	ComplexShipSection *sec = NULL; int processed = 0;
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
 	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
 	{
 		// Make sure the section is valid
-		sec = (*it); 
-		if (!sec || !sec->GetModel() || !sec->GetModel()->IsGeometryLoaded()) continue;
+		ComplexShipSection *sec = (*it); if (!sec) continue;
 
 		// Have the section recalculate its own size
 		sec->CalculateShipSizeData();
 
-		// Determine the min and max bounds of this ship section, based on the model size about its centre point
-		bmin = XMVectorSubtract(sec->GetRelativePosition(), XMVectorMultiply(sec->GetSize(), HALF_VECTOR));
-		bmax = XMVectorAdd(sec->GetRelativePosition(), XMVectorMultiply(sec->GetSize(), HALF_VECTOR));
-
-		// Add the ship section offset to each, to get the actual bounds in world space
-		//bmin += sec->GetPosition(); bmax += sec->GetPosition();
-
-		// If the bounds are now outside our current min & max, record them as the new ship limits
-		MinBounds = XMVectorMin(MinBounds, bmin);
-		MaxBounds = XMVectorMax(MaxBounds, bmax);
-
-		// We have processed this section
-		++processed;
+		// Retrieve the element size of this section and use it to expand the total ship element area
+		elmin = IntVector3Min(elmin, sec->GetElementLocation());
+		elmax = IntVector3Max(elmax, (sec->GetElementLocation() + sec->GetElementSize() - ONE_INTVECTOR3));
 	}
 	
 	// Make sure we actually processed something
-	if (processed == 0)
+	if (!(elmin < elmax))
 	{
 		this->MinBounds = HALF_VECTOR_N;
 		this->MaxBounds = HALF_VECTOR_P;
@@ -770,16 +757,23 @@ void ComplexShip::CalculateShipSizeData(void)
 		return;
 	}
 
-	// Ship size OVERRIDE - must match size in elements.  TODO: Remove above and based all on elements in future?
-	this->SetSize(Game::ElementLocationToPhysicalPosition(this->GetElementSize()));
+	// Ship size is set based on total element size (of all constituent ship sections); SetElementSize() will internally call SetSize()
+	INTVECTOR3 element_size = (elmax - elmin + ONE_INTVECTOR3);
+	this->SetElementSize(element_size);
+
+	// Calculate derived data that is required for Ship subclasses
+	XMVECTOR half_size = XMVectorMultiply(GetSize(), HALF_VECTOR);
+	MinBounds = XMVectorNegate(half_size);
+	MaxBounds = half_size;
 
 	// Also recalculate the ship centre offset
 	// SetCentreOffsetTranslation(-(D3DXVECTOR3(	(this->MaxBounds.x + this->MinBounds.x) * 0.5f, ..., ...)))
-	SetCentreOffsetTranslation(XMVectorNegate(XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR)));
+	//SetCentreOffsetTranslation(XMVectorNegate(XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR)));
+	SetCentreOffsetTranslation(NULL_VECTOR);		// This should not be required now; all objects are origin-centred
 
 	// Complex ships are all space environments.  Calculate the environment zero-element translation at this point as well, 
 	// based upon the overall object size.  This translates from the object centre to its (0,0,0) element position
-	this->SetZeroPointTranslation(XMVectorMultiply(m_size, HALF_VECTOR_N));
+	SetZeroPointTranslation(XMVectorNegate(half_size));
 }
 
 

@@ -4,8 +4,7 @@
     <Code>corridor_ns_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_ns.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_ns.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -13,8 +12,7 @@
     <Code>corridor_se_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_se.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_se.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
   
@@ -22,8 +20,7 @@
     <Code>corridor_nse_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nse.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nse.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -31,8 +28,7 @@
     <Code>corridor_nsew_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nsew.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nsew.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -41,50 +37,46 @@
     <Code>quarters_dorm01_interior_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
-    <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
-    <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
+    <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
+    <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
   </Model>
 
   <Model>
     <Code>quarters_dorm01_wall_straight_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
-    <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
-    <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
-    <collision px="-4.980024" py="0.000000" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.485000" ey="5.205013" ez="5.345026" />
+    <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
+    <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
+    <collision px="-0.4980024" py="0.0000000" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.0485000" ey="0.5205013" ez="0.5345026" />
   </Model>
 
   <Model>
     <Code>quarters_dorm01_wall_corner_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
-    <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
-    <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
-    <collision px="-4.860025" py="0.000000" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.520002" ey="5.445024" ez="5.135016" />
-    <collision px="-0.010000" py="0.000000" pz="4.985023" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.130025" ey="5.005014" ez="0.765000" />
+    <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
+    <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
+    <collision px="-0.4860025" py="0.0000000" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.0520002" ey="0.5445024" ez="0.5135016" />
+    <collision px="-0.0010000" py="0.0000000" pz="0.4985023" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5130025" ey="0.5005014" ez="0.0765000" />
   </Model>
 
   <Model>
     <Code>quarters_dorm01_connection_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
-    <collision px="0.005000" py="-4.655028" pz="-0.254996" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.590047" ey="0.205001" ez="5.755050" />
-    <collision px="0.180000" py="4.490032" pz="0.325000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.575043" ey="0.200001" ez="5.720042" />
-    <collision px="-4.755028" py="0.000000" pz="-4.110014" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.080001" ey="5.170033" ez="1.360000" />
-    <collision px="-4.705027" py="-0.010000" pz="3.920015" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.400001" ey="4.875028" ez="1.045000" />
-    <collision px="-4.790026" py="3.990009" pz="-0.025000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.475000" ey="1.190000" ez="5.005024" />
+    <collision px="0.0005000" py="-0.4655028" pz="-0.0254996" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5590047" ey="0.0205001" ez="0.5755050" />
+    <collision px="0.0180000" py="0.4490032" pz="0.0325000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5575043" ey="0.0200001" ez="0.5720042" />
+    <collision px="-0.4755028" py="0.0000000" pz="-0.4110014" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.0080001" ey="0.5170033" ez="0.1360000" />
+    <collision px="-0.4705027" py="-0.0010000" pz="0.3920015" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.0400001" ey="0.4875028" ez="0.1045000" />
+    <collision px="-0.4790026" py="0.3990009" pz="-0.0025000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.0475000" ey="0.1190000" ez="0.5005024" />
   </Model>
   
 </GameData>

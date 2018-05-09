@@ -8,8 +8,10 @@
 
 #include <fstream>
 #include <string>
-#include "Texture.h"
+#include "ErrorCodes.h"
+#include "Rendering.h"
 #include "CompilerSettings.h"
+class TextureDX11;
 
 
 // This class has no special alignment requirements
@@ -33,7 +35,7 @@ public:
 	FontData(const FontData&);
 	~FontData();
 
-	Result Initialize(ID3D11Device* device, std::string name, const char *fontFilename, const char *textureFilename);
+	Result Initialize(const std::string & name, const char *fontFilename, const std::string & texture);
 	void Shutdown();
 
 	ID3D11ShaderResourceView* GetTexture();
@@ -45,15 +47,15 @@ public:
 							float *pOutSentenceWidth, float *pOutSentenceHeight );
 
 private:
+
 	Result LoadFontData(const char*);
 	void ReleaseFontData();
-	Result FontData::LoadTexture(ID3D11Device* device, const char *filename);
-	void ReleaseTexture();
 
 private:
+
 	std::string		m_name;
 	FontType*		m_Font;
-	Texture*		m_Texture;
+	TextureDX11 *	m_Texture;
 	float			m_spacing;
 };
 

@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include "CompilerSettings.h"
+#include "VariableSizeValue.h"
 #include "ArticulatedModelComponent.h"
 #include "Attachment.h"
 
@@ -36,7 +37,7 @@ public:
 	CMPINLINE int								GetAttachmentCount(void) const				{ return m_attachcount; }
 
 	// Set the definition of a particular model component.  Returns a value indicating whether the definition could be set
-	bool										SetComponentDefinition(int index, Model *model);
+	bool										SetComponentDefinition(int index, Model *model, const VariableSizeValue & size);
 
 	// Returns a pointer to the specified component, if valid
 	ArticulatedModelComponent *					GetComponent(int index);

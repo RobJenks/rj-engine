@@ -7,6 +7,7 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "GameDataExtern.h"
 
 
@@ -16,7 +17,7 @@ class iShader
 public:
 
 	// Renders the shader.
-	virtual Result XM_CALLCONV Render(	ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+	virtual Result RJ_XM_CALLCONV Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 										const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)		= 0;
 
 

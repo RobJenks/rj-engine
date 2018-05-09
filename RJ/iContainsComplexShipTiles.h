@@ -50,7 +50,7 @@ public:
 	CMPINLINE ComplexShipTileCollection &	  GetTilesOfType(D::TileClass type)			{ return m_tiles[(int)type]; }
 	CMPINLINE int							  GetTileCountOfType(D::TileClass type) const		
 	{ 
-		return (((int)type > 0 && (int)type < D::TileClass::_COUNT) ? m_tilecount[(int)type] : 0);
+		return (static_cast<int>(type) > 0 && static_cast<int>(type) < static_cast<int>(D::TileClass::_COUNT) ? m_tilecount[static_cast<int>(type)] : 0);
 	}
 
 	// Attempts to locate a tile at the specified location.  Only searches for tiles with an ElementLocation specifically
@@ -93,8 +93,8 @@ public:
 protected:
 
 	// Fields for managing the ship tiles linked to this parent object
-	ComplexShipTileCollection		m_tiles[D::TileClass::_COUNT];			// The collection of tiles linked to this parent; [0] is the full collection, [1]-[n-1] are collections by class
-	int								m_tilecount[D::TileClass::_COUNT];		// The number of tiles that are linked to this parent (precalc)
+	ComplexShipTileCollection		m_tiles[static_cast<int>(D::TileClass::_COUNT)];			// The collection of tiles linked to this parent; [0] is the full collection, [1]-[n-1] are collections by class
+	int								m_tilecount[static_cast<int>(D::TileClass::_COUNT)];		// The number of tiles that are linked to this parent (precalc)
 	
 	// Determines whether tile-based calculation is enabled
 	bool							m_tilecalcsuspended;

@@ -1,7 +1,8 @@
 #include "DX11_Core.h" // #include "FullDX11.h"
 #include "ErrorCodes.h"
 #include "FastMath.h"
-#include "Texture.h"
+#include "TextureDX11.h"
+#include "CoreEngine.h"
 
 #include "ParticleEmitter.h"
 
@@ -15,7 +16,7 @@ const XMFLOAT2 ParticleEmitter::TexCoord[4][4] = {
 };
 
 // Initialises the particle emitter.  Properties should have been set first.
-Result ParticleEmitter::Initialise(ID3D11Device *device)
+Result ParticleEmitter::Initialise(void)
 {
 	Result result;
 
@@ -27,7 +28,7 @@ Result ParticleEmitter::Initialise(ID3D11Device *device)
 	}
 
 	// Now initialise the buffers used for rendering
-	result = InitialiseBuffers(device);
+	result = InitialiseBuffers();
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -90,7 +91,7 @@ Result ParticleEmitter::InitialiseParticles(void)
 	return ErrorCodes::NoError;
 }
 
-Result ParticleEmitter::InitialiseBuffers(ID3D11Device *device)
+Result ParticleEmitter::InitialiseBuffers(void)
 {
 	INDEXFORMAT *indices;
 	int i;
@@ -119,7 +120,7 @@ Result ParticleEmitter::InitialiseBuffers(ID3D11Device *device)
 	vertexData.SysMemSlicePitch = 0;
 
 	// Now finally create the vertex buffer.
-    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexbuffer);
+    result = Game::Engine->GetRenderDevice()->GetDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexbuffer);
 	if(FAILED(result))	return ErrorCodes::CouldNotCreateParticleVertexBuffer;
 
 	// Set up the description of the static index buffer.
@@ -136,7 +137,7 @@ Result ParticleEmitter::InitialiseBuffers(ID3D11Device *device)
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexbuffer);
+	result = Game::Engine->GetRenderDevice()->GetDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexbuffer);
 	if(FAILED(result))	return ErrorCodes::CouldNotCreateParticleIndexBuffer;
 
 	// Release the index array since it is no longer needed.
@@ -281,7 +282,7 @@ void ParticleEmitter::AddParticle(int id)
 	//if (m_maxparticleidcreated >= m_particlelimit) m_maxparticleidcreated = m_particlelimit-1;
 }
 
-void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup)
+void ParticleEmitter::Render(Rendering::RenderDeviceContextType  *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup)
 {
 	// Update the particle data
 	UpdateParticles(vright, vup);
@@ -290,7 +291,7 @@ void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 
 	RenderBuffers(devicecontext);
 }
 
-void ParticleEmitter::RenderBuffers(ID3D11DeviceContext *devicecontext)
+void ParticleEmitter::RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -324,43 +325,23 @@ void ParticleEmitter::RenderBuffers(ID3D11DeviceContext *devicecontext)
 }
 
 
-
-Result ParticleEmitter::LoadTexture(ID3D11Device* device, const char *filename)
+ID3D11ShaderResourceView * ParticleEmitter::GetParticleTexture(void) 
 {
-	// If texture already exists then release and deallocate it first
-	if (m_texture)
+	return (m_texture ? m_texture->GetShaderResourceView() : NULL);
+}
+
+void ParticleEmitter::SetParticleTexture(const std::string & name)
+{
+	m_texture = Game::Engine->GetAssets().GetTexture(name);
+	if (!m_texture)
 	{
-		m_texture->Shutdown();
-		delete m_texture;
-		m_texture = NULL;
+		Game::Log << LOG_WARN << "Cannot load texture \"" << name << "\" for particle emitter \"" << m_code << "\"\n";
 	}
-
-	// Create the texture object
-	m_texture = new Texture();
-	if(!m_texture) return ErrorCodes::CouldNotCreateTextureObject;
-
-	// Initialize the texture object
-	Result result = m_texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we loaded the texture successfully
-	return ErrorCodes::NoError;
 }
 
 void ParticleEmitter::Shutdown(void)
 {
-	// Dispose and deallocate the texture object
-	if (m_texture)
-	{
-		m_texture->Shutdown();
-		delete m_texture;
-		m_texture = NULL;
-	}
-
-	// Now deallocate the particle data array
+	// Deallocate the particle data array
 	if (m_particles)
 	{
 		delete[] m_particles;
@@ -397,21 +378,11 @@ ParticleEmitter *ParticleEmitter::CreateClone(void)
 	// Set the pos/orient specifically to ensure the world matrix is recalculated
 	e->SetPositionAndOrientation(this->GetPosition(), this->GetOrientation());
 	
-	// Extract resource information from the source emitter texture, for use in creating the new one
-	ID3D11Device *tdev;
-	ID3D11Resource *tres;
-	D3D11_SHADER_RESOURCE_VIEW_DESC tdesc;
-	this->GetParticleTexture()->GetDevice(&tdev);
-	this->GetParticleTexture()->GetResource(&tres);
-	this->GetParticleTexture()->GetDesc(&tdesc);
-	
 	// Set a new texture object, using the same texture resources as the old object
-	Texture *tex = new Texture();
-	tex->Initialise(tres, &tdesc);
-	e->SetParticleTexture(tex);
+	e->SetParticleTexture(m_texture);
 	
 	// Run initialisation functions on the emitter
-	e->Initialise(tdev);
+	e->Initialise();
 
 	// Return a reference to the new emitter
 	return e;

@@ -1,27 +1,10 @@
 #include <string>
-#include "Texture.h"
 #include "Utility.h"
 #include "EffectBase.h"
 
-Result EffectBase::LoadTexture(Texture **texture, const char *filename)
-{
-	// Create the texture object
-	(*texture) = new Texture();
-	if(!(*texture)) return ErrorCodes::CouldNotCreateTextureObject;
-
-	// Initialize the texture object
-	Result result = (*texture)->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we loaded the texture successfully
-	return ErrorCodes::NoError;
-}
 
 // Derives the effect model type from a string identifier.  Used for loading in from game XML data
-EffectBase::EffectModelType EffectBase::DeriveEffectModel(const std::string modelname)
+EffectBase::EffectModelType EffectBase::DeriveEffectModel(const std::string & modelname)
 {
 	// Convert to lowercase for case-insensitive comparison
 	std::string s = StrLower(modelname);

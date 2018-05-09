@@ -1,0 +1,9 @@
+<gamedata>
+
+  <!-- Used for rendering editor grid lines -->
+  <Texture code="ui_editor_line_1" dimension="Texture2D" filename="UI/ShipBuilder/ui_editor_line_1.dds" />
+  <Material code="ui_editor_line_1">
+    <DiffuseTexture>ui_editor_line_1</DiffuseTexture>
+  </Material>
+  
+</gamedata>

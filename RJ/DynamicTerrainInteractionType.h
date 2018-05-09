@@ -2,7 +2,7 @@
 
 #include <string>
 
-enum DynamicTerrainInteractionType
+enum class DynamicTerrainInteractionType
 {
 	None = 0,					// No interaction is possible
 

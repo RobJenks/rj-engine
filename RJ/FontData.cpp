@@ -1,8 +1,10 @@
 #include <string>
 #include "ErrorCodes.h"
 #include "FontData.h"
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 
-Result FontData::Initialize(ID3D11Device* device, std::string name, const char *fontFilename, const char *textureFilename)
+Result FontData::Initialize(const std::string & name, const char *fontFilename, const std::string & texture)
 {
 	Result result;
 
@@ -15,16 +17,18 @@ Result FontData::Initialize(ID3D11Device* device, std::string name, const char *
 
 	// Load in the text file containing the font data.
 	result = LoadFontData(fontFilename);
-	if(result != ErrorCodes::NoError)
+	if (result != ErrorCodes::NoError)
 	{
+		Game::Log << LOG_WARN << "Could not load descriptor data for font \"" << name << "\" (" << fontFilename << ")\n";
 		return result;
 	}
 
 	// Load the texture that has the font characters on it.
-	result = LoadTexture(device, textureFilename);
-	if(result != ErrorCodes::NoError)
+	m_Texture = Game::Engine->GetAssets().GetTexture(texture);
+	if (!m_Texture)
 	{
-		return result;
+		Game::Log << LOG_WARN << "Could not load font texture \"" << texture << "\" for font \"" << name << "\"\n";
+		return ErrorCodes::CannotLoadFontDataFile;
 	}
 
 	return ErrorCodes::NoError;
@@ -33,9 +37,6 @@ Result FontData::Initialize(ID3D11Device* device, std::string name, const char *
 
 void FontData::Shutdown()
 {
-	// Release the font texture.
-	ReleaseTexture();
-
 	// Release the font data.
 	ReleaseFontData();
 }
@@ -98,43 +99,9 @@ void FontData::ReleaseFontData()
 }
 
 
-Result FontData::LoadTexture(ID3D11Device* device, const char *filename)
-{
-	Result result;
-
-	// Create the texture object.
-	m_Texture = new Texture();
-	if(!m_Texture)
-	{
-		return ErrorCodes::CannotCreateFontTextureObject;
-	}
-
-	// Initialize the texture object.
-	result = m_Texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	return ErrorCodes::NoError;
-}
-
-
-void FontData::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-}
-
-
 ID3D11ShaderResourceView* FontData::GetTexture()
 {
-	return m_Texture->GetTexture();
+	return m_Texture->GetShaderResourceView();
 }
 
 
@@ -145,6 +112,9 @@ void FontData::BuildVertexArray(void* vertices, const char *sentence, float draw
 	int numLetters, index, i, letter;
 	float spacingpixels, letterwidth, letterheight;
 	FontType fontitem;
+
+	// Take no action if we have not yet initailised the required font data
+	if (!m_Font) return;
 
 	// Store the starting point of this sentence, for use in calculating sentence width later
 	float startX = drawX;

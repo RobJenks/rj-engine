@@ -1,8 +1,9 @@
-#pragma once
+/*#pragma once
 
 #ifndef __CubeMapTextureH__
 #define __CubeMapTextureH__
 
+#include "Rendering.h"
 #include "Texture.h"
 
 // This class has no special alignment requirements
@@ -12,8 +13,8 @@ public:
 	CubeMapTexture(void);
 	~CubeMapTexture(void);
 
-	Result Initialise(ID3D11Device *device, const char *filename);
+	Result Initialise(Rendering::RenderDeviceType  *device, const char *filename);
 };
 
 
-#endif
+#endif*/

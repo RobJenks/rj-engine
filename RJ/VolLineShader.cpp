@@ -1,11 +1,15 @@
+#include <unordered_map>
 #include "DX11_Core.h"
 #include "Utility.h"
 
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
 #include "ModelBuffer.h"
+#include "MaterialDX11.h"
 #include "CoreEngine.h"
-#include "Texture.h"
+#include "TextureDX11.h"
 #include "VolumetricLine.h"
 
 #include "VolLineShader.h"
@@ -13,7 +17,7 @@
 // Static resources used during line rendering
 ModelBuffer *										VolLineShader::BaseModel = NULL;
 std::unordered_map<std::string, ModelBuffer*>		VolLineShader::LineModels;
-Texture *											VolLineShader::LinearDepthTextureObject = NULL;
+TextureDX11 *										VolLineShader::LinearDepthTextureObject = NULL;
 ID3D11ShaderResourceView *							VolLineShader::LinearDepthTexture = NULL;
 ID3D11ShaderResourceView **							VolLineShader::PSShaderResources = NULL;
 
@@ -39,7 +43,7 @@ VolLineShader::VolLineShader(void)
 }
 
 
-Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far)
+Result VolLineShader::Initialise(Rendering::RenderDeviceType  *device, XMFLOAT2 viewport_size, float clip_near, float clip_far)
 {
 	Result result;
 
@@ -66,7 +70,7 @@ Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, f
 }
 
 // Initialise shader
-Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -95,7 +99,7 @@ Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 }
 
 // Initialise shader
-Result VolLineShader::InitialiseGeometryShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialiseGeometryShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -115,7 +119,7 @@ Result VolLineShader::InitialiseGeometryShader(ID3D11Device *device, std::string
 }
 
 // Initialise shader
-Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -139,7 +143,7 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 }
 
 // Initialise shader
-Result VolLineShader::InitialisePixelShaderTextured(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialisePixelShaderTextured(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -157,7 +161,7 @@ Result VolLineShader::InitialisePixelShaderTextured(ID3D11Device *device, std::s
 }
 
 // Renders the shader.
-Result XM_CALLCONV VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+Result RJ_XM_CALLCONV VolLineShader::Render(	Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
@@ -250,7 +254,7 @@ void VolLineShader::Shutdown()
 }
 
 // Initialise the static data used in volumetric line rendering
-Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
+Result VolLineShader::InitialiseStaticData(Rendering::RenderDeviceType  *device)
 {
 	// Initialise the static model storage
 	VolLineShader::BaseModel = NULL;
@@ -260,10 +264,8 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 	VolLineShader::BaseModel = VolLineShader::CreateLineModel(NULL);
 
 	// Load the linear depth texture as a static resource for each rendering cycle
-	VolLineShader::LinearDepthTextureObject = new Texture();
-	Result result = VolLineShader::LinearDepthTextureObject->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\linear_depth.dds").str().c_str());
-	if (result != ErrorCodes::NoError) return ErrorCodes::CouldNotInitialiseStaticVolumetricLineData;
-	VolLineShader::LinearDepthTexture = VolLineShader::LinearDepthTextureObject->GetTexture();
+	VolLineShader::LinearDepthTextureObject = Game::Engine->GetAssets().GetTexture("linear_depth");
+	VolLineShader::LinearDepthTexture = VolLineShader::LinearDepthTextureObject->GetShaderResourceView();
 	
 	// We will maintain a two-resource array as input parameter for textured line rendering.  The second parameter
 	// will be filled at runtime by the shader texture required
@@ -275,50 +277,40 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 	return ErrorCodes::NoError;
 }
 
-// Returns a model appropriate for rendering volumetric lines with the specified texture, or for pure
-// non-textured volumetric lines if render_texture == NULL
-ModelBuffer * VolLineShader::LineModel(Texture *render_texture)
+// Returns a model appropriate for rendering volumetric lines with the specified material, or for pure
+// non-textured volumetric lines if render_material == NULL
+ModelBuffer * VolLineShader::LineModel(MaterialDX11 *render_material)
 {
 	// If we want pure volumetric line rendering then simply return the base model
-	if (!render_texture) return VolLineShader::BaseModel;
+	if (!render_material) return VolLineShader::BaseModel;
 
 	// Otherwise check whether we already have a model for this render texture
-	const std::string & filename = render_texture->GetFilename();
-	if (VolLineShader::LineModels.count(filename) == 0)
+	const std::string & name = render_material->GetCode();
+	if (VolLineShader::LineModels.count(name) == 0)
 	{
 		// We do not have a model for this texture, so create one now before returning it
-		ModelBuffer *buffer = VolLineShader::CreateLineModel(render_texture);
-		LineModels[filename] = buffer;
+		ModelBuffer *buffer = VolLineShader::CreateLineModel(render_material);
+		LineModels[name] = buffer;
 		return buffer;
 	}
 	else
 	{
 		// We already have a model for this texture, so simply return it here
-		return LineModels[filename];
+		return LineModels[name];
 	}
 }
 
-// Creates a new line model appropriate for rendering volumetric lines with the specified texture, or for pure
-// non-textured volumetric lines if render_texture == NULL
-ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
+// Creates a new line model appropriate for rendering volumetric lines with the specified material, or for pure
+// non-textured volumetric lines if render_material == NULL
+ModelBuffer * VolLineShader::CreateLineModel(MaterialDX11 *render_material)
 {
-	ModelBuffer *buffer = new ModelBuffer();
-	if (!buffer) return NULL;
-
 	// Create the base vertex and index data
 	XMFLOAT3 *v = new XMFLOAT3[1] { XMFLOAT3(0.0f, 0.0f, 0.0f) }; 
-	UINT16 *i = new UINT16[1] { 0U }; 
+	UINT32 *i = new UINT32[1] { 0U }; 
 
 	// Initialise the base model using this data
-	Result result = buffer->Initialise(Game::Engine->GetDevice(), (const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT16), 1U);
-	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
-
-	// Assign the base model texture - make a clone so that this buffer owns its own texture object
-	if (render_texture)
-	{
-		result = buffer->SetTexture(render_texture->Clone());
-		if (result != ErrorCodes::NoError) { SafeDeleteArray(v); SafeDeleteArray(i); SafeDelete(buffer); return NULL; }
-	}
+	ModelBuffer *buffer = new ModelBuffer((const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT32), 1U, render_material);
+	if (!buffer) { delete(v); delete(i); delete(buffer); return NULL; }
 
 	// Deallocate the model vertex and index data
 	SafeDeleteArray(v);
@@ -338,9 +330,6 @@ void VolLineShader::ShutdownStaticData(void)
 		if (it->second) delete(it->second);
 	}
 	VolLineShader::LineModels.clear();
-
-	// Deallocate the linear depth texture
-	VolLineShader::LinearDepthTextureObject->Shutdown();
 
 	// Deallocate the static base model for pure volumetric rendering 
 	SafeDelete(VolLineShader::BaseModel);

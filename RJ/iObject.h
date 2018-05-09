@@ -23,7 +23,7 @@
 #include "AudioItem.h"
 #include "AudioParameters.h"
 #include "GameConsoleCommand.h"
-class Model;
+#include "ModelInstance.h"
 class ArticulatedModel;
 struct BasicProjectile;
 
@@ -186,7 +186,7 @@ public:
 	// The world matrix of this object
 	CMPINLINE XMMATRIX						GetWorldMatrix(void) const { return m_worldmatrix; }
 	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const { return m_inverseworld; }
-	CMPINLINE void XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
+	CMPINLINE void RJ_XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
 		m_worldmatrix = m;
@@ -277,15 +277,24 @@ public:
 	virtual void							Shutdown(void);
 
 	// The size of this object in world coordinates
-	void									SetSize(const FXMVECTOR size);
-	CMPINLINE void							SetSize(const XMFLOAT3 & size)		{ SetSize(XMLoadFloat3(&size)); }
+	void									SetSize(const FXMVECTOR size, bool preserve_proportions = true);
+	CMPINLINE void							SetSize(const XMFLOAT3 & size, bool preserve_proportions = true)	{ SetSize(XMLoadFloat3(&size), preserve_proportions); }
 	CMPINLINE XMVECTOR						GetSize(void) const					{ return m_size; }
 	CMPINLINE const XMFLOAT3 &				GetSizeF(void) const				{ return m_sizef; }
 	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }
 	CMPINLINE Game::BoundingVolumeType		MostAppropriateBoundingVolumeType(void) const { return m_best_bounding_volume; }
 
+	// We can set the object size with a single parameter; the largest object dimension will be scaled
+	// to this value, maintaining proportions, based on the underlying model size.  If the object has no 
+	// model then the size will be uniformly scaled by this value
+	void									SetSize(float max_dimension);
+	CMPINLINE void							SetMaxSize(float max_dimension) { SetSize(max_dimension); }		// For DEBUG_FN which can't handle the overload
+
+	// Reference to the instance of this model and any per-instance data
+	CMPINLINE ModelInstance &				GetModelInstance(void)				{ return m_model; }
+
 	// The model used for rendering this object (or NULL if object is non-renderable)
-	CMPINLINE Model *						GetModel(void)						{ return m_model; }
+	CMPINLINE Model *						GetModel(void) 						{ return m_model.GetModel(); }
 	void									SetModel(Model *model);
 
     // The articulated model used for rendering this object (or NULL if not applicable)
@@ -542,7 +551,7 @@ protected:
 	HashVal								m_instancecodehash;				// Hash value of the instance code, used for more efficient comparison
 	bool								m_standardobject;				// Flag indicating whether this is a 'standard', centrally-maintained template object
 	Faction::F_ID						m_faction;						// ID of the faction this object belongs to; will be 0 for the null faction if it has no affiliation
-	Model *								m_model;						// Pointer to the static model for this object, which is stored in 
+	ModelInstance						m_model;						// Pointer to the static model for this object, which is stored in 
 																		// the central collection.  Can be NULL if non-renderable.
 	ArticulatedModel *                  m_articulatedmodel;             // The articulated model to use for this object, if relevant.  If NULL, the object
                                                                         // will use its static model by default
@@ -613,7 +622,12 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-	SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
+
+	// World = (BaseModelWorld * Rotation * Translation)
+	SetWorldMatrix(XMMatrixMultiply(XMMatrixMultiply(
+		m_model.GetWorldMatrix(), 
+		m_orientationmatrix), 
+		XMMatrixTranslationFromVector(m_position)));
 }
 
 

@@ -9,7 +9,7 @@
 // Creates a new light source with default properties
 LightSource * LightSource::Create(void)
 {
-	return LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultPointLightData()));
+	return LightSource::Create(Light(Game::Engine->LightingManager->GetDefaultPointLightData()));
 }
 
 // Creates a new light source based on the supplied light data
@@ -56,14 +56,14 @@ LightSource::LightSource(const Light & data)
 	// Determine an object code for the light based on its properties
 	DetermineObjectCode();
 
-	// Light sources do perform a post-simulation update to reposition their internal light component
-	SetPostSimulationUpdateFlag(true);
+	// Light sources do not require any post-simulation update
+	SetPostSimulationUpdateFlag(false);
 }
 
 // Determine an object code for the light based on its properties
 void LightSource::DetermineObjectCode(void)
 {
-	SetCode(concat("LightSource-")(Light::TranslateLightTypeToString((Light::LightType)m_light.GetType())).str());
+	SetCode(concat("LightSource-")(Light::TranslateLightTypeToString((LightType)m_light.GetType())).str());
 }
 
 // Set the range of this light source
@@ -76,16 +76,54 @@ void LightSource::SetRange(float range)
 	SetCollisionSphereRadius(m_light.Data.Range);
 }
 
-
-// Light sources do implement a post-simulation update method to reposition their internal light component
-void LightSource::PerformPostSimulationUpdate(void)
+// Calculate point light volume transform for the given light
+XMMATRIX LightSource::CalculatePointLightTransform(const LightData & light)
 {
-	// Update the position of our internal light component
-	m_light.Data.Position = m_positionf;
+	return XMMatrixMultiply(
+		XMMatrixScaling(light.Range, light.Range, light.Range),
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
+}
 
-	// Update light direction based on orientation of the light source object
-	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, (XMQuaternionMultiply(m_relativelightorient, m_orientation)));
-	XMStoreFloat3(&m_light.Data.Direction, dir);
+// Calculate spotlight light volume transform for the given light
+XMMATRIX LightSource::CalculateSpotlightTransform(const LightData & light)
+{
+	// Spotlight cone radius: tan(x) = O/A -> O = Atan(x)
+	float cone_radius = light.Range * std::tanf(light.SpotlightAngle);
+	return XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(cone_radius, cone_radius, light.Range),
+		XMMatrixRotationQuaternion(QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)))),	// TODO: Can likely make this more efficient
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
+}
+
+// Calculates all derived data for the light required for rendering, for example view-space equivalent data.  We only need to calculate
+// these fields if the light is being rendered this frame
+void LightSource::RecalculateRenderingData(void)
+{
+	/** Position: common to all light types **/
+
+	// World-space light position
+	XMStoreFloat4(&m_light.Data.PositionWS, m_position);
+
+	// View-space light position
+	const XMMATRIX & view = Game::Engine->GetRenderViewMatrix();
+	XMStoreFloat4(&m_light.Data.PositionVS, XMVector3TransformCoord(m_position, view));
+
+	/** Direction: We can skip these calculations for point lights **/
+	if (m_light.GetType() != LightType::Point)
+	{
+		// We need to derive the heading for lighting calcs.  Also store within the object given that we are doing the work
+		PhysicsState.Heading = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
+
+		// World space light direction
+		XMVECTOR dirWS = XMVector3Rotate(PhysicsState.Heading, m_relativelightorient);
+		XMStoreFloat4(&m_light.Data.DirectionWS, dirWS);
+
+		// View-space light direction
+		XMStoreFloat4(&m_light.Data.DirectionVS, XMVector3NormalizeEst(XMVector3TransformCoord(dirWS, view)));
+	}
+
 }
 
 // Custom debug string function
@@ -97,7 +135,7 @@ std::string	LightSource::DebugString(void) const
 // Custom debug string function for light data specifically
 std::string LightSource::DebugLightDataString(void) const
 {
-	return concat("Type=")(Light::TranslateLightTypeToString((Light::LightType)m_light.Data.Type))
+	return concat("Type=")(Light::TranslateLightTypeToString((LightType)m_light.Data.Type))
 		(", Active=")((m_light.IsActive() ? "True" : "False")).str();
 	//	(", R=")(m_light.Data.Colour.x)(", G=")(m_light.Data.Colour.y)(", B=")(m_light.Data.Colour.z)
 	//	(", A=")(m_light.Data.AmbientIntensity)(", D=")(m_light.Data.DiffuseIntensity)(", S=")(m_light.Data.SpecularPower).str();

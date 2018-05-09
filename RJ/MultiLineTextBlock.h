@@ -5,6 +5,7 @@
 
 #include <string>
 #include "CompilerSettings.h"
+#include "ErrorCodes.h"
 #include "Utility.h"
 #include "iUIComponent.h"
 class Render2DGroup;
@@ -85,7 +86,7 @@ public:
 
 	// Static constants
 	static const int							TEXT_MARGIN = 6;
-	static const char *							BACKDROP_COMPONENT;
+	static const std::string					BACKDROP_COMPONENT;
 
 protected:
 

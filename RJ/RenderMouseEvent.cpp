@@ -1,4 +1,5 @@
 #include "RenderMouseEvent.h"
+#include "Utility.h"
 
 // Constructor; initialises all components to null
 RenderMouseEvent::RenderMouseEvent(std::string code)

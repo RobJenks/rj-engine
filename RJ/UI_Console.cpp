@@ -31,8 +31,8 @@ UI_Console::UI_Console(void)
 Result UI_Console::InitialiseController(Render2DGroup *render, UserInterface *ui)
 {
 	// Retrieve references to the key UI controls
-	m_input = (UITextBox*)m_render->FindUIComponent("txt_input", NullString);
-	m_history_text = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_history", NullString);
+	m_input = (UITextBox*)m_render->FindUIComponent("txt_input");
+	m_history_text = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_history");
 	if (!m_input || !m_history_text) return ErrorCodes::CannotInitialiseAllRequiredConsoleComponents;
 
 

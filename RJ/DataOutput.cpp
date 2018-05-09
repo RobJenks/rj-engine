@@ -274,7 +274,7 @@ Result IO::Data::SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection
 	IO::Data::LinkFloatXMLElement("TurnRate", object->GetTurnRate(), node);
 	IO::Data::LinkFloatXMLElement("BankRate", object->GetBankRate(), node);
 	IO::Data::LinkVector3AttrXMLElement("BankExtent", (object->GetBankExtents() * _180BYPI), node);		// Convert radians to degrees
-	IO::Data::LinkStringXMLElement("PreviewImage", object->GetPreviewImage()->GetFilename(), node);
+	IO::Data::LinkStringXMLElement("PreviewImage", object->GetPreviewImage()->GetCode(), node);
 
 	// Save each hardpoint in turn
 	std::vector<Hardpoint*>::const_iterator it_end = object->GetHardpoints().end();

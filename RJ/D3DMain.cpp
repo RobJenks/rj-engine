@@ -1,11 +1,10 @@
-#include "ErrorCodes.h"
+#include "D3DMain.h"
+
+/*#include "ErrorCodes.h"
 
 #include "Logging.h"
 #include "DX11_Core.h"
 #include "FastMath.h"
-
-#include "D3DMain.h"
-
 
 D3DMain::D3DMain(void)
 {
@@ -679,3 +678,4 @@ std::string D3DMain::DisplayModeToString(const DXGI_MODE_DESC & mode)
 	}
 	return modestr;
 }
+*/

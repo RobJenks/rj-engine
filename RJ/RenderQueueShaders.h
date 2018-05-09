@@ -6,7 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include "DX11_Core.h"
-#include "D3DMain.h"
+#include "ShaderFlags.h"
 #include "GameVarsExtern.h"
 #include "RM_ZSortedInstance.h"
 class iShader;
@@ -17,21 +17,22 @@ struct							RM_InstancedShaderDetails
 {
 	iShader *					Shader;							// The shader itself
 	bool						RequiresZSorting;				// Flag determining whether instances must go through an intermediate z-sorting step
-	D3DMain::AlphaBlendState	AlphaBlendRequired;				// Flag indicating if/how alpha blending should be enabled for this shader
 	D3D11_PRIMITIVE_TOPOLOGY	PrimitiveTopology;				// The primitive topology to be used for rendering in this shader
+	ShaderFlags					Flags;
 
 	std::vector<RM_ZSortedInstance>	SortedInstances;			// Vector used for the intermediate sorting step, where required, so that items 
 																// are sent for rendering in a particular Z order
 
 	// Default constructor, no reference to shader, sets all parameters to defaults
 	RM_InstancedShaderDetails(void) : 
-		Shader(NULL), RequiresZSorting(false), AlphaBlendRequired(D3DMain::AlphaBlendState::AlphaBlendDisabled), 
-		PrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+		Shader(NULL), RequiresZSorting(false),
+		PrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST), 
+		Flags(0U)
 	{}
 
 	// Constructor allowing all parameters to be specified
-	RM_InstancedShaderDetails(iShader *shader, bool requiresZsorting, D3DMain::AlphaBlendState alphablend, D3D11_PRIMITIVE_TOPOLOGY primitive_topology) :
-		Shader(shader), RequiresZSorting(requiresZsorting), AlphaBlendRequired(alphablend), PrimitiveTopology(primitive_topology)
+	RM_InstancedShaderDetails(iShader *shader, bool requiresZsorting, D3D11_PRIMITIVE_TOPOLOGY primitive_topology, ShaderFlags flags) :
+		Shader(shader), RequiresZSorting(requiresZsorting), PrimitiveTopology(primitive_topology), Flags(flags)
 	{}
 };
 
@@ -44,6 +45,8 @@ enum RenderQueueShader
 {
 	RM_LightShader = 0,					// Requires: none
 	RM_LightHighlightShader,			// Requires: none
+
+	RM_OrthographicTexture,				// Orthographic texture/UI rendering, managed separately by the engine
 
 	/* Alpha blending cutoff; perform all alpha blend-enabled operations after this point */
 

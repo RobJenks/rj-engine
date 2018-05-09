@@ -61,6 +61,7 @@ public:
 namespace HashedStrings
 {
 	DefineHash(H_SimpleShip, "simpleship");
+	DefineHash(H_SimpleShipLoadout, "simpleshiploadout");
 	DefineHash(H_ComplexShip, "complexship");
 	DefineHash(H_ComplexShipSection, "complexshipsection");
 	DefineHash(H_ComplexShipSectionInstance, "complexshipsectioninstance");
@@ -107,6 +108,7 @@ namespace HashedStrings
 	DefineHash(H_Option, "option");
 	DefineHash(H_Filename, "filename");
 	DefineHash(H_Texture, "texture");
+	DefineHash(H_Material, "material");
 	DefineHash(H_NoModelCentering, "nomodelcentering");
 	DefineHash(H_EffectiveSize, "effectivesize");
 	DefineHash(H_ActualEffectiveSize, "actualeffectivesize");
@@ -308,6 +310,48 @@ namespace HashedStrings
 	DefineHash(H_SwitchConstraintMin, "switchconstraintmin");
 	DefineHash(H_SwitchConstraintMax, "switchconstraintmax");
 	DefineHash(H_MaxRotationSpeed, "maxrotationspeed");
+	DefineHash(H_GlobalAmbient, "globalambient");
+	DefineHash(H_AmbientColor, "ambientcolor");
+	DefineHash(H_EmissiveColor, "emissivecolor");
+	DefineHash(H_DiffuseColor, "diffusecolor");
+	DefineHash(H_SpecularColor, "specularcolor");
+	DefineHash(H_Reflectance, "reflectance");
+	DefineHash(H_Opacity, "opacity");
+	DefineHash(H_SpecularPower, "specularpower");
+	DefineHash(H_SpecularScale, "specularscale");
+	DefineHash(H_IndexOfRefraction, "indexofrefraction");
+	DefineHash(H_AmbientTexture, "ambienttexture");
+	DefineHash(H_EmissiveTexture, "emissivetexture");
+	DefineHash(H_DiffuseTexture, "diffusetexture");
+	DefineHash(H_SpecularTexture, "speculartexture");
+	DefineHash(H_SpecularPowerTexture, "specularpowertexture");
+	DefineHash(H_NormalTexture, "normaltexture");
+	DefineHash(H_BumpTexture, "bumptexture");
+	DefineHash(H_OpacityTexture, "opacitytexture");
+	DefineHash(H_BumpIntensity, "bumpintensity");
+	DefineHash(H_AlphaThreshold, "alphathreshold");
+	DefineHash(H_Data, "data");
+	DefineHash(H_Engine, "engine");
+	DefineHash(H_System, "system");
+	DefineHash(H_FireEffect, "fireeffect");
+	DefineHash(H_ParticleEmitter, "particleemitter");
+	DefineHash(H_UILayout, "uilayout");
+	DefineHash(H_UIManagedControlDefinition, "uimanagedcontroldefinition");
+	DefineHash(H_Resource, "resource");
+	DefineHash(H_SkinnedModel, "skinnedmodel");
+	DefineHash(H_ActorAttributeGeneration, "actorattributegeneration");
+	DefineHash(H_ActorBase, "actorbase");
+	DefineHash(H_TerrainDefinition, "terraindefinition");
+	DefineHash(H_DynamicTerrainDefinition, "dynamicterraindefinition");
+	DefineHash(H_Faction, "faction");
+	DefineHash(H_Turret, "turret");
+	DefineHash(H_BasicProjectileDefinition, "basicprojectiledefinition");
+	DefineHash(H_SpaceProjectileDefinition, "spaceprojectiledefinition");
+	DefineHash(H_ModifierDetails, "modifierdetails");
+	DefineHash(H_Audio, "audio");
+	DefineHash(H_ScreenResolution, "screenresolution");
+	DefineHash(H_SoftwareRasterizerOverride, "softwarerasterizeroverride");
+	DefineHash(H_Font, "font");
 
 }
 

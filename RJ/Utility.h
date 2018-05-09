@@ -26,21 +26,27 @@ class iObject;
 #define MemDiffReport(c1, c2, c3) _CrtMemState c3; if ( _CrtMemDifference(&c3, &c1, &c2)) { OutputDebugString("\n\n*** WARNING: ACCUMULATING MEMORY ALLOCATIONS.  INCREMENTAL ALLOCATIONS BELOW ***\n\n"); _CrtMemDumpStatistics( &c3 ); } 
 #define MemDump(label,cp) MemReg(cp);OutputDebugString("**** ");OutputDebugString(label);OutputDebugString(": \n");_CrtMemDumpStatistics(&cp);
 
+// Convenience macro for generating string literal data
+#define STRING(x) #x
+
+// String macro to force macro expansion before resolving as string (https://stackoverflow.com/questions/2653214/stringification-of-a-macro-value)
+#define MSTRING(x) STRING(x)
+
 // Convenience macro to combine multiple arguments, including commas, into one macro argument
 #define SINGLE_ARG(...) __VA_ARGS__
 
 // Convenience macro for releasing COM objects.
-#define ReleaseCOM(x) { if(x){ x->Release(); x = 0; } }
+#define ReleaseCOM(x) { if(x){ x->Release(); (x) = 0; } }
 
 // Convenience macros for deleting objects.
-#define SafeDelete(x) { delete x; x = 0; }
-#define SafeDeleteArray(x) { delete[] x; x = 0; }
+#define SafeDelete(x) { delete (x); (x) = 0; }
+#define SafeDeleteArray(x) { delete[] (x); (x) = 0; }
 
 // Convenience macro for freeing malloc-ed memory
-#define SafeFree(x) { free(x); x = 0; }
+#define SafeFree(x) { free(x); (x) = 0; }
 
 // Convenience macro for releasing non-null COM resources
-#define ReleaseIfExists(x) { if (x) { x->Release(); x = 0; } }
+#define ReleaseIfExists(x) { if (x) { (x)->Release(); (x) = 0; } }
 
 // Debug logging macro; logs to the debug output stream before returning
 #ifdef _DEBUG
@@ -108,9 +114,12 @@ void StrLowerC(std::string &);				// Converts a std::string to lowercase in-plac
 void StrUpperC(std::string &);				// Converts a std::string to uppercase in-place
 std::string StrLower(std::string);		// Converts a std::string to lowercase as a new string
 std::string StrUpper(std::string);		// Converts a std::string to uppercase as a new string
+std::string TrimString(const std::string & str);
 
 char *BuildFilename(const char *, const char *);
 std::string BuildStrFilename(const std::string &, const std::string &);
+
+std::string DataRelativeFile(const std::string & relative_path);
 
 // Enumeration of possible comparison results
 enum ComparisonResult { Equal = 0, LessThan, GreaterThan };
@@ -141,12 +150,13 @@ CMPINLINE std::string ConvertWStringToString(const std::wstring & utf16_string)
 class concat
 {
 public:
+
+	// Append to string stream
 	template <typename T>
 	explicit concat(const T & t)
 	{
 		m_out << t ;
 	}
-
 	template <typename T>
 	concat & operator()(const T & t)
 	{
@@ -154,6 +164,7 @@ public:
 		return *this ;
 	}
 
+	// String output
 	std::string str() const
 	{
 		return m_out.str() ;
@@ -197,6 +208,10 @@ void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
 std::string MatrixToString(const XMFLOAT4X4 & m);
 CMPINLINE std::string MatrixToString(const XMMATRIX & m) { XMFLOAT4X4 mf; XMStoreFloat4x4(&mf, m); return MatrixToString(mf); }
 
+// Value ptr is a pointer to the first element in contiguous structure data; in the case of XMFLOAT#, this is always the x component
+CMPINLINE const float* ValuePtr(const XMFLOAT2 & xmf) { return &(xmf.x); }
+CMPINLINE const float* ValuePtr(const XMFLOAT3 & xmf) { return &(xmf.x); }
+CMPINLINE const float* ValuePtr(const XMFLOAT4 & xmf) { return &(xmf.x); }
 
 // Generic 'ToString' method that can be specialised as required
 template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }
@@ -463,8 +478,14 @@ CMPINLINE std::string GetLocalDateTimeString(void)
 // Splits a string based upon the supplied delimeter, optionally skipping empty items
 void SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements);
 
+// Splits a string around spaces, observing the presence of quote marks
+void SplitStringQuoted(const std::string & input, std::vector<std::string> & outElements);
+
 // Concatenates a series of strings together, optionally with the supplied string as a delimiter
 std::string ConcatenateStrings(const std::vector<std::string> & elements, const std::string & delimiter);
+
+// Replace all instances of a substring in a string with another; returns a copy, original string is unmodified
+std::string StringReplace(std::string str, const std::string & original, const std::string & replacement);
 
 // Normalise the given string into one suitable for use in object codes
 std::string NormaliseString(const std::string & string_value);

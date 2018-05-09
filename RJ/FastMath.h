@@ -40,8 +40,12 @@ extern const double INF_DOUBLE;
 
 extern const INTVECTOR2 NULL_INTVECTOR2;
 extern const INTVECTOR3 NULL_INTVECTOR3;
+extern const UINTVECTOR2 NULL_UINTVECTOR2;
+extern const UINTVECTOR3 NULL_UINTVECTOR3;
 extern const INTVECTOR2 ONE_INTVECTOR2;
 extern const INTVECTOR3 ONE_INTVECTOR3;
+extern const UINTVECTOR2 ONE_UINTVECTOR2;
+extern const UINTVECTOR3 ONE_UINTVECTOR3;
 extern const XMVECTOR NULL_VECTOR;
 extern const XMVECTOR NULL_VECTOR2;
 extern const XMVECTOR NULL_VECTOR3;
@@ -170,15 +174,52 @@ XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax);
 bool				Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2);
 bool				IsZeroFloat3(const XMFLOAT3 &v);
 
-CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+
+CMPINLINE XMFLOAT2	Float2Add(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 {
-	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+	return XMFLOAT2(v1.x + v2.x, v1.y + v2.y);
 }
 
 CMPINLINE XMFLOAT2	Float2Subtract(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 {
 	return XMFLOAT2(v1.x - v2.x, v1.y - v2.y);
 }
+
+CMPINLINE bool		Float2Equal(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x == v2.x && v1.y == v2.y);
+}
+
+CMPINLINE bool		Float2NotEqual(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2Equal(v1, v2);
+}
+
+CMPINLINE bool		Float2LessThan(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x < v2.x && v1.y < v2.y);
+}
+
+CMPINLINE bool		Float2GreaterThan(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2LessThan(v1, v2);
+}
+
+CMPINLINE bool		Float2LessThanOrEqualTo(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x <= v2.x && v1.y <= v2.y);
+}
+
+CMPINLINE bool		Float2GreaterThanOrEqualTo(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2LessThanOrEqualTo(v1, v2);
+}
+
+CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+}
+
 CMPINLINE XMFLOAT3	Float3Subtract(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return XMFLOAT3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
@@ -358,6 +399,8 @@ const XMMATRIX & GetRotationMatrix(Rotation90Degree rot);
 XMMATRIX GetRotationMatrixInstance(Rotation90Degree rot);
 const XMFLOAT4X4 * GetRotationMatrixF(Rotation90Degree rot);
 XMFLOAT4X4 GetRotationMatrixInstanceF(Rotation90Degree rot);
+const XMMATRIX & GetRotationMatrixUnchecked(Rotation90Degree rot);
+const XMMATRIX GetRotationMatrixInstanceUnchecked(Rotation90Degree rot);
 
 extern const XMMATRIX ROT_MATRIX_0;
 extern const XMMATRIX ROT_MATRIX_90;
@@ -367,7 +410,7 @@ extern const XMFLOAT4X4 ROT_MATRIX_0_F;
 extern const XMFLOAT4X4 ROT_MATRIX_90_F;
 extern const XMFLOAT4X4 ROT_MATRIX_180_F;
 extern const XMFLOAT4X4 ROT_MATRIX_270_F;
-extern const XMMATRIX* ROT_MATRICES[4];
+extern const XMMATRIX ROT_MATRICES[4];
 extern XMVECTOR ROT_QUATERNIONS[4];
 
 // Orthornormal unit basis vectors;
@@ -413,7 +456,7 @@ CMPINLINE float fast_abs(float v)
 }
 
 // Calculate the inverse transpose of a matrix
-CMPINLINE XMMATRIX XM_CALLCONV MatrixInverseTranspose(FXMMATRIX M)
+CMPINLINE XMMATRIX RJ_XM_CALLCONV MatrixInverseTranspose(FXMMATRIX M)
 {
 	// Inverse-transpose is just applied to normals.  So zero out 
 	// translation row so that it doesn't get into our inverse-transpose

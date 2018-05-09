@@ -8,7 +8,7 @@
 #include "Render2DGroup.h"
 #include "Texture.h"
 #include "UIManagedControlDefinition.h"
-#include "Image2DRenderGroup.h"
+#include "Image2D.h"
 #include "TextBlock.h"
 
 #include "UIComboBox.h"
@@ -52,14 +52,13 @@ UIComboBox::UIComboBox(void)
 	m_expandback = NULL;
 	m_expandtext.clear();
 	m_scrollbarback = NULL;
-	m_scrollbarupdown = NULL;
+	m_scrollbarup = NULL;
+	m_scrollbardown = NULL;
 	m_scrollbarhandle = NULL;
 }
 
 Result UIComboBox::Initialise(UIManagedControlDefinition *def, std::string code, int expandsize, int x, int y, float z, int width, int height, bool render)
 {
-	Result result;
-
 	// Make sure we have valid parameters
 	if (!def) return ErrorCodes::CannotCreateControlFromInvalidDefinition;
 	expandsize = min(max(expandsize, UIComboBox::EXPAND_MIN_SIZE), UIComboBox::EXPAND_MAX_SIZE);
@@ -74,15 +73,16 @@ Result UIComboBox::Initialise(UIManagedControlDefinition *def, std::string code,
 	m_code = code;
 
 	// Create each image component in turn, based on the definition
-	HandleErrors(InitialiseImageComponentDefault(def, &m_mainback, "mainback", 1, z), result);					// Main back panel
-	HandleErrors(InitialiseImageComponentDefault(def, &m_expand, "expand", 1, z), result);						// Expand button
-	HandleErrors(InitialiseImageComponentDefault(def, &m_expandback, "expandback", 1, z), result);				// Back panel of the expanded control
-	HandleErrors(InitialiseImageComponentDefault(def, &m_scrollbarback, "scrollbarback", 1, z), result);		// Back panel of the scroll bar
-	HandleErrors(InitialiseImageComponentDefault(def, &m_scrollbarupdown, "scrollbarupdown", 2, z), result);	// Up & down buttons for the scrollbar
-	HandleErrors(InitialiseImageComponentDefault(def, &m_scrollbarhandle, "scrollbarhandle", 1, z), result);	// Handle of the scroll bar
+	m_mainback = InitialiseImageComponentDefault(def, "mainback", z);
+	m_expand = InitialiseImageComponentDefault(def, "expand", z);
+	m_expandback = InitialiseImageComponentDefault(def, "expandback", z);
+	m_scrollbarback = InitialiseImageComponentDefault(def, "scrollbarback", z);
+	m_scrollbarup = InitialiseImageComponentDefault(def, "scrollbarupdown", z);
+	m_scrollbardown = InitialiseImageComponentDefault(def, "scrollbarupdown", z);
+	m_scrollbarhandle = InitialiseImageComponentDefault(def, "scrollbarhandle", z);
 
-	// There are two instances for the scroll bar up/down; rotate one by 180 degrees so they are aligned correctly
-	m_scrollbarupdown->GetInstance(1)->rotation = Rotation90Degree::Rotate180;
+	// There are two components for the scroll bar up/down; rotate one by 180 degrees so they are aligned correctly
+	m_scrollbardown->SetRotation(PI);
 
 	// Now create the main text block
 	m_maintext = D::UI->CreateTextBlock(concat(m_code)(".maintext").str(), "", 256, 0, INTVECTOR2(0,0), 1.0f, XMFLOAT4(1.0, 1.0f, 1.0f, 1.0f), true);
@@ -103,16 +103,19 @@ Result UIComboBox::Initialise(UIManagedControlDefinition *def, std::string code,
 	}
 	
 	// Store pointers to each component in the control components collection for ease of traversal
-	m_components.push_back(m_mainback->GetInstance(0));
+	m_components.push_back(m_mainback);
 	m_components.push_back(m_maintext);
-	m_components.push_back(m_expand->GetInstance(0));
-	m_components.push_back(m_expandback->GetInstance(0));
-	m_components.push_back(m_scrollbarback->GetInstance(0));
-	m_components.push_back(m_scrollbarupdown->GetInstance(0));
-	m_components.push_back(m_scrollbarupdown->GetInstance(1));
-	m_components.push_back(m_scrollbarhandle->GetInstance(0));
-	for (int i=0; i<(int)m_expandtext.size(); i++)
+	m_components.push_back(m_expand);
+	m_components.push_back(m_expandback);
+	m_components.push_back(m_scrollbarback);
+	m_components.push_back(m_scrollbarup);
+	m_components.push_back(m_scrollbardown);
+	m_components.push_back(m_scrollbarhandle);
+
+	for (int i = 0; i < (int)m_expandtext.size(); i++)
+	{
 		m_components.push_back(m_expandtext.at(i));
+	}
 
 	// Now set the location & size of this control, which will cause a recalculation of all component properties and set up the control
 	UpdateControl(INTVECTOR2(x, y), INTVECTOR2(width, height), z, render, true);
@@ -134,7 +137,6 @@ void UIComboBox::UpdateControl(bool fullrefresh)
 // Sets the size & position of this control, and recalculates all component properties accordingly
 void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorder, bool render, bool fullrefresh)
 {
-	Image2DRenderGroup::Instance *mainback, *expand, *expandback, *scrollback, *scrollup, *scrolldown, *scrollhandle;
 	INTVECTOR2 textpos = INTVECTOR2(0, 0);
 
 	// Store the new positioning parameters
@@ -148,32 +150,30 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 	std::vector<ComboBoxItem>::size_type itemcount = GetItemCount();
 
 	// Set position of main component back panel first
-	mainback = m_mainback->GetInstance(0);
-	if (mainback && fullrefresh) {
-		mainback->position = location;
-		mainback->size = INTVECTOR2((int)floor((float)size.x * UIComboBox::CONTROL_ACTIVE_AREA), size.y);
-		mainback->zorder = zorder;
+	if (m_mainback && fullrefresh) {
+		m_mainback->SetPosition(location.ToFloat());
+		m_mainback->SetSize(INTVECTOR2((int)floor((float)size.x * UIComboBox::CONTROL_ACTIVE_AREA), size.y).ToFloat());
+		m_mainback->SetZOrder(zorder);
 
 		// Main text block is displayed within this back panel
 		m_maintext->UpdateTextBlock( m_maintext->GetText().c_str(), location.x + UIComboBox::TEXT_OFFSET_X, 
-									 (int)(location.y + (((float)mainback->size.y / 2.0f) - (m_maintext->GetTextHeight() / 2.0f)) + 2.0f),
+									 (int)(location.y + ((m_mainback->GetSize().y / 2.0f) - (m_maintext->GetTextHeight() / 2.0f)) + 2.0f),
 									 m_maintext->GetRenderActive(),
 									 m_maintext->GetTextColour(), m_maintext->GetSize());
 	}
 
 	// Expand button is set just to the side of the main back panel
-	expand = m_expand->GetInstance(0);
-	if (expand && mainback && fullrefresh) {
-		expand->position = INTVECTOR2(location.x + mainback->size.x, location.y);
-		expand->size = INTVECTOR2(size.x - mainback->size.x, size.y);
-		expand->zorder = zorder;
+	if (m_expand && m_mainback && fullrefresh) {
+		m_expand->SetPosition(INTVECTOR2(location.x + (int)m_mainback->GetSize().x, location.y).ToFloat());
+		m_expand->SetSize(INTVECTOR2(size.x - (int)m_mainback->GetSize().x, size.y).ToFloat());
+		m_expand->SetZOrder(zorder);
 	}
 
 	// We now want to create the expand panel and text items; we can only do this if the prior components were successfully created
-	if (mainback && expand && fullrefresh)
+	if (m_mainback && m_expand && fullrefresh)
 	{
 		// Position the expanded text blocks before the frame itself, to determine how much room is required.  Determine positioning first
-		textpos = INTVECTOR2(location.x + UIComboBox::TEXT_OFFSET_X, location.y + mainback->size.y + UIComboBox::TEXT_OFFSET_Y);
+		textpos = INTVECTOR2(location.x + UIComboBox::TEXT_OFFSET_X, location.y + (int)m_mainback->GetSize().y + UIComboBox::TEXT_OFFSET_Y);
 		
 		// Calculate a height value for each item, based on the rasterised height of item #0
 		m_expanditemheight = 16;
@@ -194,61 +194,62 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 	}
 
 	// We can now position the expand back panel; height can be derived from the main panel size and the rasterised height of text items
-	expandback = m_expandback->GetInstance(0);
-	if (expandback && mainback && fullrefresh) {
-		expandback->position = INTVECTOR2(location.x, location.y + mainback->size.y);
-		expandback->size = INTVECTOR2(mainback->size.x, textpos.y - (location.y + mainback->size.y));
-		expandback->zorder = zorder;
+	if (m_expandback && m_mainback && fullrefresh) {
+		m_expandback->SetPosition(INTVECTOR2(location.x, location.y + (int)m_mainback->GetSize().y).ToFloat());
+		m_expandback->SetSize(XMFLOAT2(m_mainback->GetSize().x, (float)textpos.y - ((float)location.y + m_mainback->GetSize().y)));
+		m_expandback->SetZOrder(zorder);
 	}
 
 	// The scroll bar back panel is positioned alongside the expand panel, with same width as the expand button
-	scrollback = m_scrollbarback->GetInstance(0);
-	if (scrollback && expand && expandback && fullrefresh) {
-		scrollback->position = INTVECTOR2(expand->position.x, location.y + expand->size.y);
-		scrollback->size = INTVECTOR2(expand->size.x, expandback->size.y);
-		scrollback->zorder = zorder;
+	if (m_scrollbarback && m_expand && m_expandback && fullrefresh) {
+		m_scrollbarback->SetPosition(INTVECTOR2((int)m_expand->GetPosition().x, location.y + (int)m_expand->GetSize().y).ToFloat());
+		m_scrollbarback->SetSize(XMFLOAT2(m_expand->GetSize().x, m_expandback->GetSize().y));
+		m_scrollbarback->SetZOrder(zorder);
 	}
 
 	// Scroll bar buttons are positioned at each end of the scroll bar panel, and are square in size
-	scrollup = m_scrollbarupdown->GetInstance(0);
-	scrolldown = m_scrollbarupdown->GetInstance(1);
-	if (scrollup && scrolldown && scrollback && fullrefresh) {
-		scrollup->size = scrolldown->size = INTVECTOR2(scrollback->size.x, scrollback->size.x);
-		scrollup->position = INTVECTOR2(scrollback->position.x, scrollback->position.y);
-		scrolldown->position = INTVECTOR2(scrollback->position.x, scrollback->position.y + (scrollback->size.y - scrolldown->size.y));
-		scrollup->zorder = scrolldown->zorder = zorder;
+	if (m_scrollbarup && m_scrollbardown && m_scrollbarback && fullrefresh) 
+	{
+		XMFLOAT2 size(m_scrollbarback->GetSize().x, m_scrollbarback->GetSize().x);
+		m_scrollbarup->SetSize(size);
+		m_scrollbardown->SetSize(size);
+		m_scrollbarup->SetPosition(m_scrollbarback->GetPosition());
+		m_scrollbardown->SetPosition(XMFLOAT2(m_scrollbarback->GetPosition().x, m_scrollbarback->GetPosition().y + (m_scrollbarback->GetSize().y - m_scrollbardown->GetSize().y)));
+		m_scrollbarup->SetZOrder(zorder);
+		m_scrollbardown->SetZOrder(zorder);
 
 		// Reduce the size of the scroll bar back panel so that it does not overlap the up/down buttons.  Also move it back in the z order
-		scrollback->position.y += scrollup->size.y;
-		scrollback->size.y -= (scrollup->size.y + scrolldown->size.y);
-		scrollback->zorder += 0.001f;
+		m_scrollbarback->Move(XMFLOAT2(0.0f, m_scrollbarup->GetSize().y));
+		m_scrollbarback->Resize(XMFLOAT2(0.0f, -(m_scrollbarup->GetSize().y + m_scrollbardown->GetSize().y)));
+		m_scrollbarback->AdjustZOrder(+0.001f);
 	}
 
 	// Scroll bar handle is positioned at the % equivalent to selection in the list, and has (bounded) size 
 	// relative to #items vs #displayed.  This is part of the lite-refresh (i.e. fullrefresh == false)
-	scrollhandle = m_scrollbarhandle->GetInstance(0);
-	if (scrollhandle && scrollback && scrollup && scrolldown) 
+	if (m_scrollbarhandle && m_scrollbarback && m_scrollbarup && m_scrollbardown) 
 	{
 		// Calculate the active area of scroll bar (i.e. the extent between the two control buttons)
-		int scrollbararea = (scrollback->size.y); // - scrollup->size.y - scrolldown->size.y);
+		float scrollbararea = (m_scrollbarback->GetSize().y);
 
 		// Determine the scroll handle height
-		int handlesize;
+		float handlesize;
 		if (itemcount == 0 || itemcount <= expandcount)		
 			handlesize = scrollbararea;
 		else
-			handlesize = (int)floor(scrollbararea * (max(min(((float)expandcount / (float)itemcount), 1.0f), 0.0f)));
+			handlesize = (scrollbararea * (max(min(((float)expandcount / (float)itemcount), 1.0f), 0.0f)));
 
 		// Set the scroll handle size and position
-		scrollhandle->size = INTVECTOR2(  scrollback->size.x, handlesize);
-		scrollhandle->zorder = zorder;
-		scrollhandle->position = INTVECTOR2(scrollback->position.x, 
-											scrollback->position.y + //scrollup->size.y + 
-											(int)floor(((float)m_scrollposition / (float)itemcount) * scrollbararea));
+		m_scrollbarhandle->SetSize(XMFLOAT2(m_scrollbarback->GetSize().x, handlesize));
+		m_scrollbarhandle->SetZOrder(zorder);
+		m_scrollbarhandle->SetPosition(XMFLOAT2(m_scrollbarback->GetPosition().x,
+											m_scrollbarback->GetPosition().y + 
+											((float)m_scrollposition / (float)itemcount) * scrollbararea));
 
 		// Perform bounds checking on the handle size and adjust its position if necessary
-		if ( (scrollhandle->position.y + scrollhandle->size.y) > (scrollback->position.y + /*scrollup->size.y +*/ scrollbararea) )
-			  scrollhandle->position.y = (scrollback->position.y + /*scrollup->size.y +*/ scrollbararea) - scrollhandle->size.y;							
+		if ((m_scrollbarhandle->GetPosition().y + m_scrollbarhandle->GetSize().y) > (m_scrollbarback->GetPosition().y + scrollbararea))
+		{
+			m_scrollbarhandle->Move(XMFLOAT2(0.0f, m_scrollbarback->GetPosition().y + scrollbararea - m_scrollbarhandle->GetSize().y));
+		}
 	}
 
 	// Now update both control render state and control contents
@@ -288,8 +289,6 @@ void UIComboBox::UpdateControlContents(void)
 // Updates the visibility of control components following a change to the render state or expand state
 void UIComboBox::UpdateControlVisibility(void)
 {
-	Image2DRenderGroup::Instance *inst = NULL;
-
 	// Default components will simply take the render state; expanded components need to also consider the expand state
 	bool expandrender = (m_render && m_expandstate == UIComboBox::ExpandState::Expanded);
 
@@ -297,21 +296,23 @@ void UIComboBox::UpdateControlVisibility(void)
 	bool scrollrender = (expandrender && (m_items.size() > m_expandtext.size()));
 
 	// Set the render state of each component accordingly; first, the default components
-	inst = m_mainback->GetInstance(0);			if (inst) inst->render = m_render;
-	inst = m_expand->GetInstance(0);			if (inst) inst->render = m_render;
+	if (m_mainback) m_mainback->SetRenderActive(m_render);
+	if (m_expand) m_expand->SetRenderActive(m_render);
 	if (m_maintext) m_maintext->SetRenderActive(m_render);
 
 	// Now the expanded components
-	inst = m_expandback->GetInstance(0);		if (inst) inst->render = expandrender;
-	inst = m_scrollbarback->GetInstance(0);		if (inst) inst->render = scrollrender;
-	inst = m_scrollbarupdown->GetInstance(0);	if (inst) inst->render = scrollrender;			// Up button
-	inst = m_scrollbarupdown->GetInstance(1);	if (inst) inst->render = scrollrender;			// Down button
-	inst = m_scrollbarhandle->GetInstance(0);	if (inst) inst->render = scrollrender;
+	if (m_expandback) m_expandback->SetRenderActive(expandrender);
+	if (m_scrollbarback) m_scrollbarback->SetRenderActive(scrollrender);
+	if (m_scrollbarup) m_scrollbarup->SetRenderActive(scrollrender);
+	if (m_scrollbardown) m_scrollbardown->SetRenderActive(scrollrender);
+	if (m_scrollbarhandle) m_scrollbarhandle->SetRenderActive(scrollrender);
 
 	// Iterate over each item in the expanded list and apply the same render state
 	int n = (int)m_expandtext.size();
-	for (int i=0; i<n; i++)
+	for (int i = 0; i < n; ++i)
+	{
 		if (m_expandtext[i]) m_expandtext[i]->SetRenderActive(expandrender);
+	}
 }
 
 void UIComboBox::RenderControl(void) 
@@ -335,19 +336,21 @@ void UIComboBox::RegisterWithRenderGroup(Render2DGroup *group)
 	group->Components.ComboBoxes.AddItem(m_code, this);
 
 	// Now add each image component to the render group in turn
-	group->Components.Image2DGroup.AddItem(m_mainback->GetCode(), m_mainback);
-	group->Components.Image2DGroup.AddItem(m_expand->GetCode(), m_expand);
-	group->Components.Image2DGroup.AddItem(m_expandback->GetCode(), m_expandback);
-	group->Components.Image2DGroup.AddItem(m_scrollbarback->GetCode(), m_scrollbarback);
-	group->Components.Image2DGroup.AddItem(m_scrollbarupdown->GetCode(), m_scrollbarupdown);
-	group->Components.Image2DGroup.AddItem(m_scrollbarhandle->GetCode(), m_scrollbarhandle);
+	group->Components.Image2D.AddItem(m_mainback->GetCode(), m_mainback);
+	group->Components.Image2D.AddItem(m_expand->GetCode(), m_expand);
+	group->Components.Image2D.AddItem(m_expandback->GetCode(), m_expandback);
+	group->Components.Image2D.AddItem(m_scrollbarback->GetCode(), m_scrollbarback);
+	group->Components.Image2D.AddItem(m_scrollbarup->GetCode(), m_scrollbarup);
+	group->Components.Image2D.AddItem(m_scrollbardown->GetCode(), m_scrollbardown);
+	group->Components.Image2D.AddItem(m_scrollbarhandle->GetCode(), m_scrollbarhandle);
 	
 	// Add each image component to the group render queue
 	group->RegisterRenderableComponent(m_mainback);
 	group->RegisterRenderableComponent(m_expand);
 	group->RegisterRenderableComponent(m_expandback);
 	group->RegisterRenderableComponent(m_scrollbarback);
-	group->RegisterRenderableComponent(m_scrollbarupdown);
+	group->RegisterRenderableComponent(m_scrollbarup);
+	group->RegisterRenderableComponent(m_scrollbardown);
 	group->RegisterRenderableComponent(m_scrollbarhandle);
 	
 	// Now add each of the control text components in turn
@@ -370,16 +373,18 @@ void UIComboBox::UnregisterFromRenderGroup(void)
 	m_rendergroup->UnregisterRenderableComponent(m_expand);
 	m_rendergroup->UnregisterRenderableComponent(m_expandback);
 	m_rendergroup->UnregisterRenderableComponent(m_scrollbarback);
-	m_rendergroup->UnregisterRenderableComponent(m_scrollbarupdown);
+	m_rendergroup->UnregisterRenderableComponent(m_scrollbarup);
+	m_rendergroup->UnregisterRenderableComponent(m_scrollbardown);
 	m_rendergroup->UnregisterRenderableComponent(m_scrollbarhandle);
 
 	// Now remove the image components themselves from the group
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_mainback->GetCode());
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_expand->GetCode());
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_expandback->GetCode());
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_scrollbarback->GetCode());
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_scrollbarupdown->GetCode());
-	m_rendergroup->Components.Image2DGroup.RemoveItem(m_scrollbarhandle->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_mainback->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_expand->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_expandback->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_scrollbarback->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_scrollbarup->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_scrollbardown->GetCode());
+	m_rendergroup->Components.Image2D.RemoveItem(m_scrollbarhandle->GetCode());
 
 	// Now remove all text components from the group
 	m_rendergroup->Components.TextBlocks.RemoveItem(m_maintext->GetCode());
@@ -543,47 +548,43 @@ void UIComboBox::SelectItem(std::vector<ComboBoxItem>::size_type item)
 }
 
 // Process mouse down events on the control	
-void UIComboBox::HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIComboBox::HandleMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
-	Image2DRenderGroup::Instance *upinst, *downinst = NULL;
+	if (!component) return;
 
 	// Test which component we have the mouse over
-	if (component.rendergroup == m_scrollbarupdown)
+	if (component == m_scrollbarup)
 	{
-		// The mouse is down over one of the scroll bar buttons
-		upinst = m_scrollbarupdown->GetInstance(0);
-		if (upinst && upinst == component.instance)
-			ScrollItemList(iUIControl::ScrollState::ScrollUp);			// We are scrolling up
-		else
-			ScrollItemList(iUIControl::ScrollState::ScrollDown);		// If we aren't scrolling up, we must be scrolling down
+		ScrollItemList(iUIControl::ScrollState::ScrollUp);
+	}
+	else if (component == m_scrollbardown)
+	{
+		ScrollItemList(iUIControl::ScrollState::ScrollDown);
 	}
 
 }
 
 // Methods to handle user mouse input to the control
-void UIComboBox::HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) { }
-void UIComboBox::HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) { }
-void UIComboBox::HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) { }
-void UIComboBox::HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation) { }
+void UIComboBox::HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation) { }
+void UIComboBox::HandleRightMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation) { }
+void UIComboBox::HandleMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation) { }
+void UIComboBox::HandleRightMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation) { }
 
 // Event handler for left mouse clicks on the components making up this control
-void UIComboBox::HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UIComboBox::HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
+	if (!component) return;
+
 	// Test which part of the control has been clicked
-	if (componentgroup == m_expand)
+	if (component == m_expand)
 	{
 		// If the user has clicked on the expand button then we want to toggle expand state
 		ToggleExpandState();
 	}
-	else if (componentgroup == m_expandback)
+	else if (component == m_expandback)
 	{
 		// If the user has clicked within the expanded list then work out which item has been selected
-		Image2DRenderGroup::Instance *back = m_expandback->GetInstance(0);
-		if (!back) return;
-
-		// Determine the point that has been clicked
-		int y = (mouselocation.y - back->position.y) - UIComboBox::TEXT_OFFSET_Y;
+		int y = (mouselocation.y - (int)m_expandback->GetPosition().y) - UIComboBox::TEXT_OFFSET_Y;
 		int item = (int)floor((float)y / (float)(m_expanditemheight));
 
 		// Change the selection to this new item
@@ -592,10 +593,8 @@ void UIComboBox::HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image
 }
 
 // Event handler for right mouse clicks on the components making up this control
-void UIComboBox::HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-											INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UIComboBox::HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
-
 }
 
 // Toggles the expand state of this control

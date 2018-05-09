@@ -33,10 +33,10 @@ public:
 	~TextManager();
 
 	// Initialises the text manager
-	Result XM_CALLCONV Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, const FXMMATRIX, FontShader*);
+	Result RJ_XM_CALLCONV Initialize(HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
-	Result InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID);
+	Result InitializeFont(const std::string & code, const std::string & fontdata, const std::string & fonttexture);
 
 	// Creates a new sentence object, allocating memory and building a vertex buffer
 	SentenceType *CreateSentence(int fontID, int maxlength);
@@ -46,7 +46,7 @@ public:
 							const XMFLOAT4 & textcolour, float size);
 
 	// Renders all text sentences (dependent on render flag) using the font shader instance
-	Result XM_CALLCONV Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix);
+	Result RJ_XM_CALLCONV Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix);
 
 	// Shuts down the text manager instance and releases all resources (including fonts and text sentences)
 	void Shutdown(void);
@@ -66,14 +66,14 @@ public:
 private:
 	Result InitializeSentence(SentenceType** sentence, int maxLength, int fontID);
 	void ReleaseSentence(SentenceType**);
-	Result XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
+	Result RJ_XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
+
+	// Static map of standard fonts that will have space & index preallocated within the font collection
+	static const std::vector<std::pair<std::string, int*>> m_standard_font_indices;
 
 private:
 	std::vector<FontData*> m_fonts;
 	std::vector<SentenceType*> m_sentences;
-
-	ID3D11Device *m_device;
-	ID3D11DeviceContext *m_devicecontext;
 
 	int m_screenWidth, m_screenHeight;
 	float m_sentencewidth;

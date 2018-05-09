@@ -1,5 +1,3 @@
-#include "Data\\Shaders\\render_constants.h"
-#include "Data\\Shaders\\light_definition.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "GameVarsExtern.h"
@@ -8,8 +6,13 @@
 #include "GameUniverse.h"
 #include "SpaceSystem.h"
 #include "LightSource.h"
+#include "CPUGraphicsResourceAccess.h"
+#include "Data/Shaders/LightDataBuffers.hlsl"
 
 #include "LightingManagerObject.h"
+
+#include "GameInput.h"	// TODO: REMOVE
+
 
 // Initialise static comparator for binary search comparisons
 LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject::LightSourceEntryPriorityComparator = LightingManagerObject::_LightSourceEntryPriorityComparator();
@@ -18,22 +21,26 @@ LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject
 // Default constructor
 LightingManagerObject::LightingManagerObject(void)
 	:
-	m_source_count(0U), m_active_config(0U), m_lighting_is_overridden(false), m_source_vector_is_sorted(false)
+	m_source_count(0U), m_lighting_is_overridden(false), m_source_vector_is_sorted(false)
 {
 	// Initialise space in the light source vector to hold the maximum possible number of lights
 	m_sources.clear();
 	for (int i = 0; i < LightingManagerObject::LIGHT_LIMIT; ++i) m_sources.push_back(NULL);
 
-	// Initialise the light config lookup table
-	for (int i = 0; i < LightingManagerObject::LIGHT_LIMIT; ++i)
-	{
-		// Each light uses one bit, e.g. light #0 = 0x0, #1 = 0x1, #2 = 0x2, #3 = 0x4, ...
-		m_config_lookup[i] = (1 << i);
-	}
-
 	// Initialise space in the lighting override vector to hold the maximum possible number of lights
 	m_override_lights.clear();
 	m_override_lights.reserve(LightingManagerObject::LIGHT_LIMIT);
+
+	// Initialise all final light buffer data to zero
+	UINT light_buffer_size = (LightingManagerObject::LIGHT_LIMIT * sizeof(m_light_data[0]));
+	memset(&(m_light_data[0]), 0, light_buffer_size);
+
+	// Create the structured buffer that will hold compiiled frame lighting data
+	m_sb_lights = Game::Engine->GetRenderDevice()->Assets.CreateStructuredBuffer<LightData>(LightBufferName, LightingManagerObject::LIGHT_LIMIT, CPUGraphicsResourceAccess::Write);
+	if (!m_sb_lights)
+	{
+		Game::Log << LOG_ERROR << "Failed to instantiate lighting manager buffers for frame lighting data\n";
+	}
 
 	// Initialise the pre-configured lighting setups that can be used as a standard override
 	InitialiseStandardLightingOverrides();
@@ -60,7 +67,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// Now perform a search of the local area for all NON-DIRECTIONAL light sources
 		const SpaceSystem & system = Game::Universe->GetCurrentSystem();
 		Game::Search<iObject>().CustomSearch(Game::Engine->GetCamera()->GetPosition(), system.SpatialPartitioningTree,
-			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(Light::LightType::Directional));
+			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(LightType::Directional));
 
 		// Pre-register all directional system list sources since we know they will always be relevant, and they 
 		// will not be returned by the object search method above
@@ -80,12 +87,14 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// We know that all search results will be light sources
 		light = (LightSource*)(*it); if (!light) continue;
 
+		// Skip any directional lights; we have already unconditionally included them
+		if (light->GetLight().GetType() == LightType::Directional) continue;			// TODO: should be unneccessary due to predicate above
+
 		// Check whether the light could impact the viewing frustum.   We can skip the range check for
 		// directional lights since they are defined to be unsituated
-		if (light->GetLight().GetType() == Light::LightType::Directional ||  
-			Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
+		if (Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
 		{
-			// Register this as a potentialy-important light source
+			// Register this as a potentially-important light source
 			RegisterLightSource(light);
 		}
 	}
@@ -95,10 +104,13 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	{
 		m_light_data[i] = m_sources[i].Source->GetLight().Data;
 	}
+
+	// Update contents of the structured buffer in texture memory, ready for rendering
+	m_sb_lights->SetData((void*)&m_light_data[0], sizeof(LightData), 0U, m_source_count);
 }
 
 // Register a new light source for this scene
-bool LightingManagerObject::RegisterLightSource(const LightSource *light)
+bool LightingManagerObject::RegisterLightSource(LightSource *light)
 {
 	// Parameter check
 	if (!light) return false;
@@ -107,13 +119,17 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 	// We only want to register lights that are currently active
 	if (l.IsActive() == false) return false;
 
+	// This light is likely to be included in the rendered scene; recalculate any per-frame rendering data at this
+	// point so it is available (assuming the light is not deprioritised later, but it is neater to do this once here)
+	light->RecalculateRenderingData();
+
 	// Lights are prioritised in part based on their position relative to the camera
 	const XMVECTOR & cam_pos = Game::Engine->GetCamera()->GetPosition();
 
 	// Determine a distance/priority for the light; directional lights always have top priority so set a distsq of -999
 	// This ensures that directional light sources will ALWAYS be at the start of the light vector
 	float distsq = -999.0f;
-	if ((Light::LightType)l.GetType() != Light::LightType::Directional)
+	if ((LightType)l.GetType() != LightType::Directional)
 	{
 		// Directional lights keep a distsq value of -999.  For all other light types, determine the actual squared
 		// distance here.  Will always be >= 0 and so always lower priority than the directional lights
@@ -171,7 +187,7 @@ void LightingManagerObject::ClearAllLightSources(void)
 
 
 // Return the light configuration relevant to the specified object
-Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(const iObject *object)
+/*Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(const iObject *object)
 {
 	// Results will be returned in a light config bitstring
 	Game::LIGHT_CONFIG config = 0U;
@@ -185,7 +201,7 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 		if (light.IsActive() == false) continue;
 
 		// Take different action based on the type of light
-		if (light.Data.Type == (int)Light::LightType::Directional)
+		if (light.Data.Type == (int)LightType::Directional)
 		{
 			// If this is a directional light it should always be included
 			SetBit(config, m_config_lookup[i]);
@@ -205,7 +221,7 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 
 	// Return the relevant lighting configuration
 	return config;
-}
+}*/
 
 // Called at the end of a frame to perform any final lighting-related activities
 void LightingManagerObject::EndFrame(void)
@@ -216,54 +232,45 @@ void LightingManagerObject::EndFrame(void)
 void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::Directional;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
-	outLight.AmbientIntensity = 0.1f;
-	outLight.DiffuseIntensity = 0.1f;
-	outLight.SpecularPower = 0.05f;
-	outLight.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	outLight.Type = LightType::Directional;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 0.82f, 1.0f);
+	outLight.DirectionWS = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	outLight.Enabled = true;
+	outLight.Intensity = 0.75f;
 }
 
 // Returns data for a basic, default point light
 void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::PointLight;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	outLight.AmbientIntensity = 30.0f;
-	outLight.DiffuseIntensity = 26.0f;
-	outLight.SpecularPower = 0.5f;
+	outLight.Type = LightType::Point;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
-	outLight.Attenuation.Constant = 1.0f;
-	outLight.Attenuation.Linear = 0.012f;
-	outLight.Attenuation.Exp = 0.0052f;
+	outLight.Enabled = true;
 }
 
 // Returns data for a basic, default spot light
 void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::SpotLight;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	outLight.AmbientIntensity = 30.0f;
-	outLight.DiffuseIntensity = 26.0f;
-	outLight.SpecularPower = 0.5f;
-	outLight.Range = 500.0f;
-	outLight.Attenuation.Constant = 1.0f;
-	outLight.Attenuation.Linear = 0.012f;
-	outLight.Attenuation.Exp = 0.0052f;
-	outLight.SpotlightInnerHalfAngleCos = std::cosf(PIBY180 * 30.0f);
-	outLight.SpotlightOuterHalfAngleCos = std::cosf(PIBY180 * 35.0f);
+	outLight.Type = LightType::Spotlight;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	outLight.Range = 20.0f;
+	outLight.Enabled = true;
+	outLight.SpotlightAngle = (PIBY180 * 30.0f);
 }
 
 // Initialise the pre-configured lighting setups that can be used as a standard override
 void LightingManagerObject::InitialiseStandardLightingOverrides(void)
 {
-	LightData std_dim = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.075f, 0.075f, 0.035f, XMFLOAT3(0.0f, 0.0f, 1.0f));
-	LightData std_bright = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.15f, 0.15f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f));
+	LightData std_dim, std_bright;
+	GetDefaultDirectionalLightData(std_dim);
+	GetDefaultDirectionalLightData(std_bright);
+	std_dim.Intensity = 0.15f;
+	std_bright.Intensity = 0.75f;
 
-	/* Standard camera-facing override.  Directional lighting only which primarily shines out of the 
-	   camera, but also includes a more limited amount of ambient/surrounding light from other angles */
+	// Standard camera-facing override.  Directional lighting only which primarily shines out of the 
+	// camera, but also includes a more limited amount of ambient/surrounding light from other angles 
 	XMVECTOR orient[] = { 
 		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),						// Light 1: Facing directly forwards from the camera; e.g. (0,0,-10) to local (0,0,0)
 		XMVectorSet(0.330013f, 0.660026f, -0.0f, 0.674875f),		// Light 2: Facing from (10,-5,1) up+left to local (0,0,0)

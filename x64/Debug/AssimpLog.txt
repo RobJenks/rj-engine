@@ -1,0 +1,72 @@
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_cone.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T19184: Entering post processing pipeline
+Info,  T19184: CalcTangentsProcess finished. Tangents have been calculated
+Warn,  T19184: Mesh 0: Not suitable for vcache optimization
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_line.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T19184: Entering post processing pipeline
+Error, T19184: FindInvalidDataProcess fails on mesh normals: Found zero-length vector
+Info,  T19184: FindInvalidDataProcess finished. Found issues ...
+Info,  T19184: GenFaceNormalsProcess finished. Face normals have been calculated
+Info,  T19184: CalcTangentsProcess finished. Tangents have been calculated
+Warn,  T19184: Mesh 0: Not suitable for vcache optimization
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_sphere.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T19184: Entering post processing pipeline
+Error, T19184: FindInvalidDataProcess fails on mesh uvcoords: All vectors are identical
+Info,  T19184: FindInvalidDataProcess finished. Found issues ...
+Error, T19184: Failed to compute tangents; need UV data in channel0
+Warn,  T19184: Mesh 0: Not suitable for vcache optimization
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Entering post processing pipeline
+Error, T19184: Failed to compute tangents; need UV data in channel0
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_square.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T19184: Entering post processing pipeline
+Error, T19184: FindInvalidDataProcess fails on mesh uvcoords: All vectors are identical
+Error, T19184: FindInvalidDataProcess fails on mesh normals: Found zero-length vector
+Info,  T19184: FindInvalidDataProcess finished. Found issues ...
+Info,  T19184: GenFaceNormalsProcess finished. Face normals have been calculated
+Error, T19184: Failed to compute tangents; need UV data in channel0
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Entering post processing pipeline
+Error, T19184: Failed to compute tangents; need UV data in channel0
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Medium\frigate_medium_midsection1.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Medium\'
+Info,  T19184: Entering post processing pipeline
+Error, T19184: FindInvalidDataProcess fails on mesh normals: Found zero-length vector
+Info,  T19184: FindInvalidDataProcess finished. Found issues ...
+Info,  T19184: GenFaceNormalsProcess finished. Face normals have been calculated
+Info,  T19184: CalcTangentsProcess finished. Tangents have been calculated
+Warn,  T19184: Mesh 0: Not suitable for vcache optimization
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Small\frigate_small_midsection1.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Small\'
+Info,  T19184: Entering post processing pipeline
+Error, T19184: FindInvalidDataProcess fails on mesh normals: Found zero-length vector
+Info,  T19184: FindInvalidDataProcess finished. Found issues ...
+Info,  T19184: GenFaceNormalsProcess finished. Face normals have been calculated
+Info,  T19184: CalcTangentsProcess finished. Tangents have been calculated
+Warn,  T19184: Mesh 0: Not suitable for vcache optimization
+Info,  T19184: Cache relevant are 0 meshes (0 faces). Average output ACMR is -nan(ind)
+Info,  T19184: Leaving post processing pipeline
+Info,  T19184: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Simple\Testing\testship1\testship1.obj
+Info,  T19184: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T19184: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Simple\Testing\testship1\'
+Error, T19184: #aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible

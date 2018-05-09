@@ -51,37 +51,6 @@ OverlayRenderer::OverlayRenderer(void)
 // Initialises the overlay rendering component; includes loading of all required models
 Result OverlayRenderer::Initialise(void)
 {
-	Result result;
-
-	// Line models will all use the same underlying geometry, but with the following different textures
-	std::string line_models[] = { "overlay_none.dds", "overlay_green.dds", "overlay_red.dds", "overlay_lblue.dds" };
-
-	// Create all models required for overlay rendering
-	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
-	{
-		m_models[i] = new Model();
-		m_models[i]->SetCentredAboutOrigin(false);
-		m_models[i]->SetCode(concat("OverlayModel")(i).str());
-		result = m_models[i]->Initialise(	concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str(),
-											concat(D::IMAGE_DATA)("\\Models\\Misc\\")(line_models[i]).str());
-		if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
-	}
-
-	// Initialise blueprint overlay model
-	m_blueprintoverlay = new Model();
-	m_blueprintoverlay->SetCode("OverlayBlueprintModel");
-	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
-											concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
-	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
-
-	// Initialise blueprint element-sized model
-	m_blueprintcubeoverlay = new Model();
-	m_blueprintcubeoverlay->SetCode("OverlayBlueprintCubeModel");
-	result = m_blueprintcubeoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str(),
-		concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
-	//m_blueprintcubeoverlay->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(INTVECTOR3(1, 1, 1)));
-	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
-
 	// Initialise all pre-cached transform matrices for render efficiency
 	InitialiseCachedMatrices();
 
@@ -137,6 +106,26 @@ void OverlayRenderer::InitialiseCachedMatrices()
 	SetNodeSpinSpeed(0.5f);
 }
 
+// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+Result OverlayRenderer::PerformPostDataLoadInitialisation(void)
+{
+	// All required models and their destination fields
+	std::string model_names[] = { "overlay_line_none", "unit_line_model_green", "unit_line_model_red", "unit_line_model_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
+	Model ** models[] = { &m_models[0], &m_models[1], &m_models[2], &m_models[3], &m_blueprintoverlay, &m_blueprintcubeoverlay };
+
+	// Retrieve all models required for overlay rendering
+	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
+	{
+		*(models[i]) = Model::GetModel(model_names[i]);
+		if (*(models[i]) == NULL)
+		{
+			Game::Log << LOG_WARN << "Failed to initialise overlay rendering model \"" << model_names[i] << "\"\n";
+		}
+	}
+
+	return ErrorCodes::NoError;
+}
+
 void OverlayRenderer::SetNodeSpinSpeed(float speed)
 {
 	// Store the new spin speed
@@ -147,32 +136,33 @@ void OverlayRenderer::SetNodeSpinSpeed(float speed)
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
-void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
+void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), world, world.r[3]);
+	Game::Engine->RenderModel(&m_models[(int)colour]->Data, world, world.r[3]);
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
-void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
+void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour_alpha, world);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_None]->Data, position, colour_alpha, world);
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
-void XM_CALLCONV OverlayRenderer::RenderLineFlat(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
+void RJ_XM_CALLCONV OverlayRenderer::RenderLineFlat(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModelFlat(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour_alpha, world);
+	//Game::Engine->RenderModelFlat(&m_models[RenderColour::RC_None]->Data, position, colour_alpha, world);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_LightBlue]->Data, world, position);		// TODO: Temporary, fix this
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
-void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness)
+void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness)
 {
 	// Scale the current world matrix and pass it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixScaling(thickness, thickness, length), world);
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+	Game::Engine->RenderModel(&m_models[(int)colour]->Data, mworld, mworld.r[3]);
 }
 
 // Method to add a line for rendering.  Does all calculation of required world matrix to generate the line between two points
@@ -217,14 +207,15 @@ void OverlayRenderer::DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVE
 	// Now determine the quaternion rotation from the basis vector to the desired heading difference, and apply via rotation matrix
 	XMMATRIX rot = XMMatrixRotationQuaternion(QuaternionBetweenVectors(BASIS_VECTOR, vdiff));
 	
-	// Finally apply a translation matrix to move the transformed model into position, with pt1 at the origin and pt2
-	// successfully transformed to its desired position (world = scale * rot * trans)
-	outMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), XMMatrixTranslationFromVector(pt1));
+	// Finally apply a translation matrix to move the transformed model into position, with (pt1+pt2)/2 at the origin and both points
+	// successfully transformed to their desired position (world = scale * rot * trans)
+	XMVECTOR midpoint = XMVectorMultiply(XMVectorAdd(pt1, pt2), HALF_VECTOR_P);
+	outMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), XMMatrixTranslationFromVector(midpoint));
 }
 
 // Method to render a box at the specified location.  World matrix specifies transforming to the target location/orientation.  Size/thickness
 // are used to derive the scaling matrix
-void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize)
+void RJ_XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize)
 {
 	XMMATRIX mfinal, scale, trans, scale_x_rot;
 
@@ -294,7 +285,7 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRender
 
 
 // Method to render a box at the specified location
-void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT4 & colour_alpha, float thickness)
+void RJ_XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT4 & colour_alpha, float thickness)
 {
 	XMMATRIX mfinal, scale, trans, scale_x_rot;
 
@@ -429,7 +420,7 @@ void OverlayRenderer::RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
-void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize)
+void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -440,11 +431,11 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+	Game::Engine->RenderModel(&m_models[(int)colour]->Data, mworld, mworld.r[3]);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
-void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size)
+void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -454,12 +445,12 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+	Game::Engine->RenderModel(&m_models[(int)colour]->Data, mworld, mworld.r[3]);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes alpha blending.
 // Therefore also requires the position to be provided for efficient depth-sorting
-void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position)
+void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -470,12 +461,12 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), position, alpha, mworld);
+	Game::Engine->RenderModel(&m_models[(int)colour]->Data, position, alpha, mworld);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes 
 // custom colour.  No alpha blending
-void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT4 & colour)
+void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT4 & colour)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	XMVECTOR size = XMVectorSet(xSize, ySize, zSize, 0.0f);
@@ -484,12 +475,12 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSiz
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), colour, mworld, mworld.r[3]);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_None]->Data, colour, mworld, mworld.r[3]);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes 
 // custom colour and alpha blending.  Requires the position to be provided for efficient depth-sorting
-void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT3 & colour, float alpha, const CXMVECTOR position)
+void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT3 & colour, float alpha, const CXMVECTOR position)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	XMVECTOR size = XMVectorSet(xSize, ySize, zSize, 0.0f);
@@ -498,7 +489,7 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSiz
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour, alpha, mworld);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_None]->Data, position, colour, alpha, mworld);
 }
 
 
@@ -520,7 +511,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 
 		// Scale & translate the current world matrix before passing it to the engine rendering method
 		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
-		Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+		Game::Engine->RenderModel(&m_models[(int)colour]->Data, mworld, mworld.r[3]);
 	}
 }
 
@@ -542,7 +533,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 		// Scale & translate the current world matrix before passing it to the engine rendering method
 		// Use the light highlight/fade shader to add the custom colour and alpha values
 		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
-		Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), ship->GetPosition(), colour_alpha, mworld);
+		Game::Engine->RenderModel(&m_models[RenderColour::RC_None]->Data, ship->GetPosition(), colour_alpha, mworld);
 
 		//OutputDebugString(concat("El: ")(element_pos.ToString())(" = ")(Vector3ToString(XMVector3TransformCoord(NULL_VECTOR, mworld)))("\n").str().c_str());
 	}
@@ -601,7 +592,7 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const
 		XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V), add));
 
 	// Scale to element size, then translate to the relevant place for rendering
-	Game::Engine->RenderModelFlat(m_blueprintoverlay->GetModelBuffer(), ship.GetPosition(), colour_alpha,
+	Game::Engine->RenderModelFlat(&m_blueprintoverlay->Data, ship.GetPosition(), colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
 
@@ -618,7 +609,7 @@ void OverlayRenderer::RenderElement3DOverlay(iSpaceObjectEnvironment & ship, con
 		Game::C_CS_ELEMENT_MIDPOINT_V));
 
 	// Scale to element size, then translate to the relevant place for rendering
-	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay->GetModelBuffer(), ship.GetPosition(), colour_alpha,
+	Game::Engine->RenderModelFlat(&m_blueprintcubeoverlay->Data, ship.GetPosition(), colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
 
@@ -631,7 +622,7 @@ void OverlayRenderer::Render3DOverlay(const FXMVECTOR position, const FXMVECTOR 
 	XMMATRIX scale = XMMatrixScalingFromVector(size);
 
 	// Render using a basic overlay texture and flat shading
-	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay->GetModelBuffer(), position, colour_alpha,
+	Game::Engine->RenderModelFlat(&m_blueprintcubeoverlay->Data, position, colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans));
 }
 
@@ -643,7 +634,7 @@ void OverlayRenderer::Render3DOverlay(const FXMVECTOR position, const FXMVECTOR 
 	XMMATRIX scale = XMMatrixScalingFromVector(size);
 
 	// Render using a basic overlay texture and flat shading
-	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay->GetModelBuffer(), position, colour_alpha,
+	Game::Engine->RenderModelFlat(&m_blueprintcubeoverlay->Data, position, colour_alpha,
 		XMMatrixMultiply(scale, trans));
 }
 
@@ -651,7 +642,7 @@ void OverlayRenderer::Render3DOverlay(const FXMVECTOR position, const FXMVECTOR 
 void OverlayRenderer::Render3DOverlay(const XMMATRIX & world, const XMFLOAT4 & colour_alpha)
 {
 	// Render using a basic overlay texture and flat shading
-	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay->GetModelBuffer(), XMVector3TransformCoord(NULL_VECTOR, world), colour_alpha, world);
+	Game::Engine->RenderModelFlat(&m_blueprintcubeoverlay->Data, XMVector3TransformCoord(NULL_VECTOR, world), colour_alpha, world);
 }
 
 // Renders an overlay over the specified environment.  Accepts iterators into a range of colour/alpha data, and an offset parameter
@@ -705,7 +696,7 @@ void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive,
 }
 
 // Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
-void XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
+void RJ_XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
 {
 	// Determine the rotation matrix to be used based on current clock time
 	XMMATRIX mrot = XMMatrixRotationY((Game::ClockMs % 1000) * m_nodespinradians);
@@ -717,11 +708,11 @@ void XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, const XMFLOAT4
 		mrot),
 		XMMatrixTranslationFromVector(pos));
 
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), pos, colour_alpha, mworld);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_None]->Data, pos, colour_alpha, mworld);
 }
 
 // Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
-void XM_CALLCONV OverlayRenderer::RenderNodeFlat(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
+void RJ_XM_CALLCONV OverlayRenderer::RenderNodeFlat(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
 {
 	// Determine the rotation matrix to be used based on current clock time
 	XMMATRIX mrot = XMMatrixRotationY((Game::ClockMs % 1000) * m_nodespinradians);
@@ -733,7 +724,7 @@ void XM_CALLCONV OverlayRenderer::RenderNodeFlat(const FXMVECTOR pos, const XMFL
 		mrot),
 		XMMatrixTranslationFromVector(pos));
 
-	Game::Engine->RenderModelFlat(m_models[RenderColour::RC_None]->GetModelBuffer(), pos, colour_alpha, mworld);
+	Game::Engine->RenderModelFlat(&m_models[RenderColour::RC_None]->Data, pos, colour_alpha, mworld);
 }
 
 // Method to add a node for rendering in a ship-relative element space location.  Spins in place.
@@ -755,7 +746,7 @@ void OverlayRenderer::RenderNodeAtRelativeElementLocation(iSpaceObjectEnvironmen
 			mrot),
 			mtrans),
 			ship->GetZeroPointWorldMatrix());
-		Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+		Game::Engine->RenderModel(&m_models[(int)colour]->Data, mworld, mworld.r[3]);
 	}
 }
 
@@ -884,16 +875,8 @@ void OverlayRenderer::DebugRenderEnvironmentTree(const EnvironmentTree *tree, bo
 // Shutdown method to deallocate all resources maintained by the renderer
 void OverlayRenderer::Shutdown(void)
 {
-	// Shutdown each model maintained by the renderer
-	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; i++)
-	{
-		if (m_models[i]) { m_models[i]->Shutdown(); SafeDelete(m_models[i]); }
-	}
-
 	// Shutdown all cached/pre-calculated data
 	if (m_matrix_boxtransforms) { SafeDeleteArray(m_matrix_boxtransforms); }
-	if (m_blueprintoverlay) { m_blueprintoverlay->Shutdown(); SafeDelete(m_blueprintoverlay); }
-	if (m_blueprintcubeoverlay) { m_blueprintcubeoverlay->Shutdown(); SafeDelete(m_blueprintcubeoverlay); }
 }
 
 

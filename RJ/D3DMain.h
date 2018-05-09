@@ -2,7 +2,7 @@
 
 #ifndef __D3DMainH__
 #define __D3DMainH__
-
+/*
 // Include all DX11-related headers
 #include <string>
 #include "DX11_Core.h" // #include "FullDX11.h"
@@ -10,6 +10,7 @@
 #include "CompilerSettings.h"
 #include "Utility.h"
 #include "FrameProfiler.h"
+#include "Rendering.h"
 
 // Constant values for buffer background colour; each frame reset to this base colour before rendering begins
 const float					m_bufferbg[4] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -32,8 +33,8 @@ public:
 	void							BeginScene();
 	void							EndScene();
 
-	CMPINLINE ID3D11Device*			GetDevice()					{ return m_device; }
-	CMPINLINE ID3D11DeviceContext*	GetDeviceContext()			{ return m_deviceContext; }
+	CMPINLINE Rendering::RenderDeviceType *			GetDevice()										{ return m_device; }
+	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext()								{ return m_deviceContext; }
 
 	CMPINLINE void					GetProjectionMatrix(XMMATRIX & outMatrix) const		{ outMatrix = m_projectionMatrix; }
 	CMPINLINE void					GetWorldMatrix(XMMATRIX & outMatrix) const			{ outMatrix = m_worldMatrix; }
@@ -97,11 +98,11 @@ public:
 	}
 
 	// Enables alpha blending and applies additive filters (for e.g. effect rendering)
-	/*CMPINLINE void					SetAlphaBlendModeAdditive(void)
-	{
-	m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
-	m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff);
-	}*/
+	//CMPINLINE void					SetAlphaBlendModeAdditive(void)
+	//{
+	//m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
+	//m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff);
+	//}
 
 	// Disables alpha blending
 	CMPINLINE void					SetAlphaBlendModeDisabled(void)
@@ -119,15 +120,16 @@ public:
 
 private:
 	
+	Rendering::RenderDeviceType				* m_device;
+	Rendering::RenderDeviceContextType		* m_deviceContext;
+
 	D3D_FEATURE_LEVEL			m_featurelevel;
 	D3D_DRIVER_TYPE				m_devicetype;
 	bool						m_vsync_enabled;
 	UINT						m_vsync_uint;
 	int							m_videoCardMemory;
 	char						m_videoCardDescription[128];
-	IDXGISwapChain				*m_swapChain;
-	ID3D11Device				*m_device;
-	ID3D11DeviceContext			*m_deviceContext;
+	IDXGISwapChain				*m_swapChain;	
 	ID3D11RenderTargetView		*m_renderTargetView;
 	ID3D11Texture2D				*m_depthStencilBuffer;
 	ID3D11DepthStencilState		*m_depthStencilState;					// For normal rendering
@@ -152,6 +154,6 @@ private:
 };
 
 
-
+*/
 
 #endif

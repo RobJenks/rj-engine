@@ -1,0 +1,23 @@
+<gamedata>
+  
+  <!-- Pure emissive materials for rendering UI elements -->
+  <Material code="emissive_red">
+    <EmissiveColor r="1.0" g="0.0" b="0.0" a="0.8" />
+  </Material>
+  <Material code="emissive_green">
+    <EmissiveColor r="0.0" g="1.0" b="0.0" a="0.8" />
+  </Material>
+  <Material code="emissive_blue">
+    <EmissiveColor r="0.0" g="0.0" b="1.0" a="0.8" />
+  </Material>
+  <Material code="emissive_yellow">
+    <EmissiveColor r="1.0" g="1.0" b="0.0" a="0.8" />
+  </Material>
+  <Material code="emissive_cyan">
+    <EmissiveColor r="0.0" g="1.0" b="1.0" a="0.8" />
+  </Material>
+  <Material code="emissive_purple">
+    <EmissiveColor r="1.0" g="0.0" b="1.0" a="0.8" />
+  </Material>
+  
+</gamedata>

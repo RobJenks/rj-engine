@@ -45,8 +45,12 @@ public:
 	// Object simulation method.  Light sources do not need to take any action (TODO: dynamic lights, e.g. flickering, could use this)
 	CMPINLINE void										SimulateObject(void) { }
 
-	// Light sources do implement a post-simulation update method to reposition their internal light component
-	virtual void										PerformPostSimulationUpdate(void);
+	// Light sources do not require a post-simulation update method; simulation is performed in a pre-render step only for visible light sources
+	CMPINLINE virtual void								PerformPostSimulationUpdate(void) { }
+
+	// Calculates all derived data for the light required for rendering, for example view-space equivalent data.  We only need to calculate
+	// these fields if the light is being rendered this frame
+	void												RecalculateRenderingData(void);
 
 	// Inherited virtual method.  Destruction method triggered when object HP hits zero
 	CMPINLINE void										DestroyObject(void) { }
@@ -67,6 +71,14 @@ public:
 	// Updates the command with its result if the command can be processed at this level
 	void												ProcessDebugCommand(GameConsoleCommand & command);
 
+
+
+	// Calculate point light volume transform for the given light
+	static XMMATRIX										CalculatePointLightTransform(const LightData & light);
+
+	// Calculate spotlight light volume transform for the given light
+	static XMMATRIX										CalculateSpotlightTransform(const LightData & light);
+	
 
 protected:
 

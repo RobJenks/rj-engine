@@ -2,6 +2,7 @@
 #include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
+#include "LightingManagerObject.h"
 #include "RJMain.h"
 #include "GameVarsExtern.h"
 #include "UserInterface.h"
@@ -9,6 +10,7 @@
 #include "Player.h"
 #include "GameUniverse.h"
 #include "Model.h"
+#include "ModelData.h"
 #include "FileSystem.h"
 #include "MultiLineTextBlock.h"
 #include "UIButton.h"
@@ -206,7 +208,7 @@ void UI_ModelBuilder::RenderCurrentSelection(void)
 		XMMATRIX removeoffset;
 		if (m_selected_terrain->GetDefinition() && m_selected_terrain->GetDefinition()->GetModel())
 		{
-			removeoffset = XMMatrixTranslationFromVector(XMLoadFloat3(&m_selected_terrain->GetDefinition()->GetModel()->GetModelCentre()));
+			removeoffset = XMMatrixTranslationFromVector(XMLoadFloat3(&m_selected_terrain->GetDefinition()->GetModel()->Geometry.get()->CentrePoint));
 		}
 		else
 		{
@@ -398,7 +400,7 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	}
 
 	// Create a basic directional light for the editor
-	m_lightsource = LightSource::Create(LightData(Light::LightType::Directional, ONE_FLOAT3, 0.2f, 0.5f, 2.0f, FORWARD_VECTOR_F));
+	m_lightsource = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	if (m_lightsource)
 	{
 		m_lightsource->SetPosition(NULL_VECTOR);
@@ -493,7 +495,7 @@ void UI_ModelBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keyboard->GetKey(DIK_R) && m_key_ctrl && m_key_shift)
 	{
 		if (!m_object || !m_object->GetModel()) return;
-		XMVECTOR adjust = XMLoadFloat3(&Float3MultiplyScalar(m_object->GetModel()->GetActualModelSize(), 0.5f));
+		XMVECTOR adjust = XMLoadFloat3(&Float3MultiplyScalar(m_object->GetModel()->Geometry.get()->ModelSize, 0.5f));
 		for (int i = 0; i < (int)m_terrain.size(); ++i)
 			if (m_terrain[i])
 				m_terrain[i]->SetPosition(XMVectorSubtract(m_terrain[i]->GetPosition(), adjust));
@@ -564,7 +566,7 @@ void UI_ModelBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 }
 
 // Process the mouse-up event for this component
-void UI_ModelBuilder::ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void UI_ModelBuilder::ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// If we were rotating the model via a right mouse drag then stop the rotation here
 	if (m_rotatingmodel)
@@ -714,7 +716,7 @@ void UI_ModelBuilder::AddNewTerrain(void)
 	std::string code = NullString;
 
 	// Get a reference to the model name text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_terraincode", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_terraincode");
 	if (tb) code = tb->GetText();
 	
 	// Create a new static terrain object with this definition (or NULL) and default parameters
@@ -1075,7 +1077,7 @@ void UI_ModelBuilder::PerformZoom(float zoom)
 Result UI_ModelBuilder::LoadModel_ButtonClicked(void)
 {
 	// Get a reference to the model name text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_modelcode", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_modelcode");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the model code that we are trying to load and make sure it is valid
@@ -1095,7 +1097,7 @@ Result UI_ModelBuilder::LoadModel_ButtonClicked(void)
 // Processes the user request to save the current model
 Result UI_ModelBuilder::SaveModel_ButtonClicked(void)
 {
-	MultiLineTextBlock *tb = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_test", NullString);
+	MultiLineTextBlock *tb = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_test");
 	if (!tb) return 1;
 
 	if (tb->GetOperationMode() == MultiLineTextBlock::OperationMode::IndividualLines)
@@ -1116,7 +1118,7 @@ Result UI_ModelBuilder::SaveModel_ButtonClicked(void)
 Result UI_ModelBuilder::LoadCollData_ButtonClicked(void)
 {
 	// Get a reference to the collision data text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the filename that we are trying to load and make sure it is valid
@@ -1137,7 +1139,7 @@ Result UI_ModelBuilder::SaveCollData_ButtonClicked(void)
 	Result result;
 
 	// Get a reference to the collision data text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the filename that we are trying to save and make sure it is valid

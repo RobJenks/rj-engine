@@ -1,6 +1,7 @@
 #include "GameVarsExtern.h"
 #include "RJMain.h"
 #include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "CameraClass.h"
 #include "GameDataExtern.h"
 #include "VolumetricLine.h"
@@ -135,25 +136,18 @@ void UI_ShipBuilder::Activate(void)
 void UI_ShipBuilder::InitialiseRenderData(void)
 {
 	// Initialise the volumetric line used for rendering the editor grid
-	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
 	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
-		(tex->GetTexture() != NULL ? tex : NULL));
+		Game::Engine->GetAssets().GetMaterial("ui_editor_line_1"));
 
 	// Initialise the volumetric line used for rendering the collider trajectory in structural test mode
-	tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"));
 	m_intersect_test_trajectory = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 0.243f, 0.11f, 0.75f), 0.5f,
-		(tex->GetTexture() != NULL ? tex : NULL));
+		Game::Engine->GetAssets().GetMaterial("ui_intersection_test_trajectory"));
 
 }
 
 // Revert any editor-specific render states and data
 void UI_ShipBuilder::RevertRenderData(void)
 {
-	// Deallocate the editor gridline objects
-	if (m_gridline.RenderTexture)
-	{
-		SafeDelete(m_gridline.RenderTexture);
-	}
 }
 
 
@@ -185,7 +179,7 @@ void UI_ShipBuilder::Render(void)
 void UI_ShipBuilder::PerformRenderUpdate(void)
 {
 	// Override lighting with a basic camera-oriented lighting override
-	Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
+	//Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
 }
 
 // Perform editor-mode-specific rendering
@@ -1070,7 +1064,7 @@ void UI_ShipBuilder::RevertPlacementTileUpdates(void)
 }
 
 // Event raised when the LMB is first depressed
-void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component)
 {
 	// Take different action depending on the editor mode
 	if (m_mode == EditorMode::StructuralTestMode)
@@ -1080,7 +1074,7 @@ void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRend
 }
 
 // Event raised when the RMB is first depressed
-void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component)
 {
 	// Store the current camera centre point when the RMB is first depressed, for use when panning the camera
 	if (m_rmb_down_component == NULL) m_rmb_down_start_centre = m_centre;
@@ -1119,7 +1113,7 @@ void UI_ShipBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 }
 
 // Method to handle the mouse up event
-void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// Take different action depending on the active editor mode
 	if (m_mode == EditorMode::StructuralTestMode)

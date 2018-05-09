@@ -73,9 +73,6 @@
     <ClCompile Include="CSQuartersTile.cpp">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMapTexture.cpp">
-      <Filter>Engine\Textures</Filter>
-    </ClCompile>
     <ClCompile Include="D3DMain.cpp">
       <Filter>Engine\D3D</Filter>
     </ClCompile>
@@ -117,12 +114,6 @@
     </ClCompile>
     <ClCompile Include="FireEffect.cpp">
       <Filter>Engine\Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="FireShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="FontShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="FontData.cpp">
       <Filter>Engine\Text</Filter>
@@ -220,21 +211,6 @@
     <ClCompile Include="Image2DRenderGroupInstance.cpp">
       <Filter>UI\Components</Filter>
     </ClCompile>
-    <ClCompile Include="LightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightHighlightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightHighlightShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="iShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
@@ -273,9 +249,6 @@
     </ClCompile>
     <ClCompile Include="OverlayRenderer.cpp">
       <Filter>Engine\Overlay</Filter>
-    </ClCompile>
-    <ClCompile Include="ParticleShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Player</Filter>
@@ -337,17 +310,11 @@
     <ClCompile Include="MeshGeometry.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Engine\Models\Static</Filter>
-    </ClCompile>
     <ClCompile Include="SkinnedData.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClCompile>
     <ClCompile Include="SkinnedModel.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="SkinnedNormalMapShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="SpaceEmitter.cpp">
       <Filter>Objects\Emitters</Filter>
@@ -358,15 +325,6 @@
     <ClCompile Include="SystemRegion.cpp">
       <Filter>Regions</Filter>
     </ClCompile>
-    <ClCompile Include="TexcubeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureTransShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="TextBlock.cpp">
       <Filter>UI\Components</Filter>
     </ClCompile>
@@ -375,9 +333,6 @@
     </ClCompile>
     <ClCompile Include="TextManager.cpp">
       <Filter>Engine\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Engine\Textures</Filter>
     </ClCompile>
     <ClCompile Include="XML\tinystr.cpp">
       <Filter>XML</Filter>
@@ -472,9 +427,6 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
-    <ClCompile Include="VolLineShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="ModelBuffer.cpp">
       <Filter>Engine\Models\Static</Filter>
     </ClCompile>
@@ -523,12 +475,6 @@
     <ClCompile Include="UI_ShipBuilder.cpp">
       <Filter>UI\UI Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="LightingManagerObject.cpp">
-      <Filter>Engine\Lighting</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Engine\Materials</Filter>
-    </ClCompile>
     <ClCompile Include="InputLayoutDesc.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
@@ -564,9 +510,6 @@
     </ClCompile>
     <ClCompile Include="DebugInvocation.cpp">
       <Filter>Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="LightFlatHighlightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="EnvironmentOBBRegion.cpp">
       <Filter>Data structures</Filter>
@@ -766,6 +709,204 @@
     <ClCompile Include="DataObjectEngineHeadingController.cpp">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderParameterDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Old_Texture.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDX11Util.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplerStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizerStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencilStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderMacros.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelInstance.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDeviceDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDevice.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRenderProcess.cpp">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredGBuffer.cpp">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendState.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ALIGN16.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderProcess.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderProcessDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderAssetsDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="FireShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="FontShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="iShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightFlatHighlightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedNormalMapShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TexcubeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTransShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VolLineShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapTexture.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="__OLD_Model.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClCompile>
+    <ClCompile Include="LightingManagerObject.cpp">
+      <Filter>Engine\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Definitions\ModelData.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderParameter.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicVertexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="VariableSizeValue.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="UIRenderProcess.cpp">
+      <Filter>Engine\Rendering\DirectX11\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RM_ModelData.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
+    <ClCompile Include="iUIComponentRenderable.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="iUIComponent.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundElementModel.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundElementModelTests.cpp">
+      <Filter>_Tests\Models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -852,9 +993,6 @@
     <ClInclude Include="CSQuartersTileDefinition.h">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
-    <ClInclude Include="CubeMapTexture.h">
-      <Filter>Engine\Textures</Filter>
-    </ClInclude>
     <ClInclude Include="D3DMain.h">
       <Filter>Engine\D3D</Filter>
     </ClInclude>
@@ -911,12 +1049,6 @@
     </ClInclude>
     <ClInclude Include="FireEffect.h">
       <Filter>Engine\Effects</Filter>
-    </ClInclude>
-    <ClInclude Include="FireShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="FontShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="FontData.h">
       <Filter>Engine\Text</Filter>
@@ -1035,21 +1167,6 @@
     <ClInclude Include="Image2DRenderGroupInstance.h">
       <Filter>UI\Components</Filter>
     </ClInclude>
-    <ClInclude Include="LightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHighlightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHighlightShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="iShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
@@ -1115,9 +1232,6 @@
     </ClInclude>
     <ClInclude Include="OverlayRenderer.h">
       <Filter>Engine\Overlay</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Player</Filter>
@@ -1191,17 +1305,11 @@
     <ClInclude Include="MeshGeometry.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Engine\Models\Static</Filter>
-    </ClInclude>
     <ClInclude Include="SkinnedData.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClInclude>
     <ClInclude Include="SkinnedModel.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinnedNormalMapShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="SpaceEmitter.h">
       <Filter>Objects\Emitters</Filter>
@@ -1215,15 +1323,6 @@
     <ClInclude Include="SystemRegion.h">
       <Filter>Regions</Filter>
     </ClInclude>
-    <ClInclude Include="TexcubeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureTransShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="TextBlock.h">
       <Filter>UI\Components</Filter>
     </ClInclude>
@@ -1232,9 +1331,6 @@
     </ClInclude>
     <ClInclude Include="TextManager.h">
       <Filter>Engine\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Engine\Textures</Filter>
     </ClInclude>
     <ClInclude Include="XML\tinystr.h">
       <Filter>XML</Filter>
@@ -1347,9 +1443,6 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Engine\ShaderManager</Filter>
     </ClInclude>
-    <ClInclude Include="VolLineShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="InputLayoutDesc.h">
       <Filter>Engine\ShaderManager</Filter>
     </ClInclude>
@@ -1443,12 +1536,6 @@
     <ClInclude Include="UI_ShipBuilder.h">
       <Filter>UI\UI Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="LightingManagerObject.h">
-      <Filter>Engine\Lighting</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Engine\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="LightSource.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
@@ -1488,12 +1575,8 @@
     <ClInclude Include="Utility\chrono_io.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="DebugInvocation.h">
       <Filter>Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="LightFlatHighlightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="EnvironmentOBBRegion.h">
       <Filter>Data structures</Filter>
@@ -1771,6 +1854,273 @@
     <ClInclude Include="DataObjectEngineHeadingController.h">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClInclude>
+    <ClInclude Include="Data\Shaders\old_light_definition.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\old_render_constants.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderParameterDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderParameter.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="CPUGraphicsResourceAccess.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Old_Texture.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ClearFlags.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDX11Util.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewport.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderMacros.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\LightData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\MaterialData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelInstance.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultingFloat4.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDevice.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDeviceDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderProcess.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRenderProcess.h">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredGBuffer.h">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagedPtr.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderProcessDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderAssetsDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelRenderPredicate.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="InstanceProperties.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderBufferDefinitions.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderConstantBufferDefinitions.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderPipelineStructures.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="FireShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FontShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="iShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightFlatHighlightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedNormalMapShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TexcubeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTransShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VolLineShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapTexture.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="__OLD_Model.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="LightingManagerObject.h">
+      <Filter>Engine\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelData.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicVertexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="VariableSizeValue.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="UIRenderProcess.h">
+      <Filter>Engine\Rendering\DirectX11\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderRenderPredicate.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderFlags.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\UIRenderingCommonData.hlsl.h">
+      <Filter>HLSL\Common\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RM_ModelData.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RM_MaterialInstanceMapping.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundElementModel.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundTileModelType.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundElementModelTests.h">
+      <Filter>_Tests\Models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1823,9 +2173,6 @@
     </Filter>
     <Filter Include="Objects\Ships\Tiles\TileClasses">
       <UniqueIdentifier>{cc9eb6d8-0f7d-4347-a294-c3107cd3332b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Textures">
-      <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\D3D">
       <UniqueIdentifier>{4bea18cf-fc13-4314-86bf-b43231d91279}</UniqueIdentifier>
@@ -2016,9 +2363,6 @@
     <Filter Include="AI\Pathfinding\Orders">
       <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Materials">
-      <UniqueIdentifier>{89a23be2-347b-41a8-aac8-90ea8fef0e88}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Picking">
       <UniqueIdentifier>{0112f23b-bb53-447c-990b-ccff107fb515}</UniqueIdentifier>
     </Filter>
@@ -2088,98 +2432,85 @@
     <Filter Include="Objects\Data\Objects\Engines">
       <UniqueIdentifier>{0aaa3089-0f5a-4e5a-8bc6-cb9ff41781eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering">
+      <UniqueIdentifier>{4f47e151-e33f-4251-b2bd-87a29202492a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11">
+      <UniqueIdentifier>{f24a97b6-c30a-45f2-9c21-cef25d3a77bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old">
+      <UniqueIdentifier>{d2412553-0518-43ff-975e-40be417b55e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old\Textures">
+      <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imported Definitions">
+      <UniqueIdentifier>{121be652-4e99-4a12-9982-4e3c064ae820}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Common">
+      <UniqueIdentifier>{06661c74-dd71-48e1-a79e-e27edcbc4389}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Deferred">
+      <UniqueIdentifier>{847bc2e4-6523-4c61-9832-eda5e92e19c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old\Shaders">
+      <UniqueIdentifier>{72a9e836-b31a-4cd3-a9a6-dc44d4e03a0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\UI">
+      <UniqueIdentifier>{59c642a1-d59c-47ea-a0b7-85f37d65508b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Common\Deferred">
+      <UniqueIdentifier>{527a2151-53ff-48f6-9a98-e760e9443157}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Common\UI">
+      <UniqueIdentifier>{a4c657e9-401c-4fc2-92c1-1b328c70844c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\Models">
+      <UniqueIdentifier>{fd51e35b-114e-44e7-a09d-e4c795e190f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
     <None Include="Engine components.cd" />
+    <None Include="Data\Shaders\hlsl_common.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\LightDataBuffers.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\lighting_calculations.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl">
+      <Filter>HLSL\Common\Deferred</Filter>
+    </None>
+    <None Include="Data\Shaders\DeferredRenderingGBuffer.hlsl.h">
+      <Filter>HLSL\Common\Deferred</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl" />
-    <FxCompile Include="Data\Shaders\vol_line.vs.hlsl">
+    <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\deferred_ps_geometry.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line.gs.hlsl">
+    <FxCompile Include="Data\Shaders\deferred_ps_lighting.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line.ps.hlsl">
+    <FxCompile Include="Data\Shaders\ps_standard.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light.ps.hlsl">
+    <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light.vs.hlsl">
+    <FxCompile Include="Data\Shaders\deferred_ps_debug.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight.ps.hlsl">
+    <FxCompile Include="Data\Shaders\vs_basic_texture.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight_fade.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texture.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texture.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texcube.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texcube.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texturetrans.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texturetrans.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_fade.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\particle.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\particle.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\font.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\font.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\fire.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\fire.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\skinned_nmap.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\skinned_nmap.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="volumetric_cloud.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line_tex.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.vs.hlsl">
+    <FxCompile Include="Data\Shaders\ps_basic_texture.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

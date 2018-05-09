@@ -20,7 +20,6 @@
 
 #include "iObject.h"
 #include "CoreEngine.h"
-#include "D3DMain.h"
 #include "CameraClass.h"
 #include "AudioManager.h"
 #include "LightShader.h"
@@ -51,6 +50,7 @@
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
 #include "ObjectSearch.h"
+#include "LightingManagerObject.h"
 #include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "SpaceSystem.h"
@@ -148,6 +148,11 @@
 #include <stdlib.h> 
 
 #include "RJMain.h"
+
+
+// TODO: Several VC++ safety measures added to STL even in default release builds, should disable for release builds 
+// of this application.  Should set "_HAS_ITERATOR_DEBUGGING=0"  "_SECURE_SCL = 0".  See 
+// http://assimp.sourceforge.net/lib_html/install.html for details
 
 
 // Application window properties
@@ -581,21 +586,82 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Keyboard.LockKey(DIK_GRAVE);
 	}
 
+	// Debug rendering of GBuffer data
+	if (b[DIK_F1])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("none");
+		Game::Keyboard.LockKey(DIK_F1);
+	}
+	if (b[DIK_F2])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("diffuse");
+		Game::Keyboard.LockKey(DIK_F2);
+	}
+	if (b[DIK_F3])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("specular");
+		Game::Keyboard.LockKey(DIK_F3);
+	}
+	if (b[DIK_F4])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("normal");
+		Game::Keyboard.LockKey(DIK_F4);
+	}
+	if (b[DIK_F5])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Keyboard.LockKey(DIK_F5);
+	}
+
+	// Debug resource loading
+	if (b[DIK_F6])
+	{
+		Game::Engine->GetRenderDevice()->ReloadAllShaders();
+		Game::Keyboard.LockKey(DIK_F6);
+	}
+	if (b[DIK_F7])
+	{
+		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
+		Game::Keyboard.LockKey(DIK_F7);
+	}
+	if (b[DIK_F8])
+	{
+		Model::ReloadAllModels();
+		Game::Keyboard.LockKey(DIK_F8);
+	}
+
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		XMVECTOR v1 = XMVectorSet(-5, -5, 0, 1);	// BL
-		XMVECTOR v2 = XMVectorSetY(v1, +5);			// TL
-		XMVECTOR v3 = XMVectorSetX(v2, +5);			// TR
-
-		XMVECTOR normal = XMVector3Cross(XMVectorSubtract(v2, v1), XMVectorSubtract(v3, v2));
-
-		XMVECTOR camera = XMVectorSet(-1, 0, 0.1, 1);
-
-		float dot1 = XMVectorGetX(XMVector3Dot(camera, normal));
-		float dot2 = XMVectorGetX(XMVector3Dot(normal, camera));
-
-		OutputDebugString(concat("Dot: ")(dot1)(", ")(dot2)("\n").str().c_str());
+		auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
+		for (auto & obj : objects)
+		{
+			if (obj()->GetObjectType() == iObject::ObjectType::LightSourceObject)
+			{
+				LightSource *ls = (LightSource*)obj();
+				if (ls->GetLight().GetType() == LightType::Directional)
+				{
+					if (b[DIK_LALT])
+					{
+						ls->LightObject().Toggle();
+						Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
+						break;
+					}
+					else if (b[DIK_LSHIFT])
+					{
+						ls->LightObject().ChangeIntensity(+0.1f);
+						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
+						break;
+					}
+					else if (b[DIK_LCONTROL])
+					{
+						ls->LightObject().ChangeIntensity(-0.1f);
+						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
+						break;
+					}
+				}
+			}
+		}
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
@@ -888,56 +954,63 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 	if (b[DIK_2]) {
-		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
-		
-		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
-		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
-
-		if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
+		if (b[DIK_LSHIFT])
 		{
-			ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
-			XMVECTOR centre = tile->GetRelativePosition();
+			Game::Console.ProcessRawCommand(GameConsoleCommand("enter_system_env AB01"));
+		}
+		else
+		{
+			//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+			Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+			Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
+			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-			DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_vertical_01");
-			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
-			t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI)); 
-			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
-
-			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
-			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
-			t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
-			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
-
-			DataObjectEngineHeadingController *t_head = (DataObjectEngineHeadingController*) DynamicTerrain::Create("BasicEngineHeadingController");
-			t_head->SetPosition(XMVectorAdd(t2->GetPosition(), XMVectorSet(0.0f, 0.5f, 15.0f, 0.0f)));
-			cs()->AddTerrainObject(static_cast<Terrain*>(t_head));
-
-
-			DynamicTerrain *target = NULL;
-			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
-			for (auto terrain : cs()->TerrainObjects)
+			if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
 			{
-				if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
+				ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
+				XMVECTOR centre = tile->GetRelativePosition();
+
+				Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+
+				DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_vertical_01");
+				t1->SetPosition(XMVectorSet(63.74f, 1.4f, 64.25f, 0.0f)); // XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
+				t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t1));
+
+				DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
+				t2->SetPosition(XMVectorSet(67.2f, 1.4f, 64.25f, 0.0f)); // XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+				t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t2));
+
+				DataObjectEngineHeadingController *t_head = (DataObjectEngineHeadingController*)DynamicTerrain::Create("BasicEngineHeadingController");
+				t_head->SetPosition(XMVectorAdd(t2->GetPosition(), XMVectorSet(0.0f, 0.5f, 15.0f, 0.0f)));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t_head));
+
+
+				DynamicTerrain *target = NULL;
+				Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
+				for (auto * terrain : cs()->TerrainObjects)
 				{
-					target = terrain->ToDynamicTerrain();
-					break;
+					if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
+					{
+						target = terrain->ToDynamicTerrain();
+						break;
+					}
 				}
-			}		
-			
-			Game::Log << LOG_DEBUG << "Connecting thrust controller: " << 
-			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
-			
-			Game::Log << LOG_DEBUG << "Connecting heading controller: " <<
-				t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
+
+				Game::Log << LOG_DEBUG << "Connecting thrust controller: " <<
+					t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
+
+				Game::Log << LOG_DEBUG << "Connecting heading controller: " <<
+					t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
 
 
-			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+				Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+			}
 		}
 
 		Game::Keyboard.LockKey(DIK_2);
@@ -946,7 +1019,7 @@ void RJMain::ProcessKeyboardInput(void)
 		
 		if (b[DIK_LSHIFT])
 		{
-			int a = 1;
+			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 0"));
 		}
 		else
 		{
@@ -955,9 +1028,10 @@ void RJMain::ProcessKeyboardInput(void)
 
 		Game::Keyboard.LockKey(DIK_3);
 	}
-	if (b[DIK_4]) {
-		
-		cs()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
+	if (b[DIK_4]) 
+	{
+		Game::Log << LOG_DEBUG << "Pos: " << Vector3ToString(Game::CurrentPlayer->GetActivePlayerObject()->GetPositionF()) << ", EnvPos: " <<
+			Vector3ToString(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition()) << "\n";
 
 		Game::Keyboard.LockKey(DIK_4);
 		
@@ -1160,8 +1234,6 @@ void RJMain::Quit(void)
 }
 
 
-#include "Data\\Shaders\\standard_ps_const_buffer.h"
-
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
@@ -1297,14 +1369,20 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Perform post-load initialisation of any data just loaded from game files
 	InitialiseLoadedGameData();
 
+	// All game data has now been loaded & initialised
+	Game::GameDataLoaded = true;
+
+	// Allow the core engine to perform any post-data-load activities, e.g. retrieving models that have now been loaded
+	Game::Engine->PerformPostDataLoadInitialisation();
+
 	// Initialise the simulation state manager
 	InitialiseStateManager();
 
-	// *** DEBUG ***
-	__CreateDebugScenario();
-
 	// Initialise the active player object
 	InitialisePlayer();
+
+	// *** DEBUG ***
+	__CreateDebugScenario();
 
 	// Initialise the primary region objects
 	res = InitialiseRegions();
@@ -1356,7 +1434,9 @@ Result RJMain::InitialiseGameDataDependencies(void)
 	delete[] wcfull;
 
 	// Derive other required application paths
-	D::IMAGE_DATA_S = std::string(Game::ExePath + "\\Data\\ImageContent\\Data\\");
+	// TODO: Reverted back to main data directory for now; copy to ImageContent to be set up via VStudio image pipeline
+	//D::IMAGE_DATA_S = std::string(Game::ExePath + "\\Data\\ImageContent\\Data\\");
+	D::IMAGE_DATA_S =  std::string("C:\\Users\\robje\\Documents\\Visual Studio 2017\\Projects\\RJ\\RJ\\Data\\");
 	D::IMAGE_DATA = D::IMAGE_DATA_S.c_str();
 
 	// Make sure paths are valid
@@ -1420,13 +1500,12 @@ Result RJMain::InitialiseRegions(void)
 
 	// Initialise the immediate region, centred around the player
 	D::Regions::Immediate = new ImmediateRegion();
-	res = D::Regions::Immediate->Initialise(
-		Game::Engine->GetDevice(),																		// Pointer to the D3D device
-		BuildStrFilename(D::IMAGE_DATA, "Particles\\dust_particle.dds").c_str(),						// Texture to be mapped onto all dust particles
-		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),											// Starting centre point = player location
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),										// Minimum region bounds
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),									// Maximum region bounds
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_THRESHOLD), 0.0f)								// Region update threshold
+	res = D::Regions::Immediate->Initialise(								// Pointer to the D3D device
+		"dust_particle", 													// Texture to be mapped onto all dust particles
+		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),				// Starting centre point = player location
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),			// Minimum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),		// Maximum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_THRESHOLD), 0.0f)	// Region update threshold
 		);
 
 	// If initialisation of the immediate region failed then return with an error here
@@ -1435,14 +1514,12 @@ Result RJMain::InitialiseRegions(void)
 	// Initialise the system region, and set a default texture for now
 	// TODO: THIS SHOULD COME FROM THE SYSTEM DATA FILE WHEN IT IS LOADED
 	D::Regions::System = new SystemRegion();
-	res = D::Regions::System->Initialise(Game::Engine->GetDevice());
+	res = D::Regions::System->Initialise();
 	if (res != ErrorCodes::NoError) return res;
 
 	// DEBUG: SET BACKDROP
 	XMFLOAT2 texsize = XMFLOAT2(2048.0f, 1024.0f);
-	if (true) D::Regions::System->SetBackdropTexture(Game::Engine->GetDevice(),
-		BuildStrFilename(D::IMAGE_DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(),
-		texsize);
+	if (true) D::Regions::System->SetBackdropTexture("omega_backdrop", texsize);
 
 
 	// Return success if we have reached the end
@@ -1497,12 +1574,15 @@ Result RJMain::InitialisePlayer(void)
 	actor->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::CurrentPlayer->SetActor(actor);
 	if (Game::CurrentPlayer->GetActor() == NULL) return ErrorCodes::CouldNotCreatePlayerActor;
-
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 
+	// Temporary: create a player ship.  Also assign to an application variable so we can reference it in global scope
+	Ship *ship = InitialiseTemporaryPlayerShip();
+	ss = ship;
+
 	// Place the player in a default (already created) ship and the current system
-	Game::CurrentPlayer->SetPlayerShip(ss());
+	Game::CurrentPlayer->SetPlayerShip(ship);
 	Game::CurrentPlayer->EnterEnvironment(Game::Universe->GetSystem("AB01"));
 
 	// Return success
@@ -2163,6 +2243,27 @@ void RJMain::DebugFireBasicProjectile(const BasicRay & trajectory) const
 		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), trajectory.Direction);
 }
 
+Ship * RJMain::InitialiseTemporaryPlayerShip(void)
+{
+	// Temp: Create a new ship for the player to use
+	SimpleShip *ss_ship = SimpleShip::Create("testship1");
+	ss_ship->SetName("Player ship ss");
+	ss_ship->OverrideInstanceCode("ss");
+	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
+	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+	
+	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	ss_ship->SetPosition(XMVectorSet(300, 225, 100, 0));
+	ss_ship->SetOrientation(ID_QUATERNION);
+	
+	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
+
+	// Also assign to a temporary application variable so we can reference in global scopes
+	ss = ss_ship;
+
+	return ss_ship;
+}
+
 void RJMain::__CreateDebugScenario(void)
 {
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
@@ -2170,19 +2271,6 @@ void RJMain::__CreateDebugScenario(void)
 		Game::FactionManager.GetFactionIDByCode("faction_prc"), Faction::FactionDisposition::Hostile);
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFactionIDByCode("faction_prc"),
 		Game::FactionManager.GetFactionIDByCode("faction_us"), Faction::FactionDisposition::Hostile);
-
-	// Temp: Create a new ship for the player to use
-	SimpleShip *ss_ship = SimpleShip::Create("testship1");
-	ss_ship->SetName("Player ship ss");
-	ss_ship->OverrideInstanceCode("ss");
-	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
-	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
-	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	ss_ship->SetPosition(XMVectorSet(600, 200, -200, 0.0f));
-	ss_ship->SetOrientation(ID_QUATERNION);
-	ss_ship->SetInvulnerabilityFlag(true);
-	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
-	ss = ss_ship;
 
 	// Temp: Create two complex ships in this scenario
 	if (true) {
@@ -2274,7 +2362,7 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 	if (true) {
-		SimpleShip *s3_1_ship = SimpleShip::Create("test_placeholder_ship");
+		SimpleShip *s3_1_ship = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_1_ship);
 		s3_1_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 		s3_1_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
@@ -2338,19 +2426,31 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring nsew = (up | left | down | right);	// == 15
 
 	// Temp: Create a directional light source for the system
-	LightSource *l = LightSource::Create(LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
+	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
+	l->OverrideInstanceCode("syslight");
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
+	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
+		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
+	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
+	l->LightObject().SetIntensity(0.95f);
+
+	// Temp: Create a point light source near the player
+	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
+	l2->SetRange(600.0f);
+	l2->LightObject().SetIntensity(0.75f);
+	//l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	l2->SetPosition(XMVectorSet(400, 300, 100, 0));
+	lt = l2;
 
 	// Add a spotlight to the player actor
-	/*Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
-	LightSource *player_light = LightSource::Create(pl);
+	LightSource *player_light = LightSource::Create(Game::Engine->LightingManager->GetDefaultSpotLightData());
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	Game::RegisterObject(player_light);
-	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);*/
-
+	player_light->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
+	player_light->LightObject().SetIntensity(1.0f);
+	//player_light->LightObject().Deactivate();
+	lt2 = player_light;
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
@@ -2521,12 +2621,14 @@ void RJMain::DEBUGDisplayInfo(void)
 		{
 			if (!terrain->IsDynamic()) continue;
 			DynamicTerrain *dt = terrain->ToDynamicTerrain();
-			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = (DataObjectContinuousSwitch*)dt;
+			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_lever_vertical_01") t = (DataObjectContinuousSwitch*)dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "V.Obj: %s, NPObj: %s, T: %d, DT: %d  |  M.Obj: %s, NPObj: %s, T: %d, DT: %d",
-
-			(Game::CurrentPlayer->GetViewDirectionObject() ? Game::CurrentPlayer->GetViewDirectionObject()->GetInstanceCode().c_str() : "-"),
+		if (t)
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %s, Dist: %.2f", Vector3ToString(t->GetPosition()).c_str(),
+			XMVectorGetX(XMVector3LengthEst(XMVectorSubtract(Game::CurrentPlayer->GetActor()->GetPosition(), t->GetPosition()))));
+		
+			/*(Game::CurrentPlayer->GetViewDirectionObject() ? Game::CurrentPlayer->GetViewDirectionObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetViewDirectionNonPlayerObject() ? Game::CurrentPlayer->GetViewDirectionNonPlayerObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetViewDirectionTerrain() ? Game::CurrentPlayer->GetViewDirectionTerrain()->GetID() : -1),
 			(Game::CurrentPlayer->GetViewDirectionUsableTerrain() ? Game::CurrentPlayer->GetViewDirectionUsableTerrain()->GetID() : -1),
@@ -2535,11 +2637,53 @@ void RJMain::DEBUGDisplayInfo(void)
 			(Game::CurrentPlayer->GetMouseSelectedNonPlayerObject() ? Game::CurrentPlayer->GetMouseSelectedNonPlayerObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetMouseSelectedTerrain() ? Game::CurrentPlayer->GetMouseSelectedTerrain()->GetID() : -1),
 			(Game::CurrentPlayer->GetMouseSelectedUsableTerrain() ? Game::CurrentPlayer->GetMouseSelectedUsableTerrain()->GetID() : -1)
-		);
+		);*/
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+
+
+		// Tmp: Update player spotlight position and orientation to match camera
+		LightSource *lights[2] = { lt(), lt2() };
+		for (LightSource *active : lights)
+		{
+			active->SetPosition(Game::Engine->GetCamera()->GetPosition());
+			active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
+			if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+			{
+				active->LightObject().SetRange(active->LightObject().GetRange() < 100.0f ? 200.0f : 20.0f);
+				Game::Keyboard.LockKey(DIK_CAPSLOCK);
+			}
+		}
+
+
+		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
+			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));
+		
+		
+
+
+		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
+/*		auto renderinfo = Game::Engine->GetRenderInfo();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: Draw Calls: %zu, Instances: %zu, ZSortedInstances: %zu, SkinnedInstances: %zu [%s %s %s %s %s %s ]",
+			renderinfo.DrawCalls, renderinfo.InstanceCount, renderinfo.InstanceCountZSorted, renderinfo.InstanceCountSkinnedModel,
+			(renderinfo.ShipRenderCount == 0 ? "" : concat(" S.Ship = ")(renderinfo.ShipRenderCount).str().c_str()),
+			(renderinfo.ComplexShipRenderCount == 0 ? "" : concat(" C.Ship = ")(renderinfo.ComplexShipRenderCount).str().c_str()),
+			(renderinfo.ComplexShipSectionRenderCount == 0 ? "" : concat(" CS.Sec = ")(renderinfo.ComplexShipSectionRenderCount).str().c_str()),
+			(renderinfo.ComplexShipTileRenderCount == 0 ? "" : concat(" CS.Tile = ")(renderinfo.ComplexShipTileRenderCount).str().c_str()),
+			(renderinfo.ActorRenderCount == 0 ? "" : concat(" Actor = ")(renderinfo.ActorRenderCount).str().c_str()),
+			(renderinfo.TerrainRenderCount == 0 ? "" : concat(" Terrain = ")(renderinfo.TerrainRenderCount).str().c_str())
+		);
+		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";*/
+		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
+
+		//lt2()->SetModel(Model::GetModel("spotlight_cone_model"));
+		//lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
+		//lt()->SetSize(XMVectorReplicate(45.0f));
+		//Game::Engine->RenderObject(lt2());
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
+

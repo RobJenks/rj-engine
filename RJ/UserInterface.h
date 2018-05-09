@@ -18,6 +18,7 @@ class UIComboBox;
 class Image2D;
 class GameInputDevice;
 class iUIController;
+class iUIComponent;
 class UI_Console;
 class UI_ShipDesigner;
 class UI_ModelBuilder;
@@ -69,9 +70,6 @@ public:
 	Result					InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
 
-	// Creates a new component, for addition to one of the UI component sets
-	Image2D *				NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height);
-
 	// Initialise the different components sets used for rendering the UI in different scenarios
 	Result					InitialiseUIComponentSets(void);
 
@@ -117,7 +115,7 @@ public:
 	void					ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 
 	// Broadcasts a mouse up event to any control not currently in its default state
-	void					BroadcastMouseUpEvent(bool lmb, bool rmb, Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
+	void					BroadcastMouseUpEvent(bool lmb, bool rmb, iUIComponent *component, INTVECTOR2 mouselocation);
 
 	// User control events from each control type; can be handled by the UI, but generally passed directly to the controller
 	void					ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex);
@@ -170,7 +168,7 @@ private:
 
 	// Cached data on the last mouse event, for efficiency in subsequent cycles where the mouse hasn't moved
 	INTVECTOR2									m_mousepreviouslocation;
-	Image2DRenderGroup::InstanceReference		m_mousecurrenthovercomponent;
+	iUIComponent *								m_mousecurrenthovercomponent;
 
 	// Collection of managed control definitions
 	typedef std::unordered_map<std::string, UIManagedControlDefinition*> ManagedControlDefinitionCollection;
@@ -189,7 +187,7 @@ public:
 private:
 	
 	// Broadcasts a mouse up event within a class of iUIControl-derived components.  Internal private method.
-	void BroadcastMouseUpEventToClass(RenderComponentGroup<iUIControl*> *cclass, bool lmb, bool rmb, Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
+	void BroadcastMouseUpEventToClass(RenderComponentGroup<iUIControl*> *cclass, bool lmb, bool rmb, iUIComponent *component, INTVECTOR2 mouselocation);
 
 };
 

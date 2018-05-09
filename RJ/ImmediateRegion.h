@@ -8,7 +8,8 @@
 #include "CompilerSettings.h"
 #include "DustParticle.h"
 #include "ErrorCodes.h"
-#include "Texture.h"
+#include "Rendering.h"
+class TextureDX11;
 class ParticleShader;
 
 #include "RegionBase.h"
@@ -39,7 +40,7 @@ public:
 	const float				UPDATE_EPSILON;
 
 	// Initialisation method
-	Result					Initialise(	ID3D11Device *device, const char *particletexture,
+	Result					Initialise( const std::string & texture, 
 										const FXMVECTOR centre, 
 										const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
 										const GXMVECTOR updatethreshold);
@@ -104,29 +105,26 @@ public:
 	// Debug method to output the coordinates of all particles in string format to the debug output window
 	void					DebugPrintParticleCoordinates(void);
 
-	// Returns a pointer to the texture resource that will be used for rendering immediate-space particles
-	CMPINLINE ID3D11ShaderResourceView* 
-							GetParticleTextureResource(void) { return m_texture->GetTexture(); }
+	// Pointer to the texture resource that will be used for rendering immediate-space particles
+	ID3D11ShaderResourceView * GetParticleTextureResource(void);
+	void					SetParticleTexture(const std::string & name);
+	void					SetParticleTexture(TextureDX11 * texture);
 
 	// Prepares the vertex buffers by filling in the render-time data (positon of vertices 1-5)
-	void XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
 
 	// Method to render the everything in the region
-	void XM_CALLCONV 		Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		Render(const FXMMATRIX view);
 
 	// Render each component of the region to the vertex buffer
-	void XM_CALLCONV 		RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		RenderDustParticles(const FXMMATRIX view);
 
 	// Methods to initialise and release the vertex/index buffers
-	Result					InitialiseBuffers(ID3D11Device* device);
+	Result					InitialiseBuffers(void);
 	void					ReleaseBuffers(void);
 
-	// Methods to initialise and release the texture resource
-	Result					LoadTexture(ID3D11Device* device, const char *filename);
-	void					ReleaseTexture(void);
-
 	// Renders the vertex buffers to the DX output stream, once all data is prepared in the buffers
-	void					RenderBuffers(ID3D11DeviceContext *devicecontext);
+	void					RenderBuffers(void);
 
 private:
 
@@ -169,7 +167,7 @@ private:
 	ID3D11Buffer						*m_vertexbuffer, *m_indexbuffer;
 
 	// Texture resource that will be mapped to each particle
-	Texture								*m_texture;
+	TextureDX11							*m_texture;
 };
 
 

@@ -4,7 +4,6 @@
 
 #include "ErrorCodes.h"
 
-#include "D3DMain.h"
 #include "CameraClass.h"
 #include "ParticleEmitter.h"
 #include "ParticleShader.h"
@@ -21,7 +20,7 @@ Result ParticleEngine::Initialise(void)
 Result ParticleEngine::LinkParticleShader(ParticleShader *pshader)
 {
 	// Make sure we have valid references
-	if (!pshader) return ErrorCodes::CannotLinkAllRequiredShadersToParticleEngine;
+	if (!pshader) Game::Log << LOG_WARN << "Cannot link particle shader to particle engine\n";
 
 	// Store reference to the particle shader that we will use for rendering
 	m_pshader = pshader;
@@ -106,11 +105,13 @@ void ParticleEngine::ShutdownParticleEmitter(std::string key)
 	m_emitters[key] = NULL;
 }
 
-void XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
+void RJ_XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
 {
+	/* TODO: Disabled since this does not work within the deferred rendering engine; replace with compliant implementation */
+
 	// Enable alpha blending and disable writing to the depth buffer (for correct alpha rendering) before rendering any particles
 	// TODO: Currently use additive alpha.  Make dependent on the prototypes being rendered (disabled vs enabled vs additive vs ...)
-	D3D->SetAlphaBlendModeEnabled();
+/*	D3D->SetAlphaBlendModeEnabled();
 	D3D->DisableZBufferWriting();
 
 	// Retrieve the camera basis vectors for use in billboarding particles
@@ -140,6 +141,7 @@ void XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX pr
 	// TODO: Move to somewhere more global once we have further rendering that requires alpha effects.  Avoid multiple on/off switches
 	D3D->SetAlphaBlendModeDisabled();
 	D3D->EnableZBuffer();
+	*/
 }
 
 void ParticleEngine::Shutdown(void)

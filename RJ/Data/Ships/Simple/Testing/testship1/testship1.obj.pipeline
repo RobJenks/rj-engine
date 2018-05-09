@@ -1,0 +1,1 @@
+-skip all -op triangulate -op invert-v -op custom-transform

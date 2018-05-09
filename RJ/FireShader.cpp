@@ -20,7 +20,7 @@ FireShader::FireShader(void)
 	m_sampleState2 = 0;
 }
 
-Result FireShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result FireShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -37,7 +37,7 @@ Result FireShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result FireShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result FireShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -67,7 +67,7 @@ Result FireShader::InitialiseVertexShader(ID3D11Device *device, std::string file
 
 
 // Initialise shader
-Result FireShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result FireShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -105,7 +105,7 @@ void FireShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV FireShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
+Result RJ_XM_CALLCONV FireShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
 							 XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, XMFLOAT2 distortion2,

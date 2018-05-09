@@ -8,7 +8,6 @@
 #include <string>
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
-class Texture;
 
 // This class has no special alignment requirements
 class EffectBase
@@ -16,9 +15,6 @@ class EffectBase
 public:
 	// Enumeration of the available effect models that can be used for rendering
 	enum EffectModelType { UnitSquare = 0, UnitCone };
-
-	// Utility function for loading in effect texture data
-	Result					LoadTexture(Texture **texture, const char *filename);
 
 	// Returns/sets the uniquely identifying code for this effect
 	CMPINLINE std::string GetCode(void) { return m_code; }
@@ -30,7 +26,7 @@ public:
 	CMPINLINE void SetEffectModel(std::string modelname) { m_effectmodel = DeriveEffectModel(modelname); }
 	
 	// Derives the effect model type from a supplied string name
-	EffectBase::EffectModelType DeriveEffectModel(std::string modelname);
+	EffectBase::EffectModelType DeriveEffectModel(const std::string & modelname);
 
 	// Constructors/destructors
 	EffectBase(void);

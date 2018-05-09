@@ -1,0 +1,7 @@
+Info,  T15408: Load C:\Users\robje\Downloads\sphere.obj
+Info,  T15408: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T15408: Import root directory is 'C:\Users\robje\Downloads\'
+Info,  T15408: Entering post processing pipeline
+Info,  T15408: TriangulateProcess finished. All polygons have been triangulated.
+Info,  T15408: GenFaceNormalsProcess finished. Face normals have been calculated
+Info,  T15408: Leaving post processing pipeline

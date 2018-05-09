@@ -28,7 +28,7 @@ namespace ErrorCodes {
 	const Result		CouldNotSetCOMInitialisationMethod				= 15;
 
 	// DirectX error codes												(1000-1999)
-	const Result		CannotCreateDirect3DDevice						= 1000;
+	const Result		CannotCreateRenderDevice						= 1000;
 	const Result		CannotCreateDXLocaliserComponent				= 1001;
 	const Result		CannotCreateCameraComponent						= 1002;
 	const Result		CannotCreateViewFrustrum						= 1003;
@@ -36,6 +36,7 @@ namespace ErrorCodes {
 	const Result		CannotCreate2DRenderManager						= 1005;
 	const Result		CannotCreateFXManager							= 1006;
 	const Result		CannotCreateOverlayRenderer						= 1007;
+	const Result		CannotCreateDirect3DFinalVersion				= 1008;
 
 	const Result		InvalidDXLevelPassedToLocaliser					= 1060;
 	const Result		CouldNotDetermineSupportedDXFeatureLevels		= 1061;
@@ -50,7 +51,6 @@ namespace ErrorCodes {
 	const Result		CouldNotCreateTextureObject						= 1106;
 	const Result		CouldNotOpenModelFile							= 1107;
 	const Result		CouldNotAllocateModelDataStorage				= 1108;
-	
 	const Result		CouldNotCreateShaderFromTextureFile				= 1109;
 	const Result		CouldNotCreateLightShader						= 1110;
 	const Result		LightVertexShaderCompilationFailed				= 1111;
@@ -61,7 +61,7 @@ namespace ErrorCodes {
 	const Result		CannotCreateLightPixelShader					= 1116;
 	const Result		CannotCreateLightObject							= 1117;
 	const Result		CouldNotCreateVertexShaderInputLayout			= 1118;
-	const Result		CouldNotCreateVertexShaderSamplerState			= 1119;
+	const Result		CouldNotCreateSamplerState						= 1119;
 	const Result		CouldNotCreateVertexShaderMatConstBuffer		= 1120;
 	const Result		CouldNotCreatePixelShaderLightConstBuffer		= 1121;
 	const Result		CouldNotObtainShaderBufferLock					= 1122;
@@ -74,7 +74,7 @@ namespace ErrorCodes {
 	const Result		CouldNotEnumerateAdapterDisplayModes			= 1129;
 	const Result		CouldNotDetermineAdapterDescription				= 1130;
 	const Result		CouldNotConvertAndStoreAdapterDescData			= 1131;
-	const Result		CouldNotCreateD3DDeviceAndSwapChain				= 1132;
+	const Result		CouldNotCreateSwapChain							= 1132;
 	const Result		CouldNotObtainPointerToBackBuffer				= 1133;
 	const Result		CouldNotCreateRenderTargetView					= 1134;
 	const Result		CouldNotCreateDepthBufferTextture				= 1135;
@@ -293,6 +293,14 @@ namespace ErrorCodes {
 	const Result		CouldNotAllocateMemoryForRenderQueue			= 1348;
 	const Result		CouldNotCreateEffectManager						= 1349;
 	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1350;
+	const Result		CannotDeserializeModel							= 1351;
+	const Result		CannotCompileModel								= 1352;
+	const Result		InvalidShaderReferenceProvidedForInitialisation = 1353;
+	const Result		CannotLoadShaderFromFile						= 1354;
+	const Result		CannotLoadDuplicateShaderResource				= 1355;
+	const Result		CannotFindTextureResource						= 1356;
+	const Result		CouldNotInitialiseEffectManager					= 1357;
+	const Result		CannotInitialiseLightingManager					= 1358;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;
@@ -310,8 +318,13 @@ namespace ErrorCodes {
 	const Result		ReceivedNullParticleEmitterKey					= 1510;
 	const Result		CouldNotCreateParticleEngine					= 1511;
 	const Result		CannotLinkAllRequiredShadersToParticleEngine	= 1512;
-	
-	
+	const Result		ShaderValidationFailed							= 1513;
+	const Result		CannotLocateShader								= 1514;
+	const Result		CannotPreInitialiseShaderParameter				= 1515;
+	const Result		CouldNotReloadAndRecompileShader				= 1516;
+	const Result		CannotReloadMaterialWhichDoesNotExist			= 1517;
+	const Result		CannotReloadMaterialWithoutSourceFilename		= 1518;
+
 
 	// External data read/write errors									(2000-2199)
 	const Result		FileDoesNotExist								= 2000;
@@ -431,6 +444,20 @@ namespace ErrorCodes {
 	const Result		CannotLoadHardpointDataFromNullResources		= 2691;
 	const Result		CouldNotLoadUnrecognisedHardpointProperty		= 2692;
 	const Result		HardpointElementMissingRequiredAttributes		= 2693;
+	const Result		CannotLoadMaterialWithNullData					= 2694;
+	const Result		CannotLoadMaterialWithoutCode					= 2695;
+	const Result		CannotCreateMaterialAsset						= 2696;
+	const Result		CannotLoadTextureWithNullData					= 2697;
+	const Result		CannotLoadTextureWithMissingData				= 2698;
+	const Result		CannotInstantiateTexture						= 2699;
+	const Result		CannotLoadTextureResources						= 2700;
+	const Result		CannotLoadNullFontData							= 2701;
+	const Result		CannotLoadFontWithMissingData					= 2702;
+	const Result		ModelDoesNotExist								= 2703;
+	const Result		CannotLoadFromNullDataNode						= 2704;
+	const Result		CannotReloadObjectWithMissingCode				= 2705;
+	const Result		CannotReloadObjectWithUnrecognisedCode			= 2706;
+
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

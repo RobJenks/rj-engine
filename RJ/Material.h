@@ -1,30 +1,43 @@
 #pragma once
 
-#ifndef __MaterialH__
-#define __MaterialH__
+#include "CompilerSettings.h"
 
-#include "Data\\Shaders\\material_definition.h"
 
 class Material
 {
 public:
 
-	// Maximum number of materials that can be rendered in one pass
-	static const unsigned int	MATERIAL_LIMIT;
+	// Custom type for material ID
+	typedef unsigned int		MaterialID;				
 
-	// Material data; held in structure common to both cpp and hlsl builds
-	MaterialData				Data;
+	// Texture indices.  Texture resources will be bound to these registers in all shader programs, if they exist
+	enum class TextureType
+	{
+		Ambient = 0, 
+		Emissive = 1, 
+		Diffuse = 2,
+		Specular = 3,
+		SpecularPower = 4,
+		Normal = 5, 
+		Bump = 6,
+		Opacity = 7,
 
+		TEXTURE_TYPE_COUNT = 8
+	};
 
-	// Default constructor
 	Material(void);
-
-	// Default destructor
 	~Material(void);
+
+	CMPINLINE MaterialID		GetID(void) const { return m_id; }
+	void						AssignNewUniqueID(void);
+
+protected:
+
+private:
+
+	// Unique material ID
+	MaterialID					m_id; 
+	static MaterialID			GlobalMaterialIDCount;	// Monotonically-increasing ID counter for material objects
+	CMPINLINE static MaterialID NewID(void) { return ++GlobalMaterialIDCount; }
+
 };
-
-
-
-#endif
-
-

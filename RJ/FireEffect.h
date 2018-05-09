@@ -4,7 +4,7 @@
 #define __FireEffectH__
 
 #include "EffectBase.h"
-#include "Texture.h"
+class TextureDX11;
 
 
 
@@ -18,11 +18,9 @@ public:
 
 	Result Initialise(void);
 
-	void Shutdown(void);
-
-	Result	SetFireTexture(const char *texture);
-	Result	SetNoiseTexture(const char *texture);
-	Result	SetAlphaTexture(const char *texture);
+	Result	SetFireTexture(const std::string & texture);
+	Result	SetNoiseTexture(const std::string & texture);
+	Result	SetAlphaTexture(const std::string & texture);
 	void	SetScrollSpeeds(const XMFLOAT3 &scrollspeed);
 	void	SetScaling(const XMFLOAT3 &scaling);
 	void	SetDistortionParameters1(const XMFLOAT2 &distortion);
@@ -31,9 +29,9 @@ public:
 	void	SetDistortionScale(float dscale);
 	void	SetDistortionBias(float dbias);
 
-	CMPINLINE ID3D11ShaderResourceView		*GetFireTexture(void) { return m_firetexture->GetTexture(); }
-	CMPINLINE ID3D11ShaderResourceView		*GetNoiseTexture(void) { return m_noisetexture->GetTexture(); }
-	CMPINLINE ID3D11ShaderResourceView		*GetAlphaTexture(void) { return m_alphatexture->GetTexture(); }
+	ID3D11ShaderResourceView *				 GetFireTexture(void);
+	ID3D11ShaderResourceView *				 GetNoiseTexture(void);
+	ID3D11ShaderResourceView *				 GetAlphaTexture(void);
 	CMPINLINE XMFLOAT3						 GetScrollSpeeds(void) { return m_scrollspeeds; }
 	CMPINLINE XMFLOAT3						 GetScaling(void) { return m_scaling; }
 	CMPINLINE XMFLOAT2						 GetDistortionParameters1(void) { return m_distortion1; }
@@ -46,9 +44,9 @@ public:
 
 
 private:
-	Texture							*m_firetexture;
-	Texture							*m_noisetexture;
-	Texture							*m_alphatexture;
+	TextureDX11 * 					 m_firetexture;
+	TextureDX11 *					 m_noisetexture;
+	TextureDX11 *					 m_alphatexture;
 	XMFLOAT3						 m_scrollspeeds;
 	XMFLOAT3						 m_scaling;
 	XMFLOAT2						 m_distortion1; 

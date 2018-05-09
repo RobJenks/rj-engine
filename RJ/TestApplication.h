@@ -8,6 +8,7 @@
 #include "EnvironmentMapTests.h"
 #include "SequenceGenerationTests.h"
 #include "DataPortTests.h"
+#include "CompoundElementModelTests.h"
 
 #define RUN(test) { tester.Run<test>();}
 
@@ -30,6 +31,7 @@ public:
 		RUN(EnvironmentMapTests);
 		tester.Run<SequenceGenerationTests>();
 		tester.Run<DataPortTests>();
+		tester.Run<CompoundElementModelTests>();
 			
 
 

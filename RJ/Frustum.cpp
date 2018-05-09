@@ -54,7 +54,7 @@ Frustum::Frustum(const size_t frustum_side_count, const FXMVECTOR near_plane, co
 
 // Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
 // Generally only applicable for the primary view frustum
-Result XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, const float far_plane_distance, const float FOV, const float aspect)
+Result RJ_XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, const float far_plane_distance, const float FOV, const float aspect)
 {
 	// Calculate the minimum z distance in the frustrum and generate a frustrum-specific proj
 	XMFLOAT4X4 fproj;
@@ -81,7 +81,7 @@ void Frustum::CopyViewFrustumData(const Frustum & view_frustum)
 // Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
 // Note frustum must have either been initialised as a view frustum via InitialiseAsViewFrustum, or must have copied relevant data from 
 // a valid view frustum via CopyViewFrustumData, before it can construct a valid frustum from view data
-void XM_CALLCONV Frustum::ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
+void RJ_XM_CALLCONV Frustum::ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
 {
 	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix
 	XMFLOAT4X4 matrix;

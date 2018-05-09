@@ -4,14 +4,17 @@
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
 #include "Logging.h"
-#include "D3DMain.h"
 #include "RJMain.h"
+#include "DeferredRenderProcess.h"
+#include "UIRenderProcess.h"
 #include "Profiler.h"
 #include "FrameProfiler.h"
 #include "Timers.h"
 #include "CameraClass.h"
+#include "TextureDX11.h"
 #include "InputLayoutDesc.h"
 #include "LightingManagerObject.h"
+#include "ShaderFlags.h"
 #include "LightShader.h"
 #include "LightFadeShader.h"
 #include "LightHighlightShader.h"
@@ -24,6 +27,8 @@
 #include "Light.h"
 #include "Frustum.h"
 #include "BoundingObject.h"
+#include "MaterialDX11.h"
+#include "PipelineStateDX11.h"
 #include "FontShader.h"
 #include "AudioManager.h"
 #include "TextManager.h"
@@ -76,44 +81,49 @@
 
 #include "CoreEngine.h"
 
+// Forward declare allowed instances of render queue processing
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderNonTransparent>(PipelineStateDX11*);
+
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderUI, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
 
 // Default constructor
 CoreEngine::CoreEngine(void)
 	:
-	m_rq_optimiser(m_renderqueue)
+	m_renderdevice(NULL),
+	m_rq_optimiser(m_renderqueue), 
+	m_camera(NULL),
+	m_lightshader(NULL),
+	m_lightfadeshader(NULL),
+	m_lighthighlightshader(NULL),
+	m_lighthighlightfadeshader(NULL),
+	m_particleshader(NULL),
+	m_textureshader(NULL),
+	m_texcubeshader(NULL),
+	m_frustrum(NULL),
+	m_textmanager(NULL),
+	m_fontshader(NULL),
+	m_fireshader(NULL),
+	m_skinnedshader(NULL),
+	m_vollineshader(NULL),
+	m_audiomanager(NULL), 
+	m_effectmanager(NULL),
+	m_particleengine(NULL),
+	m_render2d(NULL),
+	m_overlayrenderer(NULL),
+	m_instancebuffer(NULL),
+	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
+	m_hwnd( NULL ),
+	m_vsync( false ), 
+	m_render_device_failure_count(0U)
 {
-	// Reset all component pointers to NULL, in advance of initialisation
-	m_D3D = NULL;
-	m_camera = NULL;
-	m_lightshader = NULL;
-	m_lightfadeshader = NULL;
-	m_lighthighlightshader = NULL;
-	m_lighthighlightfadeshader = NULL;
-	m_particleshader = NULL;
-	m_textureshader = NULL;
-	m_texcubeshader = NULL;
-	m_frustrum = NULL;
-	m_textmanager = NULL;
-	m_fontshader = NULL;
-	m_fireshader = NULL;
-	m_skinnedshader = NULL;
-	m_vollineshader = NULL;
-	m_effectmanager = NULL;
-	m_particleengine = NULL;
-	m_render2d = NULL;
-	m_overlayrenderer = NULL;
-	m_instancebuffer = NULL;
+	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
 	m_debug_portal_debugrender = m_debug_portal_debuglog = false;
 	m_debug_portal_render_initial_frustum = NULL;
 	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
-	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
-
-	// Set default values for game engine parameters
-	m_hwnd = NULL;
-	m_vsync = false;
 
 	// Initialise all render stage flags to true at startup
 	m_renderstages = std::vector<bool>(CoreEngine::RenderStage::Render_STAGECOUNT, true);
@@ -121,15 +131,15 @@ CoreEngine::CoreEngine(void)
 	// Initialise all special render flags at startup
 	m_renderflags = std::vector<bool>(CoreEngine::RenderFlag::_RFLAG_COUNT, false);
 
-	// Set pre-populated parameter values for render-time efficiency
-	m_current_modelbuffer = NULL;
+	// Initialise miscellaneous cached data
 	m_instanceparams = NULL_FLOAT4;
+	m_unit_quad_model = NULL;
 
 	// Initialise all key matrices to the identity
-	r_view = r_projection = r_orthographic = r_invview = r_viewproj = r_invviewproj = m_projscreen 
+	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
 		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
-	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
-
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
+	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
 	
@@ -143,6 +153,8 @@ CoreEngine::CoreEngine(void)
 Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 { 
 	Result res;
+
+	m_hwnd = hwnd;
 
 	// Initialise each component in turn; in case of failure, attempt to roll back anything possible and return an error
 	Game::Log << "\n" << LOG_INFO << "Beginning initialisation of game engine\n";
@@ -163,111 +175,46 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "DX Math initialised\n";
 
-	// Initialise the Direct3D component
-	res = InitialiseDirect3D(hwnd);
+	// Initialise shader support data
+	res = InitialiseShaderSupport();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Direct3D initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader support data initialised\n";
+
+	// Initialise the render device component
+	res = InitialiseRenderDevice(hwnd);
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Render device initialisation complete\n";
 
 	// Initialise the camera component
 	res = InitialiseCamera();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Camera initialised\n";
 
-	// Initialise the lighting manager
-	res = InitialiseLightingManager();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Lighting manager initialised\n";
-
-	// Initialise shader support data
-	res = InitialiseShaderSupport();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader support data initialised\n";
-
-	// Initialise the light shader
-	res = InitialiseLightShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light] initialisation complete\n";
-
-	// Initialise the light/fade shader
-	res = InitialiseLightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light fade] initialisation complete\n";
-
-	// Initialise the light/highlight shader
-	res = InitialiseLightHighlightShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light highlight] initialisation complete\n";
-
-	// Initialise the light/highlight/fade shader
-	res = InitialiseLightHighlightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light highlight fade] initialisation complete\n";
-
-	// Initialise the light(flat)/highlight/fade shader
-	res = InitialiseLightFlatHighlightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light flat highlight fade] initialisation complete\n";
-
-	// Initialise the particle shader
-	res = InitialiseParticleShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Particle] initialisation complete\n";
-
-	// Initialise the texture shader
-	res = InitialiseTextureShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Texture] initialisation complete\n";
-
 	// Initialise the view frustrum
 	res = InitialiseFrustrum();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "View frustum created\n";
-
-	// Initialise the font shader
-	res = InitialiseFontShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Font] initialisation complete\n";
 
 	// Initialise the audio manager
 	res = InitialiseAudioManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Audio manager initialisation complete\n";
 
+	// Initialise the lighting manager
+	res = InitialiseLightingManager();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Lighting manager initialisation complete\n";
+
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Text rendering initialised\n";
-
-	// Initialise all game fonts
-	res = InitialiseFonts();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Font initialisation complete\n";
-
-	// Initialise the texcube shader
-	res = InitialiseTexcubeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Texcube] initialisation complete\n";
-
-	// Initialise the fire shader
-	res = InitialiseFireShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Fire] initialisation complete\n";
 
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Effect manager initialised\n";
 
-	// Initialise the skinned normal map shader
-	res = InitialiseSkinnedNormalMapShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Skinned normal map] initialisation complete\n";
-
-	// Initialise the volumetric line shader
-	res = InitialiseVolLineShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Volumetric line] initialisation complete\n";
-	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -293,42 +240,70 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Environment rendering initialised\n";
 
+	// Activate the required render processes for this configuration
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>();
+	Game::Engine->GetRenderDevice()->ActivateUIRenderProcess<UIRenderProcess>();
 
 	// If we succeed in all initialisation functions then return success now
 	Game::Log << LOG_INFO << "All game engine initialisation completed successfully\n\n";
 	return ErrorCodes::NoError;
 }
 
+// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+Result CoreEngine::PerformPostDataLoadInitialisation(void)
+{
+	// Perform post-load initialisation for the core engine itself
+	PerformInternalEnginePostDataLoadInitialisation();
+
+	// Perform post-load initialisation for all sub-components which require it
+	GetRenderDevice()->PerformPostDataLoadInitialisation();
+	GetEffectManager()->PerformPostDataLoadInitialisation();
+	GetOverlayRenderer()->PerformPostDataLoadInitialisation();
+
+	return ErrorCodes::NoError;
+}
+
+// Post-data load initialisation for the core engine component itself
+Result CoreEngine::PerformInternalEnginePostDataLoadInitialisation(void)
+{
+	Result result = ErrorCodes::NoError;
+
+	// Load all required model geometry
+	std::vector<std::tuple<std::string, std::string, Model**>> models = {
+		{ "unit quad", "unit_square_model", &m_unit_quad_model }
+	};
+
+	for (auto & model : models)
+	{
+		Model *m = Model::GetModel(std::get<1>(model));
+		if (!m)
+		{
+			Game::Log << LOG_ERROR << "Could not load " << std::get<0>(model) << " model (\"" << std::get<1>(model) << "\") during deferred render process initialisation\n";
+			result = ErrorCodes::ModelDoesNotExist;
+		}
+
+		*(std::get<2>(model)) = m;
+	}
+
+	return result;
+}
+
 void CoreEngine::ShutdownGameEngine()
 {
 	// Run the termination function for each component
-	ShutdownLightShader();
-	ShutdownLightFadeShader();
-	ShutdownLightHighlightShader();
-	ShutdownLightHighlightFadeShader();
-	ShutdownLightFlatHighlightFadeShader();
-	ShutdownParticleShader();
-	ShutdownTextureShader();
 	ShutdownCamera();
-	ShutdownLightingManager();
 	ShutdownShaderSupport();
 	ShutdownFrustrum();
 	ShutdownAudioManager();
 	ShutdownTextRendering();
-	ShutdownFontShader();
-	ShutdownFonts();
-	ShutdownTexcubeShader();
-	ShutdownFireShader();
 	ShutdownEffectManager();
-	ShutdownSkinnedNormalMapShader();
-	ShutdownVolLineShader();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
 	ShutdownOverlayRenderer();
 	ShutdownRenderQueue();
 	ShutdownEnvironmentRendering();
 	ShutdownTextureData();
-	ShutdownDirect3D();
+	ShutdownRenderDevice();
 }
 
 Result CoreEngine::InitialiseRenderFlags(void)
@@ -339,18 +314,15 @@ Result CoreEngine::InitialiseRenderFlags(void)
 	return ErrorCodes::NoError;
 }
 
-Result CoreEngine::InitialiseDirect3D(HWND hwnd)
+Result CoreEngine::InitialiseRenderDevice(HWND hwnd)
 {
-	// Store key window parameters
-	m_hwnd = hwnd; 
+	// Attempt to create the render device object.
+	m_renderdevice = new RenderDeviceDX11();
+	if ( !m_renderdevice ) return ErrorCodes::CannotCreateRenderDevice;
 
-	// Attempt to create the Direct3D object.
-	m_D3D = new D3DMain();
-	if ( !m_D3D ) return ErrorCodes::CannotCreateDirect3DDevice;
-
-	// Initialise the Direct3D object.
-	Result result = m_D3D->Initialise(Game::ScreenWidth, Game::ScreenHeight, m_vsync, m_hwnd, Game::FullScreen, 
-									  SCREEN_DEPTH, SCREEN_NEAR);
+	// Perform all render engine initialisation
+	Result result = m_renderdevice->Initialise(	hwnd, INTVECTOR2(Game::ScreenWidth, Game::ScreenHeight), Game::FullScreen, 
+												Game::VSync, Game::NearClipPlane, Game::FarClipPlane);
 	return result;
 }
 
@@ -372,40 +344,16 @@ Result CoreEngine::InitialiseDirectXMath(void)
 
 Result CoreEngine::InitialiseRenderQueue(void)
 {
-	D3D11_BUFFER_DESC ibufdesc;
-	D3D11_SUBRESOURCE_DATA ibufdata;
-
-	// Create a new empty instance stream, for initialisation of the buffer
-	RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
-	if (!idata) return ErrorCodes::CouldNotAllocateMemoryForRenderQueue;
-	memset(idata, 0, Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
-
-	// Create the instance buffer description
-	ibufdesc.Usage = D3D11_USAGE_DYNAMIC;
-	ibufdesc.ByteWidth = sizeof(RM_Instance) * Game::C_INSTANCED_RENDER_LIMIT;
-	ibufdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	ibufdesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	ibufdesc.MiscFlags = 0;
-	ibufdesc.StructureByteStride = 0;
-
-	// Link the subresource object to the initial empty instance stream
-	ibufdata.pSysMem = idata;
-	ibufdata.SysMemPitch = 0;
-	ibufdata.SysMemSlicePitch = 0;
-
-	// Create the instance buffer
-	HRESULT hr = m_D3D->GetDevice()->CreateBuffer(&ibufdesc, &ibufdata, &m_instancebuffer);
-	if (FAILED(hr)) return ErrorCodes::CouldNotInitialiseInstanceBuffer;
-
-	// Release memory used to initialise the instance buffer
-	free(idata); idata = NULL;
+	// Create the instance buffer that will be reused by the render queue for all rendering
+	// This must be a DYNAMIC vertex buffer since we will be re-mapping instance data multiple times every frame
+	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", static_cast<UINT>(Game::C_INSTANCED_RENDER_LIMIT), true);
 
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB
-	m_instancedbuffers[1] = m_instancebuffer;		
+	m_instancedbuffers[1] = m_instancebuffer->GetCompiledBuffer();	// Buffer[1] is the instance buffer
 	m_instancedstride[0] = 0U;										// Stride[0] will be populated with the model-specific vertex size
-	m_instancedstride[1] = sizeof(RM_Instance);
-	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;
+	m_instancedstride[1] = sizeof(RM_Instance);						// Buffer[1] is the instance buffer
+	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;				// No offsets in either buffer
 
 	// Initialise the render queue with a blank map for each shader in scope
 	m_renderqueue = RenderQueue(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
@@ -413,28 +361,41 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
+
+	m_renderqueueshaders[RenderQueueShader::RM_OrthographicTexture] =
+		RM_InstancedShaderDetails((iShader*)NULL, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeUI);
+
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFlatHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal,
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	
+		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
-		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 
 	// TODO: DEBUG: Remove variants on the light shader
 	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];*/
+
+	// Initialise render queue slots with this data
+	// TODO: a little redundant to have both...?
+	for (int i = 0; i < (int)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		m_renderqueue[i].SetShaderDetails(m_renderqueueshaders[i]);
+	}
+
+
+	// Set an initial primitive topology as a default
+	// TODO: Temporary fix for actual problem: if RenderInstanced was called before ProcessRenderQueue, no topology had been set and 
+	// engine failed with D3D exception.  In general, should not rely on this being set only by render queue.  Should perhaps be set
+	// as part of pipeline binding?
+	r_devicecontext = m_renderdevice->GetDeviceContext();
+	ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -462,161 +423,12 @@ Result CoreEngine::InitialiseCamera(void)
 
 }
 
-Result CoreEngine::InitialiseLightingManager(void)
-{
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 Result CoreEngine::InitialiseShaderSupport(void)
 {
 	// Initialise all standard vertex input layouts
 	InputLayoutDesc::InitialiseStaticData();
 
 	// Returns success
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseLightShader(void)
-{
-	// Create the light shader object.
-	m_lightshader = new LightShader();
-	if(!m_lightshader)
-	{
-		return ErrorCodes::CouldNotCreateLightShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseLightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lightfadeshader = new LightFadeShader();
-	if(!m_lightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightHighlightShader(void)
-{
-	// Create the light shader object.
-	m_lighthighlightshader = new LightHighlightShader();
-	if(!m_lighthighlightshader)
-	{
-		return ErrorCodes::CouldNotCreateLightHighlightShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lighthighlightshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightHighlightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lighthighlightfadeshader = new LightHighlightFadeShader();
-	if (!m_lighthighlightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightHighlightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lighthighlightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightFlatHighlightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lightflathighlightfadeshader = new LightFlatHighlightFadeShader();
-	if (!m_lightflathighlightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightFlatHighlightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightflathighlightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseParticleShader(void)
-{
-	// Create the particle shader object
-	m_particleshader = new ParticleShader();
-	if (!m_particleshader)
-	{
-		return ErrorCodes::CouldNotCreateParticleShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_particleshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseTextureShader(void)
-{
-	// Create the texture shader object
-	m_textureshader = new TextureShader();
-	if (!m_textureshader)
-	{
-		return ErrorCodes::CouldNotCreateTextureShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_textureshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
 	return ErrorCodes::NoError;
 }
 
@@ -627,32 +439,10 @@ Result CoreEngine::InitialiseFrustrum()
 	if (!m_frustrum) return ErrorCodes::CannotCreateViewFrustrum;
 	
 	// Run the initialisation function with viewport/projection data that can be precaulcated
-	Result res = m_frustrum->InitialiseAsViewFrustum(m_D3D->GetProjectionMatrix(), SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
+	Result res = m_frustrum->InitialiseAsViewFrustum(m_renderdevice->GetProjectionMatrix(), Game::FarClipPlane, m_renderdevice->GetFOV(), m_renderdevice->GetAspectRatio());
 	if (res != ErrorCodes::NoError) return res;	
 
 	// Return success if the frustrum was created
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseFontShader(void)
-{
-	Result result;
-
-	// Create the font shader object.
-	m_fontshader = new FontShader();
-	if(!m_fontshader)
-	{
-		return ErrorCodes::CannotCreateFontShader;
-	}
-
-	// Initialize the font shader object.
-	result = m_fontshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
 }
 
@@ -679,6 +469,17 @@ Result CoreEngine::InitialiseAudioManager(void)
 
 }
 
+Result CoreEngine::InitialiseLightingManager(void)
+{
+	LightingManager = new LightingManagerObject();
+	if (!LightingManager)
+	{
+		return ErrorCodes::CannotInitialiseLightingManager;
+	}
+
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseTextRendering(void)
 {
 	Result result;
@@ -691,8 +492,7 @@ Result CoreEngine::InitialiseTextRendering(void)
 	}
 
 	// Now attempt to initialise the text rendering object
-	result = m_textmanager->Initialize(	m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, 
-										Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
+	result = m_textmanager->Initialize(m_hwnd, Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -701,65 +501,6 @@ Result CoreEngine::InitialiseTextRendering(void)
 	// Return success
 	return ErrorCodes::NoError;
 
-}
-
-Result CoreEngine::InitialiseFonts(void)
-{
-	Result result;
-
-	// Make sure the text manager has been successfully initialised first
-	if (!m_textmanager) return ErrorCodes::CannotInitialiseFontsWithoutTextManager;
-
-	// Initialise each font in turn from its data file and composite texture
-	// TODO: To be loaded from external file?  How to set Game::Fonts::* IDs?
-	result = m_textmanager->InitializeFont(	"Font_Basic1", 
-											concat(D::DATA)("/Fonts/font_basic1.txt").str().c_str(), 
-											concat(D::IMAGE_DATA)("/Fonts/font_basic1.dds").str().c_str(), 
-											Game::Fonts::FONT_BASIC1);
-	if (result != ErrorCodes::NoError) return result;
-
-	// Return success when all fonts are loaded
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseTexcubeShader(void)
-{
-	// Create the texture shader object
-	m_texcubeshader = new TexcubeShader();
-	if (!m_texcubeshader)
-	{
-		return ErrorCodes::CouldNotCreateTexcubeShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_texcubeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseFireShader(void)
-{
-	// Create the fire shader object
-	m_fireshader = new FireShader();
-	if (!m_fireshader)
-	{
-		return ErrorCodes::CouldNotCreateFireShader;
-	}
-
-	// Initialise the fire shader
-	Result result = m_fireshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
 }
 
 Result CoreEngine::InitialiseEffectManager(void)
@@ -774,7 +515,7 @@ Result CoreEngine::InitialiseEffectManager(void)
 	}
 
 	// Initialise the effect manager
-	result = m_effectmanager->Initialise(m_D3D->GetDevice());
+	result = m_effectmanager->Initialise(GetDevice());
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -791,61 +532,13 @@ Result CoreEngine::InitialiseEffectManager(void)
 	return ErrorCodes::NoError;
 }
 
-Result CoreEngine::InitialiseSkinnedNormalMapShader(void)
-{
-	// Create a new instance of the shader object
-	m_skinnedshader = new SkinnedNormalMapShader();
-	if (!m_skinnedshader)
-	{
-		return ErrorCodes::CannotCreateSkinnedNormalMapShader;
-	}
-
-	// Now attempt to initialise the shader
-	Result result = m_skinnedshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseVolLineShader(void)
-{
-	// Initialise the static data used in volumetric line rendering
-	Result result = VolLineShader::InitialiseStaticData(GetDevice());
-	if (result != ErrorCodes::NoError) return result;
-
-	// Create a new instance of the shader object
-	m_vollineshader = new VolLineShader();
-	if (!m_vollineshader)
-	{
-		return ErrorCodes::CannotCreateVolumetricLineShader;
-	}
-
-	// Now attempt to initialise the shader
-	result = m_vollineshader->Initialise(m_D3D->GetDevice(), XMFLOAT2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
-										 m_frustrum->GetNearClipPlaneDistance(), m_frustrum->GetFarClipPlaneDistance());
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 Result CoreEngine::InitialiseParticleEngine(void)
 {
 	Result result;
 
 	// Create the particle engine object
 	m_particleengine = new ParticleEngine();
-	if (!m_particleengine)
-	{
-		return ErrorCodes::CouldNotCreateParticleEngine;
-	}
+	if (!m_particleengine) return ErrorCodes::CouldNotCreateParticleEngine;
 
 	// Attempt to initialise the particle engine
 	result = m_particleengine->Initialise();
@@ -875,7 +568,7 @@ Result CoreEngine::Initialise2DRenderManager(void)
 	}
 
 	// Now attempt to initialise the render manager
-	Result result = m_render2d->Initialise(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, 
+	Result result = m_render2d->Initialise(GetDevice(), GetDeviceContext(), m_hwnd, 
 										   Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix);
 	if (result != ErrorCodes::NoError)
 	{
@@ -918,33 +611,25 @@ Result CoreEngine::InitialiseEnvironmentRendering(void)
 }
 
 
-void CoreEngine::ShutdownDirect3D(void)
+void CoreEngine::ShutdownRenderDevice(void)
 {
-	// Attempt to release the Direct3D component
-	if ( m_D3D )
+	// Render engine destructor will release all related resources and centrally-maintained 
+	// components (shaders, states, buffers).  Should therefore be terminated late
+	if ( m_renderdevice )
 	{
-		m_D3D->Shutdown();
-		SafeDelete(m_D3D);
+		SafeDelete(m_renderdevice);
 	}
 }
 
 void CoreEngine::ShutdownRenderQueue(void)
 {
-	// Release any resources currently reserved by the render queue
-	DeallocateRenderingQueue();
-
-	// Free all resources held by the instance buffer
-	if ( m_instancebuffer )
-	{
-		m_instancebuffer->Release(); 
-		m_instancebuffer = NULL;
-	}
+	// Free all resources that are not automatically deallocated
 }
 
 void CoreEngine::ShutdownTextureData(void)
 {	
 	// Shutdown all texture data in the static global collection
-	Texture::ShutdownAllTextureData();
+	TextureDX11::ShutdownGlobalTextureCollection();
 }
 
 void CoreEngine::ShutdownCamera(void)
@@ -956,82 +641,9 @@ void CoreEngine::ShutdownCamera(void)
 	}
 }
 
-void CoreEngine::ShutdownLightingManager(void)
-{
-	// Nothing required
-}
-
 void CoreEngine::ShutdownShaderSupport(void)
 {
 	// Nothing required
-}
-
-void CoreEngine::ShutdownLightShader(void)
-{
-	// Release the light shader object.
-	if(m_lightshader)
-	{
-		m_lightshader->Shutdown();
-		SafeDelete(m_lightshader);
-	}
-}
-
-void CoreEngine::ShutdownLightFadeShader(void)
-{
-	// Release the light shader object.
-	if(m_lightfadeshader)
-	{
-		m_lightfadeshader->Shutdown();
-		SafeDelete(m_lightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownLightHighlightShader(void)
-{
-	// Release the light shader object.
-	if(m_lighthighlightshader)
-	{
-		m_lighthighlightshader->Shutdown();
-		SafeDelete(m_lighthighlightshader);
-	}
-}
-
-void CoreEngine::ShutdownLightHighlightFadeShader(void)
-{
-	// Release the light shader object.
-	if (m_lighthighlightfadeshader)
-	{
-		m_lighthighlightfadeshader->Shutdown();
-		SafeDelete(m_lighthighlightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownLightFlatHighlightFadeShader(void)
-{
-	// Release the light shader object.
-	if (m_lightflathighlightfadeshader)
-	{
-		m_lightflathighlightfadeshader->Shutdown();
-		SafeDelete(m_lightflathighlightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownParticleShader(void)
-{
-	if (m_particleshader)
-	{
-		m_particleshader->Shutdown();
-		SafeDelete(m_particleshader);
-	}
-}
-
-void CoreEngine::ShutdownTextureShader(void)
-{
-	if (m_textureshader)
-	{
-		m_textureshader->Shutdown();
-		SafeDelete(m_textureshader);
-	}
 }
 
 void CoreEngine::ShutdownFrustrum(void)
@@ -1053,6 +665,15 @@ void CoreEngine::ShutdownAudioManager(void)
 	}
 }
 
+void CoreEngine::ShutdownLightingManager(void)
+{
+	// Release the lighting manager object
+	if (LightingManager)
+	{
+		SafeDelete(LightingManager);
+	}
+}
+
 void CoreEngine::ShutdownTextRendering(void)
 {
 	// Release the text manager object.
@@ -1063,67 +684,12 @@ void CoreEngine::ShutdownTextRendering(void)
 	}
 }
 
-void CoreEngine::ShutdownFontShader(void)
-{
-	// Release the font shader object.
-	if(m_fontshader)
-	{
-		m_fontshader->Shutdown();
-		SafeDelete(m_fontshader);
-	}
-}
-
-void CoreEngine::ShutdownTexcubeShader(void)
-{
-	if (m_texcubeshader)
-	{
-		m_texcubeshader->Shutdown();
-		SafeDelete(m_texcubeshader);
-	}
-}
-
-void CoreEngine::ShutdownFireShader(void)
-{
-	if (m_fireshader)
-	{
-		m_fireshader->Shutdown();
-		SafeDelete(m_fireshader);
-	}
-}
-
-void CoreEngine::ShutdownFonts(void)
-{
-	// No actions to be taken; fonts are deallocated as part of the text manager shutdown
-}
-
 void CoreEngine::ShutdownEffectManager(void)
 {
 	if (m_effectmanager)
 	{
 		m_effectmanager->Shutdown();
 		SafeDelete(m_effectmanager);
-	}
-}
-
-void CoreEngine::ShutdownSkinnedNormalMapShader(void)
-{
-	if (m_skinnedshader)
-	{
-		m_skinnedshader->Shutdown();
-		SafeDelete(m_skinnedshader);
-	}
-}
-
-void CoreEngine::ShutdownVolLineShader(void)
-{
-	// Deallocate all static data
-	VolLineShader::ShutdownStaticData();
-
-	// Deallocate the shader itself and any remaining resources
-	if (m_vollineshader)
-	{
-		m_vollineshader->Shutdown();
-		SafeDelete(m_vollineshader);
 	}
 }
 
@@ -1181,26 +747,20 @@ void CoreEngine::Render(void)
 	ResetRenderInfo();
 
 	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
-	r_devicecontext = m_D3D->GetDeviceContext();
-	m_D3D->GetProjectionMatrix(r_projection);
-	m_camera->GetViewMatrix(r_view);
-	m_camera->GetInverseViewMatrix(r_invview);
-	m_D3D->GetOrthoMatrix(r_orthographic);
-	r_viewproj = XMMatrixMultiply(r_view, r_projection);
-	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
-	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
-	r_invviewprojscreen = XMMatrixInverse(NULL, r_viewprojscreen);
-
-	// Store local float representations of each key matrix for runtime efficiency
-	XMStoreFloat4x4(&r_view_f, r_view);
-	XMStoreFloat4x4(&r_invview_f, r_invview);
-	XMStoreFloat4x4(&r_projection_f, r_projection);
-	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
-	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
-	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
-
-	// Validate render cycle parameters before continuing with the render process
-	if (!r_devicecontext) return;
+	RetrieveRenderCycleData();
+	
+	// Verify the render device is in a good state and report errors if not
+	if (GetRenderDevice()->VerifyState() == false)
+	{
+		++m_render_device_failure_count;
+		Game::Log << LOG_ERROR << "SEVERE: Render device failed state verification; frame skipped.  Failure " << m_render_device_failure_count << " of "
+			<< ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT << " allowable failure cases\n";
+		if (m_render_device_failure_count > ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT)
+		{
+			Game::Log << LOG_ERROR << "FATAL: Render device failures exceed allowable threshold; invoking application shutdown\n";
+			Game::Application.Quit();
+		}
+	}
 
 	// Run any pre-render debug processes
 #	ifdef _DEBUG
@@ -1210,84 +770,71 @@ void CoreEngine::Render(void)
 	// Construct the view frustrum for this frame so we can perform culling calculations
 	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
 
-	// Determine which system we are currently rendering
+	// Determine the lighting configuration visible in the current frame
+	LightingManager->AnalyseNewFrame();
+
+	/* Process the scene and populate the render queue (TODO: break out and add remainder; actors, particles, ...) */
 	SpaceSystem & system = Game::Universe->GetCurrentSystem();
-	
-	// Initialise the lighting manager for this frame
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Analysing frame lighting");
-	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
-	{
-		LightingManager.AnalyseNewFrame();
-	}
-	RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting);
+	RenderAllSystemObjects(system);
 
-	/*** Perform rendering that is common to all player environment & states ***/
+	/* Render all user interface components */
+	RenderUserInterface();
 
-	// Render the system region
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: System region");
-	if (RenderStageActive(RenderStage::Render_SystemRegion)) 
-		RenderSystemRegion();			// The system-wide rendering, e.g. space backdrop and scenery
+	/* Perform debug rendering */
+	RenderDebugData();
 
-	// Render the immmediate player region, e.g. localised space dust
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Immediate region");
-	if (RenderStageActive(RenderStage::Render_ImmediateRegion)) 
-		RenderImmediateRegion();
+	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
+	m_renderdevice->Render();
 
-	// Render all objects in the current system; simulation state & visibility will be taken 
-	// into account to ensure we only render those items that are necessary
-	{
-		// Render all objects
-		RJ_FRAME_PROFILER_CHECKPOINT("Render: System objects");
-		if (RenderStageActive(RenderStage::Render_SystemObjects))
-			RenderAllSystemObjects(system);
+	/* Present the scene once all rendering is complete */
+	m_renderdevice->PresentFrame();
 
-		// Render all visible basic projectiles
-		RJ_FRAME_PROFILER_CHECKPOINT("Render: Basic projectiles");
-		if (RenderStageActive(RenderStage::Render_BasicProjectiles))
-			RenderProjectileSet(system.Projectiles);
-	}
-
-	// Render effects and particle emitters
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Effects");
-	if (RenderStageActive(RenderStage::Render_Effects)) RenderEffects();
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Particles");
-	if (RenderStageActive(RenderStage::Render_ParticleEmitters)) RenderParticleEmitters();
-
-	// Perform all 2D rendering of text and UI components
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: User interface");
-	if (RenderStageActive(RenderStage::Render_UserInterface))
-		RenderUserInterface();	
-
-	// Perform any debug/special rendering 
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Debug data");
-	if (RenderStageActive(RenderStage::Render_DebugData))
-		RenderDebugData();
-
-	// Activate the render queue optimiser here if it is ready for its next cycle
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Optimising render queue");
+	// Activate the render queue optimiser here if it is ready for its next cycle, then clear the render queue ready for Frame+1
 	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
-
-	// Final activity: process all items queued for rendering.  Any item that benefits from instanced/batched geometry rendering is
-	// added to the render queue during the process above.  We now use instanced rendering on the entire render queue.  The more 
-	// high-volume items that can be moved to use instanced rendering the better
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Processing render queue");
-	ProcessRenderQueue();
-
+	ClearRenderQueue();
+	
 	// Run any post-render debug processes
 #	ifdef _DEBUG
 		RunPostRenderDebugProcesses();
 #	endif
 
 	// End the frame
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Ending frame");
-	LightingManager.EndFrame();
+	
 }
 
-// Submit a model buffer to the render queue manager for rendering this frame
-void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
+// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
+void CoreEngine::RetrieveRenderCycleData(void)
+{
+	r_devicecontext = m_renderdevice->GetDeviceContext();
+	m_camera->GetViewMatrix(r_view);
+	m_camera->GetInverseViewMatrix(r_invview);
+	r_projection = m_renderdevice->GetProjectionMatrix();
+	r_invproj = m_renderdevice->GetInverseProjectionMatrix();
+	r_orthographic = m_renderdevice->GetOrthoMatrix();
+	r_invorthographic = XMMatrixInverse(NULL, r_orthographic);
+	r_viewproj = XMMatrixMultiply(r_view, r_projection);
+	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
+	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
+	r_invviewprojscreen = XMMatrixInverse(NULL, r_viewprojscreen);
+
+	// Store local float representations of each key matrix for runtime efficiency
+	XMStoreFloat4x4(&r_view_f, r_view);
+	XMStoreFloat4x4(&r_invview_f, r_invview);
+	XMStoreFloat4x4(&r_projection_f, r_projection);
+	XMStoreFloat4x4(&r_invproj_f, r_invproj);
+	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
+	XMStoreFloat4x4(&r_invorthographic_f, r_invorthographic);
+	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
+	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
+}
+
+// Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
+// overrides any default material specified in the model buffer.  A material of NULL will use the default 
+// material in the model buffer
+void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance)
 {
 	// Exclude any null-geometry objects
-	if (!model || model->VertexBuffer == NULL) return;
+	if (!model) return;
 
 	// Retrieve the most appropriate render slot and move this instance into it
 	size_t render_slot = model->GetAssignedRenderSlot(shader);
@@ -1297,15 +844,15 @@ void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelB
 		m_renderqueue.RegisterModelBuffer(shader, render_slot, model);
 	}
 
-	m_renderqueue[shader].ModelData[render_slot].NewInstance(std::move(instance));
+	m_renderqueue[shader].ModelData[render_slot].GetInstances(material).NewInstance(std::move(instance));
 }
 
 // Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 // objects.  Performance overhead; should be used only where specifically required
-void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, CXMVECTOR position)
+void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, CXMVECTOR position)
 {
 	// Exclude any null-geometry objects
-	if (!model || model->VertexBuffer == NULL) return;
+	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;
 
 	// Determine the distance to this object so we can use it as a sort key
 	int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
@@ -1314,8 +861,166 @@ void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader,
 	m_renderqueueshaders[shader].SortedInstances.push_back(std::move(RM_ZSortedInstance(z, model, std::move(instance))));
 }
 
+// Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
+void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity, float zorder)
+{
+	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+	const XMFLOAT2 adjust = XMFLOAT2(Game::ScreenWidth * -0.5f, Game::ScreenHeight - (Game::ScreenHeight * 0.5f));
+
+	// Build a transform matrix based on the given screen-space properties
+	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(size.x, size.y, 1.0f),
+		XMMatrixRotationZ(rotation)),
+		XMMatrixTranslation(adjust.x + position.x + (size.x * 0.5f), adjust.y - (position.y + (size.y * 0.5f)), zorder));
+
+	// Delegate to the primary submission method
+	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material,
+		RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f)));;
+}
+
+
+// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
+// will be rendered through the given rendering pipeline
+template <class TShaderRenderPredicate, class TModelRenderPredicate>
+void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
+{
+	size_t model_count, material_count, instancecount, inst;
+	UINT batch_size;
+	TShaderRenderPredicate render_shader;
+	TModelRenderPredicate render_model;
+	ModelBuffer * modelbuffer;
+
+	if (!pipeline) return;
+
+	// Iterate through each shader in the render queue (though not currently required; all will be mapped to 0)
+	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		// Verfy against the shader rendering predicate before proceeding
+		RM_ModelDataCollection & rq_shader = m_renderqueue[i];
+		if (!render_shader(rq_shader)) continue;
+
+		// Early-exit for empty shader queues, before changing any state below
+		model_count = rq_shader.CurrentSlotCount;
+		if (model_count == 0U) continue;
+
+		// Set the type of primitive that should be rendered through this shader, if it needs to be changed
+		ChangePrimitiveTopologyIfRequired(rq_shader.PrimitiveTopology);
+
+		// Process each model separately
+		for (size_t mi = 0U; mi < model_count; ++mi)
+		{
+			// Early-exit if this model has no compiled geometry or fails the model rendering predicate
+			RM_ModelData & model = rq_shader.ModelData[mi];
+			modelbuffer = model.ModelBufferInstance;
+			if (!modelbuffer || !modelbuffer->VertexBuffer.GetCompiledBuffer()) continue;
+			if (!render_model(modelbuffer)) continue;
+
+			// Process each material that will be used to render the instances
+			material_count = model.CurrentMaterialCount;
+			for (size_t mat = 0U; mat < material_count; ++mat)
+			{
+				auto & model_data = model.Data[mat];
+
+				/// TODO: Sort instances here?
+
+				// Loop through the instances in batches, if the total count is larger than our limit
+				instancecount = model_data.InstanceCollection.CurrentInstanceCount;
+				for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
+				{
+					// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
+					batch_size = static_cast<UINT>(min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT));
+
+					// Pass control to the core instanced rendering method to issue a draw call
+					RenderInstanced(*pipeline, *modelbuffer, model_data.Material, model_data.InstanceCollection.InstanceData[inst], batch_size);
+
+				} /// per-instance
+
+			} /// per-material
+
+		} /// per-model
+
+	} /// per-shader
+
+}
+
+// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
+// invoked by other processes (e.g. for deferred light volume rendering).  A material can be supplied that will override
+// the material specified in the model buffer; a null material will fall back to the default model buffer material
+void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count)
+{
+	// Update the instance buffer by mapping, updating and unmapping the memory
+	m_instancebuffer->Set(&instance_data, static_cast<UINT>(sizeof(RM_Instance)) * instance_count);
+
+	// The render queue will take ownership for binding vertex buffers ({ vertices, instances}) so 
+	// that we can bind both to the shader in parallel.  m_instancedbuffers[1] = instancebuffer, so just 
+	// set [0] before binding
+	m_instancedbuffers[0] = model.VertexBuffer.GetCompiledBuffer();
+	m_instancedstride[0] = model.VertexBuffer.GetStride();
+	r_devicecontext->IASetVertexBuffers(0, 2, (ID3D11Buffer * const *)(&m_instancedbuffers[0]), m_instancedstride, m_instancedoffset);
+
+	// Set the model index buffer to active in the input assembler
+	r_devicecontext->IASetIndexBuffer(model.IndexBuffer.GetCompiledBuffer(), IndexBufferDX11::INDEX_FORMAT, 0U);
+
+	// Bind the model material, which will populate the relevant constant buffer and bind all required texture resources
+	// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
+	// Use override material if available, otherwise fall back to the model buffer material (which may also be null in [error] cases)
+	if (!material) material = model.Material;
+	if (material)
+	{
+		material->Bind(pipeline.GetShader(Shader::Type::VertexShader));
+		material->Bind(pipeline.GetShader(Shader::Type::PixelShader));
+	}
+
+	// Issue a draw call to the currently active render pipeline
+	r_devicecontext->DrawIndexedInstanced(model.IndexBuffer.GetIndexCount(), instance_count, 0U, 0, 0);
+
+	// Update the total count of draw calls & instances that have been processed
+	++m_renderinfo.DrawCalls; 
+	m_renderinfo.InstanceCount += instance_count;
+}
+
+// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
+// queue items multiple times through e.g. different shader pipelines
+void CoreEngine::ClearRenderQueue(void)
+{
+	// For each shader in the render queue
+	for (size_t i = 0U; i < (size_t)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		auto & modelqueue = m_renderqueue[i];
+		auto model_count = modelqueue.CurrentSlotCount;
+
+		// For each model being rendered by this shader
+		for (size_t mi = 0U; mi < model_count; ++mi)
+		{
+			// Unregister this model from the given render queue slot
+			m_renderqueue.UnregisterModelBuffer(i, mi);
+
+			// Reset the per-material data back to default state
+			m_renderqueue[i].ModelData[mi].Reset();
+		}
+
+		// Reset this render queue shader ready for the next frame
+		m_renderqueue[i].CurrentSlotCount = 0U;
+	}
+}
+
+void CoreEngine::ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology)
+{
+	r_devicecontext->IASetPrimitiveTopology(primitive_topology);
+	m_current_topology = primitive_topology;
+}
+
+void CoreEngine::ChangePrimitiveTopologyIfRequired(D3D_PRIMITIVE_TOPOLOGY primitive_topology)
+{
+	if (primitive_topology != GetCurrentPrimitiveTopology())
+	{
+		ChangePrimitiveTopology(primitive_topology);
+	}
+}
+
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
-RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
+/*RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 	std::vector<RM_Instance>::size_type instancecount, inst, n;
@@ -1377,12 +1082,12 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer;
-				m_instancedstride[0] = m_current_modelbuffer->GetVertexSize();
+				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer.GetCompiledBuffer();
+				m_instancedstride[0] = m_current_modelbuffer->VertexBuffer.GetStride();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (rq_shader.PrimitiveTopology != m_current_topology) 
@@ -1417,13 +1122,13 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 
 	// Return any render parameters to their default if required, to avoid any downstream impact
 	if (m_D3D->GetAlphaBlendState() != D3DMain::AlphaBlendState::AlphaBlendDisabled) m_D3D->SetAlphaBlendModeDisabled();
-}
+}*/
 
 // Performs an intermediate z-sorting of instances before populating and processing the render queue.  Used only for 
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
-	unsigned int n;
+	/*unsigned int n;
 	std::vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 #	ifdef RJ_ENABLE_FRAME_PROFILER
@@ -1481,7 +1186,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (shader.PrimitiveTopology != m_current_topology)
@@ -1516,7 +1221,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 	}
 
 	// Clear the sorted instance vector ready for the next frame
-	shader.SortedInstances.clear();
+	shader.SortedInstances.clear();*/
 }
 
 // Generic iObject rendering method; used by subclasses wherever possible.  Returns a flag indicating whether
@@ -1537,9 +1242,6 @@ bool CoreEngine::RenderObject(iObject *object)
 
 		// We are rendering this object, so call its pre-render update method
 		object->PerformRenderUpdate();
-
-		// Set the lighting configuration to be used for rendering this object
-		LightingManager.SetActiveLightingConfigurationForObject(object);
 
 		// Render either articulated or static model depending on object properties
 		if (object->GetArticulatedModel())
@@ -1571,22 +1273,23 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		float alpha = object->Fade.GetFadeAlpha();
-		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
+		float alpha = object->Fade.GetFadeAlpha();	// TODO: need to use this value
+		if (alpha < Game::C_EPSILON) return;			
 
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), m_instanceparams, object->GetPosition());
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, &(object->GetModel()->Data), 
+			std::move(RM_Instance(object->GetWorldMatrix())), object->GetPosition());
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
-			m_instanceparams = object->Highlight.GetColour();
-			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), m_instanceparams, RM_Instance::CalculateSortKey(object->GetPosition()));
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(object->GetModel()->Data), NULL, 
+				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()));
+			SubmitForRendering(RenderQueueShader::RM_LightShader, &(object->GetModel()->Data), NULL, 
+				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
 }
@@ -1609,30 +1312,29 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		float alpha = object->Fade.GetFadeAlpha();
+		float alpha = object->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
 
         // Submit each component for rendering in turn
 		ArticulatedModelComponent **component = model->GetComponents();
 		for (int i = 0; i < n; ++i, ++component)
 		{
-			SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(), 
-										m_instanceparams, (*component)->GetPosition());
+			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
+				RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
 		}
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
-			m_instanceparams = object->Highlight.GetColour();
+			const XMFLOAT4 & highlight = object->Highlight.GetColour();
 
 			// Submit each component for rendering in turn
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams,
-					RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
+					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 			}
 		}
 		else
@@ -1641,8 +1343,8 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-					RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
+					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 			}
 		}
 	}
@@ -1720,7 +1422,7 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 		if (shiprendered)
 		{
 			// Set one active lighting configuration for the entire ship (rather than by turret) for efficiency
-			LightingManager.SetActiveLightingConfigurationForObject(ship);
+			//LightingManager.SetActiveLightingConfigurationForObject(ship);
 
 			// Render any turret objects on the exterior of the ship, if applicable
 			if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);
@@ -1883,7 +1585,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			if (terrain->IsRendered()) continue;
 			if (terrain->IsDestroyed()) continue; 
 			
-			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01")
+			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_lever_vertical_01")
 			{
 				int a = 1;
 			}
@@ -1893,10 +1595,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
-					));
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition()))))
+				)));
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -1914,8 +1616,8 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -1979,10 +1681,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	m_tmp_frustums.clear();
 	
 	// If we are debug-rendering the portal data, also render all portals in tiles which were not processed
-	DEBUG_PORTAL_TRAVERSAL(environment, { for (auto tile : environment->GetTiles()) {
+	DEBUG_PORTAL_TRAVERSAL(environment, { for (auto & tile : environment->GetTiles()) {
 		if (tile.value && !tile.value->IsRendered()) {
 			XMMATRIX cell_world = XMMatrixMultiply(tile.value->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
-			for (auto portal : tile.value->GetPortals()) DEBUG_PORTAL_RENDER(portal, cell_world, false); 
+			for (auto & portal : tile.value->GetPortals()) DEBUG_PORTAL_RENDER(portal, cell_world, false); 
 		}
 	}});
 
@@ -2065,8 +1767,8 @@ void CoreEngine::DebugOverrideInitialPortalRenderingViewer(const iObject *viewer
 	
 	assert(m_debug_portal_render_initial_frustum == NULL);
 	m_debug_portal_render_initial_frustum = new Frustum(4U);
-	m_debug_portal_render_initial_frustum->InitialiseAsViewFrustum(	GetDirect3D()->GetProjectionMatrix(), Game::C_DEFAULT_CLIP_FAR_DISTANCE,
-																	GetDirect3D()->GetDisplayFOV(), GetDirect3D()->GetDisplayAspectRatio());
+	m_debug_portal_render_initial_frustum->InitialiseAsViewFrustum(	m_renderdevice->GetProjectionMatrix(), Game::FarClipPlane,
+																	m_renderdevice->GetFOV(), m_renderdevice->GetAspectRatio() );
 
 	m_debug_portal_render_initial_frustum->ConstructViewFrustrum(view, invview);
 	m_debug_portal_render_viewer_position = viewer->GetPosition();
@@ -2200,10 +1902,10 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
-					));
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition()))))
+				)));
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -2221,8 +1923,8 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2275,30 +1977,29 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 	if (!tile->HasCompoundModel())
 	{
 		// Add the single tile model to the render queue, for either normal or z-sorted processing
-		if (tile->GetModel()) 
+		if (tile->GetModel().GetModel()) 
 		{
 			if (tile->Fade.AlphaIsActive())
 			{
 				// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-				float alpha = tile->Fade.GetFadeAlpha();
+				float alpha = tile->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 				if (alpha < Game::C_EPSILON) return;
-				m_instanceparams.x = alpha;
 
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), world, m_instanceparams, 
-											world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, &(tile->GetModel().GetModel()->Data), std::move(
+					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
 			{
 				if (tile->Highlight.IsActive())
 				{
-					m_instanceparams = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), world, m_instanceparams, 
-						RM_Instance::CalculateSortKey(world.r[3]));	// Position can be taken from trans. components of world matrix (_41 to _43)
+					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
+						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel(), world, 
-						RM_Instance::CalculateSortKey(world.r[3]));	// Position can be taken from trans. components of world matrix (_41 to _43)
+					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
+						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 			}
 		}
@@ -2308,31 +2009,29 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		XMMATRIX modelwm; 
 
 		// Determine whether any effects are active on the tile; these will need to be propogated across to constituent parts here
-		bool fade = false;
-		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams.x = tile->Fade.GetFadeAlpha(); }
+		bool fade = false; float alpha;
+		if (tile->Fade.AlphaIsActive()) { fade = true; alpha = tile->Fade.GetFadeAlpha(); }
 
 		// Iterate through all models to be rendered
-		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
-		for (ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it = tile->GetCompoundModelSet()->Models.begin(); it != it_end; ++it)
-		{
-			// Get a reference to the model
-			const ComplexShipTile::TileModel & item = (*it).value;
-			
-			// Apply a transformation of (ModelRotation * ModelTranslationToElementCentre * CurrentWorldMatrix)
-			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.rotmatrix, 
-				XMMatrixTranslationFromVector(XMVectorAdd(item.offset, Game::C_CS_ELEMENT_MIDPOINT_V))), 
-				world);
+		for (auto & item : tile->GetCompoundModelSet().GetModels())
+		{	
+			// Calculate the full world transformation for this item
+			modelwm = XMMatrixMultiply(
+				item.LocalWorld,			// (Scale * LocalRotationWithinEnv * LocalTranslationWithinEnv * ...
+				world						// ... WorldMatrixOfEnvironment)
+			);
 			
 			// Submit the tile model for rendering using this adjusted world matrix
+			// Take pos from the trans components of the world matrix (_41 to _43)
 			if (fade)
 			{
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, item.model, modelwm, m_instanceparams,
-											modelwm.r[3]);									// Take pos from the trans components of the world matrix (_41 to _43)
+				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, item.Model.GetModel(), std::move(
+					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))), modelwm.r[3]);
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, modelwm, 
-											RM_Instance::CalculateSortKey(modelwm.r[3]));	// Take pos from the trans components of the world matrix (_41 to _43)
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.Model.GetModel(), NULL, std::move(
+					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))));
 			}
 		}
 	}
@@ -2373,7 +2072,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 		float alpha = parent->Fade.GetFadeAlpha();
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
+		
+		// TODO: need to use this alpha value
 
 		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects (with alpha)", 
 		{
@@ -2396,19 +2096,19 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 				component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						m_instanceparams, (*component)->GetPosition());
+					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
 				}
 			}
 		});
 	}
 	else
 	{
-		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects",
+		//RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects",
 		{
 			if (parent->Highlight.IsActive())
 			{
-				m_instanceparams = parent->Highlight.GetColour();
+				const XMFLOAT4 & highlight = parent->Highlight.GetColour();
 
 				// Iterate through each turret in turn
 				TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
@@ -2429,8 +2129,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams,
-							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
+							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 					}
 				}
 			}
@@ -2455,12 +2155,12 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
+							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 					}
 				}
 			}
-		});
+		}//);
 	}
 }
 
@@ -2501,19 +2201,19 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	XMStoreFloat4(&p2, line.P2);
 
 	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
-	m.World = XMFLOAT4X4(p1.x, p1.y, p1.z, 1.0f, p2.x, p2.y, p2.z, 1.0f, line.Colour.x, line.Colour.y, line.Colour.z, line.Colour.w, 0.0f, 0.0f, 0.0f, 0.0f);
+	m.Transform = XMFLOAT4X4(p1.x, p1.y, p1.z, 1.0f, p2.x, p2.y, p2.z, 1.0f, line.Colour.x, line.Colour.y, line.Colour.z, line.Colour.w, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Provide additional parameters as required.  x = line radius
-	m.Params = line.Params;
+	//m.Params = line.Params;		// TODO: need to re-enable this
 	
 	// Submit to the render queue
-	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), std::move(m), line.P1);
+	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), std::move(m), line.P1);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 {
 	// Prepare all region particles, calculate vertex data and promote all to the buffer ready for shader rendering
-	D::Regions::Immediate->Render(m_D3D->GetDeviceContext(), r_view);
+	/*D::Regions::Immediate->Render(r_devicecontext, r_view);
 
 	// Enable alpha blending before rendering any particles
 	m_D3D->SetAlphaBlendModeEnabled();
@@ -2526,13 +2226,13 @@ RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 	// Disable alpha blending after rendering the particles
 	// TODO: Move to somewhere more global once we have further rendering that requires alpha effects.  Avoid multiple on/off switches
 	m_D3D->SetAlphaBlendModeDisabled();	
-	m_D3D->EnableZBuffer();
+	m_D3D->EnableZBuffer();*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 {
 	// Use ID for the world matrix, except use the last (translation) row of the inverse view matrix for r[3] (_41 to _43)
-	XMMATRIX world = ID_MATRIX;
+	/*XMMATRIX world = ID_MATRIX;
 	world.r[3] = r_invview.r[3];
 
 	// Render system backdrop using the standard texture shader, if there is a backdrop to render
@@ -2547,68 +2247,48 @@ RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 		D::Regions::System->Render(m_D3D->GetDeviceContext());
 
 		// Render the buffers using the standard texture shader
-		m_texcubeshader->Render( r_devicecontext, D::Regions::System->GetBackdropSkybox()->GetIndexCount(), 
+		m_texcubeshader->Render( r_devicecontext, D::Regions::System->GetBackdropSkybox()->Data.IndexBuffer.GetIndexCount(), 
 								 world, r_view, r_projection,
 								 D::Regions::System->GetBackdropTextureResource() );
 
 		// Re-enable culling and the z-buffer after rendering the skybox
 		m_D3D->EnableRasteriserCulling();
 		m_D3D->EnableZBuffer();
-	}
+	}*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderUserInterface, void)
 {
-	// Enable alpha-blending, and disable the z-buffer, in advance of any 2D UI rendering
-	m_D3D->SetAlphaBlendModeEnabled();
-//	m_D3D->DisableZBuffer();
-
-	// Call the UI controller rendering function
+	// Call the UI controller rendering function; this will invoke the Render() method of all UI controllers, 
+	// allowing them to perform any render updates for the frame, as well as handling managed control state updates
 	D::UI->Render();
 
-	// Render all 2D components to the screen
+	// Render all active 2D components to the engine render queue
 	m_render2d->Render();
 
-	// Render the text strings to the interface
-	m_textmanager->Render(ID_MATRIX, r_orthographic);
-
-	// Now disable alpha blending, and re-enable the z-buffer, to return to normal rendering
-	m_D3D->SetAlphaBlendModeDisabled();
-//	m_D3D->EnableZBuffer();
+	// Render text strings to the interface
+	// TODO: DISABLED
+	//m_textmanager->Render(ID_MATRIX, r_orthographic);
 }
 
 RJ_PROFILED(void CoreEngine::RenderEffects, void)
 {
 	// Enable alpha blending before rendering any effects
-	m_D3D->SetAlphaBlendModeEnabled();
+	/*m_D3D->SetAlphaBlendModeEnabled();
 
 	// Update the effect manager frame timer to ensure effects are rendered consistently regardless of FPS
 	m_effectmanager->BeginEffectRendering();
 	
-	//TODO: REMOVE
-	// Render a test fire effect
-	/*if (false) {
-		D3DXMATRIX world, tmpT, tmpR, tmpS;
-		D3DXQUATERNION *tmpQ;
-		D3DXMatrixTranslation(&tmpT, 0,0,125);
-		tmpQ = m_camera->GetDecomposedViewRotation();
-		//D3DXQuaternionIdentity(&tmpQ);
-		D3DXMatrixRotationQuaternion(&tmpR, tmpQ);
-		D3DXMatrixInverse(&tmpR, 0, &tmpR);
-		D3DXMatrixScaling(&tmpS, 15.0f, 15.0f, 15.0f);
-		D3DXMatrixMultiply(&tmpS, &tmpR, &tmpS);
-		D3DXMatrixMultiply(&world, &tmpS, &tmpT);
-		m_effectmanager->RenderFireEffect(0, r_devicecontext, world, r_view, r_projection);
-	}*/
-
 	// Disable alpha blending after all effects are rendered
-	m_D3D->SetAlphaBlendModeDisabled();
+	m_D3D->SetAlphaBlendModeDisabled();*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderParticleEmitters, void)
 {
 	// Pass control to the particle engine to perform all required rendering
+	/*
 	m_particleengine->Render(r_view, r_projection, m_D3D, m_camera);
+	*/
 }
 
 // Push an actor onto the queue for rendering
@@ -2626,7 +2306,7 @@ void CoreEngine::QueueActorRendering(Actor *actor)
 RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 {
 	// Quit immediately if there are no queued actors to render
-	if (m_queuedactors.empty()) return;
+	/*if (m_queuedactors.empty()) return;
 
 	// Disable rasteriser culling to prevent loss of intermediate faces in skinned models; we only have to do this once before rendering all actors
 	m_D3D->DisableRasteriserCulling();
@@ -2664,31 +2344,43 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	m_renderinfo.ActorRenderCount += count;
 
 	// Reset the queue now that it has been processed, so we are ready for adding new items in the next frame
-	m_queuedactors.clear();
+	m_queuedactors.clear();*/
 }
 
 // Resets the queue to a state before any rendering has taken place.  Deallocates reserved memory.  
-// Should generally only be called during application shutdown to ensure all resources are released
+// Not reuired at shutdown since all resources are automatically deallocated; only for debug purposes
 void CoreEngine::DeallocateRenderingQueue(void)
 {
 	// Iterate through each shader in the render queue
-	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	size_t count = m_renderqueue.size();
+	for (size_t shader = 0U; shader < count; ++shader)
 	{
 		// Iterate through each model currently registered with the shader
-		auto model_count = m_renderqueue[i].CurrentSlotCount;
-		for (auto mi = 0U; mi < model_count; ++mi)
+		auto model_count = m_renderqueue[shader].CurrentSlotCount;
+		for (auto model = 0U; model < model_count; ++model)
 		{
-			m_renderqueue[i].ModelData[mi].InstanceData.clear();
-			m_renderqueue[i].ModelData[mi].InstanceData.shrink_to_fit();
-
-			if (m_renderqueue[i].ModelData[mi].ModelBufferInstance != NULL)
+			// Iterate through each material registered for this model
+			for (auto & material : m_renderqueue[shader].ModelData[model].Data)
 			{
-				m_renderqueue.UnregisterModelBuffer(i, mi);
+				// Clear all instance data
+				material.InstanceCollection.InstanceData.clear();
+				material.InstanceCollection.InstanceData.shrink_to_fit();
+
+			} /// per-material
+
+			// Unregister any model buffer associated with this entry
+			if (m_renderqueue[shader].ModelData[model].ModelBufferInstance != NULL)
+			{
+				m_renderqueue.UnregisterModelBuffer(shader, model);
 			}
-		}
-		m_renderqueue[i].ModelData.clear();
-		m_renderqueue[i].ModelData.shrink_to_fit();
-	}
+		
+		} /// per-model
+
+		m_renderqueue[shader].ModelData.clear();
+		m_renderqueue[shader].ModelData.shrink_to_fit();
+
+	} /// per-shader
+
 	m_renderqueue.clear();
 	m_renderqueue.shrink_to_fit();
 }
@@ -3168,6 +2860,19 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			return true;
 		}
 	}
+	else if (command.InputCommand == "backbuffer_attach")
+	{
+		if (GetRenderDevice()->RepointBackbufferRenderTargetAttachment(command.Parameter(0)))
+		{
+			command.SetSuccessOutput(concat("Redirected primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
+		}
+		else
+		{
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters,
+				concat("Failed to redirect primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
+		}
+		return true;
+	}
 	else if (command.InputCommand == "hull_render")
 	{
 		bool b = !(command.ParameterAsBool(0));
@@ -3343,7 +3048,8 @@ void CoreEngine::DebugOutputRenderQueueContents(void)
 
 	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		ss << "\tShader " << i << " [AlphaBlend=" << m_renderqueueshaders[i].AlphaBlendRequired << ", ZSort=" << m_renderqueueshaders[i].RequiresZSorting <<
+		ss << "\tShader " << i << 
+			" [ZSort=" << m_renderqueueshaders[i].RequiresZSorting <<
 			", Topology=" << m_renderqueueshaders[i].PrimitiveTopology << "]\n";
 	}
 	ss << "}\n";

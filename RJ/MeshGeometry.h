@@ -5,6 +5,7 @@
 
 #include "DX11_Core.h"
 #include "ErrorCodes.h"
+#include "Rendering.h"
 
 // This class has no special alignment requirements
 class MeshGeometry
@@ -31,9 +32,9 @@ public:
 	~MeshGeometry();
 
 	template <typename VertexType>
-	Result SetVertices(ID3D11Device* device, const VertexType* vertices, UINT count);
+	Result SetVertices(Rendering::RenderDeviceType * device, const VertexType* vertices, UINT count);
 
-	Result SetIndices(ID3D11Device* device, const USHORT* indices, UINT count);
+	Result SetIndices(Rendering::RenderDeviceType * device, const USHORT* indices, UINT count);
 
 	void SetSubsetTable(std::vector<Subset>& subsetTable);
 
@@ -54,7 +55,7 @@ private:
 };
 
 template <typename VertexType>
-Result MeshGeometry::SetVertices(ID3D11Device* device, const VertexType* vertices, UINT count)
+Result MeshGeometry::SetVertices(Rendering::RenderDeviceType * device, const VertexType* vertices, UINT count)
 {
 	ReleaseCOM(mVB);
 

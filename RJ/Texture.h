@@ -1,81 +1,112 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: texture.h
-////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#ifndef __TextureH__
-#define __TextureH__
-
-
-//////////////
-// INCLUDES //
-//////////////
 #include <string>
-#include <unordered_map>
 #include "DX11_Core.h"
 
-#include "ErrorCodes.h"
-#include "Utility.h"
-#include "CompilerSettings.h"
 
-// This class has no special alignment requirements
 class Texture
 {
 public:
-	enum APPLY_MODE { Normal = 0, Repeat = 1 };
 
-	Texture();
-	Texture(const std::string & filename);
+	enum class Dimension
+	{
+		Texture1D,
+		Texture1DArray,
+		Texture2D,
+		Texture2DArray,
+		Texture3D,
+		TextureCube,
+		_COUNT
+	};
 
-	Texture(const Texture&);
-	~Texture();
+	// The number of components used to create the texture.
+	enum class Components
+	{
+		R,              // One red component.
+		RG,             // Red, and green components.
+		RGB,            // Red, green, and blue components.
+		RGBA,           // Red, green, blue, and alpha components.
+		Depth,          // Depth component.
+		DepthStencil    // Depth and stencil in the same texture.
+	};
 
-	Result	Initialise(const std::string & filename);
-	Result	Initialise(ID3D11Resource *resource, D3D11_SHADER_RESOURCE_VIEW_DESC *resourcedesc);
+	// The type of components in the texture.
+	enum class Type
+	{
+		Typeless,           // Typeless formats.
+							// TODO: sRGB type
+		UnsignedNormalized, // Unsigned normalized (8, 10, or 16-bit unsigned integer values mapped to the range [0..1])
+		SignedNormalized,   // Signed normalized (8, or 16-bit signed integer values mapped to the range [-1..1])
+		Float,              // Floating point format (16, or 32-bit).
+		UnsignedInteger,    // Unsigned integer format (8, 16, or 32-bit unsigned integer formats).
+		SignedInteger,      // Signed integer format (8, 16, or 32-bit signed integer formats).
+	};
 
-	CMPINLINE ID3D11ShaderResourceView *GetTexture(void) { return m_texture; };
+	struct TextureFormat
+	{
+		Texture::Components Components;
+		Texture::Type Type;
 
-	void	Shutdown();
+		// For multi-sample textures, we can specify how many samples we want 
+		// to use for this texture. Valid values are usually in the range [1 .. 16]
+		// depending on hardware support.
+		// A value of 1 will effectively disable multisampling in the texture.
+		uint8_t NumSamples;
 
-	Texture * Clone(void) const;
+		// Components should commonly be 8, 16, or 32-bits but some texture formats
+		// support 1, 10, 11, 12, or 24-bits per component.
+		uint8_t RedBits;
+		uint8_t GreenBits;
+		uint8_t BlueBits;
+		uint8_t AlphaBits;
+		uint8_t DepthBits;
+		uint8_t StencilBits;
 
-	CMPINLINE std::string &				GetFilename(void) { return m_filename; }
-	CMPINLINE INTVECTOR2				GetTextureSize(void) { return m_size; }
-	CMPINLINE void						SetTextureSize(INTVECTOR2 size) { m_size = size; }
+		// By default create a 4-component unsigned normalized texture with 8-bits per component and no multisampling.
+		TextureFormat(Texture::Components components = Components::RGBA,
+			Texture::Type type = Type::UnsignedNormalized,
+			uint8_t numSamples = 1,
+			uint8_t redBits = 8,
+			uint8_t greenBits = 8,
+			uint8_t blueBits = 8,
+			uint8_t alphaBits = 8,
+			uint8_t depthBits = 0,
+			uint8_t stencilBits = 0)
+			: Components(components)
+			, Type(type)
+			, NumSamples(numSamples)
+			, RedBits(redBits)
+			, GreenBits(greenBits)
+			, BlueBits(blueBits)
+			, AlphaBits(alphaBits)
+			, DepthBits(depthBits)
+			, StencilBits(stencilBits)
+		{}
 
-	static INTVECTOR2 DetermineTextureSize(ID3D11ShaderResourceView *texture);
-	static APPLY_MODE TranslateTextureMode(const std::string mode);
+		// TODO: Define some commonly used texture formats.
+	};
 
-	// Creates a shader resource view object directly, rather than initialising a texture object
-	static ID3D11ShaderResourceView *Texture::CreateSRV(const std::string & filename);
+	// For cube maps, we may need to access a particular face of the cube map.
+	enum class CubeFace
+	{
+		Right,  // +X
+		Left,   // -X
+		Top,    // +Y
+		Bottom, // -Y
+		Front,  // +Z
+		Back,   // -Z
+	};
 
-	// Static method that deallocates all textures in the central texture dictionary
-	static void							ShutdownAllTextureData(void);
+	// Translate texture dimension to/from its string representation
+	static std::string TranslateDimensionToString(Dimension dim);
+	static Dimension TranslateDimensionFromString(const std::string & dim);
+
+
+
 
 protected:
 
-	ID3D11ShaderResourceView	*m_texture;
-	INTVECTOR2					 m_size;
-	std::string					 m_filename;
 
-	// Static controller of texture resources, to avoid having to load multiple instances of the same texture
-	typedef std::unordered_map<std::string, ID3D11ShaderResourceView*>		TextureResourceRepository;
-	static TextureResourceRepository											TextureResources;
 
-	// Retrieves a texture resource from the static collection, if a matching resource exists
-	CMPINLINE static ID3D11ShaderResourceView *				Get(const std::string & filename)
-	{
-		if (Texture::TextureResources.count(filename) > 0)	return Texture::TextureResources[filename];
-		else												return NULL;
-	}
 
-	// Stores a resource in the static texture collection, assuming it is a valid reference and not a duplicate
-	CMPINLINE static void									Store(const std::string & filename, ID3D11ShaderResourceView *tex)
-	{
-		if (filename != NullString && tex != NULL && Texture::TextureResources.count(filename) == 0)
-			Texture::TextureResources[filename] = tex;
-	}
 };
-
-
-#endif

@@ -6,11 +6,19 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "DX11_Core.h"
-#include "Texture.h"
-#include "Material.h"
+#include "Rendering.h"
 #include "RenderQueueShaders.h"
+#include "MaterialDX11.h"
+#include "VertexBufferDX11.h"
+#include "IndexBufferDX11.h"
+class Model;
+
 
 // This class has no special alignment requirements
+// Model buffer encapsulates a { VB, IB, Material } with a few other properties.  It is intended to be entirely sufficient for rendering
+// of a mesh with all associated effects.  If a model requires multiple materials then it should contain multiple ModelBuffer objects, 
+// each of which is rendered sequentially, and where the VB/IB include only relevant vertices for each (or at minimum, IB references
+// only valid vertices from the full VB duplicated in each)
 class ModelBuffer
 {
 public:
@@ -19,49 +27,52 @@ public:
 	static const size_t				NO_RENDER_SLOT;
 
 	// Default constructor
-	ModelBuffer(void);
+	ModelBuffer(void) noexcept;
 
-	// Initialise the buffers based on the supplied model data
-	Result							Initialise(ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
-												const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount);
+	// Constructor to build a new buffer from the provided data
+	ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+				const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount, const MaterialDX11 * material) noexcept;
 
-	// Sets the texture for this object
-	Result							SetTexture(const char *filename);
-	Result							SetTexture(Texture *texture);
+	// Constructor to build a new buffer from existing buffer data, which will be MOVED into the buffer
+	ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && index_buffer, const MaterialDX11 * material) noexcept;
+
+	// Constructor to build a new buffer from the provided data.  Index buffer will be automatically constructed as a sequential
+	// buffer matching the vertex buffer length, using the standard index format
+	ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material) noexcept;
+	
+	// Copy construction and assignment must be disallowed, since this buffer owns several single-instance COM buffers
+	CMPINLINE ModelBuffer(const ModelBuffer & other) = delete;
+	CMPINLINE ModelBuffer & operator=(const ModelBuffer & other) = delete;
+
+	// Move constructor
+	ModelBuffer(ModelBuffer && other) noexcept;
+
+	// Move assignment
+	ModelBuffer & operator=(ModelBuffer && other) noexcept;
+
+
+
 
 	// Vertex buffer
-	ID3D11Buffer *					VertexBuffer;
+	VertexBufferDX11				VertexBuffer;
 
 	// Index buffer
-	ID3D11Buffer *					IndexBuffer;
+	IndexBufferDX11					IndexBuffer;
 
-	// Methods to return buffer data
+	// Material.  Pointer to material potentially shared across many models.  Model buffers only contain one material since, as per class
+	// header comments above, an object requiring multiple materials should contain multiple ModelBuffers which are rendered sequentially
+	const MaterialDX11 * 			Material;
+
+	// Other buffer properties
 	CMPINLINE std::string			GetCode(void) const					{ return m_code; }
 	CMPINLINE void					SetCode(const std::string & code)	{ m_code = code; }
-	CMPINLINE Texture *				GetTexture(void)					{ return m_texture; }
-	CMPINLINE unsigned int			GetVertexCount(void) const			{ return m_vertexcount; }
-	CMPINLINE unsigned int			GetIndexCount(void) const			{ return m_indexcount; }
-	CMPINLINE unsigned int			GetVertexSize(void) const			{ return m_vertexsize; }
-	CMPINLINE unsigned int			GetIndexSize(void) const			{ return m_indexsize; }
+	
+	// Pointer back to the parent Model class for this buffer.  Not always set.  Mostly useful for debugging
+	CMPINLINE Model *				GetParentModel(void) const				{ return m_parentmodel; }
+	CMPINLINE void					SetParentModel(Model *parentmodel)		{ m_parentmodel = parentmodel; }
 
-	// Return the underlying shader texture resource for this object, if applicable
-	CMPINLINE ID3D11ShaderResourceView *		GetTextureResource(void) 				
-	{ 
-		return (m_texture ? m_texture->GetTexture() : NULL);
-	}
 
-	// Returns the number of materials in this model
-	CMPINLINE unsigned int			GetMaterialCount(void) const		{ return m_material_count; }
-
-	// Returns a pointer to the material data for this model
-	CMPINLINE Material *			GetMaterialData(void) const			{ return m_materials; }
-
-	// Set the number of materials in this model and allocate space accordingly
-	void							SetMaterialCount(unsigned int count);
-
-	// Set details for the specified material
-	void							SetMaterial(unsigned int index, const Material & material);
-
+	// TODO: Probably need to remove this
 	// Render queue slot assigned to this buffer for the current frame, or (0U-1) if none
 	CMPINLINE size_t				GetAssignedRenderSlot(size_t shader) const		{ return m_render_slot[shader]; }
 	CMPINLINE bool					HasAssignedRenderSlot(size_t shader) const		{ return (m_render_slot[shader] != ModelBuffer::NO_RENDER_SLOT); }
@@ -72,33 +83,16 @@ public:
 		for (size_t shader = 0U; shader < (size_t)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++shader) m_render_slot[shader] = ModelBuffer::NO_RENDER_SLOT;
 	}
 
-	// Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
-	// handled automatically when the object is deallocated
-	void							ReleaseModelBufferResources(void);
-
-	// Releases all resources and initialises back to initial state.  Includes model buffer resources (as per ReleaseModelBufferResources)
-	// as well as e.g. texture resources.  Not required in normal use since this will be handled automatically when the object is deallocated
-	void							ReleaseAllResources(void);
-
-
 	// Default destructor
-	~ModelBuffer(void);
+	~ModelBuffer(void) noexcept;
 
 
 protected:
 
 	std::string				m_code;
 
-	unsigned int			m_vertexcount;
-	unsigned int			m_indexcount;
-
-	unsigned int			m_vertexsize;
-	unsigned int			m_indexsize;
-
-	Texture *				m_texture;
-
-	Material *				m_materials;
-	unsigned int			m_material_count;
+	// Reference back to a parent model; only set in some cases, useful mostly for debugging
+	Model *					m_parentmodel;
 
 	// Render queue slot assigned to this buffer for the current frame, or (0U-1) if none
 	size_t					m_render_slot[RenderQueueShader::RM_RENDERQUEUESHADERCOUNT];		

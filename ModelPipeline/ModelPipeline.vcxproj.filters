@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Console">
+      <UniqueIdentifier>{6711efba-bece-4658-91b7-2bfff9fba6e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Transformer\Input">
+      <UniqueIdentifier>{8a498859-4c8d-4f34-bd5a-f22e897f8dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Output">
+      <UniqueIdentifier>{ca9b12fc-c1bd-4d4d-812a-7a36de1d0f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Transforms">
+      <UniqueIdentifier>{e946e088-cb31-44f1-beff-4970dbd40e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Builder">
+      <UniqueIdentifier>{3f4ed8eb-5e43-4dec-9c45-238286e19f63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imported Definitions">
+      <UniqueIdentifier>{fcf95953-7dee-45b6-8258-94ed5211915b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{7036f300-3c02-4bfb-a0b6-b886bad6e8e1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TransformPipeline.cpp">
+      <Filter>Transformer</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformPipelineBuilder.cpp">
+      <Filter>Transformer\Builder</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTransformerAssimp.cpp">
+      <Filter>Transformer\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformPipelineOutput.cpp">
+      <Filter>Transformer\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryOutputTransform.cpp">
+      <Filter>Transformer\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Definitions\ModelData.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStageCentreModel.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineUtil.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelPipeline.cpp" />
+    <ClCompile Include="PipelineStageOutputModelInfo.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTransformerLegacyRjm.cpp">
+      <Filter>Transformer\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTransformerRjm.cpp">
+      <Filter>Transformer\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStageAssimpTransform.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="AssimpIntegration.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjFormatIntegration.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelPipelineConstants.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjFormatOutputTransform.cpp">
+      <Filter>Transformer\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStageUnitScaleModel.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineStageDirectPostprocess.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipeline.h">
+      <Filter>Transformer</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStage.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineInput.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineOutput.h">
+      <Filter>Transformer\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformerComponent.h">
+      <Filter>Transformer</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerAssimp.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryOutputTransform.h">
+      <Filter>Transformer\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineBuilder.h">
+      <Filter>Transformer\Builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\LightData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\MaterialData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelData.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ByteString.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageCentreModel.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStagePassthrough.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineUtil.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageOutputModelInfo.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerLegacyRjm.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerRjm.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageAssimpTransform.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpIntegration.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFormatIntegration.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelPipelineConstants.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFormatOutputTransform.h">
+      <Filter>Transformer\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpLogStream.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageUnitScaleModel.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomPostProcess.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageDirectPostprocess.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

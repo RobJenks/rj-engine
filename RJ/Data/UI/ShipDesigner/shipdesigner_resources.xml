@@ -1,0 +1,77 @@
+<gamedata>
+
+  <!-- Texture resources specific to the ship designer UI -->
+  <Texture code="sd_connectionchangetool_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sd_connectionchangetool.dds" />
+  <Material code="sd_connectionchangetool">
+    <DiffuseTexture>sd_connectionchangetool_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_active_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_active.dds" />
+  <Material code="sdgrid_active">
+    <DiffuseTexture>sdgrid_active_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_apoint_standard_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_apoint_standard.dds" />
+  <Material code="sdgrid_apoint_standard">
+    <DiffuseTexture>sdgrid_apoint_standard_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_apoint_turret_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_apoint_turret.dds" />
+  <Material code="sdgrid_apoint_turret">
+    <DiffuseTexture>sdgrid_apoint_turret_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_blueprint_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_blueprint.dds" />
+  <Material code="sdgrid_blueprint">
+    <DiffuseTexture>sdgrid_blueprint_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_buildable_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_buildable.dds" />
+  <Material code="sdgrid_buildable">
+    <DiffuseTexture>sdgrid_buildable_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_corridor_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_corridor.dds" />
+  <Material code="sdgrid_corridor">
+    <DiffuseTexture>sdgrid_corridor_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_null_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_null.dds" />
+  <Material code="sdgrid_null">
+    <DiffuseTexture>sdgrid_null_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_placementconflict_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_placementconflict.dds" />
+  <Material code="sdgrid_placementconflict">
+    <DiffuseTexture>sdgrid_placementconflict_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_tile_border_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_tile_border.dds" />
+  <Material code="sdgrid_tile_border">
+    <DiffuseTexture>sdgrid_tile_border_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_tile_civilian_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_tile_civilian.dds" />
+  <Material code="sdgrid_tile_civilian">
+    <DiffuseTexture>sdgrid_tile_civilian_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_tile_engineering_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_tile_engineering.dds" />
+  <Material code="sdgrid_tile_engineering">
+    <DiffuseTexture>sdgrid_tile_engineering_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_tile_military_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_tile_military.dds" />
+  <Material code="sdgrid_tile_military">
+    <DiffuseTexture>sdgrid_tile_military_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="sdgrid_walkable_connect_texture" dimension="Texture2D" filename="UI/ShipDesigner/Content/sdgrid_walkable_connect.dds" />
+  <Material code="sdgrid_walkable_connect">
+    <DiffuseTexture>sdgrid_walkable_connect_texture</DiffuseTexture>
+  </Material>
+
+
+
+
+</gamedata>

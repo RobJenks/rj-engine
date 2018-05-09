@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef __Image2DRenderGroupH__
-#define __Image2DRenderGroupH__
+#if 0
 
 #include <vector>
 #include <deque>
@@ -11,13 +10,14 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "Utility.h"
-#include "Texture.h"
+#include "Rendering.h"
 #include "iUIComponent.h"
 #include "iUIComponentRenderable.h"
+class TextureDX11;
 class iUIControl;
 
 // This class has no special alignment requirements
-class Image2DRenderGroup : public iUIComponentRenderable
+class _OLD_Image2DRenderGroup : public iUIComponentRenderable
 {
 private:
 
@@ -91,13 +91,13 @@ public:
 	struct InstanceReference
 	{
 		Instance *				instance;
-		Image2DRenderGroup *	rendergroup;
+		_OLD_Image2DRenderGroup *	rendergroup;
 		int						index;
 		std::string				code;
 	
 		InstanceReference(void) { instance = NULL; rendergroup = NULL; index = -1; code = ""; }
 
-		InstanceReference(Instance *_instance, Image2DRenderGroup *_rendergroup, int _index, std::string _code) {
+		InstanceReference(Instance *_instance, _OLD_Image2DRenderGroup *_rendergroup, int _index, std::string _code) {
 			instance = _instance; rendergroup = _rendergroup; index = _index; code = _code;
 		}
 	};
@@ -105,9 +105,9 @@ public:
 	// Methods to add/remove/change instances
 	CMPINLINE InstanceCollection *			GetInstances(void) { return &m_instances; }
 	CMPINLINE Instance *					GetInstanceDirect(InstanceCollection::size_type index) { return &(m_instances[index]); }
-	Image2DRenderGroup::Instance *			GetInstanceByCode(std::string code);
-	Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(std::string code);
-	Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
+	_OLD_Image2DRenderGroup::Instance *			GetInstanceByCode(std::string code);
+	_OLD_Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(std::string code);
+	_OLD_Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
 	void									RemoveInstance(Instance *instance);
 	void									RemoveInstance(InstanceCollection::size_type index);
 	CMPINLINE InstanceCollection::size_type	GetInstanceCount(void) { return m_instances.size(); }	
@@ -124,6 +124,14 @@ public:
 	CMPINLINE float						GetZOrder(void) { return m_zorder; }
 	CMPINLINE void						SetZOrder(float z) { m_zorder = z; }
 
+	// Texture repeat
+	CMPINLINE bool						IsTextureRepeating(void) const { return m_repeattexture; }
+	CMPINLINE void						SetTextureRepeat(bool repeat) 
+	{ 
+		m_repeattexture = repeat; 
+		m_forcefullupdate = true;
+	}
+
 	// Determines whether instances of this group will accept or ignore mouse input.  Default is false.
 	CMPINLINE bool						AcceptsMouseInput(void) { return m_acceptsmouse; }
 	CMPINLINE void						SetAcceptsMouseInput(bool flag) { m_acceptsmouse = flag; }
@@ -134,7 +142,7 @@ public:
 	CMPINLINE void ClearAllInstances(void) { if (m_instances.size() != 0) m_instances.clear(); }
 
 	CMPINLINE int GetIndexCount() { return m_indexCount; }
-	CMPINLINE ID3D11ShaderResourceView* GetTexture() { return m_Texture->GetTexture(); }
+	ID3D11ShaderResourceView* GetTexture();
 
 
 public:
@@ -144,23 +152,20 @@ public:
 	// to maintain compatibility; likely too major a change to handle via the localiser
 	typedef UINT16 INDEXFORMAT;	
 
-	Image2DRenderGroup(void);
-	~Image2DRenderGroup(void);
+	_OLD_Image2DRenderGroup(void);
+	~_OLD_Image2DRenderGroup(void);
 
-	Result								Initialize( ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode);
+	Result								Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat);
 	Result								InitializeBuffers(void);
 
 	void								Render(void);
 
-	void								SetTextureDirect(Texture *tex);
-
-	CMPINLINE Texture::APPLY_MODE		GetTextureMode(void) { return m_texturemode; }
-	void								SetTextureMode(Texture::APPLY_MODE mode);
+	void								SetTexture(const std::string & name);
+	void								SetTexture(TextureDX11 *tex);
 
 	void								Shutdown(void);
 	
 private:
-	Result								LoadTexture(ID3D11Device* device, const char *filename);
 	
 	Result								UpdateBuffers(void);
 	void								RenderBuffers(void);
@@ -169,7 +174,6 @@ private:
 
 	void								ShutdownBuffers(void);
 	void								ReleaseAllInstances(void);
-	void								ReleaseTexture(void);
 
 
 private:
@@ -179,17 +183,15 @@ private:
 	ID3D11Buffer *						m_vertexBuffer, *m_indexBuffer;
 	int									m_vertexCount, m_indexCount;
 	VertexType *						m_vertices;
-	Texture*							m_Texture;
-	Texture::APPLY_MODE					m_texturemode;		// Method to use for applying this texture to each instance
+	TextureDX11 *						m_Texture;
 	INTVECTOR2							m_texturesize;		// Size of the texture to be applied to this render group
 	XMFLOAT2							m_ftexturesize;		// Texture size, stored in floating point representation to avoid casts later
+	bool								m_repeattexture;
 
 	bool								m_forcefullupdate;
 
 	float								m_zorder;			// The z-order of this component *group*, which determines order of rendering by the render manager
 
-	ID3D11Device *						m_device;
-	ID3D11DeviceContext *				m_devicecontext;
 	int									m_screenWidth, m_screenHeight;
 	float								m_screenHalfWidth, m_screenHalfHeight;
 	float								m_screenLeft;

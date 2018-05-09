@@ -1,24 +1,25 @@
-#include "DX11_Core.h"
+#include "Image2DRenderGroup.h"
 
+#if 0
+
+#include "DX11_Core.h"
 #include "ErrorCodes.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
+#include "DX11_Core.h"
 #include "CoreEngine.h"
-#include "Texture.h"
+#include "TextureDX11.h"
 
-#include "Image2DRenderGroup.h"
 
-Image2DRenderGroup::Image2DRenderGroup(void)
+_OLD_Image2DRenderGroup::_OLD_Image2DRenderGroup(void)
 {
-	m_instances = Image2DRenderGroup::InstanceCollection();
-	m_device = NULL;
-	m_devicecontext = NULL;
+	m_instances = _OLD_Image2DRenderGroup::InstanceCollection();
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
-	m_texturemode = Texture::APPLY_MODE::Normal;
 	m_texturesize = INTVECTOR2(1, 1);
 	m_ftexturesize = XMFLOAT2(1.0f, 1.0f);
+	m_repeattexture = false;
 	m_vertices = NULL;
 	m_zorder = 0.0f;
 	m_indexCount = 0;
@@ -28,21 +29,16 @@ Image2DRenderGroup::Image2DRenderGroup(void)
 }
 
 
-Result Image2DRenderGroup::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode)
+Result _OLD_Image2DRenderGroup::Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat)
 { 
 	Result result;
 
-	// Store the device and screen details
-	m_device = device;
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 	m_screenHalfWidth = (float)m_screenWidth / 2.0f;
 	m_screenHalfHeight = (float)m_screenHeight / 2.0f;
 	m_screenLeft = (m_screenHalfWidth * -1.0f);
-	m_texturemode = texturemode;
-
-	// Also get a reference to the device context
-	m_devicecontext = Game::Engine->GetDeviceContext();
+	m_repeattexture = texture_repeat;
 
 	// Initialize the vertex and index buffers.
 	result = InitializeBuffers();
@@ -52,21 +48,42 @@ Result Image2DRenderGroup::Initialize(ID3D11Device* device, int screenWidth, int
 	}
 
 	// Load the texture for this bitmap if a filename is specified.  If not, we can leave it as NULL for now
-	if (textureFilename)
-	{
-		result = LoadTexture(device, textureFilename);
-		if(result != ErrorCodes::NoError)
-		{
-			return result;
-		}
-	}
+	SetTexture(texture);
 
 	// Return success
 	return ErrorCodes::NoError;
 }
 
+ID3D11ShaderResourceView * _OLD_Image2DRenderGroup::GetTexture(void)
+{
+	return (m_Texture ? m_Texture->GetShaderResourceView() : NULL);
+}
 
-Result Image2DRenderGroup::InitializeBuffers(void)
+
+void _OLD_Image2DRenderGroup::SetTexture(const std::string & name)
+{
+	SetTexture(Game::Engine->GetAssets().GetTexture(name));
+}
+
+void _OLD_Image2DRenderGroup::SetTexture(TextureDX11 *tex)
+{
+	m_Texture = tex;
+
+	if (!tex)
+	{
+		Game::Log << LOG_WARN << "Cannot load texture for 2D image render group \"" << m_code << "\"\n";
+		m_texturesize = NULL_INTVECTOR2;
+	}
+	else
+	{
+		// Also store the texture size locally, for efficiency
+		m_texturesize = INTVECTOR2(m_Texture->GetWidth(), m_Texture->GetHeight());
+	}
+
+	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
+}
+
+Result _OLD_Image2DRenderGroup::InitializeBuffers(void)
 {
 	INDEXFORMAT *indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
@@ -90,14 +107,14 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	m_vertices = new VertexType[m_vertexCount];
 	if(!m_vertices)
 	{
-		return ErrorCodes::CouldNotAllocateImage2DRenderGroupVertexArray;
+		return ErrorCodes::CouldNotAllocate_OLD_Image2DRenderGroupVertexArray;
 	}
 
 	// Create the index array.
 	indices = new INDEXFORMAT[m_indexCount];
 	if(!indices)
 	{
-		return ErrorCodes::CouldNotAllocateImage2DRenderGroupIndexArray;
+		return ErrorCodes::CouldNotAllocate_OLD_Image2DRenderGroupIndexArray;
 	}
 
 	// Initialize vertex array to zeros at first.
@@ -109,7 +126,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	for (int i = 0; i < instancecount; ++i)
 	{
 		// Calculate max texture coordinates based on the current texture mode
-		if (m_texturemode == Texture::APPLY_MODE::Repeat) {
+		if (IsTextureRepeating()) {
 			if (m_instances[i].rotation == Rotation90Degree::Rotate0 || m_instances[i].rotation == Rotation90Degree::Rotate180) {
 				umax = ((float)m_instances[i].size.x / m_ftexturesize.x);
 				vmax = ((float)m_instances[i].size.y / m_ftexturesize.y);
@@ -147,10 +164,11 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	vertexData.SysMemSlicePitch = 0;
 
 	// Now create the vertex buffer.
-    result = m_device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+	auto *device = Game::Engine->GetRenderDevice()->GetDevice();
+    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotCreateImage2DRenderGroupVertexBuffer;
+		return ErrorCodes::CouldNotCreate_OLD_Image2DRenderGroupVertexBuffer;
 	}
 
 	// Set up the description of the static index buffer.
@@ -167,68 +185,20 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	result = m_device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotCreateImage2DRenderGroupIndexBuffer;
+		return ErrorCodes::CouldNotCreate_OLD_Image2DRenderGroupIndexBuffer;
 	}
 
 	// Release the index array now that the buffer has been created and loaded.
 	delete [] indices;
 	indices = 0;
-
-	return ErrorCodes::NoError;
-}
-
-Result Image2DRenderGroup::LoadTexture(ID3D11Device* device, const char *filename)
-{
-	Result result;
-
-	// Create the texture object.
-	m_Texture = new Texture();
-	if(!m_Texture)
-	{
-		return ErrorCodes::CouldNotAllocateImage2DRenderGroupTextureObject;
-	}
-
-	// Initialize the texture object.
-	result = m_Texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Also store the texture size locally, for efficiency
-	m_texturesize = m_Texture->GetTextureSize();
-	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
-void Image2DRenderGroup::SetTextureMode(Texture::APPLY_MODE mode)
-{
-	// Store the new texture mode
-	m_texturemode = mode;
-
-	// Request a full update of the vertex buffers since the texture mode impacts mapping of texture coordinates within the buffer
-	m_forcefullupdate = true;
-}
-
-void Image2DRenderGroup::SetTextureDirect(Texture *tex)
-{
-	// Dispose of the old texture, if we had one
-	if (m_Texture) m_Texture->Shutdown();
-
-	// Store a reference to the new texture
-	m_Texture = tex;
 	
-	// Also store the texture size locally, for efficiency
-	m_texturesize = m_Texture->GetTextureSize();
-	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
+	return ErrorCodes::NoError;
 }
 
-void Image2DRenderGroup::Render(void)
+void _OLD_Image2DRenderGroup::Render(void)
 {
 	// If there are no instances in the collection then we have nothing to render
 	int numinstances = (int)m_instances.size();
@@ -250,16 +220,13 @@ void Image2DRenderGroup::Render(void)
 }
 
 
-Result Image2DRenderGroup::UpdateBuffers(void)
+Result _OLD_Image2DRenderGroup::UpdateBuffers(void)
 {
 	float left, right, top, bottom, zorder;
 	float umax, vmax;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	VertexType* verticesPtr;
 	HRESULT result;
-
-	// Precalculate fields where possible
-	bool texturemoderepeat = (m_texturemode == Texture::APPLY_MODE::Repeat);
 
 	// Look at each instance in turn
 	int vertexindex = 0;
@@ -281,7 +248,7 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 		bufferupdaterequired = true;
 
 		// Determine whether we need to remap texture coordinates based on a change in instance size
-		bool textureremaprequired = (texturemoderepeat && ( (m_instances[i].size.x != m_instances[i].__prevsize.x) || 
+		bool textureremaprequired = (m_repeattexture && ( (m_instances[i].size.x != m_instances[i].__prevsize.x) || 
 															(m_instances[i].size.y != m_instances[i].__prevsize.y)));
 
 		// Before updating the control fields, see if we need to update texture mapping coords due to a resize
@@ -348,10 +315,11 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 	if (!bufferupdaterequired) return ErrorCodes::NoError;
 
 	// Lock the vertex buffer so it can be written to, now that all vertex data has been updated
-	result = m_devicecontext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
+	result = context->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotObtainImage2DRenderGroupBufferLock;
+		return ErrorCodes::CouldNotObtain_OLD_Image2DRenderGroupBufferLock;
 	}
 
 	// Get a pointer to the data in the vertex buffer.
@@ -361,12 +329,12 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 	memcpy(verticesPtr, (void*)m_vertices, (sizeof(VertexType) * m_vertexCount));
 
 	// Unlock the vertex buffer.
-	m_devicecontext->Unmap(m_vertexBuffer, 0);
+	context->Unmap(m_vertexBuffer, 0);
 
 	return ErrorCodes::NoError;
 }
 
-void Image2DRenderGroup::RenderBuffers(void)
+void _OLD_Image2DRenderGroup::RenderBuffers(void)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -376,28 +344,26 @@ void Image2DRenderGroup::RenderBuffers(void)
 	offset = 0;
     
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
+	context->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	m_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Image2DRenderGroup::Shutdown()
+void _OLD_Image2DRenderGroup::Shutdown()
 {
 	// Release each instance within the render group in turn
 	ReleaseAllInstances();
-
-	// Release the bitmap texture.
-	ReleaseTexture();
 
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
 }
 
-void Image2DRenderGroup::ReleaseAllInstances()
+void _OLD_Image2DRenderGroup::ReleaseAllInstances()
 {
 	// Loop through each instance in turn
 	InstanceCollection::size_type n = m_instances.size();
@@ -411,7 +377,7 @@ void Image2DRenderGroup::ReleaseAllInstances()
 	m_instances.clear();
 }
 
-void Image2DRenderGroup::ShutdownBuffers()
+void _OLD_Image2DRenderGroup::ShutdownBuffers()
 {
 	// Release the index buffer.
 	if(m_indexBuffer)
@@ -435,22 +401,10 @@ void Image2DRenderGroup::ShutdownBuffers()
 	}
 }
 
-void Image2DRenderGroup::ReleaseTexture(void)
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-}
-
-
-Image2DRenderGroup::Instance *Image2DRenderGroup::AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation)
+_OLD_Image2DRenderGroup::Instance *_OLD_Image2DRenderGroup::AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation)
 {
 	// Create a new instance object and push onto the instance vector
-	m_instances.push_back(Image2DRenderGroup::Instance(pos, zorder, size, render, rotation));
+	m_instances.push_back(_OLD_Image2DRenderGroup::Instance(pos, zorder, size, render, rotation));
 
 	// Now return a pointer to this new element in the vector
 	return &(m_instances.at(m_instances.size()-1));	
@@ -458,7 +412,7 @@ Image2DRenderGroup::Instance *Image2DRenderGroup::AddInstance(INTVECTOR2 pos, fl
 
 // Removes an instance from the instance collection.  NOTE: this has undefined behaviour if 
 // the instance in question doesn't already exist in the collection
-void Image2DRenderGroup::RemoveInstance(Instance *instance)
+void _OLD_Image2DRenderGroup::RemoveInstance(Instance *instance)
 {
 	InstanceCollection::size_type size = m_instances.size();
 
@@ -466,14 +420,14 @@ void Image2DRenderGroup::RemoveInstance(Instance *instance)
 	if (size == 0) return;
 
 	// If we have more than one instance then we need to swap this instance with the end one
-	Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
+	_OLD_Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
 	if (size > 1) std::swap(instance, lastinstance);
 	
 	// Now pop the last element off the vector to remove it from the collection
 	m_instances.pop_back();
 }
 
-void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
+void _OLD_Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 {
 	InstanceCollection::size_type size = m_instances.size();
 
@@ -483,8 +437,8 @@ void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 	// If this instance is not already the last one then move it to the end now
 	if (index != (size-1))
 	{
-		Image2DRenderGroup::Instance *instance = &(m_instances[index]);
-		Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
+		_OLD_Image2DRenderGroup::Instance *instance = &(m_instances[index]);
+		_OLD_Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
 		std::swap(instance, lastinstance);
 	}
 
@@ -492,7 +446,7 @@ void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 	m_instances.pop_back();
 }
 
-Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(std::string code)
+_OLD_Image2DRenderGroup::Instance * _OLD_Image2DRenderGroup::GetInstanceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();
@@ -505,7 +459,7 @@ Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(std::string
 	return NULL;
 }
 
-Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceByCode(std::string code)
+_OLD_Image2DRenderGroup::InstanceReference _OLD_Image2DRenderGroup::GetInstanceReferenceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();
@@ -514,15 +468,15 @@ Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceBy
 		if (m_instances[i].code == code)
 		{
 			// If we have a match, build a new instance reference object and return it
-			return Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, (int)i, code);
+			return _OLD_Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, (int)i, code);
 		}
 	}
 
 	// Otherwise return a null instance reference
-	return Image2DRenderGroup::InstanceReference();
+	return _OLD_Image2DRenderGroup::InstanceReference();
 }
 
-void Image2DRenderGroup::UpdateVertexTextureMappingCoords(Image2DRenderGroup::VertexType *v, Rotation90Degree rotation, float umax, float vmax)
+void _OLD_Image2DRenderGroup::UpdateVertexTextureMappingCoords(_OLD_Image2DRenderGroup::VertexType *v, Rotation90Degree rotation, float umax, float vmax)
 {
 	// Apply different texture coords depending on the rotation of this instance (allowed in 90-degree increments)
 	switch (rotation)
@@ -566,6 +520,8 @@ void Image2DRenderGroup::UpdateVertexTextureMappingCoords(Image2DRenderGroup::Ve
 }
 
 
-Image2DRenderGroup::~Image2DRenderGroup(void)
+_OLD_Image2DRenderGroup::~_OLD_Image2DRenderGroup(void)
 {
 }
+
+#endif

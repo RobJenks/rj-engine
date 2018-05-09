@@ -30,35 +30,35 @@ Result iUIController::Initialise(const std::string & state_code, Render2DGroup *
 
 
 // Handles the first mouse-down event with the LMB.  
-void iUIController::ProcessMouseFirstDownEvent_Base(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void iUIController::ProcessMouseFirstDownEvent_Base(INTVECTOR2 location, iUIComponent *component)
 {
 	// Store details on the mouse down event
 	m_lmb_down = true;
 	m_lmb_down_location = location;
 
 	// Also store the UI component that we began the movement over, in case it is relevant later
-	m_lmb_down_component = component.instance;
+	m_lmb_down_component = component;
 
 	// Pass control to the subclass-implemented method
 	ProcessMouseFirstDownEvent(location, component);
 }
 
 // Handles the first mouse-down event with the RMB.  
-void iUIController::ProcessRightMouseFirstDownEvent_Base(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void iUIController::ProcessRightMouseFirstDownEvent_Base(INTVECTOR2 location, iUIComponent *component)
 {
 	// Store details on the mouse down event
 	m_rmb_down = true;
 	m_rmb_down_location = location;
 
 	// Also store the UI component that we began the movement over, in case it is relevant later
-	m_rmb_down_component = component.instance;
+	m_rmb_down_component = component;
 
 	// Pass control to the subclass-implemented method
 	ProcessRightMouseFirstDownEvent(location, component);
 }
 
 // Handles the LMB mouse-up event that generally signals the end of a mouse click and/or drag
-void iUIController::ProcessMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void iUIController::ProcessMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// Pass control to the subclass-implemented method first, before we reset the mouse down flags
 	ProcessMouseUpEvent(location, startlocation, component);
@@ -70,7 +70,7 @@ void iUIController::ProcessMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 sta
 }
 
 // Handles the RMB mouse-up event that generally signals the end of a mouse click and/or drag
-void iUIController::ProcessRightMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void iUIController::ProcessRightMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// Pass control to the subclass-implemented method first, before we reset the mouse down flags
 	ProcessRightMouseUpEvent(location, startlocation, component);

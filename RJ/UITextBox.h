@@ -6,7 +6,7 @@
 #include <string>
 #include "iUIControl.h"
 #include "Utility.h"
-#include "Image2DRenderGroup.h"
+#include "Image2D.h"
 class TextBlock;
 class GameInputDevice;
 
@@ -23,10 +23,10 @@ public:
 
 	// Constructor
 	UITextBox(std::string code,
-				Image2DRenderGroup::InstanceReference framecomponent, 
-				Image2DRenderGroup::InstanceReference framefocuscomponent, 
-				TextBlock * textcomponent,
-				INTVECTOR2 pos, INTVECTOR2 size, bool render );
+		Image2D *framecomponent, 
+		Image2D *framefocuscomponent,
+		TextBlock * textcomponent,
+		INTVECTOR2 pos, INTVECTOR2 size, bool render );
 
 	// Destructor
 	~UITextBox(void);
@@ -40,9 +40,9 @@ public:
 	CMPINLINE INTVECTOR2						GetTextOffset(void) { return m_textoffset; }
 
 	// Methods to retrieve text box components
-	CMPINLINE const Image2DRenderGroup::InstanceReference *	GetFrameComponent(void) { return &m_framecomponent; }
-	CMPINLINE const Image2DRenderGroup::InstanceReference *	GetFrameFocusComponent(void) { return &m_framefocuscomponent; }
-	CMPINLINE TextBlock *									GetTextComponent(void) { return m_textcomponent; }
+	CMPINLINE Image2D *							GetFrameComponent(void) { return m_framecomponent; }
+	CMPINLINE Image2D *							GetFrameFocusComponent(void) { return m_framefocuscomponent; }
+	CMPINLINE TextBlock *						GetTextComponent(void) { return m_textcomponent; }
 
 	// Methods to change properties, which will also propogate to component parts as required
 	void										SetPosition(INTVECTOR2 pos);
@@ -52,17 +52,15 @@ public:
 
 	// Core control methods, implemented to satisfy the iUIControl interface
 	bool										WithinControlBounds(INTVECTOR2 point);
-	void										HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
+	void										HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleMouseDownEvent(iUIComponent  *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseDownEvent(iUIComponent  *component, INTVECTOR2 mouselocation);
+	void										HandleMouseUpEvent(iUIComponent  *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseUpEvent(iUIComponent  *component, INTVECTOR2 mouselocation);
 
 	// Methods to handle mouse clicks on the components making up this control
-	void HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-							   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
-	void HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
 
 	// Flag determining whether this control can accept user input focus
 	CMPINLINE bool								CanAcceptFocus(void) { return m_canacceptfocus; }			
@@ -100,8 +98,8 @@ private:
 	iUIControl::ControlState					m_state;
 
 	// The components that make up this text box
-	Image2DRenderGroup::InstanceReference		m_framecomponent;
-	Image2DRenderGroup::InstanceReference		m_framefocuscomponent;
+	Image2D *									m_framecomponent;
+	Image2D *									m_framefocuscomponent;
 	TextBlock *									m_textcomponent;
 	TextBlock *									m_caretcomponent;
 

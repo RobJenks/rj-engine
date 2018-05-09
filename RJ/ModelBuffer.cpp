@@ -7,193 +7,75 @@
 const size_t ModelBuffer::NO_RENDER_SLOT = ((size_t)0U - (size_t)1U);
 
 // Default constructor
-ModelBuffer::ModelBuffer(void)
+ModelBuffer::ModelBuffer(void) noexcept
+	:
+	Material(NULL), 
+	m_parentmodel(NULL)
 {
-	// Default all values
-	VertexBuffer = NULL;
-	IndexBuffer = NULL;
-	m_texture = NULL;
-	m_vertexcount = m_indexcount = 0U;
-	m_vertexsize = m_indexsize = 0U;
-	m_materials = NULL;
-	m_material_count = 0U;
-	
 	ClearAllRenderSlots();
 }
 
-// Initialise the buffers based on the supplied model data
-Result ModelBuffer::Initialise(	ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
-								const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount)
+// Constructor to build a new buffer from the provided data
+ModelBuffer::ModelBuffer(	const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+							const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount, const MaterialDX11 * material) noexcept
+	:
+	VertexBuffer(*ppVertexdata, vertexcount, vertexsize), 
+	IndexBuffer(*ppIndexdata, indexcount, indexsize), 
+	Material(material)
 {
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, indexData;
-
-	// Parameter check
-	if (!device || !ppVertexdata || !(*ppVertexdata) || !ppIndexdata || !(*ppIndexdata) || 
-		vertexsize <= 0U || indexsize <= 0U || vertexcount <= 0U || indexcount <= 0U)
-		return ErrorCodes::CannotInitialiseModelBufferWithInvalidData;
-
-	// Store any parameters that we want to maintain within the object
-	m_vertexcount = vertexcount;
-	m_vertexsize = vertexsize;
-	m_indexcount = indexcount;
-	m_indexsize = indexsize;
-
-	// Set up the description of the static vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = (m_vertexsize * m_vertexcount);
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = (*ppVertexdata);
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexData, &VertexBuffer);
-	if (FAILED(hr))
-	{
-		return ErrorCodes::CouldNotCreateMBVertexBuffer;
-	}
-
-	// Set up the description of the static index buffer.
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = (m_indexsize * m_indexcount);
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = (*ppIndexdata);
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// Create the index buffer.
-	hr = device->CreateBuffer(&indexBufferDesc, &indexData, &IndexBuffer);
-	if (FAILED(hr)) return ErrorCodes::CouldNotCreateMBIndexBuffer;
-
-	// We have initialised all model buffer data so return success
-	return ErrorCodes::NoError;
+	ClearAllRenderSlots();
 }
 
-// Sets the texture for this object
-Result ModelBuffer::SetTexture(const char *filename)
+// Constructor to build a new buffer from existing buffer data, which will be MOVED into the buffer
+ModelBuffer::ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && index_buffer, const MaterialDX11 * material) noexcept
+	:
+	VertexBuffer(std::move(vertex_buffer)), 
+	IndexBuffer(std::move(index_buffer)), 
+	Material(material)
 {
-	// We want to deallocate any texture that already exists
-	if (m_texture)
-	{
-		m_texture->Shutdown();
-		SafeDelete(m_texture);
-	}
-
-	// Now load the model texture, if required (or leave as NULL if a null input was provided)
-	if (filename)
-	{
-		// Create the texture object
-		m_texture = new Texture();
-		if (!m_texture) return ErrorCodes::CouldNotCreateTextureObject;
-
-		// Initialise the texture object
-		Result result = m_texture->Initialise(filename);
-		if (result != ErrorCodes::NoError) return result;
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
+	ClearAllRenderSlots();
 }
 
-// Sets the texture for this object
-Result ModelBuffer::SetTexture(Texture *texture)
+// Constructor to build a new buffer from the provided data.  Index buffer will be automatically constructed as a sequential
+// buffer matching the vertex buffer length, using the standard index format
+ModelBuffer::ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material) noexcept
+	:
+	VertexBuffer(*ppVertexdata, vertexsize, vertexcount), 
+	IndexBuffer(vertexcount), 
+	Material(material)
 {
-	// We want to deallocate any texture that already exists
-	if (m_texture)
-	{
-		m_texture->Shutdown();
-		SafeDelete(m_texture);
-	}
-
-	// Now simply store the texture object
-	m_texture = texture;
-
-	// Return success
-	return ErrorCodes::NoError;
+	ClearAllRenderSlots();
 }
 
-
-// Set the number of materials in this model and allocate space accordingly
-void ModelBuffer::SetMaterialCount(unsigned int count)
+// Move constructor
+ModelBuffer::ModelBuffer(ModelBuffer && other) noexcept
+	: 
+	m_code(other.m_code)
 {
-	// Deallocate any existing material storage, if applicable
-	if (m_materials != NULL)
-	{
-		SafeDeleteArray(m_materials);
-		m_material_count = 0U;
-	}
+	for (size_t i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i) m_render_slot[i] = other.m_render_slot[i];
 
-	// Store the new material count
-	m_material_count = count;
-
-	// Allocate space for the materials
-	m_materials = new Material[m_material_count];
+	this->VertexBuffer = std::move(other.VertexBuffer);
+	this->IndexBuffer = std::move(other.IndexBuffer);
+	this->Material = other.Material;
 }
 
-// Set details for the specified material
-void ModelBuffer::SetMaterial(unsigned int index, const Material & material)
+// Move assignment
+ModelBuffer & ModelBuffer::operator=(ModelBuffer && other) noexcept
 {
-	// Parameter check
-	if (index < 0 || index >= m_material_count) return;
+	m_code = other.m_code;
+	for (size_t i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i) m_render_slot[i] = other.m_render_slot[i];
 
-	// Copy the material data
-	m_materials[index] = material;
+	this->VertexBuffer = std::move(other.VertexBuffer);
+	this->IndexBuffer = std::move(other.IndexBuffer);
+	this->Material = other.Material;
 
-	// Also ensure that the material ID is set accordingly
-	m_materials[index].Data.ID = index;
+	return *this;
 }
 
-
-// Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
-// handled automatically when the object is deallocated
-void ModelBuffer::ReleaseModelBufferResources(void)
-{
-	// Release each of the buffers if they have been allocated
-	ReleaseIfExists(VertexBuffer);
-	ReleaseIfExists(IndexBuffer);
-
-	// Initialise other fields back to initial states
-	m_vertexcount = m_indexcount = 0U;
-	m_vertexsize = m_indexsize = 0U;
-}
-
-// Releases all resources and initialises back to initial state.  Includes model buffer resources (as per ReleaseModelBufferResources)
-// as well as e.g. texture resources.  Not required in normal use since this will be handled automatically when the object is deallocated
-void ModelBuffer::ReleaseAllResources(void)
-{
-	// Release all the resources allocated to model (VB / IB) buffers
-	ReleaseModelBufferResources();
-	
-	// Deallocate the texture object if relevant
-	if (m_texture)
-	{
-		m_texture->Shutdown();
-		SafeDelete(m_texture);
-	}
-
-	// Deallocate material data if relevant
-	if (m_materials)
-	{
-		SafeDeleteArray(m_materials);
-	}
-}
 
 // Default destructor
-ModelBuffer::~ModelBuffer(void)
+ModelBuffer::~ModelBuffer(void) noexcept
 {
-	// Release all buffer resources
-	ReleaseAllResources();
 }
 
 

@@ -5,11 +5,11 @@
 
 
 #include "DX11_Core.h"
-
+#include "Rendering.h"
 #include <vector>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
-#include "Texture.h"
+class TextureDX11;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -44,14 +44,14 @@ public:
 	static const XMFLOAT2	TexCoord[4][4];
 
 	// Initialisation function
-	Result						Initialise(ID3D11Device *device);
+	Result						Initialise(void);
 
 	// Methods for adding and per-frame updating of particles
 	void						AddParticle(int id);
 	void						UpdateParticles(const XMFLOAT3 & rightbasisvector, const XMFLOAT3 & upbasisvector);
 
 	// Rendering method
-	void						Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup);
+	void						Render(Rendering::RenderDeviceContextType  *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup);
 
 	// Shutdown functions
 	void						Shutdown(void);
@@ -95,7 +95,7 @@ public:
 
 	// We also allow setting of the world matrix directly, if it has been calculated elsewhere.  Note this could leave it
 	// out of sync with the pos/orient unless these are also updated
-	CMPINLINE void	XM_CALLCONV 			SetEmitterWorldMatrix(const FXMMATRIX world)			{ m_worldmatrix = world; }
+	CMPINLINE void	RJ_XM_CALLCONV 			SetEmitterWorldMatrix(const FXMMATRIX world)			{ m_worldmatrix = world; }
 
 
 	// Set the position, orientation and world matrix directly.  Used for efficiency when a parent object has already done these calculations
@@ -112,10 +112,9 @@ public:
 
 
 	// Methods to get and set other emitter properties
-	Result						LoadTexture(ID3D11Device* device, const char *filename);
-	CMPINLINE ID3D11ShaderResourceView 
-								*GetParticleTexture(void) { return m_texture->GetTexture(); }
-	CMPINLINE void				SetParticleTexture(Texture *tex) { m_texture = tex; }
+	ID3D11ShaderResourceView *	GetParticleTexture(void);
+	void						SetParticleTexture(const std::string & name);
+	CMPINLINE void				SetParticleTexture(TextureDX11 *texture) { m_texture = texture; }
 
 	CMPINLINE bool				Exists(void) { return m_exists; }
 	CMPINLINE void				SetExists(bool exists) { m_exists = exists; }
@@ -159,10 +158,10 @@ public:
 private:
 	// Initialisation functions
 	Result						InitialiseParticles(void);
-	Result						InitialiseBuffers(ID3D11Device *device);
+	Result						InitialiseBuffers(void);
 
 	// Rendering methods
-	void						RenderBuffers(ID3D11DeviceContext *devicecontext);
+	void						RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
 
 	// Memory allocated for storage of particle & vertex data, plus buffers required for rendering
 	Particle					*m_particles;						// The array of Particle objects
@@ -186,7 +185,7 @@ private:
 
 	int							m_particlelimit;					// Maximum number of particles that can exist at any one time
 	int							m_vertexlimit;						// Similar limit for vertices; always equal to 6*particle limit
-	Texture						*m_texture;							// Texture applied to each particle (can be NULL for coloured particles)
+	TextureDX11 *				m_texture;							// Texture applied to each particle (can be NULL for coloured particles)
 
 	float						m_emissionfreq[2];					// Time between each particle emission (secs)
 	float						m_timetonextemission;				// Time until the next particle should be emitted (secs)

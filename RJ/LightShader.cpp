@@ -7,7 +7,7 @@
 #include "CameraClass.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
-#include "Data\\Shaders\\light_definition.h"
+#include "LightData.hlsl.h"
 #include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "LightShader.h"
@@ -24,7 +24,7 @@ LightShader::LightShader(void)
 	m_cbuffer_ps = 0;
 }
 
-Result LightShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result LightShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -41,7 +41,7 @@ Result LightShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result LightShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result LightShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -67,7 +67,7 @@ Result LightShader::InitialiseVertexShader(ID3D11Device *device, std::string fil
 
 
 // Initialise shader
-Result LightShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result LightShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -91,7 +91,7 @@ Result LightShader::InitialisePixelShader(ID3D11Device *device, std::string file
 	return ErrorCodes::NoError;
 }
 
-Result XM_CALLCONV LightShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+Result RJ_XM_CALLCONV LightShader::Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 						   const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

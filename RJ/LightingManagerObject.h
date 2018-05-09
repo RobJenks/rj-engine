@@ -4,11 +4,11 @@
 #define __LightingManagerH__
 
 #include "GameVarsExtern.h"
-#include "Data\\Shaders\\render_constants.h"
-#include "Data\\Shaders\\light_definition.h"
 #include "Light.h"
 #include "LightSource.h"
 #include "iAcceptsConsoleCommands.h"
+#include "StructuredBufferDX11.h"
+
 
 class LightingManagerObject : public iAcceptsConsoleCommands
 {
@@ -27,8 +27,9 @@ public:
 	// Typedefs
 	typedef std::vector<LightSourceEntry>			LightSources;				// Collection of light source entries
 
-	// Limit on the number of lights that can contribute to a scene
-	static const unsigned int						LIGHT_LIMIT = C_LIGHT_LIMIT;
+	// Limit on the number of lights that can contribute to a scene.  Should be far less of a 
+	// constraint under deferred rendering system
+	static const unsigned int						LIGHT_LIMIT = LIGHT_RENDER_LIMIT;
 
 	// Default constructor
 	LightingManagerObject(void);
@@ -37,7 +38,7 @@ public:
 	void								AnalyseNewFrame(void);
 
 	// Register a new light source for this scene
-	bool								RegisterLightSource(const LightSource *light);
+	bool								RegisterLightSource(LightSource *light);
 
 	// Clear all registered light sources
 	void								ClearAllLightSources(void);
@@ -51,11 +52,14 @@ public:
 	// Returns a pointer to the core light data for each source in scope for this frame
 	CMPINLINE const LightData *			GetLightData(void) const					{ return &(m_light_data[0]); }
 
+	// Returns a pointer to the structured buffer holding all light data for this frame
+	CMPINLINE StructuredBufferDX11 *	GetLightDataBuffer(void)					{ return m_sb_lights; }
+
 	// Return the light configuration relevant to the specified object
-	Game::LIGHT_CONFIG					GetLightingConfigurationForObject(const iObject *object);
+	//Game::LIGHT_CONFIG					GetLightingConfigurationForObject(const iObject *object);
 
 	// Returns the currently-active lighting configuration
-	Game::LIGHT_CONFIG					GetActiveLightingConfiguration(void) const								{ return m_active_config; }
+	/*Game::LIGHT_CONFIG					GetActiveLightingConfiguration(void) const								{ return m_active_config; }
 
 	// Set the active lighting configuration
 	CMPINLINE void						SetActiveLightingConfiguration(Game::LIGHT_CONFIG light_config)			{ m_active_config = light_config; }
@@ -64,7 +68,7 @@ public:
 	CMPINLINE void						SetActiveLightingConfigurationForObject(const iObject *object)
 	{
 		if (object) SetActiveLightingConfiguration(GetLightingConfigurationForObject(object));
-	}
+	}*/
 
 	// Called at the end of a frame to perform any final lighting-related activities
 	void								EndFrame(void);
@@ -133,11 +137,14 @@ protected:
 	// vector is sorted and items are added in priority order
 	bool													m_source_vector_is_sorted;
 
+	// Structured buffer that is populated with all frame lighting data and compiled during frame analysis
+	StructuredBufferDX11 *									m_sb_lights;
+
 	// The lighting manager is responsible for storing the active lighting configuration during rendering
-	Game::LIGHT_CONFIG										m_active_config;
+	/*Game::LIGHT_CONFIG										m_active_config;
 
 	// Lookup array which translates from a light index to its bit value in a light config bitstring
-	Game::LIGHT_CONFIG										m_config_lookup[LightingManagerObject::LIGHT_LIMIT];
+	Game::LIGHT_CONFIG										m_config_lookup[LightingManagerObject::LIGHT_LIMIT];*/
 
 	// Lighting override data
 	bool													m_lighting_is_overridden;
@@ -169,32 +176,30 @@ protected:
 	class LightOfSpecificType
 	{
 	public:
-		LightOfSpecificType(Light::LightType _type) : type(_type){ }
+		LightOfSpecificType(LightType _type) : type(_type){ }
 		bool operator()(iObject* obj) const 
 		{ 
 			return (obj->GetObjectType() == iObject::ObjectType::LightSourceObject &&		// Object must be a LightSource...
-				((Light::LightType)((LightSource*)obj)->GetLight().Data.Type) == type);		// ...and have specific light type
+				((LightType)((LightSource*)obj)->GetLight().Data.Type) == type);			// ...and have specific light type
 		}
 	protected:
-		Light::LightType type;
+		LightType type;
 	};
 
 	// Unary predicate for excluding specific light objects
 	class LightNotOfSpecificType 
 	{
 	public:
-		LightNotOfSpecificType(Light::LightType _type) : type(_type){ }
+		LightNotOfSpecificType(LightType _type) : type(_type){ }
 		bool operator()(iObject* obj) const
 		{
 			return (obj->GetObjectType() == iObject::ObjectType::LightSourceObject &&		// Object must be a LightSource...
-				((Light::LightType)((LightSource*)obj)->GetLight().Data.Type) != type);		// ...and NOT be the specified light type
+				((LightType)((LightSource*)obj)->GetLight().Data.Type) != type);			// ...and NOT be the specified light type
 		}
 	protected:
-		Light::LightType type;
+		LightType type;
 	};
 };
-
-
 
 
 #endif

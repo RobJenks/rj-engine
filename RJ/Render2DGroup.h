@@ -29,7 +29,6 @@ public:
 	struct CG_STRUCT
 	{
 		RenderComponentGroup<Image2D*>					Image2D;
-		RenderComponentGroup<Image2DRenderGroup*>		Image2DGroup;
 		RenderComponentGroup<TextBlock*>				TextBlocks;
 		RenderComponentGroup<MultiLineTextBlock*>		MultiLineTextBlocks;
 
@@ -46,7 +45,6 @@ public:
 public:
 
 	typedef std::unordered_map<std::string, Image2D*> Image2DCollection;
-	typedef std::unordered_map<std::string, Image2DRenderGroup*> Image2DRenderGroupCollection;
 	typedef std::unordered_map<std::string, RenderMouseEvent*> MouseEventCollection;
 	typedef std::unordered_map<std::string, TextBlock*> TextBlockCollection;
 	typedef std::unordered_map<std::string, MultiLineTextBlock*> MultiLineTextBlockCollection;
@@ -77,7 +75,7 @@ public:
 	CMPINLINE void SetDescription(std::string text) { m_description = text; }
 
 	// Methods to retrieve components or instances at a specific location
-	Image2DRenderGroup::InstanceReference GetComponentInstanceAtLocation(INTVECTOR2 location, bool only_components_which_accept_mouse_input);
+	iUIComponent * GetComponentAtLocation(XMFLOAT2 location, bool only_components_which_accept_mouse_input);
 
 	// Shortcut methods to find and return a render constant with the specified key
 	CMPINLINE bool HaveConstant(std::string key) { return (m_constants.count(key) > 0); }
@@ -88,10 +86,10 @@ public:
 	void PerformManagedControlRendering(iUIControl *focuscontrol);
 
 	// Method to search for a component by code, across all iUIComponent-derived component classes
-	iUIComponent *FindUIComponent(std::string code, std::string key);
+	iUIComponent *FindUIComponent(const std::string & code);
 
 	// Render function, which will process each registered renderable component in turn
-	void XM_CALLCONV Render(const FXMMATRIX baseviewmatrix);
+	void RJ_XM_CALLCONV Render(void);
 
 	// Methods to add and remove specific renderable components, so they are handled correctly by the render queue
 	bool RegisterRenderableComponent(iUIComponentRenderable *component);
@@ -114,7 +112,6 @@ private:
 	std::string						m_description;
 
 	Image2DCollection				m_components;
-	Image2DRenderGroupCollection	m_componentgroups;
 	MouseEventCollection			m_mouseevents;
 	TextBlockCollection				m_textblocks;
 	MultiLineTextBlockCollection	m_multilinetextblocks;

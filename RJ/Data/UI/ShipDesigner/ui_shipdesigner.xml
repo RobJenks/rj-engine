@@ -1,4 +1,7 @@
 <gamedata>
+
+  <include file="UI/ShipDesigner/shipdesigner_resources.xml" />
+  
   <uilayout>
     <Code>UI_SHIPDESIGNER</Code>
     <Description>Ship Designer View</Description>
@@ -13,19 +16,19 @@
     <Constant code="sd_grid.gridsize.current" value="32" />
 
     <!-- Content for the SD grid rendering groups -->
-    <Constant code="sd_grid.inactive.texture" value="UI\ShipDesigner\Content\sdgrid_null.dds" />
-    <Constant code="sd_grid.active.texture" value="UI\ShipDesigner\Content\sdgrid_active.dds" />
-    <Constant code="sd_grid.buildable.texture" value="UI\ShipDesigner\Content\sdgrid_buildable.dds" />
-    <Constant code="sd_grid.blueprint.texture" value="UI\ShipDesigner\Content\sdgrid_blueprint.dds" />
-    <Constant code="sd_grid.placementconflict.texture" value="UI\ShipDesigner\Content\sdgrid_placementconflict.dds" />
-    <Constant code="sd_grid.apoint_standard.texture" value="UI\ShipDesigner\Content\sdgrid_apoint_standard.dds" />
-    <Constant code="sd_grid.apoint_turret.texture" value="UI\ShipDesigner\Content\sdgrid_apoint_turret.dds" />
-    <Constant code="sd_grid.walkable_connect.texture" value="UI\ShipDesigner\Content\sdgrid_walkable_connect.dds" />
-    <Constant code="sd_grid.corridor.texture" value="UI\ShipDesigner\Content\sdgrid_corridor.dds" />
-    <Constant code="sd_grid.tile_border.texture" value="UI\ShipDesigner\Content\sdgrid_tile_border.dds" />
-    <Constant code="sd_grid.tile_civilian.texture" value="UI\ShipDesigner\Content\sdgrid_tile_civilian.dds" />
-    <Constant code="sd_grid.tile_engineering.texture" value="UI\ShipDesigner\Content\sdgrid_tile_engineering.dds" />
-    <Constant code="sd_grid.tile_military.texture" value="UI\ShipDesigner\Content\sdgrid_tile_military.dds" />
+    <Constant code="sd_grid.inactive.texture" value="sdgrid_null" />
+    <Constant code="sd_grid.active.texture" value="sdgrid_active" />
+    <Constant code="sd_grid.buildable.texture" value="sdgrid_buildable" />
+    <Constant code="sd_grid.blueprint.texture" value="sdgrid_blueprint" />
+    <Constant code="sd_grid.placementconflict.texture" value="sdgrid_placementconflict" />
+    <Constant code="sd_grid.apoint_standard.texture" value="sdgrid_apoint_standard" />
+    <Constant code="sd_grid.apoint_turret.texture" value="sdgrid_apoint_turret" />
+    <Constant code="sd_grid.walkable_connect.texture" value="sdgrid_walkable_connect" />
+    <Constant code="sd_grid.corridor.texture" value="sdgrid_corridor" />
+    <Constant code="sd_grid.tile_border.texture" value="sdgrid_tile_border" />
+    <Constant code="sd_grid.tile_civilian.texture" value="sdgrid_tile_civilian" />
+    <Constant code="sd_grid.tile_engineering.texture" value="sdgrid_tile_engineering" />
+    <Constant code="sd_grid.tile_military.texture" value="sdgrid_tile_military" />
 
     <!-- Defines the rendering order for SD grid rendering groups-->
     <Constant code="sd_grid.inactive.z" value="0.100000" />
@@ -47,11 +50,11 @@
     <Constant code="shippreview.z" value="0.000000" />
     
     <!-- Render group detail for other components of the SD -->
-    <Constant code="sd_connectionchangetool.texture" value="UI\ShipDesigner\Content\sd_connectionchangetool.dds" />
+    <Constant code="sd_connectionchangetool.texture" value="sd_connectionchangetool" />
     <Constant code="sd_connectionchangetool.z" value="0.025000" />
     
     <!-- Corners of the side control panel -->
-    <Image2DGroup code="control_panel_corners" texture="UI\Common\Content\panel_corner.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="control_panel_corners" texture="panel_corner" texturemode="Normal" render="true">
       <Instance x="800" y="60" z="0.25" width="32" height="32" render="true" rotation="0" />
       <Instance x="1088" y="60" z="0.25" width="32" height="32" render="true" rotation="90" />
       <Instance x="1088" y="656" z="0.25" width="32" height="32" render="true" rotation="180" />
@@ -59,7 +62,7 @@
     </Image2DGroup>
 
     <!-- Edges of the side control panel -->
-    <Image2DGroup code="control_panel_edges" texture="UI\Common\Content\panel_edge.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="control_panel_edges" texture="panel_edge" texturemode="Repeat" render="true">
       <Instance x="800" y="92" z="0.25" width="32" height="564" render="true" rotation="0" />
       <Instance x="832" y="60" z="0.25" width="256" height="32" render="true" rotation="90" />
       <Instance x="1088" y="92" z="0.25" width="32" height="564" render="true" rotation="180" />
@@ -68,7 +71,7 @@
 
 
     <!-- Active tab components, that are shown when the selected tab is active -->
-    <Image2DGroup code="panel_tab_active" texture="UI\Common\Content\panel_tab_blank_active.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="panel_tab_active" texture="panel_tab_blank_active" texturemode="Normal" render="true">
       <Instance x="832" y="80" z="0.000000" width="32" height="32" render="false" code="0" />
       <Instance x="864" y="80" z="0.000000" width="32" height="32" render="false" code="1" />
       <Instance x="896" y="80" z="0.000000" width="32" height="32" render="false" code="2" />
@@ -80,7 +83,7 @@
     </Image2DGroup>
 
     <!-- Inactive tab components along the top of the control panel -->
-    <Image2DGroup code="panel_tab_inactive" texture="UI\Common\Content\panel_tab_blank_inactive.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="panel_tab_inactive" texture="panel_tab_blank_inactive" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance x="832" y="80" z="0.000000" width="32" height="32" render="true" code="0" />
       <Instance x="864" y="80" z="0.000000" width="32" height="32" render="true" code="1" />
       <Instance x="896" y="80" z="0.000000" width="32" height="32" render="true" code="2" />
@@ -90,7 +93,7 @@
       <Instance x="1024" y="80" z="0.000000" width="32" height="32" render="true" code="6" />
       <Instance x="1056" y="80" z="0.000000" width="32" height="32" render="true" code="7" />
     </Image2DGroup>
-    <Image2DGroup code="panel_tab_inactive_down" texture="UI\Common\Content\panel_tab_blank_inactive_down.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="panel_tab_inactive_down" texture="panel_tab_blank_inactive_down" texturemode="Normal" render="true">
       <Instance x="832" y="80" z="0.000000" width="32" height="32" render="false" code="0" />
       <Instance x="864" y="80" z="0.000000" width="32" height="32" render="false" code="1" />
       <Instance x="896" y="80" z="0.000000" width="32" height="32" render="false" code="2" />
@@ -112,22 +115,22 @@
     <Button code="panel_tab_7" up="panel_tab_inactive" up_key="7" down="panel_tab_inactive_down" down_key="7" render="true" />
 
     <!-- Button type 1 components -->
-    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="button1_up" texture="button1" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="btn_newbp_up" x="832" y="172" z="0.01" width="96" height="32" render="true" />
       <Instance code="btn_savebp_up" x="940" y="172" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_loadbp_up" x="1024" y="172" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="button1_down" texture="button1_down" texturemode="Normal" render="true">
       <Instance code="btn_newbp_down" x="832" y="172" z="0.01" width="96" height="32" render="true" />
       <Instance code="btn_savebp_down" x="940" y="172" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_loadbp_down" x="1024" y="172" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
 
     <!-- Textbox components -->
-    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame" texture="textbox_normal" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_bpname_fr" x="832" y="130" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame_focus" texture="textbox_focus" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_bpname_frf" x="832" y="130" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
 
@@ -162,7 +165,7 @@
     <ComboBox definition="UI_CONTROL_COMBOBOX1" code="shipsec_selector" x="892" y="172" z="0.01" width="192" height="32" expandsize="8" render="true" />
 
     <!-- Corners of the ship section preview window -->
-    <Image2DGroup code="ship_section_preview_corners" texture="UI\Common\Content\frame_corner.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="ship_section_preview_corners" texture="frame_corner" texturemode="Normal" render="true">
       <Instance x="832" y="400" z="0.075" width="32" height="32" render="true" rotation="0" code="shipsec_prev_tl" />
       <Instance x="1056" y="400" z="0.075" width="32" height="32" render="true" rotation="90" code="shipsec_prev_tr" />
       <Instance x="1056" y="624" z="0.075" width="32" height="32" render="true" rotation="180" code="shipsec_prev_br"/>
@@ -170,7 +173,7 @@
     </Image2DGroup>
 
     <!-- Edges of the ship section preview window -->
-    <Image2DGroup code="ship_section_preview_edges" texture="UI\Common\Content\frame_edge.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="ship_section_preview_edges" texture="frame_edge" texturemode="Repeat" render="true">
       <Instance x="832" y="432" z="0.075" width="32" height="192" render="true" rotation="0" code="shipsec_prev_left" />
       <Instance x="864" y="400" z="0.075" width="192" height="32" render="true" rotation="90" code="shipsec_prev_top" />
       <Instance x="1056" y="432" z="0.075" width="32" height="192" render="true" rotation="180" code="shipsec_prev_right" />
@@ -178,7 +181,7 @@
     </Image2DGroup>
 
     <!-- Solid black backdrop to the ship section preview window -->
-    <Image2DGroup code="ship_section_preview_back" texture="UI\Common\Content\solid_black.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="ship_section_preview_back" texture="solid_black" texturemode="Repeat" render="true">
       <Instance x="856" y="424" z="0.1" width="208" height="208" render="true" rotation="0" code="shipsec_prev_back" />
     </Image2DGroup>
     
@@ -229,7 +232,7 @@
     <!-- ============================================== -->
 
     <!-- Background of the side control panel -->
-    <Image2DGroup code="control_panel_back" texture="UI\Common\Content\panel_back.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="control_panel_back" texture="panel_back" texturemode="Repeat" render="true">
       <Instance x="832" y="92" z="0.25" width="256" height="564" render="true" />
     </Image2DGroup>
 

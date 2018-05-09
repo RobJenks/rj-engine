@@ -1,17 +1,21 @@
+#include "DX11_Core.h"
+#include "Fonts.h"
 #include "FontData.h"
 #include "FontShader.h"
 #include "SentenceType.h"
+#include "CoreEngine.h"
 
 #include "TextManager.h"
 
 
-Result XM_CALLCONV TextManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
-								const FXMMATRIX baseViewMatrix, FontShader *fontshader)
-{
-	// Store pointers to the D3D device and device context
-	m_device = device;
-	m_devicecontext = deviceContext;
+// Initialise static map of standard fonts that will have space & index preallocated within the font collection
+const std::vector<std::pair<std::string, int*>> TextManager::m_standard_font_indices = {
+	{ "font_basic1", &Game::Fonts::FONT_BASIC1 }
+};
 
+
+Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int screenHeight, const FXMMATRIX baseViewMatrix, FontShader *fontshader)
+{
 	// Store the screen width and height.
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
@@ -22,32 +26,57 @@ Result XM_CALLCONV TextManager::Initialize(ID3D11Device* device, ID3D11DeviceCon
 	// Store a pointer to the font shader that this text manager will use for rendering
 	m_fontshader = fontshader;
 
+	// Preallocate space and indices for all standard fonts
+	for (auto & font_index : m_standard_font_indices)
+	{
+		m_fonts.push_back(new FontData());
+		*(font_index.second) = (int)m_fonts.size() - 1;
+	}
+
 	// Return success if all initialisation has been completed
 	return ErrorCodes::NoError;
 }
 
-Result TextManager::InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID)
+Result TextManager::InitializeFont(const std::string & code, const std::string & fontdata, const std::string & fonttexture)
 {
 	Result result;
 
 	// Create the font object.
 	FontData *font = new FontData;
-	if(!font)
-	{
-		return ErrorCodes::CannotCreateFontObject;
-	}
+	if (!font) return ErrorCodes::CannotCreateFontObject;
 
 	// Initialize the font object.
-	result = font->Initialize(m_device, name, fontdata, fonttexture);
+	result = font->Initialize(code, fontdata.c_str(), fonttexture);
 	if(result != ErrorCodes::NoError)
 	{
+		SafeDelete(font);
+		Game::Log << LOG_WARN << "Failed to initialise font \"" << code << "\"\n";
 		return result;
 	}
 
-	// If all completed successfully then add to the collection and pass the ID of this font back to the calling function
-	m_fonts.push_back(font);
-	fontID = ((int)m_fonts.size()-1);
-	
+	// Get the index for this font; either the next unused value, or a specific index if this is recognised as a 'standard' font
+	int index = -1;
+	for (auto & font_index : m_standard_font_indices)
+	{
+		if (font_index.first == code)
+		{
+			index = *(font_index.second);
+			break;
+		}
+	}
+
+	if (index == -1)
+	{
+		m_fonts.push_back(font);
+		Game::Log << LOG_INFO << "Initialised font \"" << code << "\" (" << m_fonts.size()-1 << ")\n";
+	}
+	else
+	{
+		if (m_fonts[index]) SafeDelete(m_fonts[index]);
+		m_fonts[index] = font;
+		Game::Log << LOG_INFO << "Initialised font \"" << code << "\"; mapped to standard index " << index << "\n";
+	}
+
 	// Return success
 	return ErrorCodes::NoError;	
 }
@@ -102,7 +131,7 @@ void TextManager::Shutdown()
 }
 
 
-Result XM_CALLCONV TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result RJ_XM_CALLCONV TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	Result result, overallresult;
 	SentenceType *sentence;
@@ -203,7 +232,8 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 	vertexData.SysMemSlicePitch = 0;
 
 	// Create the vertex buffer.
-    result = m_device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer);
+	auto *device = Game::Engine->GetRenderDevice()->GetDevice();
+    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CannotCreateTextVertexBuffer;
@@ -223,7 +253,7 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	result = m_device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
+	result = device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CannotCreateTextIndexBuffer;
@@ -303,7 +333,8 @@ Result TextManager::SetSentenceText(SentenceType *sentence, const char *text, fl
 	font->BuildVertexArray((void*)vertices, text, drawX, drawY, size, &(sentence->sentencewidth), &(sentence->sentenceheight));
 
 	// Lock the vertex buffer so it can be written to.
-	result = m_devicecontext->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
+	result = context->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CouldNotObtainVertexBufferLock;
@@ -316,7 +347,7 @@ Result TextManager::SetSentenceText(SentenceType *sentence, const char *text, fl
 	memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * sentence->vertexCount));
 
 	// Unlock the vertex buffer.
-	m_devicecontext->Unmap(sentence->vertexBuffer, 0);
+	context->Unmap(sentence->vertexBuffer, 0);
 
 	// Release the vertex array as it is no longer needed.
 	delete [] vertices;
@@ -351,29 +382,30 @@ void TextManager::ReleaseSentence(SentenceType** sentence)
 }
 
 
-Result XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result RJ_XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	unsigned int stride, offset;
 
 	// Set vertex buffer stride and offset.
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
     stride = sizeof(VertexType); 
 	offset = 0;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetVertexBuffers(0, 1, &sentence->vertexBuffer, &stride, &offset);
+	context->IASetVertexBuffers(0, 1, &sentence->vertexBuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetIndexBuffer(sentence->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(sentence->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	m_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Get a handle to the font object that will be used for rendering of the text
 	FontData *font = m_fonts.at(sentence->fontID);
 	if (!font) return ErrorCodes::FontDataNoLongerExistsForTextRendering;
 
 	// Render the text using the font shader.
-	return m_fontshader->Render( m_devicecontext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, 
+	return m_fontshader->Render( context, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix,
 								 font->GetTexture(), sentence->colour);
 }
 

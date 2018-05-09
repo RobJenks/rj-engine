@@ -2,11 +2,14 @@
 #include "FileSystem.h"
 #include "Utility.h"
 #include "FastMath.h"
+#include "Logging.h"
 #include "GameDataExtern.h"
 #include "ObjectReference.h"
 #include "GameSpatialPartitioningTrees.h"
 #include "SimulationStateManager.h"
 #include "LightSource.h"
+#include "CoreEngine.h"
+#include "TextureDX11.h"
 
 #include "SpaceSystem.h"
 
@@ -24,7 +27,7 @@ SpaceSystem::SpaceSystem(void)
 	m_backdrop = NULL;
 }
 
-Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
+Result SpaceSystem::InitialiseSystem(Rendering::RenderDeviceType *device)
 {
 	// The system can only be initialised once
 	if (m_initialised) return ErrorCodes::CannotReinitialiseSystem;
@@ -48,18 +51,19 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 	Projectiles.Initialise();
 
 	// Attempt to load the system backdrop, if a valid filename has been provided
-	m_backdrop = new Texture();
-	if (m_backdroplocation != NullString) 
+	m_backdrop = Game::Engine->GetAssets().GetTexture(m_backdroplocation);
+	if (!m_backdrop)
 	{
-		std::string filename = BuildStrFilename(D::IMAGE_DATA, m_backdroplocation);
-		if (FileSystem::FileExists(filename.c_str()))
-		{
-			m_backdrop->Initialise(filename.c_str());
-		}
+		Game::Log << LOG_WARN << "Cannot load backdrop \"" << m_backdroplocation << "\" for system \"" << m_code << "\" (\"" << m_name << "\")\n";
 	}
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+CMPINLINE ID3D11ShaderResourceView * SpaceSystem::GetBackdropTextureResource(void) 
+{ 
+	return m_backdrop->GetShaderResourceView();
 }
 
 // Handles the entry of an object into the system, adding it to the system collections and updating the simulation state accordingly
@@ -164,7 +168,7 @@ void SpaceSystem::RegisterAllSystemLights(void)
 		obj = (*it)(); 
 		if (obj && obj->GetObjectType() == iObject::ObjectType::LightSourceObject)
 		{
-			if (((LightSource*)obj)->GetLight().Data.Type == Light::LightType::Directional)
+			if (((LightSource*)obj)->GetLight().Data.Type == LightType::Directional)
 			{
 				m_directional_lights.push_back((iObject*)obj);
 			}
@@ -238,13 +242,6 @@ void SpaceSystem::TerminateSystem(void)
 	// tree, returning each node to the memory pool as it goes.  
 	if (SpatialPartitioningTree) SpatialPartitioningTree->Shutdown();
 	SpatialPartitioningTree = NULL;
-
-	// Release the backdrop texture resource maintained for this system
-	if (m_backdrop) 
-	{
-		m_backdrop->Shutdown();
-		SafeDelete(m_backdrop);
-	}
 
 	// Finally, mark the system as uninitialised so it is not used in future (and can be re-initialised if required)
 	m_initialised = false;

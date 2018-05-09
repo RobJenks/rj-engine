@@ -7,6 +7,7 @@
 class GameInputDevice;
 class UserInterface;
 class Render2DGroup;
+class iUIComponent;
 class iUIControl;
 class UIComboBox;
 
@@ -48,27 +49,27 @@ public:
 
 	// Base methods to perform initial handling of mouse events.  These methods then pass control to the virtual 
 	// methods implemented by subclasses below
-	void ProcessMouseFirstDownEvent_Base(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component);
-	void ProcessMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component);
-	void ProcessRightMouseFirstDownEvent_Base(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component);
-	void ProcessRightMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component);
+	void ProcessMouseFirstDownEvent_Base(INTVECTOR2 location, iUIComponent *component);
+	void ProcessMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component);
+	void ProcessRightMouseFirstDownEvent_Base(INTVECTOR2 location, iUIComponent *component);
+	void ProcessRightMouseUpEvent_Base(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component);
 
 	// Methods to accept mouse events from the UI manager
-	virtual void ProcessMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) = 0;
-	virtual void ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) = 0;
-	virtual void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) = 0;
+	virtual void ProcessMouseDownEvent(INTVECTOR2 location, iUIComponent *component) = 0;
+	virtual void ProcessMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component) = 0;
+	virtual void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component) = 0;
 
-	virtual void ProcessRightMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) = 0;
-	virtual void ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) = 0;
-	virtual void ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) = 0;
+	virtual void ProcessRightMouseDownEvent(INTVECTOR2 location, iUIComponent *component) = 0;
+	virtual void ProcessRightMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component) = 0;
+	virtual void ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component) = 0;
 
 	// Methods to accept generic mouse click events at the specified location
 	virtual void ProcessMouseClickAtLocation(INTVECTOR2 location) = 0;
 	virtual void ProcessRightMouseClickAtLocation(INTVECTOR2 location) = 0;
 
 	// Methods to accept the processed mouse click events for particular components
-	virtual void ProcessMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) = 0;
-	virtual void ProcessRightMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) = 0;
+	virtual void ProcessMouseClickEvent(iUIComponent *component, INTVECTOR2 location, INTVECTOR2 startlocation) = 0;
+	virtual void ProcessRightMouseClickEvent(iUIComponent *component, INTVECTOR2 location, INTVECTOR2 startlocation) = 0;
 
 	// Methods to accept the processed mouse click events for managed components, e.g. buttons
 	virtual void ProcessControlClickEvent(iUIControl *control) = 0;
@@ -79,7 +80,7 @@ public:
 
 	// Method to accept mouse move events, and also mouse hover events for specific components
 	virtual void ProcessMouseMoveEvent(INTVECTOR2 location) = 0;
-	virtual void ProcessMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, bool lmb, bool rmb) = 0;
+	virtual void ProcessMouseHoverEvent(iUIComponent *component, INTVECTOR2 location, bool lmb, bool rmb) = 0;
 
 	// Methods to process specific events raised from individual controls, and routed through the UserInterface
 	virtual void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex) = 0;
@@ -120,8 +121,8 @@ protected:
 	INTVECTOR2								m_rmb_down_location;
 
 	// Also store the component that the mouse was hovering over when a mouse event began, or NULL if there wasn't one
-	Image2DRenderGroup::Instance *			m_lmb_down_component;
-	Image2DRenderGroup::Instance *			m_rmb_down_component;
+	iUIComponent *							m_lmb_down_component;
+	iUIComponent *							m_rmb_down_component;
 
 };
 

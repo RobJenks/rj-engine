@@ -16,7 +16,7 @@
         <ElementSize x="10" y="24" z="2" />
 
         <complexshipsectioninstance>
-            <Code>testfrigate12_section_0</Code>
+            <Code>mfrig_midsection_01</Code>
             <Position x="150.000000" y="225.000000" z="100.000000" />
             <ElementLocation x="0" y="0" z="0" />
             <Rotation>0</Rotation>

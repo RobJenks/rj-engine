@@ -4,24 +4,24 @@
     <Description>Model Builder View (Developer)</Description>
 
     <!-- Side panel for selecting / saving models -->
-    <Image2DGroup code="control_panel_back" texture="UI\Common\Content\panel_back.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="control_panel_back" texture="panel_back" texturemode="Repeat" render="true">
       <Instance x="1024" y="64" z="0.25" width="256" height="600" render="true" />
     </Image2DGroup>
 
     <!-- Textbox components -->
-    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame" texture="textbox_normal" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_modelcode_fr" x="1080" y="80" z="0.01" width="180" height="32" render="true" />
       <Instance code="txt_colldata_fr" x="1080" y="168" z="0.01" width="180" height="32" render="true" />
       <Instance code="txt_terraincode_fr" x="1112" y="616" z="0.01" width="136" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame_focus" texture="textbox_focus" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_modelcode_frf" x="1080" y="80" z="0.01" width="180" height="32" render="true" />
       <Instance code="txt_colldata_frf" x="1080" y="168" z="0.01" width="180" height="32" render="true" />
       <Instance code="txt_terraincode_frf" x="1112" y="616" z="0.01" width="136" height="32" render="true" />
     </Image2DGroup>
 
     <!-- Button type 1 components -->
-    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="button1_up" texture="button1" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="btn_loadmodel_up" x="1080" y="120" z="0.01" width="80" height="32" render="true" />
       <Instance code="btn_savemodel_up" x="1180" y="120" z="0.01" width="80" height="32" render="true" />
       <Instance code="btn_loadcolldata_up" x="1080" y="208" z="0.01" width="80" height="32" render="true" />
@@ -31,7 +31,7 @@
       <Instance code="btn_removecolldata_up" x="1184" y="576" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_clearcolldata_up" x="1040" y="616" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+    <Image2DGroup code="button1_down" texture="button1_down" texturemode="Normal" render="true">
       <Instance code="btn_loadmodel_down" x="1080" y="120" z="0.01" width="80" height="32" render="true" />
       <Instance code="btn_savemodel_down" x="1180" y="120" z="0.01" width="80" height="32" render="true" />
       <Instance code="btn_loadcolldata_down" x="1080" y="208" z="0.01" width="80" height="32" render="true" />

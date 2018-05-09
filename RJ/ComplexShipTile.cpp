@@ -52,7 +52,6 @@ ComplexShipTile::ComplexShipTile(void)
 	// Set properties to default values on object creation
 	m_parent = NULL;
 	m_standardtile = false;
-	m_model = NULL;
 	m_multiplemodels = false;
 	m_rotation = Rotation90Degree::Rotate0;
 	m_elementlocation = NULL_INTVECTOR3;
@@ -110,7 +109,7 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_hardness = C.GetHardness();
 	m_boundingbox = BoundingObject::Copy(C.GetBoundingObject());
 	m_multiplemodels = C.HasCompoundModel();
-	m_models.CopyFrom(C.GetCompoundModelSet());
+	m_models = C.GetCompoundModelSet();
 	DefaultProperties = C.DefaultProperties;
 	m_connections_fixed = C.ConnectionsAreFixed();
 	m_powerrequirement = C.GetPowerRequirement();
@@ -121,10 +120,12 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 
 	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
 	// Per-element construction state can therefore always be initialised to NULL
-	if (C.GetConstructedStateConst())
+	// TODO: IMPORTANT: There are currently class-slicing problems in the tile class hierarchy.  These need 
+	// to be fixed so that the production cost/progress data can be reactivated
+	/*if (C.GetConstructedStateConst())
 		m_constructedstate = C.GetConstructedStateConst()->CreateClone();
 	else
-		m_constructedstate = new ProductionCost();
+		m_constructedstate = new ProductionCost();*/
 	m_elementconstructedstate = NULL;
 
 	// Set the element size of this tile, which recalculates relevant derived fields
@@ -242,8 +243,11 @@ void ComplexShipTile::RotateAllViewPortals(Rotation90Degree rot_delta)
 // Recalculates the state of the tile following a change to its position/size etc.  Includes recalc of the world matrix and bounding volume
 void ComplexShipTile::RecalculateTileData(void)
 {
+	// Update any size data (e.g. world size) in case the structure/size of the tile has changed
+	ElementSizeChanged();
+
 	// Update the flag that indicates whether this tile spans multiple elements (for use at render-time)
-	m_multielement = (m_elementsize.x > 1 || m_elementsize.y > 1 || m_elementsize.z > 1);
+	m_multielement = (m_elementcount > 1);
 
 	// Recalculate the world matrix for this tile based on its current position
 	RecalculateWorldMatrix();
@@ -262,16 +266,23 @@ void ComplexShipTile::RecalculateTileData(void)
 void ComplexShipTile::RecalculateWorldMatrix(void)
 { 
 	// Make sure that we have model data, for either single- or compound-model mode.  If not, simply set WM = ID
-	if ((!m_multiplemodels && !m_model) || (m_multiplemodels && !m_models.AllocationPerformed()))
+	// Tcentre = model translation to its centre point, prior to rotation about its centre
+	XMVECTOR centrepoint;
+	if (!m_multiplemodels && m_model.GetModel() && m_model.GetModel()->Geometry.get())
+	{
+		centrepoint = XMLoadFloat3(&m_model.GetModel()->Geometry.get()->CentrePoint);
+	}
+	else if (m_multiplemodels)
+	{
+		centrepoint = m_models.GetCompoundModelCentre();
+	}
+	else
 	{
 		m_relativeposition = NULL_VECTOR;
 		m_relativepositionmatrix = ID_MATRIX;
 		m_worldmatrix = ID_MATRIX;
 		return;
 	}
-
-	// Tcentre = model translation to its centre point, prior to rotation about its centre
-	XMVECTOR centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : XMLoadFloat3(&m_model->GetModelCentre()));
 	
 	// Telement = translation from model centre to top-left corner (0.5*numelements*elementsize in world coords) + translation to element position
 	// Will switch y and z coordinates since we are moving from element to world space
@@ -280,9 +291,10 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	m_relativepositionmatrix = XMMatrixTranslationFromVector(m_relativeposition);
 
 	// Multiply the matrices together to determine the final tile world matrix
-	// World = (CentreTrans * Rotation * ElementPosTranslation)
-	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixTranslationFromVector(XMVectorNegate(centrepoint)),		// Translate to centre point
+	// World = (Scale * CentreTrans * Rotation * ElementPosTranslation)
+	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(XMMatrixMultiply(
+		m_model.GetWorldMatrix(),										// Inherent model world matrix (== scale)
+		XMMatrixTranslationFromVector(XMVectorNegate(centrepoint))),	// Translate to centre point
 		GetRotationMatrix(m_rotation)),									// Rotate about centre
 		m_relativepositionmatrix);										// Translate centre point to centre point of element location
 }
@@ -299,7 +311,7 @@ void ComplexShipTile::RecalculateBoundingVolume(void)
 	// Switch x and z dimensions if the tile is rotated by 90 degrees (anti)clockwise
 	if (m_rotation == Rotation90Degree::Rotate90 || m_rotation == Rotation90Degree::Rotate270)
 	{
-		float tmp = size.x; size.x = size.z; size.z = tmp;
+		std::swap(size.x, size.z);
 	}
 
 	// Create a new cuboid bounding volume to cover the tile 
@@ -324,17 +336,14 @@ void ComplexShipTile::UpdateCollisionDataFromModels()
 	if (!HasCompoundModel())
 	{
 		// The tile has only a single model
-		AddCollisionDataFromModel(GetModel());
+		AddCollisionDataFromModel(GetModel().GetModel());
 	}
 	else
 	{
 		// We have a compound model; add from each in turn
-		for (const auto & model_element : m_models.Models)
+		for (const auto & model_element : m_models.GetModels())
 		{
-			Model *model = model_element.value.model;
-			if (!model) continue;
-
-			AddCollisionDataFromModel(model, model_element.value.elementpos, model_element.value.rotation);
+			AddCollisionDataFromModel(model_element.Model, model_element.Location, model_element.Rotation);
 		}
 	}
 }
@@ -351,30 +360,32 @@ void ComplexShipTile::RemoveAllCollisionDataFromModels()
 
 // Handle the import of additional collision data from the models that comprise this tile
 // Import collision data from the single specified model, with no location or rotation offset required
-void ComplexShipTile::AddCollisionDataFromModel(Model *model)
+void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model)
 {
-	AddCollisionDataFromModel(model, NULL_INTVECTOR3, Rotation90Degree::Rotate0);
+	AddCollisionDataFromModel(model, NULL_UINTVECTOR3, Rotation90Degree::Rotate0);
 }
 
 // Handle the import of additional collision data from the models that comprise this tile
 // Import collision data from the single specified model, with the given element location
 // and rotation offsets applied during calculation of the collision volumes
-void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
+void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model, const UINTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
-	if (!model || !m_parent || model->CollisionData().empty()) return;
+	const Model *m = model.GetModel();
+	if (!m || !m_parent || m->CollisionData().empty()) return;
 
 	// Offset of the model centre from the tile centre = ((element_pos + 1/2element) - tilecentre - model_centre_point)
 	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = ((25,15)-(15,15)-(0,0)) = (10,0).  Equals ((10,0)+(15,15)) in non-tile-centred space = (25,15) = el[2,1].centre
-	XMVECTOR model_centre = XMLoadFloat3(&model->GetModelCentre());
+	XMVECTOR model_centre = XMLoadFloat3(&m->Geometry.get()->CentrePoint);
 	XMVECTOR pos_offset = XMVectorSubtract(XMVectorSubtract(XMVectorAdd(Game::ElementLocationToPhysicalPosition(element_offset), Game::C_CS_ELEMENT_MIDPOINT_V), m_centre_point), model_centre);
 	XMVECTOR orient_offset = GetRotationQuaternion(rotation_offset);
 
 	// Process every collision volume separately
-	for (const auto & collision : model->CollisionData())
+	for (const auto & collision : m->CollisionData())
 	{
-		XMVECTOR position = XMVectorAdd(XMVector3Rotate(XMLoadFloat3(&collision.Position), orient_offset), pos_offset);
+		XMVECTOR basepos = XMVector3TransformCoord(XMLoadFloat3(&collision.Position), model.GetWorldMatrix());	// Scale pos by model size
+		XMVECTOR position = XMVectorAdd(XMVector3Rotate(basepos, orient_offset), pos_offset);
 		XMVECTOR orient = XMQuaternionMultiply(XMLoadFloat4(&collision.Orientation), orient_offset);
-		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
+		XMVECTOR extent = XMVector3TransformCoord(XMLoadFloat3(&collision.Extent), model.GetWorldMatrix());		// Scale extent by model size
 
 		Terrain *terrain = Terrain::Create();
 		terrain->PostponeUpdates();
@@ -501,20 +512,13 @@ bool ComplexShipTile::IsPrimaryTile(void)
 void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 { 
 	// Make sure this is a valid size
-	if (size.x <= 0 || size.y <= 0 || size.z <= 0) return;
+	if (size.x < 1 || size.y < 1 || size.z < 1) return;
 
 	// Store the new element size and count of elements
 	m_elementsize = size; 
-	m_elementcount = (unsigned int)(size.x * size.y * size.z);	// We know all components are >= 0 so this is okay
-
-	// Determine the world size of this tile based on the element size
-	m_worldsize = Game::ElementLocationToPhysicalPosition(m_elementsize);
-
-	// Determine the approximate radius of a bounding sphere that encompasses this tile
-	m_bounding_radius = GetElementBoundingSphereRadius(max(max(m_elementsize.x, m_elementsize.y), m_elementsize.z));
-
-	// Determine the centre point of this tile in world space
-	m_centre_point = XMVectorScale(Game::ElementLocationToPhysicalPosition(m_elementsize), 0.5f);
+	
+	// Update derived size data (e.g. world size) based on this element size
+	ElementSizeChanged();
 
 	// Reallocate connection data to be appropriate for this new size
 	InitialiseConnectionState();
@@ -523,8 +527,28 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 	RecalculateTileData(); 
 
 	// Reset the tile to be 0% constructed and start the construction process
-	m_constructedstate->ResetToZeroPcProgress();
-	StartConstruction();
+	// TODO: IMPORTANT: Disabling for now since there are problems with class slicing.  Resolves these issues with 
+	// the tile class hierarchy
+	/*m_constructedstate->ResetToZeroPcProgress();		// TODO: FIX
+	StartConstruction();*/								// TODO: FIX
+}
+
+// Method which recalculates derived size data following a change to the element size (e.g. world size)
+void ComplexShipTile::ElementSizeChanged(void)
+{
+	// Element size is guaranteed to be >= 1 in all dimensions.  
+	// Update count of elements within this tile
+	m_elementcount = (unsigned int)(m_elementsize.x * m_elementsize.y * m_elementsize.z);
+
+	// Determine the world size of this tile based on the element size; set the model geometry accordingly
+	m_worldsize = Game::ElementLocationToPhysicalPosition(m_elementsize);
+	m_model.SetSize(m_worldsize);
+
+	// Determine the approximate radius of a bounding sphere that encompasses this tile
+	m_bounding_radius = GetElementBoundingSphereRadius(max(max(m_elementsize.x, m_elementsize.y), m_elementsize.z));
+
+	// Determine the centre point of this tile in world space
+	m_centre_point = XMVectorScale(Game::ElementLocationToPhysicalPosition(m_elementsize), 0.5f);
 }
 
 // Copies the basic properties of a tile from the given source
@@ -772,6 +796,10 @@ float ComplexShipTile::RemoveConstructionProgress(INTVECTOR3 element, const Reso
 // Sets the production cost & state of this tile; called upon tile creation
 void ComplexShipTile::InitialiseConstructionState(ProductionCost *state)
 {
+	// TODO: IMPORTANT: There are currently class-slicing problems in the tile class hierarchy.  These need 
+	// to be fixed so that the production cost/progress data can be reactivated
+	return;
+
 	// If we already have a production state object then remove it here first
 	if (m_constructedstate) { delete m_constructedstate; m_constructedstate = NULL; }
 
@@ -852,7 +880,9 @@ ComplexShipTile::~ComplexShipTile(void)
 	if (m_boundingbox) SafeDelete(m_boundingbox);
 
 	// Dispose of overall tile construction data
-	if (m_constructedstate) SafeDelete(m_constructedstate);
+	// TODO: IMPORTANT: There are currently class-slicing problems in the tile class hierarchy.  These need 
+	// to be fixed so that the production cost/progress data can be reactivated
+	//if (m_constructedstate) SafeDelete(m_constructedstate);
 
 	// Dispose of all per-element construction state objects, if they exist
 	DeallocatePerElementConstructionProgress();
@@ -959,7 +989,7 @@ void ComplexShipTile::SetSingleModel(Model *model)
 	// Shut down any compound-model data if it has previously been allocated, and set this tile to single-model mode
 	if (HasCompoundModel())
 	{
-		m_models.Shutdown();
+		m_models.Reset();
 		SetHasCompoundModel(false);
 	}
 
@@ -977,10 +1007,8 @@ void ComplexShipTile::SetMultipleModels(void)
 	SetHasCompoundModel(true);
 
 	// Reset and deallocate any existing compound model data
-	m_models.ResetModelSet();
+	m_models = CompoundElementModel(GetElementSize().Convert<UINT>());
 
-	// Allocate sufficient space for a compound model covering the entire tile area
-	m_models.Allocate(GetElementSize());
 }
 
 // Static method to look up a tile definition and create a new tile based upon it
@@ -1021,7 +1049,7 @@ void ComplexShipTile::RecalculateCompoundModelData(void)
 	// Make sure this tile does have compound model data
 	if (m_multiplemodels)
 	{
-		m_models.RecalculateBounds();
+		m_models.RecalculateModelData();
 	}
 }
 
@@ -1071,7 +1099,7 @@ void ComplexShipTile::ProcessDebugTileCommand(GameConsoleCommand & command)
 
 	// Accessor methods
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetClass)
-	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTileClass)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTileClassIndex)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetID)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetSimulationState)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(SimulationIsActive)
