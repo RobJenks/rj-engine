@@ -39,13 +39,7 @@
     <AllocateBoundingObjects>1</AllocateBoundingObjects>
     <BoundingObject id="0" type="cuboid" sizex="200.000000" sizey="50.000000" sizez="350.000000" />
 
-    <Hardpoint code="hpengine01" type="Engine">
-      <Position x="0.0000000" y="10.000000" z="-30.000000" />
-      <Orientation w="0.000000" x="0.000000" y="0.000000" z="1.000000" />
-    </Hardpoint>
-
     <Elementsize x="10" y="24" z="2" />
-
 
     <ElementStateDefinition>
       <DefaultState state="Active|Buildable" />

@@ -969,6 +969,8 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
 			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
+			((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(1.0f);
+
 			if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
 			{
 				ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
