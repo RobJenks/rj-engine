@@ -536,7 +536,7 @@ void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Mod
 	// Simply render a single instance of the light volume within the bound pipeline
 	// TODO: In general, optimise the sequence of bind/unbind calls; allow transition directly from Bind()->Bind() without Unbind() in the middle where possible
 	pipeline->Bind();
-	Game::Engine->RenderInstanced(*pipeline, light_render_volume->Data, NULL, RM_Instance(transform), 1U);
+	Game::Engine->RenderInstanced(*pipeline, *light_render_volume, NULL, RM_Instance(transform), 1U);
 	pipeline->Unbind();
 }
 
@@ -613,7 +613,7 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	m_pipeline_debug_rendering->Bind();
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
-	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, m_model_quad->Data, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
+	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, *m_model_quad, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();

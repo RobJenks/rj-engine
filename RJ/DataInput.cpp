@@ -14,6 +14,7 @@
 #include "FileInput.h"
 #include "Attachment.h"
 #include "Model.h"
+#include "ModelLoadingData.h"
 #include "ArticulatedModel.h"
 #include "Modifiers.h"
 #include "ModifierDetails.h"
@@ -404,12 +405,13 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
-	std::string key, code, filename, material;
+	std::string key, code;
+	std::vector<ModelLoadingData> components;
 	std::vector<CollisionSpatialDataF> collision;
 	HashVal hash;
 
 	// Set defaults before loading the model
-	code = filename = material = NullString;
+	code = NullString;
 
 	// Look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -424,12 +426,17 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 			code = child->GetText();
 			StrLowerC(code);
 		}
-		else if (hash == HashedStrings::H_Filename) {						/* Filename of the ship model file */
-			filename = child->GetText();
-		}
-		else if (hash == HashedStrings::H_Material) {						/* String code of the associated material */
-			material = child->GetText();
-			StrLowerC(material);
+		else if (hash == HashedStrings::H_Component) {
+			const char *cfile = child->Attribute("file");
+			const char *cmat = child->Attribute("material");
+
+			if (cfile)
+			{
+				components.push_back(ModelLoadingData(
+					BuildStrFilename(D::DATA, std::string(cfile)), 
+					(cmat ? std::string(cmat) : NullString))
+				);
+			}
 		}
 		else if (hash == HashedStrings::H_Collision) {						/* List of collision objects attached to this model */
 			collision.push_back(IO::Data::LoadCollisionSpatialData(child));
@@ -437,7 +444,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	}
 
 	// Make sure we have all mandatory fields 
-	if (code == NullString || filename == NullString)
+	if (code == NullString)
 	{
 		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; missing mandatory data\n";
 		return ErrorCodes::InsufficientDataToLoadModel;
@@ -450,13 +457,18 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; model already exists\n";
 		return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
 	}
-	
-	// Construct full filenames from the info specified
-	std::string full_filename = BuildStrFilename(D::DATA, filename);
 
 	// Otherwise create a new model here
 	model = new Model();
-	model->Initialise(code, full_filename, material);
+	Result result = model->Initialise(code, components);
+
+	// Terminate if initialisation was not successful
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Failed to load model \"" << code << "\" (" << result << "); discarding all geometry\n";
+		SafeDelete(model);
+		return ErrorCodes::CouldNotInitialiseModel;
+	}
 	
 	// Set other loaded properties after initialisation if required
 	model->SetCollisionData(std::move(collision));

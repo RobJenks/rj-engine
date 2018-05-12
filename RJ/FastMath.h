@@ -241,6 +241,42 @@ CMPINLINE float		Float3DistanceSq(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 	return ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
 }
 
+// Returns a new vector with each component result[k] = min(v1[k], v2[k])
+CMPINLINE XMFLOAT3	Float3Min(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z));
+}
+
+// Returns a new vector with each component result[k] = max(v1[k], v2[k])
+CMPINLINE XMFLOAT3	Float3Max(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z));
+}
+
+// Determines whether all for EVERY component k, (v1[k] < v2[k])
+CMPINLINE bool Float3LessThan(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return (v1.x < v2.x && v1.y < v2.y && v1.z < v2.z);
+}
+
+// Determines whether all for EVERY component k, (v1[k] <= v2[k])
+CMPINLINE bool Float3LessOrEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return (v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z);
+}
+
+// Determines whether all for EVERY component k, (v1[k] > v2[k])
+CMPINLINE bool Float3GreaterThan(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return (!Float3LessOrEqual(v1, v2));
+}
+
+// Determines whether all for EVERY component k, (v1[k] >= v2[k])
+CMPINLINE bool Float3GreaterOrEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return (!Float3LessThan(v1, v2));
+}
+
 CMPINLINE XMFLOAT4	Float4MultiplyScalar(const XMFLOAT4 & v, const float s)
 {
 	return XMFLOAT4(v.x * s, v.y * s, v.z * s, v.w * s);

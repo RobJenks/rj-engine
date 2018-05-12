@@ -18,8 +18,11 @@ Model::ModelID Model::GlobalModelIDCount = 0U;
 // Default constructor
 Model::Model(void)
 	:
-	m_id(++Model::GlobalModelIDCount)
+	m_id(++Model::GlobalModelIDCount), 
+	m_component_count(0U)
 {
+	// Derived fields will all be set to defaults when calculated for null model data
+	RecalculateDerivedData();
 }
 
 // Default destructor
@@ -30,54 +33,64 @@ Model::~Model(void)
 
 
 // Load a model from disk and prepare it for use
-Result Model::Initialise(const std::string & code, const std::string & filename, const std::string & material)
-{
-	return Initialise(code, fs::path(filename), material);
-}
-
-
-// Load a model from disk and prepare it for use
-Result Model::Initialise(const std::string & code, fs::path file, const std::string & material)
+Result Model::Initialise(const std::string & code, std::vector<ModelLoadingData> components)
 {
 	// Reset all geometry data beforehand so that we don't ever half-load a model over an existing one
 	Reset();
 
 	// Store key parameters
 	m_code = code;
-	m_filename = fs::absolute(file).string();
 
-	// Parameter check
-	if (m_filename.empty() || !fs::exists(file))
+	// Validation
+	if (components.empty())
 	{
-		Game::Log << LOG_ERROR << "Model file does not exist: \"" << m_filename << "\"\n";
-		return ErrorCodes::CouldNotOpenModelFile;
+		Game::Log << LOG_ERROR << "Cannot load model \"" << code << "\"; no valid components have been defined\n";
+		return ErrorCodes::ModelHasNoValidComponents;
 	}
 
-	// Read file contents
-	ByteString binary_data = FileUtils::ReadBinaryFile(file);
-	if (binary_data.empty())
+	// Process each component in turn
+	size_t n = components.size();
+	for (size_t i = 0U; i < n; ++i)
 	{
-		Game::Log << LOG_ERROR << "Model file is empty or invalid: \"" << m_filename << "\"\n";
-		return ErrorCodes::CannotLoadMesh;
+		const auto & item = components[i];
+
+		// Parameter check
+		fs::path file(item.GetFilename());
+		if (!fs::exists(file))
+		{
+			Game::Log << LOG_ERROR << "Cannot load model \"" << code << "[" << i << "]\"; model file does not exist: \"" << item.GetFilename() << "\"\n";
+			return ErrorCodes::CouldNotOpenModelFile;
+		}
+
+		// Read file contents
+		ByteString binary_data = FileUtils::ReadBinaryFile(file);
+		if (binary_data.empty())
+		{
+			Game::Log << LOG_ERROR << "Cannot load model \"" << code << "[" << i << "]\"; model file is empty or invalid: \"" << item.GetFilename() << "\"\n";
+			return ErrorCodes::CannotLoadMesh;
+		}
+
+		// Attempt to deserialize all model geometry data
+		auto geometry = ModelData::Deserialize(binary_data);
+		if (geometry.get() == NULL)
+		{
+			Game::Log << LOG_ERROR << "Could not deserialize model \"" << code << "[" << i << "]\" data from \"" << item.GetFilename() << "\"\n";
+			return ErrorCodes::CannotDeserializeModel;
+		}
+
+		// Store the new component entry
+		Components.push_back(Model::Component(std::move(geometry), NULL, item.GetFilename(), item.GetMaterial()));
 	}
 
-	// Attempt to deserialize all model geometry data
-	Geometry = ModelData::Deserialize(binary_data);
-	if (Geometry.get() == NULL)
-	{
-		Game::Log << LOG_ERROR << "Could not deserialize model data from \"" << m_filename << "\"\n";
-		return ErrorCodes::CannotDeserializeModel;
-	}
-
-	// Store the material name, which will be resolved upon compilation
-	m_materialcode = material;
-	
 	// Compile the model based upon the loaded geometry data
 	Result compile_result = CompileModel();
 	if (compile_result != ErrorCodes::NoError)
 	{
 		return compile_result;
 	}
+
+	// Perform a recalculation of derived data based on this newly-compiled geometry
+	RecalculateDerivedData();
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -86,39 +99,84 @@ Result Model::Initialise(const std::string & code, fs::path file, const std::str
 // Reset all model geometry data
 void Model::Reset(void)
 {
-	Geometry.reset(NULL);
-	Data = ModelBuffer();
+	// Release all data
+	Components.clear();
+
+	// Perform a recalculation which will reset all derived data back to defaults
+	RecalculateDerivedData();
+}
+
+// Calculate fields that are based upon the model data, for example the overall geometry bounds
+void Model::RecalculateDerivedData(void)
+{
+	// Store the number of valid model components
+	m_component_count = Components.size();
+
+	// Determine minimum and maximum vertex bounds
+	XMFLOAT3 min_bounds = XMFLOAT3(+1e6, +1e6, +1e6);
+	XMFLOAT3 max_bounds = XMFLOAT3(-1e6, -1e6, -1e6);
+	for (const auto & item : Components)
+	{
+		const auto geo = item.Geometry.get();
+		if (!geo) continue;
+
+		min_bounds = Float3Min(min_bounds, geo->MinBounds);
+		max_bounds = Float3Max(max_bounds, geo->MaxBounds);
+	}
+
+	// If we have no valid non-null components, revert to defaults
+	if (!Float3GreaterThan(max_bounds, min_bounds))
+	{
+		min_bounds = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		max_bounds = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+
+	// Calculate & store the derived data
+	m_minbounds = min_bounds;
+	m_maxbounds = max_bounds;
+	m_modelsize = XMFLOAT3(max_bounds.x - min_bounds.x, max_bounds.y - min_bounds.y, max_bounds.z - min_bounds.z);
+	m_centrepoint = XMFLOAT3(min_bounds.x + (m_modelsize.x * 0.5f), min_bounds.y + (m_modelsize.y * 0.5f), min_bounds.z + (m_modelsize.z * 0.5f));
 }
 
 // Compile a model and generate all rendering buffer data
 Result Model::CompileModel(void)
 {
-	// Make sure geometry data has been loaded
-	ModelData *data = Geometry.get();
-	if (!data)
+	// Compile each component in turn
+	size_t n = Components.size();
+	for (size_t i = 0U; i < n; ++i)
 	{
-		Game::Log << LOG_WARN << "Cannot compile model \"" << m_code << "\"; no geometry data available\n";
-		return ErrorCodes::CannotCompileModel;
+		auto & component = Components[i];
+
+		// Make sure geometry data has been loaded
+		ModelData *data = component.Geometry.get();
+		if (!data)
+		{
+			Game::Log << LOG_WARN << "Cannot compile model \"" << m_code << "[" << i << "]\"; no geometry data available\n";
+			return ErrorCodes::CannotCompileModel;
+		}
+
+		// Attempt to resolve the model material, otherwise use a default
+		const MaterialDX11 * pMaterial = Game::Engine->GetAssets().GetMaterial(component.MaterialCode);
+		if (!pMaterial)
+		{
+			Game::Log << LOG_WARN << "Cannot find material \"" << component.MaterialCode << "\" for model \"" << m_code << "[" << i << "]\"; using default\n";
+			pMaterial = Game::Engine->GetAssets().GetDefaultMaterial();
+		}
+
+		// Refresh the buffer with this new data
+		component.Data = std::make_unique<ModelBuffer>
+		(
+			VertexBufferDX11(*data),
+			IndexBufferDX11(*data),
+			pMaterial
+		);
+
+		// Store reference back to this model within the buffer; useful mostly for debugging
+		component.Data->SetParentModel(this);
 	}
 
-	// Attempt to resolve the model material, otherwise use a default
-	const MaterialDX11 * pMaterial = Game::Engine->GetAssets().GetMaterial(m_materialcode);
-	if (!pMaterial)
-	{
-		Game::Log << LOG_WARN << "Cannot find material \"" << m_materialcode << "\" for model \"" << m_code << "\"; using default\n";
-		pMaterial = Game::Engine->GetAssets().GetDefaultMaterial();
-	}
-
-	// Refresh the buffer with this new data
-	Data = ModelBuffer
-	(
-		VertexBufferDX11(*data),
-		IndexBufferDX11(*data),
-		pMaterial
-	);
-
-	// Store reference back to this model within the buffer; useful mostly for debugging
-	Data.SetParentModel(this);
+	// Store total component count for render-time
+	m_component_count = n;
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -140,24 +198,6 @@ Model *Model::GetModel(const std::string & code)
 	return (it != Models.end() ? it->second : NULL);
 }
 
-// Retrieve a model from the central collection based on its filename; requires linear search (on hash values) so less efficient than searching by code
-Model *Model::GetModelFromFilename(const std::string & filename)
-{
-	// Hash the input filename (assuming it is valid) for more efficient comparisons
-	if (filename == NullString) return NULL;
-	HashVal hash = HashString(filename);
-
-	// Iterate through the collection to look for a model with this filename
-	ModelCollection::const_iterator it_end = Model::Models.end();
-	for (ModelCollection::const_iterator it = Model::Models.begin(); it != it_end; ++it)
-	{
-		if (it->second && hash == HashString(it->second->GetFilename()))
-			return it->second;
-	}
-
-	// We could not find a model with this filename
-	return NULL;
-}
 
 // Add a new model to the central collection, indexed by its unique string code
 void Model::AddModel(Model *model)
@@ -168,7 +208,7 @@ void Model::AddModel(Model *model)
 		Game::Log << LOG_ERROR << "Could not register new model with global collection; null model or model code\n";
 		return;
 	}
-	else if (Model::ModelExists(model->GetCode()))
+	if (Model::ModelExists(model->GetCode()))
 	{
 		Game::Log << LOG_ERROR << "Could not register new model with global collection; model already exists with code \"" << model->GetCode() << "\"\n";
 		return;
@@ -191,7 +231,14 @@ void Model::ReloadModel(Model *model)
 	Game::Log << LOG_DEBUG << "Reloading model geometry for \"" << model->GetCode() << "\"\n";
 
 	// We can simply re-execute the initialisation and compilation steps; all source data is already available 
-	Result result = model->Initialise(model->GetCode(), model->GetFilename(), model->GetMaterialCode());
+	// Build a collection of source references and then re-run initialisation
+	std::vector<ModelLoadingData> source;
+	for (const auto & item : model->Components)
+	{
+		source.push_back(ModelLoadingData(item.Filename, item.MaterialCode));
+	}
+
+	Result result = model->Initialise(model->GetCode(), source);
 	if (result != ErrorCodes::NoError)
 	{
 		Game::Log << LOG_ERROR << "Failed to re-initialise model \"" << model->GetCode() << "\"; error code " << (int)result << "\n";

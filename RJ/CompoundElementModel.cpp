@@ -170,12 +170,11 @@ void CompoundElementModel::CalculateModelBounds(void)
 	for (auto & model : m_models)
 	{
 		auto modeldata = model.Model.GetModel();		if (!modeldata) continue;
-		auto geometry = modeldata->Geometry.get();		if (!geometry) continue;
 
 		// Test whether this model pushes out the overall compound model bounds
 		XMVECTOR pos = Game::ElementLocationToPhysicalPosition(model.Location);
-		minbounds = XMVectorMin(minbounds, XMVectorAdd(pos, XMLoadFloat3(&geometry->MinBounds)));
-		maxbounds = XMVectorMax(maxbounds, XMVectorAdd(pos, XMLoadFloat3(&geometry->MaxBounds)));
+		minbounds = XMVectorMin(minbounds, XMVectorAdd(pos, XMLoadFloat3(&modeldata->GetMinBounds())));
+		maxbounds = XMVectorMax(maxbounds, XMVectorAdd(pos, XMLoadFloat3(&modeldata->GetMaxBounds())));
 	}
 
 	// Make sure that at least one model has bounds, otherwise we remain with the default settings

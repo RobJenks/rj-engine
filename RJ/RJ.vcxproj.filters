@@ -907,6 +907,9 @@
     <ClCompile Include="CompoundElementModelTests.cpp">
       <Filter>_Tests\Models</Filter>
     </ClCompile>
+    <ClCompile Include="ModelLoadingData.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2120,6 +2123,9 @@
     </ClInclude>
     <ClInclude Include="CompoundElementModelTests.h">
       <Filter>_Tests\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoadingData.h">
+      <Filter>Engine\Models\Static</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

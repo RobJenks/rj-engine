@@ -18,10 +18,12 @@ public:
 
 	// Header data
 	unsigned int						ModelMaterialIndex;		// Note: not the same as MaterialId.  This is the index of materials loaded within this single model
-	XMFLOAT3							MinBounds;
-	XMFLOAT3							MaxBounds;
-	XMFLOAT3							ModelSize;
-	XMFLOAT3							CentrePoint;
+
+	XMFLOAT3							MinBounds;				// For this component; Model class will aggregate across all its components as necessary
+	XMFLOAT3							MaxBounds;				// For this component; Model class will aggregate across all its components as necessary
+	XMFLOAT3							ModelSize;				// For this component; Model class will aggregate across all its components as necessary
+	XMFLOAT3							CentrePoint;			// For this component; Model class will aggregate across all its components as necessary
+	
 	unsigned int						VertexCount;			// Determines total size of the VertexData array
 	unsigned int						IndexCount;				// Determines total size of the IndexData array
 

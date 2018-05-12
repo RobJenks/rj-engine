@@ -18,8 +18,7 @@
   <!-- Model -->
   <Model>
     <Code>frigate_medium_midsection1_model</Code>
-    <Filename>Ships\Sections\Frigate_Medium\frigate_medium_midsection1.rjm</Filename>
-    <Material>frigate_medium_midsection1_material</Material>
+    <Component file="Ships\Sections\Frigate_Medium\frigate_medium_midsection1.rjm" material="frigate_medium_midsection1_material" />
   </Model>-->
 
   <ComplexShipSection>

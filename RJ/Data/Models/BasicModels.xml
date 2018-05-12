@@ -2,38 +2,32 @@
 
   <Model>
     <Code>null_model</Code>
-    <Filename>Models\Misc\unit_square.rjm</Filename>
-    <Material>null_material</Material>
+    <Component file="Models\Misc\unit_square.rjm" material="null_material" />
   </Model>
 
   <Model>
     <Code>unit_sphere_model</Code>
-    <Filename>Models\Misc\unit_sphere.rjm</Filename>
-    <Material>null_material</Material>
+    <Component file="Models\Misc\unit_sphere.rjm" material="null_material" />
   </Model>
 
   <Model>
     <Code>unit_cone_model</Code>
-    <Filename>Models\Misc\unit_cone.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Models\Misc\unit_cone.rjm" material="debug_material" />
   </Model>
 
   <Model>
     <Code>spotlight_cone_model</Code>
-    <Filename>Models\Misc\spotlight_cone_model.rjm</Filename>
-    <Material>null_material</Material>
+    <Component file="Models\Misc\spotlight_cone_model.rjm" material="null_material" />
   </Model>
   
   <Model>
     <Code>unit_square_model</Code>
-    <Filename>Models\Misc\unit_square.rjm</Filename>
-    <Material>null_material</Material>
+    <Component file="Models\Misc\unit_square.rjm" material="null_material" />
   </Model>
 
   <Model>
     <Code>unit_cone_model_alt</Code>
-    <Filename>Models\Misc\unit_cone.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Models\Misc\unit_cone.rjm" material="debug_material" />
   </Model>
 
 </GameData>

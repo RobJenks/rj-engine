@@ -23,7 +23,7 @@
     
   </Turret>
 
-<Turret>
+  <Turret>
     <Code>turret_laser01</Code>
     <Name>Basic laser turret</Name>
     <ArticulatedModel>null_turret_model</ArticulatedModel>

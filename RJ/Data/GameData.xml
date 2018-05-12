@@ -17,7 +17,6 @@
 
   <!-- Load shared static model data -->
   <include file="Models\BasicModels.xml" />
-  <include file="Ships\ShipModels.xml" />
   <include file="Ships\TileModels.xml" />
 
   <!-- Load articulated model data (must be loaded after static models) -->

@@ -828,6 +828,27 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
 }
 
+// Submits a model to the render queue manager for rendering this frame.  Will iterate through all model components
+// and dispatch to the render queue individually
+void RJ_XM_CALLCONV	CoreEngine::SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance)
+{
+	if (!model) return;
+
+	// Single-component optimisation (TODO: probably; unless branch cost > loop & instance copy-cons cost)
+	size_t n = model->GetComponentCount();
+	if (n == 1U)
+	{
+		SubmitForRendering(shader, (model->Components[0].Data.get()), material, std::move(instance));
+		return;
+	}
+
+	// Otherwise process each component in turn
+	for (size_t i = 0U; i < n; ++i)
+	{
+		SubmitForRendering(shader, (model->Components[i].Data.get()), material, std::move(RM_Instance(instance)));
+	}
+}
+
 // Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
 // overrides any default material specified in the model buffer.  A material of NULL will use the default 
 // material in the model buffer
@@ -846,6 +867,27 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, Mod
 
 	m_renderqueue[shader].ModelData[render_slot].GetInstances(material).NewInstance(std::move(instance));
 }
+
+// Submit a model for z-sorted rendering.  Will dispatch each model component to the render queue in turn
+void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
+{
+	if (!model) return;
+
+	// Single-component optimisation (TODO: probably; unless branch cost > loop & instance copy-cons cost)
+	size_t n = model->GetComponentCount();
+	if (n == 1U)
+	{
+		SubmitForZSortedRendering(shader, (model->Components[0].Data.get()), std::move(instance), position);
+		return;
+	}
+
+	// Otherwise process each component in turn
+	for (size_t i = 0U; i < n; ++i)
+	{
+		SubmitForZSortedRendering(shader, (model->Components[i].Data.get()), std::move(RM_Instance(instance)), position);
+	}
+}
+
 
 // Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 // objects.  Performance overhead; should be used only where specifically required
@@ -875,7 +917,7 @@ void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, 
 		XMMatrixTranslation(adjust.x + position.x + (size.x * 0.5f), adjust.y - (position.y + (size.y * 0.5f)), zorder));
 
 	// Delegate to the primary submission method
-	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material,
+	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, m_unit_quad_model->Components[0].Data.get(), &material,
 		RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f)));;
 }
 
@@ -942,6 +984,20 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 
 	} /// per-shader
 
+}
+
+// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
+// invoked by other processes (e.g. for deferred light volume rendering).  A material can be supplied that will override
+// the material specified in the model buffer; a null material will fall back to the default model buffer material
+void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count)
+{
+	for (const auto & component : model.Components)
+	{
+		const auto buffer = component.Data.get();
+		if (!buffer) continue;							// TODO: If we can guarantee that Models will only ever contain valid components, we can avoid checks like this during rendering
+
+		RenderInstanced(pipeline, *buffer, material, instance_data, instance_count);
+	}
 }
 
 // Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
@@ -1276,19 +1332,19 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		float alpha = object->Fade.GetFadeAlpha();	// TODO: need to use this value
 		if (alpha < Game::C_EPSILON) return;			
 
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, &(object->GetModel()->Data), 
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), 
 			std::move(RM_Instance(object->GetWorldMatrix())), object->GetPosition());
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(object->GetModel()->Data), NULL, 
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), NULL, 
 				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightShader, &(object->GetModel()->Data), NULL, 
+			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
 				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
@@ -1595,7 +1651,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition()))))
 				)));
@@ -1902,7 +1958,7 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition()))))
 				)));
@@ -1985,7 +2041,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				float alpha = tile->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 				if (alpha < Game::C_EPSILON) return;
 
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, &(tile->GetModel().GetModel()->Data), std::move(
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel().GetModel(), std::move(
 					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
@@ -1993,12 +2049,12 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (tile->Highlight.IsActive())
 				{
 					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel().GetModel(), NULL, std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel().GetModel(), NULL, std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 			}

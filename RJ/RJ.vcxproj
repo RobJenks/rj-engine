@@ -565,6 +565,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
     <ClCompile Include="ModelInstance.cpp" />
+    <ClCompile Include="ModelLoadingData.cpp" />
     <ClCompile Include="ModifierDetails.cpp" />
     <ClCompile Include="Modifiers.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
@@ -963,6 +964,7 @@
     <ClInclude Include="MemDebugCheck.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelInstance.h" />
+    <ClInclude Include="ModelLoadingData.h" />
     <ClInclude Include="ModelRenderPredicate.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />

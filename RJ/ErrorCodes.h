@@ -301,6 +301,7 @@ namespace ErrorCodes {
 	const Result		CannotFindTextureResource						= 1356;
 	const Result		CouldNotInitialiseEffectManager					= 1357;
 	const Result		CannotInitialiseLightingManager					= 1358;
+	const Result		ModelHasNoValidComponents						= 1359;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;
@@ -457,7 +458,7 @@ namespace ErrorCodes {
 	const Result		CannotLoadFromNullDataNode						= 2704;
 	const Result		CannotReloadObjectWithMissingCode				= 2705;
 	const Result		CannotReloadObjectWithUnrecognisedCode			= 2706;
-
+	const Result		CouldNotInitialiseModel							= 2707;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

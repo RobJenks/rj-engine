@@ -72,9 +72,18 @@ struct RM_Instance
 	// Comparison operator for sorting; instances are sorted in ascending 'SortKey' order
 	CMPINLINE bool operator<(const RM_Instance & val) const { return (SortKey < val.SortKey); }
 
-	// Copy constructor & assignment are disallowed
-	CMPINLINE										RM_Instance(const RM_Instance & other) = delete;
-	CMPINLINE										RM_Instance & operator=(const RM_Instance & other) = delete;
+	// Copy constructor
+	CMPINLINE RM_Instance(const RM_Instance & other)
+		:
+		Transform(other.Transform),
+		Flags(other.Flags),
+		SortKey(other.SortKey),
+		Highlight(other.Highlight)
+	{
+	}
+
+	// Copy assignment is disallowed
+	CMPINLINE RM_Instance & operator=(const RM_Instance & other) = delete;
 
 	// Move constructor; no-exception guarantee to ensure these objects are moved rather than copied by STL containers
 	CMPINLINE RM_Instance(RM_Instance && other) noexcept

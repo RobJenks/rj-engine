@@ -20,32 +20,28 @@
   <Model>
     <Code>corridor_ns_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\CorridorTiles\corridor_ns.rjm</Filename>
-    <Material>corridor_ns_material</Material>
+    <Component file="Ships\Tiles\CorridorTiles\corridor_ns.rjm" material="corridor_ns_material" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
   <Model>
     <Code>corridor_se_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\CorridorTiles\corridor_se.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\CorridorTiles\corridor_se.rjm" material="debug_material" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
   
   <Model>
     <Code>corridor_nse_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\CorridorTiles\corridor_nse.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\CorridorTiles\corridor_nse.rjm" material="debug_material" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
   <Model>
     <Code>corridor_nsew_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\CorridorTiles\corridor_nsew.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\CorridorTiles\corridor_nsew.rjm" material="debug_material" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -53,8 +49,7 @@
   <Model>
     <Code>quarters_dorm01_interior_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm" material="debug_material" />
 
     <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
     <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
@@ -63,8 +58,7 @@
   <Model>
     <Code>quarters_dorm01_wall_straight_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm" material="debug_material" />
 
     <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
     <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
@@ -74,8 +68,7 @@
   <Model>
     <Code>quarters_dorm01_wall_corner_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm" material="debug_material" />
 
     <collision px="0.0000000" py="-0.4480027" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5360013" ey="0.0540000" ez="0.5495033" />
     <collision px="0.0000000" py="0.4540020" pz="0.0000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5405035" ey="0.0550000" ez="0.5285022" />
@@ -86,8 +79,7 @@
   <Model>
     <Code>quarters_dorm01_connection_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm</Filename>
-    <Material>debug_material</Material>
+    <Component file="Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm" material="debug_material" />
 
     <collision px="0.0005000" py="-0.4655028" pz="-0.0254996" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5590047" ey="0.0205001" ez="0.5755050" />
     <collision px="0.0180000" py="0.4490032" pz="0.0325000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.5575043" ey="0.0200001" ez="0.5720042" />

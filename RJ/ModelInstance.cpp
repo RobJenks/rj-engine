@@ -64,9 +64,9 @@ void ModelInstance::SetScaleFactor(const FXMVECTOR scale)
 
 void ModelInstance::SetSize(const FXMVECTOR size)
 {
-	if (!m_model || !m_model->Geometry) return;
+	if (!m_model) return;
 	
-	XMVECTOR base_size = XMLoadFloat3( &(m_model->Geometry.get()->ModelSize) );
+	XMVECTOR base_size = XMLoadFloat3( &(m_model->GetModelSize()) );
 	XMVECTOR component_scale = XMVectorDivide(size, base_size);
 
 	// Uniform-scale by the smallest absolute component scale factor, so that the final size 
@@ -83,9 +83,9 @@ void ModelInstance::SetSize(const FXMVECTOR size)
 
 void ModelInstance::SetExactSize(const FXMVECTOR size)
 {
-	if (!m_model || !m_model->Geometry) return;
+	if (!m_model) return;
 
-	XMVECTOR base_size = XMLoadFloat3(&(m_model->Geometry.get()->ModelSize));
+	XMVECTOR base_size = XMLoadFloat3( &(m_model->GetModelSize()) );
 	XMVECTOR component_scale = XMVectorDivide(size, base_size);
 
 	SetScaleFactor(component_scale);
@@ -115,30 +115,24 @@ void ModelInstance::SetModel(Model *model)
 XMVECTOR ModelInstance::DetermineModelInstanceSize(void) const
 {
 	if (!m_model) return NULL_VECTOR;
-	ModelData *data = m_model->Geometry.get();
-	if (!data) return NULL_VECTOR;
 
-	return XMVector3TransformCoord(XMLoadFloat3(&data->ModelSize), m_world);
+	return XMVector3TransformCoord(XMLoadFloat3(&m_model->GetModelSize()), m_world);
 }
 
 // Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
 XMVECTOR ModelInstance::DetermineModelInstanceMinBounds(void) const
 {
 	if (!m_model) return NULL_VECTOR;
-	ModelData *data = m_model->Geometry.get();
-	if (!data) return NULL_VECTOR;
 
-	return XMVector3TransformCoord(XMLoadFloat3(&data->MinBounds), m_world);
+	return XMVector3TransformCoord(XMLoadFloat3(&m_model->GetMinBounds()), m_world);
 }
 
 // Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
 XMVECTOR ModelInstance::DetermineModelInstanceMaxBounds(void) const
 {
 	if (!m_model) return NULL_VECTOR;
-	ModelData *data = m_model->Geometry.get();
-	if (!data) return NULL_VECTOR;
 
-	return XMVector3TransformCoord(XMLoadFloat3(&data->MaxBounds), m_world);
+	return XMVector3TransformCoord(XMLoadFloat3(&m_model->GetMaxBounds()), m_world);
 }
 
 

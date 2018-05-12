@@ -18,8 +18,7 @@
   <!-- Ship model -->
   <Model>
     <Code>testship1_model</Code>
-    <Filename>Ships\Simple\Testing\testship1\testship1.rjm</Filename>
-    <Material>testship1_material</Material>
+    <Component file="Ships\Simple\Testing\testship1\testship1.rjm" material="testship1_material" />
   </Model>
 
   <!-- Ship definition -->
