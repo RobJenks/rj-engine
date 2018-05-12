@@ -1,0 +1,83 @@
+CompoundTileModel
+{
+	vector<ModelInstance> models;
+	vector<size_t> index_into_models_per_element		
+
+		|vec| = elcount+1.  Range of elements X for el[x] = models[vec[x]] <= X < models[vec[x+1]]
+		vec[elcount] = elcount, so last actual el at [elcount-1] can still use the +1 as its upper bound
+
+}
+
+
+
+
+// Iterate through all locations within this model; iterating x -> y -> z means that the resulting
+	// indices stay sequential and we have optimal coherency
+	for (UINT x = 0; x < m_size.x; ++x)
+	{
+		for (UINT y = 0; y < m_size.y; ++y)
+		{
+			for (UINT z = 0; z < m_size.z; ++z)
+			{
+				UINT index = ELEMENT_INDEX_EX(x, y, z, m_size);
+			}
+		}
+	}
+	
+	
+	
+lastindex = -1
+for i = 0 to count
+{
+	model = models[i]
+	
+	index = model.index;
+	if (index != lastindex)
+	{
+		// this is where layoutindex 'index' begins
+		// fill all unfilled entries up to this one with the index 
+		for (int el = lastindex+1; el <= i; ++el)
+		{
+			layout[index] = i;
+		}
+		
+		// store this as the last index to be updated
+		lastindex = index;
+		
+	}
+}
+
+
+models.index: 
+
+200 300 300 210 
+
+ix:	0 1 2 3 4 5 6 7 8 
+	2 3 3 5 6 8 8 8 9
+
+layout: 		
+
+ix:	0 1 2 3 4 5 6 7 8 9 
+	    0 1   3 4   5 8
+		
+backfill:
+
+    0 0 0 1 3 3 4 5 5 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

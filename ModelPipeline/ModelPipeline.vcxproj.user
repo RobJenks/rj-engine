@@ -11,12 +11,12 @@
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-args .\ResourceBuilderDefaultModelPipelineConfig.txt -i "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Simple\Testing\testship1\testship1.obj" -o "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Simple\Testing\testship1\testship1.rjm"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-args .\ResourceBuilderDefaultModelPipelineConfig.txt -i "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Tiles\CorridorTiles\corridor_ns.obj" -o "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Tiles\CorridorTiles\corridor_ns.obj" -op collapse-scene -op bake-scene-transform</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>-args .\ResourceBuilderDefaultModelPipelineConfig.txt -i "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Simple\Testing\testship1\testship1.obj" -o "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Simple\Testing\testship1\testship1.rjm"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-args .\ResourceBuilderDefaultModelPipelineConfig.txt -i "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Tiles\CorridorTiles\corridor_ns.obj" -o "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Ships\Tiles\CorridorTiles\corridor_ns.obj" -op collapse-scene -op bake-scene-transform</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>

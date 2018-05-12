@@ -962,7 +962,7 @@ void RJMain::ProcessKeyboardInput(void)
 		{
 			//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
 			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
+			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
 			Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
@@ -2434,7 +2434,7 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
 		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
 	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
-	l->LightObject().SetIntensity(0.95f);
+	l->LightObject().SetIntensity(0.25f);
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
