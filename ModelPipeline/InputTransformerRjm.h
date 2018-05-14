@@ -7,10 +7,10 @@ class InputTransformerRjm : public TransformPipelineInput
 {
 public:
 
-	inline std::string						GetName(void) const { return "InputTransformRjm"; }
+	inline std::string									GetName(void) const { return "InputTransformRjm"; }
 
-	virtual std::unique_ptr<ModelData>		Transform(fs::path file) const;
-	virtual std::unique_ptr<ModelData>		Transform(const std::string & data) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(fs::path file) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(const std::string & data) const;
 
 private:
 

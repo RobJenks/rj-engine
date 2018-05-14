@@ -15,10 +15,10 @@ public:
 	InputTransformerLegacyRjm(const std::string & texture = "", bool generate_obj = false, unsigned int operations = AssimpIntegration::DefaultOperations());
 
 
-	inline std::string						GetName(void) const { return "InputTransformLegacyRjm"; }
+	inline std::string									GetName(void) const { return "InputTransformLegacyRjm"; }
 
-	virtual std::unique_ptr<ModelData>		Transform(fs::path file) const;
-	virtual std::unique_ptr<ModelData>		Transform(const std::string & data) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(fs::path file) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(const std::string & data) const;
 
 
 private:

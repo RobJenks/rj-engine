@@ -14,9 +14,9 @@ class AssimpIntegration
 {
 public:
 
-	static std::unique_ptr<ModelData>		ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, PostProcess operation_config, bool debug_info);
+	static std::vector<std::unique_ptr<ModelData>>		ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, PostProcess operation_config, bool debug_info);
 
-	static PostProcess						DefaultOperations(void);
+	static PostProcess									DefaultOperations(void);
 
 
 private:
@@ -28,6 +28,7 @@ private:
 
 #	define MODEL_INST_INFO(msg)				{ std::cout << "Info [Model instantiation]: " << msg << "\n"; }
 #	define MODEL_INST_DEBUG(msg)			{ if (debug_info) { std::cout << "Debug [Model instantiation]: " << msg << "\n"; } }
-#	define MODEL_INST_ERROR(msg)			{ std::cerr << "Error [Model instantiation]: " << msg << "\n"; return NULL; }
+#	define MODEL_INST_ERROR(msg)			{ std::cerr << "Error [Model instantiation]: " << msg << "\n"; return {}; }
+#	define MODEL_INST_PER_MESH_ERROR(msg)	{ std::cerr << "Error [Model instantiation]: " << msg << "\n"; continue; }
 
 };

@@ -5,6 +5,7 @@
 #include <vector>
 #include <filesystem>
 #include "../Definitions/ByteString.h"
+#include "../Definitions/ModelData.h"
 class TransformPipelineInput;
 class TransformPipelineOutput;
 class PipelineStage;
@@ -28,7 +29,10 @@ public:
 	ByteString Transform(fs::path file) const;
 
 	
+private:
 
+	void ExecuteTransform(std::vector<std::unique_ptr<ModelData>> && input, fs::path output_file) const;
+	ByteString ExecuteTransformInMemory(std::unique_ptr<ModelData> input) const;
 
 private:
 

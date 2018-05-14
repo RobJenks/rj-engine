@@ -11,10 +11,10 @@ public:
 	InputTransformerAssimp(void);
 	InputTransformerAssimp(unsigned int operations);
 
-	inline std::string						GetName(void) const { return "InputTransformAssimp"; }
+	inline std::string									GetName(void) const { return "InputTransformAssimp"; }
 
-	virtual std::unique_ptr<ModelData>		Transform(fs::path file) const;
-	virtual std::unique_ptr<ModelData>		Transform(const std::string & data) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(fs::path file) const;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(const std::string & data) const;
 
 	
 private:

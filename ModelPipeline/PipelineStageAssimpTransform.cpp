@@ -30,12 +30,19 @@ std::unique_ptr<ModelData> PipelineStageAssimpTransform::Transform(std::unique_p
 	TRANSFORM_INFO << "Applying Assimp input transformer over data (operations={" << m_operations << "})\n";
 	InputTransformerAssimp *transformer = new InputTransformerAssimp(m_operations);
 	auto transformed_data = transformer->Transform(converted);
-	if (transformed_data.get() == NULL)
+	if (transformed_data.empty())
 	{
 		TRANSFORM_ERROR << "Failed to apply transformations (ops={" << m_operations << "}) to model data\n";
 		return model;
 	}
 
+	// The pipeline should only be processing single meshes at every point beyond the input stage.  Warn and discard
+	// any additional meshes if they exist here, since it likely signals an error
+	if (transformed_data.size() != 1U)
+	{
+		TRANSFORM_ERROR << "Processed model data incorrectly contains multiple meshes; discarding all except first mesh\n";
+	}
+
 	// Return the new transformed version of model data; existing data will go out of scope and be deallocaated
-	return transformed_data;
+	return std::move(transformed_data.at(0));
 }
