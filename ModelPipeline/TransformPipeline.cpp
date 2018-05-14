@@ -78,6 +78,8 @@ void TransformPipeline::Transform(std::string input_data, fs::path output_file) 
 
 void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>> && input, fs::path output_file) const
 {
+	std::string original_filename = fs::absolute(output_file).string();
+
 	for (size_t index = 0U; index < input.size(); ++index)
 	{
 		auto & model = input.at(index);
@@ -93,7 +95,7 @@ void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>>
 		if (input.size() != 1U)
 		{
 			std::ostringstream ss;
-			ss << fs::absolute(output_file).string() << "." << index;
+			ss << original_filename << "." << index;
 			output_file = fs::path(ss.str());
 		}
 
