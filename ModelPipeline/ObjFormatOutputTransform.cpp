@@ -9,7 +9,7 @@ ObjFormatOutputTransform::ObjFormatOutputTransform(const std::string & material_
 }
 
 
-ByteString ObjFormatOutputTransform::Transform(std::unique_ptr<ModelData> model) const
+ByteString ObjFormatOutputTransform::ExecuteTransform(std::unique_ptr<ModelData> model) const
 {
 	ModelData *m = model.get();
 	if (!m)
@@ -36,7 +36,7 @@ ByteString ObjFormatOutputTransform::Transform(std::unique_ptr<ModelData> model)
 	return b;
 }
 
-void ObjFormatOutputTransform::Transform(std::unique_ptr<ModelData> model, fs::path output_file) const
+void ObjFormatOutputTransform::ExecuteTransform(std::unique_ptr<ModelData> model, fs::path output_file) const
 {
 	ModelData *m = model.get();
 	if (!m) return;

@@ -2,7 +2,7 @@
 #include "PipelineStageUnitScaleModel.h"
 
 
-std::unique_ptr<ModelData> PipelineStageUnitScaleModel::Transform(std::unique_ptr<ModelData> model) const
+std::unique_ptr<ModelData> PipelineStageUnitScaleModel::ExecuteTransform(std::unique_ptr<ModelData> model) const
 {
 	ModelData *m = model.get();
 	if (!m) return model;

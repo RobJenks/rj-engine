@@ -14,9 +14,19 @@ class TransformPipelineOutput : public TransformerComponent
 {
 public:
 
-	virtual ByteString			Transform(std::unique_ptr<ModelData> model) const = 0;
+	virtual ByteString			ExecuteTransform(std::unique_ptr<ModelData> model) const = 0;
+	virtual ByteString			Transform(std::unique_ptr<ModelData> model) const
+	{
+		Reset();
+		return ExecuteTransform(std::move(model));
+	}
 
-	virtual void				Transform(std::unique_ptr<ModelData> model, fs::path output_file) const = 0;
+	virtual void				ExecuteTransform(std::unique_ptr<ModelData> model, fs::path output_file) const = 0;
+	virtual void				Transform(std::unique_ptr<ModelData> model, fs::path output_file) const
+	{
+		Reset();
+		return ExecuteTransform(std::move(model), output_file);
+	}
 
 
 protected:

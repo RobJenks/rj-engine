@@ -3,7 +3,7 @@
 #include "PipelineUtil.h"
 
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerRjm::Transform(fs::path file) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerRjm::ExecuteTransform(fs::path file) const
 {
 	if (!fs::exists(file)) return {};
 
@@ -33,10 +33,10 @@ std::vector<std::unique_ptr<ModelData>> InputTransformerRjm::Transform(fs::path 
 	return std::move(result);
 }
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerRjm::Transform(const std::string & data) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerRjm::ExecuteTransform(const std::string & data) const
 {
 	fs::path file = PipelineUtil::SaveToNewTemporaryFile(data, "rjm");
-	auto result = Transform(file);
+	auto result = ExecuteTransform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 
 	return result;

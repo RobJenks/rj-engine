@@ -8,6 +8,7 @@
 #include <assimp\DefaultLogger.hpp>
 #include "PipelineUtil.h"
 #include "AssimpLogStream.h"
+#include "TransformResult.h"
 #include "ModelPipelineConstants.h"
 #include "CustomPostProcess.h"
 #include "TransformPipeline.h"
@@ -178,7 +179,7 @@ PostProcess AddModelSpecificOperations(fs::path model_file, PostProcess current_
 	return operations;
 }
 
-void ObjToRjm(const std::string & input, const std::string & target, PostProcess operations)
+TransformResult ObjToRjm(const std::string & input, const std::string & target, PostProcess operations)
 {
 	// Append any model-specific operations if they exist
 	operations = AddModelSpecificOperations(fs::path(input), operations);
@@ -195,14 +196,19 @@ void ObjToRjm(const std::string & input, const std::string & target, PostProcess
 
 	// Execute the transformation pipeline
 	pipeline->Transform(fs::path(input), fs::path(target));
-
+	
 	// For testing
 	// auto m = ModelData::Deserialize(PipelineUtil::ReadBinaryFile(fs::path("C:\\Users\\robje\\Downloads\\capsule.out")));
+
+	// Return the overall transform result
+	return TransformResult::Single(!pipeline.get()->HasErrors());
 }
 
-void ObjToRjmBulk(std::vector<std::string> & input, PostProcess operations)
+TransformResult ObjToRjmBulk(std::vector<std::string> & input, PostProcess operations)
 {
-	// Exectute the transformation pipeline
+	TransformResult result;
+
+	// Execute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
 	int index = 0;
 	for (const std::string & in : input)
@@ -211,11 +217,13 @@ void ObjToRjmBulk(std::vector<std::string> & input, PostProcess operations)
 		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".rjm");
-		ObjToRjm(in, target.string(), operations);
+		result += ObjToRjm(in, target.string(), operations);
 	}
+
+	return result;
 }
 
-void RjmToObj(const std::string & input, const std::string & target, const std::string & generate_material, PostProcess operations)
+TransformResult RjmToObj(const std::string & input, const std::string & target, const std::string & generate_material, PostProcess operations)
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
@@ -229,10 +237,15 @@ void RjmToObj(const std::string & input, const std::string & target, const std::
 
 	// Execute the transformation pipeline
 	pipeline->Transform(fs::path(input), fs::path(target));
+
+	// Return the overall transform result
+	return TransformResult::Single(!pipeline.get()->HasErrors());
 }
 
-void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate_material, PostProcess operations)
+TransformResult RjmToObjBulk(std::vector<std::string> & input, const std::string & generate_material, PostProcess operations)
 {
+	TransformResult result;
+
 	// Exectute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
 	int index = 0;
@@ -242,12 +255,16 @@ void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate
 		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out");
-		RjmToObj(in, target.string(), generate_material, operations);
+		result += RjmToObj(in, target.string(), generate_material, operations);
 	}
+
+	return result;
 }
 
-void ProcessRjm(const std::string & input, const std::string & target, PostProcess operations, bool in_place = false, bool in_place_backup = true)
+TransformResult ProcessRjm(const std::string & input, const std::string & target, PostProcess operations, bool in_place = false, bool in_place_backup = true)
 {
+	TransformResult result;
+
 	// Append any model-specific operations if they exist
 	operations = AddModelSpecificOperations(fs::path(input), operations);
 
@@ -268,6 +285,7 @@ void ProcessRjm(const std::string & input, const std::string & target, PostProce
 	{
 		// Exectute the transformation pipeline
 		pipeline->Transform(fs::path(input), fs::path(target));
+		result = TransformResult::Single(!pipeline.get()->HasErrors());
 	}
 	else
 	{
@@ -277,11 +295,13 @@ void ProcessRjm(const std::string & input, const std::string & target, PostProce
 
 		// Transform
 		pipeline->Transform(in, out);
+		result = TransformResult::Single(!pipeline.get()->HasErrors());
 
 		// Check whether the transformation succeeded
 		if (!fs::exists(out))
 		{
 			std::cerr << "RJM transformation failed\n";
+			result = TransformResult::SingleFailure();
 		}
 		else
 		{
@@ -299,10 +319,14 @@ void ProcessRjm(const std::string & input, const std::string & target, PostProce
 			fs::remove(out);
 		}	
 	}
+
+	return result;
 }
 
-void ProcessRjmBulk(std::vector<std::string> & input, PostProcess operations, bool in_place = false, bool in_place_backup = true)
+TransformResult ProcessRjmBulk(std::vector<std::string> & input, PostProcess operations, bool in_place = false, bool in_place_backup = true)
 {
+	TransformResult result;
+
 	// Exectute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
 	int index = 0;
@@ -313,12 +337,14 @@ void ProcessRjmBulk(std::vector<std::string> & input, PostProcess operations, bo
 
 		// Target is only relevant if this is not an in-place swap
 		std::string target = (in_place ? "" : (fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out"));
-		ProcessRjm(in, target, operations, in_place, in_place_backup);
+		result += ProcessRjm(in, target, operations, in_place, in_place_backup);
 	}
+
+	return result;
 }
 
 
-void RjmObjConversionTest(void)
+TransformResult RjmObjConversionTest(void)
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
@@ -331,13 +357,15 @@ void RjmObjConversionTest(void)
 
 	// Exectute the transformation pipeline
 	pipeline->Transform(fs::path("C:\\Users\\robje\\Downloads\\testship1.rjm"), fs::path("C:\\Users\\robje\\Downloads\\testship1.out"));
+	return TransformResult::Single(!pipeline.get()->HasErrors());
 
 	// For testing
 	// auto m = ModelData::Deserialize(PipelineUtil::ReadBinaryFile(fs::path("C:\\Users\\robje\\Downloads\\capsule.out")));
 }
 
-void BulkRjmObjConversion(void)
+TransformResult BulkRjmObjConversion(void)
 {
+	TransformResult result;
 	bool overwrite_backups = true;
 
 	// Basic pipeline configuration
@@ -382,6 +410,7 @@ void BulkRjmObjConversion(void)
 		if (!fs::exists(target))
 		{
 			std::cerr << "Transformation failed, moving to next model\n";
+			result += TransformResult::SingleFailure();
 			continue;
 		}
 
@@ -393,8 +422,12 @@ void BulkRjmObjConversion(void)
 
 		// Remove the target file now that it has been swapped in for the original file
 		fs::remove(target);
+
+		// Record result for this model
+		result.Add(!pipeline.get()->HasErrors());
 	}
 
+	return result;
 }
 
 
@@ -495,29 +528,32 @@ int main(int argc, const char *argv[])
 	std::cout << "Consolidated operation set: " << operations << "\n";
 
 	// Perform the requested operation
+	TransformResult result;
 	if (type == "process-rjm")
 	{
-		if (bulk)		ProcessRjmBulk(input, operations, inplace, inplace_backup);
-		else			ProcessRjm(input.at(0), output, operations, inplace, inplace_backup);
+		if (bulk)		result = ProcessRjmBulk(input, operations, inplace, inplace_backup);
+		else			result = ProcessRjm(input.at(0), output, operations, inplace, inplace_backup);
 	}
 	else if (type == "obj-to-rjm")
 	{
-		if (bulk)		ObjToRjmBulk(input, operations);
-		else			ObjToRjm(input.at(0), output, operations);
+		if (bulk)		result = ObjToRjmBulk(input, operations);
+		else			result = ObjToRjm(input.at(0), output, operations);
 	}
 	else if (type == "rjm-to-obj")
 	{
-		if (bulk)		RjmToObjBulk(input, gen_mat, operations);
-		else			RjmToObj(input.at(0), output, gen_mat, operations);
+		if (bulk)		result = RjmToObjBulk(input, gen_mat, operations);
+		else			result = RjmToObj(input.at(0), output, gen_mat, operations);
 	}
 
+	// Report a status and any errors that occurred
+	std::cout << "\nFinal result " << (result.Failure == 0U ? "is successful" : "HAS FAILURES") << ": " <<
+		result.Total() << " Total, " << result.Success << " Success, " << result.Failure << " Failed" << 
+		(result.Failure != 0U ? "     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" : "") << "\n";
 
 	// Return success
-	std::cout << "\nModel pipeline operations completed, exiting\n";
+	std::cout << "Model pipeline operations completed, exiting\n";
 	exit(0);
 }
-
-
 
 
 /* Test arguments:

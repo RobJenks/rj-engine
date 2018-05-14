@@ -216,6 +216,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClInclude Include="TransformPipelineBuilder.h" />
     <ClInclude Include="TransformPipelineInput.h" />
     <ClInclude Include="TransformPipelineOutput.h" />
+    <ClInclude Include="TransformResult.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Definitions\ModelData.cpp" />

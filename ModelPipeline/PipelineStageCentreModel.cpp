@@ -1,7 +1,7 @@
 #include "PipelineUtil.h"
 #include "PipelineStageCentreModel.h"
 
-std::unique_ptr<ModelData> PipelineStageCentreModel::Transform(std::unique_ptr<ModelData> model) const
+std::unique_ptr<ModelData> PipelineStageCentreModel::ExecuteTransform(std::unique_ptr<ModelData> model) const
 {
 	ModelData *m = model.get();
 	if (!m) return model;

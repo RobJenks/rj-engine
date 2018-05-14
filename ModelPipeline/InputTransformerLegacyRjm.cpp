@@ -14,7 +14,7 @@ InputTransformerLegacyRjm::InputTransformerLegacyRjm(const std::string & texture
 }
 
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerLegacyRjm::Transform(fs::path file) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerLegacyRjm::ExecuteTransform(fs::path file) const
 {
 	// Read the file data and transform it from (RJM -> OBJ)
 	if (!fs::exists(file)) return {};
@@ -52,11 +52,11 @@ std::vector<std::unique_ptr<ModelData>> InputTransformerLegacyRjm::Transform(fs:
 	return std::move(std::vector<std::unique_ptr<ModelData>>({ std::move(model_data) }));
 }
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerLegacyRjm::Transform(const std::string & data) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerLegacyRjm::ExecuteTransform(const std::string & data) const
 {
 	// Save data to a temporary file, then process as normal and clean up the temporary file
 	fs::path file = PipelineUtil::NewTemporaryFile("rjm");
-	auto model_data = Transform(file);
+	auto model_data = ExecuteTransform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 
 	return model_data;

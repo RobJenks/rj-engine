@@ -23,18 +23,18 @@ InputTransformerAssimp::InputTransformerAssimp(unsigned int operations)
 	m_operations = operations;
 }
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerAssimp::Transform(const std::string & data) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerAssimp::ExecuteTransform(const std::string & data) const
 {
 	// Save data to a temporary file, then process as normal and clean up the temporary file
 	fs::path file = PipelineUtil::NewTemporaryFile("obj");
 	PipelineUtil::WriteDataTofile(file, data);
-	auto model_data = Transform(file);
+	auto model_data = ExecuteTransform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 
 	return model_data;
 }
 
-std::vector<std::unique_ptr<ModelData>> InputTransformerAssimp::Transform(fs::path file) const
+std::vector<std::unique_ptr<ModelData>> InputTransformerAssimp::ExecuteTransform(fs::path file) const
 {
 	// Attempt to import the data into an Assimp scene
 	TRANSFORM_INFO << "Attempting to import data via assimp\n";

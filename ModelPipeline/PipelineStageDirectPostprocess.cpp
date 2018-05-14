@@ -22,7 +22,7 @@ PipelineStageDirectPostprocess::PipelineStageDirectPostprocess(PostProcess opera
 {
 }
 
-std::unique_ptr<ModelData> PipelineStageDirectPostprocess::Transform(std::unique_ptr<ModelData> model) const
+std::unique_ptr<ModelData> PipelineStageDirectPostprocess::ExecuteTransform(std::unique_ptr<ModelData> model) const
 {
 	ModelData *m = model.get();
 	if (!m) return model;

@@ -12,8 +12,8 @@ public:
 	ObjFormatOutputTransform(const std::string & material_texture = "");
 
 
-	ByteString			Transform(std::unique_ptr<ModelData> model) const;
-	void				Transform(std::unique_ptr<ModelData> model, fs::path output_file) const;
+	ByteString			ExecuteTransform(std::unique_ptr<ModelData> model) const;
+	void				ExecuteTransform(std::unique_ptr<ModelData> model, fs::path output_file) const;
 
 
 private:

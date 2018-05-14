@@ -11,7 +11,7 @@ public:
 
 	inline std::string						GetName(void) const { return "PipelineStageAssimpTransform"; }
 
-	std::unique_ptr<ModelData>				Transform(std::unique_ptr<ModelData> model) const;
+	std::unique_ptr<ModelData>				ExecuteTransform(std::unique_ptr<ModelData> model) const;
 
 private:
 

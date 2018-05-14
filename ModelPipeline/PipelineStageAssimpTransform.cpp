@@ -11,7 +11,7 @@ PipelineStageAssimpTransform::PipelineStageAssimpTransform(unsigned int operatio
 {
 }
 
-std::unique_ptr<ModelData> PipelineStageAssimpTransform::Transform(std::unique_ptr<ModelData> model) const
+std::unique_ptr<ModelData> PipelineStageAssimpTransform::ExecuteTransform(std::unique_ptr<ModelData> model) const
 {
 	ModelData *m = model.get();
 	if (!m) return model;

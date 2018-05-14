@@ -13,9 +13,19 @@ class TransformPipelineInput : public TransformerComponent
 {
 public:
 
-	virtual std::vector<std::unique_ptr<ModelData>>		Transform(const std::string & data) const = 0;
+	virtual std::vector<std::unique_ptr<ModelData>>		ExecuteTransform(const std::string & data) const = 0;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(const std::string & data) const
+	{
+		Reset();
+		return ExecuteTransform(data);
+	}
 
-	virtual std::vector<std::unique_ptr<ModelData>>		Transform(fs::path file) const = 0;
+	virtual std::vector<std::unique_ptr<ModelData>>		ExecuteTransform(fs::path file) const = 0;
+	virtual std::vector<std::unique_ptr<ModelData>>		Transform(fs::path file) const
+	{
+		Reset();
+		return ExecuteTransform(file);
+	}
 
 
 private:

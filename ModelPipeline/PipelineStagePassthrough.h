@@ -10,7 +10,7 @@ public:
 
 	inline std::string						GetName(void) const { return "PipelineStagePassthrough"; }
 
-	std::unique_ptr<ModelData>				Transform(std::unique_ptr<ModelData> model) const
+	std::unique_ptr<ModelData>				ExecuteTransform(std::unique_ptr<ModelData> model) const
 	{
 		TRANSFORM_INFO << "Passing model data without modification\n";
 		return model;

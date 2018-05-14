@@ -28,16 +28,22 @@ public:
 	ByteString Transform(std::string input_data) const;
 	ByteString Transform(fs::path file) const;
 
-	
+	CMPINLINE bool									HasErrors(void) const { return m_has_errors; }
+
 private:
 
 	void ExecuteTransform(std::vector<std::unique_ptr<ModelData>> && input, fs::path output_file) const;
 	ByteString ExecuteTransformInMemory(std::unique_ptr<ModelData> input) const;
+
+	CMPINLINE void ResetPipelineState(void) const { m_has_errors = false; }
+	CMPINLINE void ReportError(void) const { m_has_errors = true; }
 
 private:
 
 	std::unique_ptr<TransformPipelineInput>			m_input;
 	std::vector<std::unique_ptr<PipelineStage>>		m_stages;
 	std::unique_ptr<TransformPipelineOutput>		m_output;
+
+	mutable bool									m_has_errors;
 
 };

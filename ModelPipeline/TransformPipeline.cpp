@@ -17,7 +17,9 @@ TransformPipeline::TransformPipeline(
 	:
 	m_input(std::move(input_transform)), 
 	m_stages(std::move(transforms)), 
-	m_output(std::move(output_transform))
+	m_output(std::move(output_transform)), 
+
+	m_has_errors(false)
 {
 	std::cout << "Verifying transform pipeline\n";
 	
@@ -56,14 +58,20 @@ TransformPipeline::TransformPipeline(
 
 void TransformPipeline::Transform(fs::path file, fs::path output_file) const
 {
+	ResetPipelineState();
+
 	auto models = m_input.get()->Transform(file);
+	if (m_input.get()->HasErrors()) ReportError();
 
 	ExecuteTransform(std::move(models), output_file);
 }
 
 void TransformPipeline::Transform(std::string input_data, fs::path output_file) const
 {
+	ResetPipelineState();
+
 	auto models = m_input.get()->Transform(input_data);
+	if (m_input.get()->HasErrors()) ReportError();
 
 	ExecuteTransform(std::move(models), output_file);
 }
@@ -78,6 +86,7 @@ void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>>
 		for (const auto & stage : m_stages)
 		{
 			model = stage->Transform(std::move(model));
+			if (stage.get()->HasErrors()) ReportError();
 		}
 
 		// Construct a unique filename per mesh component, if the model contains >1
@@ -90,6 +99,7 @@ void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>>
 
 		// Output through the designated output transformer
 		m_output.get()->Transform(std::move(model), output_file);
+		if (m_output.get()->HasErrors()) ReportError();
 	}
 }
 
@@ -97,10 +107,13 @@ void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>>
 // the first mesh within a model if multiple are present
 ByteString TransformPipeline::Transform(std::string input_data) const
 {
-	auto models = m_input.get()->Transform(input_data);
+	ResetPipelineState();
 
-	if (models.empty()) { std::cerr << "Error: No model data loaded\n"; return ByteString(); }
-	if (models.size() != 1U) { std::cout << "Warning: Model contains " << models.size() << "meshes; in-memory pipeline will process and return only the first mesh\n"; }
+	auto models = m_input.get()->Transform(input_data);
+	if (m_input.get()->HasErrors()) ReportError();
+
+	if (models.empty()) { std::cerr << "Error: No model data loaded\n"; ReportError(); return ByteString(); }
+	if (models.size() != 1U) { std::cout << "Warning: Model contains " << models.size() << "meshes; in-memory pipeline will process and return only the first mesh\n"; ReportError(); }
 
 	return ExecuteTransformInMemory(std::move(models.at(0)));
 }
@@ -109,10 +122,13 @@ ByteString TransformPipeline::Transform(std::string input_data) const
 // the first mesh within a model if multiple are present
 ByteString TransformPipeline::Transform(fs::path file) const
 {
-	auto models = m_input.get()->Transform(file);
+	ResetPipelineState();
 
-	if (models.empty()) { std::cerr << "Error: No model data loaded\n"; return ByteString(); }
-	if (models.size() != 1U) { std::cout << "Warning: Model contains " << models.size() << "meshes; in-memory pipeline will process and return only the first mesh\n"; }
+	auto models = m_input.get()->Transform(file);
+	if (m_input.get()->HasErrors()) ReportError();
+
+	if (models.empty()) { std::cerr << "Error: No model data loaded\n"; ReportError(); return ByteString(); }
+	if (models.size() != 1U) { std::cout << "Warning: Model contains " << models.size() << "meshes; in-memory pipeline will process and return only the first mesh\n"; ReportError(); }
 
 	return ExecuteTransformInMemory(std::move(models.at(0)));
 }
@@ -122,8 +138,12 @@ ByteString TransformPipeline::ExecuteTransformInMemory(std::unique_ptr<ModelData
 	for (const auto & stage : m_stages)
 	{
 		input = stage->Transform(std::move(input));
+		if (stage.get()->HasErrors()) ReportError();
 	}
 
 	auto output = m_output.get()->Transform(std::move(input));
+	if (m_output.get()->HasErrors()) ReportError();
+
 	return output;
 }
+

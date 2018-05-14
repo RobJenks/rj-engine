@@ -3,7 +3,7 @@
 #include "TransformPipelineOutput.h"
 #include "BinaryOutputTransform.h"
 
-ByteString BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model) const
+ByteString BinaryOutputTransform::ExecuteTransform(std::unique_ptr<ModelData> model) const
 { 
 	ModelData *m = model.get();
 	if (!m) return ByteString();
@@ -11,7 +11,7 @@ ByteString BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model) co
 	return m->Serialize();
 }
 
-void BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model, fs::path output_file) const
+void BinaryOutputTransform::ExecuteTransform(std::unique_ptr<ModelData> model, fs::path output_file) const
 {
 	if (!model.get())
 	{
@@ -20,7 +20,7 @@ void BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model, fs::path
 	}
 
 	TRANSFORM_INFO << "Serializing model data\n";
-	ByteString output = Transform(std::move(model));
+	ByteString output = ExecuteTransform(std::move(model));
 
 	TRANSFORM_INFO << "Writing serialized data to file [" << output.size() << " bytes / " << (output.size() / 1024U) << "kb]\n";
 	if (!WriteDataToFile<ByteString::value_type>(output_file, output.data(), output.size()))

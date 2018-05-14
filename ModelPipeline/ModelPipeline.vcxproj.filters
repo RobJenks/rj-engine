@@ -176,5 +176,8 @@
     <ClInclude Include="PipelineStageDirectPostprocess.h">
       <Filter>Transformer\Transforms</Filter>
     </ClInclude>
+    <ClInclude Include="TransformResult.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
