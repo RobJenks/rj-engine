@@ -365,6 +365,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Definitions\ModelData.cpp" />
+    <ClCompile Include="..\Definitions\ModelSizeProperties.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorAttributes.cpp" />
     <ClCompile Include="ActorBase.cpp" />
@@ -770,6 +771,7 @@
     <ClInclude Include="..\Definitions\LightData.hlsl.h" />
     <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
     <ClInclude Include="..\Definitions\ModelData.h" />
+    <ClInclude Include="..\Definitions\ModelSizeProperties.h" />
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h" />
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Actor.h" />

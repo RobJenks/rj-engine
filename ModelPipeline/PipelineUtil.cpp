@@ -67,6 +67,27 @@ bool PipelineUtil::Float3AllEqual(const XMFLOAT3 & v, float value, float epsilon
 	return PipelineUtil::Float3Equal(v, XMFLOAT3(value, value, value), epsilon);
 }
 
+bool PipelineUtil::Float3LessThan(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return (v0.x < v1.x && v0.y < v1.y && v0.z < v1.z);
+}
+
+bool PipelineUtil::Float3LessOrEqual(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return (v0.x <= v1.x && v0.y <= v1.y && v0.z <= v1.z);
+}
+
+bool PipelineUtil::Float3GreaterThan(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return (!Float3LessOrEqual(v0, v1));
+}
+
+bool PipelineUtil::Float3GreaterOrEqual(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return (!Float3LessThan(v0, v1));
+}
+
+
 ByteString PipelineUtil::ReadBinaryFile(fs::path file)
 {
 	if (!fs::exists(file)) return ByteString();

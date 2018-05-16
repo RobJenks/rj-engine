@@ -120,8 +120,8 @@ void Model::RecalculateDerivedData(void)
 		const auto geo = item.Geometry.get();
 		if (!geo) continue;
 
-		min_bounds = Float3Min(min_bounds, geo->MinBounds);
-		max_bounds = Float3Max(max_bounds, geo->MaxBounds);
+		min_bounds = Float3Min(min_bounds, geo->SizeProperties.MinBounds);
+		max_bounds = Float3Max(max_bounds, geo->SizeProperties.MaxBounds);
 	}
 
 	// If we have no valid non-null components, revert to defaults

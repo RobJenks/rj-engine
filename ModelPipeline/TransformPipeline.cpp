@@ -23,12 +23,15 @@ TransformPipeline::TransformPipeline(
 {
 	std::cout << "Verifying transform pipeline\n";
 	
+	// Register input transform
 	if (!m_input.get())
 	{
 		std::cerr << "Error: No input transformer detected\n";
 		exit(1);
 	}
+	m_input.get()->RegisterParent(this);
 
+	// Register each intermediate pipeline transform
 	size_t stage_index = 0U;
 	for (const auto & stage : m_stages)
 	{
@@ -37,14 +40,17 @@ TransformPipeline::TransformPipeline(
 			std::cerr << "Error: Pipeline stage " << stage_index << " is invalid\n";
 			exit(1);
 		}
+		stage.get()->RegisterParent(this);
 		++stage_index;
 	}
 
+	// Register output transform
 	if (!m_output.get())
 	{
 		std::cerr << "Error: No output transformer detected\n";
 		exit(1);
 	}
+	m_output.get()->RegisterParent(this);
 
 	std::cout << "Transform pipeline initialised\n";
 	std::cout << "Pipeline configuration: \"" << m_input.get()->GetName() << "\" -> ";
@@ -78,8 +84,14 @@ void TransformPipeline::Transform(std::string input_data, fs::path output_file) 
 
 void TransformPipeline::ExecuteTransform(std::vector<std::unique_ptr<ModelData>> && input, fs::path output_file) const
 {
-	std::string original_filename = fs::absolute(output_file).string();
+	// Calculate a combined set of model metadata for the set of input models (since all originated from the 
+	// same source, so all are components of the same overall model)
+	std::vector<ModelSizeProperties> properties;
+	for (const auto & item : input) { if (item.get()) properties.push_back(item.get()->SizeProperties); };
+	StoreModelMetadata( ModelSizeProperties::Calculate(properties) );
 
+	// Process each model in turn
+	std::string original_filename = fs::absolute(output_file).string();
 	for (size_t index = 0U; index < input.size(); ++index)
 	{
 		auto & model = input.at(index);
@@ -149,3 +161,13 @@ ByteString TransformPipeline::ExecuteTransformInMemory(std::unique_ptr<ModelData
 	return output;
 }
 
+void TransformPipeline::StoreModelMetadata(const ModelSizeProperties & metadata) const
+{
+	m_metadata = metadata;
+}
+
+void TransformPipeline::ResetPipelineState(void) const 
+{
+	m_has_errors = false;
+	m_metadata = ModelSizeProperties();
+}

@@ -13,11 +13,7 @@ ModelData::ModelData(void)
 	VertexData(NULL),
 	IndexData(NULL), 
 	VertexCount(0U),
-	ModelMaterialIndex(0U), 
-	MinBounds(0.0f, 0.0f, 0.0f), 
-	MaxBounds(0.0f, 0.0f, 0.0f), 
-	ModelSize(0.0f, 0.0f, 0.0f), 
-	CentrePoint(0.0f, 0.0f, 0.0f)
+	ModelMaterialIndex(0U)
 {
 }
 
@@ -85,10 +81,10 @@ ByteString ModelData::Serialize(void) const
 	ByteString b;
 	b.WriteString(ModelData::GEOMETRY_FILE_IDENTIFIER);
 	b.WriteObject(this->ModelMaterialIndex);
-	b.WriteObject(this->MinBounds);
-	b.WriteObject(this->MaxBounds);
-	b.WriteObject(this->ModelSize);
-	b.WriteObject(this->CentrePoint);
+	b.WriteObject(this->SizeProperties.MinBounds);
+	b.WriteObject(this->SizeProperties.MaxBounds);
+	b.WriteObject(this->SizeProperties.ModelSize);
+	b.WriteObject(this->SizeProperties.CentrePoint);
 	b.WriteObject(this->VertexCount);
 	b.WriteObject(this->IndexCount);
 
@@ -122,10 +118,10 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 	// File appears valid so process the header data
 	ModelData *m = new ModelData();
 	data.ReadObject(m->ModelMaterialIndex);
-	data.ReadObject(m->MinBounds);
-	data.ReadObject(m->MaxBounds);
-	data.ReadObject(m->ModelSize);
-	data.ReadObject(m->CentrePoint);
+	data.ReadObject(m->SizeProperties.MinBounds);
+	data.ReadObject(m->SizeProperties.MaxBounds);
+	data.ReadObject(m->SizeProperties.ModelSize);
+	data.ReadObject(m->SizeProperties.CentrePoint);
 	data.ReadObject(m->VertexCount);
 	data.ReadObject(m->IndexCount);
 
@@ -161,21 +157,7 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 
 void ModelData::RecalculateDerivedData(void)
 {
-	// Determine minimum and maximum vertex bounds
-	XMFLOAT3 min_bounds = XMFLOAT3(+1e6, +1e6, +1e6);
-	XMFLOAT3 max_bounds = XMFLOAT3(-1e6, -1e6, -1e6);
-	for (unsigned int i = 0U; i < VertexCount; ++i)
-	{
-		const auto & p = VertexData[i].position;
-		min_bounds = XMFLOAT3(std::fmin(min_bounds.x, p.x), fmin(min_bounds.y, p.y), fmin(min_bounds.z, p.z));
-		max_bounds = XMFLOAT3(std::fmax(max_bounds.x, p.x), fmax(max_bounds.y, p.y), fmax(max_bounds.z, p.z));
-	}
-
-	// Update other derived data
-	MinBounds = min_bounds;
-	MaxBounds = max_bounds;
-	ModelSize = XMFLOAT3(max_bounds.x - min_bounds.x, max_bounds.y - min_bounds.y, max_bounds.z - min_bounds.z);
-	CentrePoint = XMFLOAT3(min_bounds.x + (ModelSize.x * 0.5f), min_bounds.y + (ModelSize.y * 0.5f), min_bounds.z + (ModelSize.z * 0.5f));
+	SizeProperties = ModelSizeProperties::Calculate(*this);
 }
 
 
@@ -213,9 +195,11 @@ bool ModelData::DetermineIfTangentSpaceDataPresent(void) const
 std::string ModelData::str(void) const
 {
 	std::ostringstream ss;
-	ss << "{ Vertices: " << VertexCount << ", Indices: " << IndexCount << ", Bounds: [" << MinBounds.x << ", " << MinBounds.y << ", " << MinBounds.z
-		<< "] to [" << MaxBounds.x << ", " << MaxBounds.y << ", " << MaxBounds.z << "], Size: [" << ModelSize.x << ", " << ModelSize.y << ", "
-		<< ModelSize.z << "], Centre: [" << CentrePoint.x << ", " << CentrePoint.y << ", " << CentrePoint.z << "], Mat: " << ModelMaterialIndex << " }";
+	ss << "{ Vertices: " << VertexCount << ", Indices: " << IndexCount << ", Bounds: [" << SizeProperties.MinBounds.x << ", " << 
+		SizeProperties.MinBounds.y << ", " << SizeProperties.MinBounds.z << "] to [" << SizeProperties.MaxBounds.x << ", " << 
+		SizeProperties.MaxBounds.y << ", " << SizeProperties.MaxBounds.z << "], Size: [" << SizeProperties.ModelSize.x << ", " << 
+		SizeProperties.ModelSize.y << ", " << SizeProperties.ModelSize.z << "], Centre: [" << SizeProperties.CentrePoint.x << ", " << 
+		SizeProperties.CentrePoint.y << ", " << SizeProperties.CentrePoint.z << "], Mat: " << ModelMaterialIndex << " }";
 
 	return ss.str();
 }

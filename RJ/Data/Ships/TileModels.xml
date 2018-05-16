@@ -1,26 +1,46 @@
 <GameData>
 
-  <Texture code="corridor_ns_diff2_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns_diff_2.dds" />
-  <Texture code="corridor_ns_diff3_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns_diff_3.dds" />
-  <Texture code="corridor_ns_bump_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns_bump.dds" />
-
-  <Material code="corridor_ns_material">
-    <!--AmbientColor x="0.718" y="0.86" z="0.86" w="1.0" /-->
-    <AmbientTexture>corridor_ns_diff3_texture</AmbientTexture>
-    <DiffuseTexture>corridor_ns_diff3_texture</DiffuseTexture>
-    <DiffuseColor x="1" y="1" z="1" w="1" />
-    <SpecularTexture>corridor_ns_diff2_texture</SpecularTexture>
-    <SpecularPower>1.25</SpecularPower>
-    <!--NormalTexture>corridor_ns_norm_texture</NormalTexture-->
-    <BumpTexture>corridor_ns_bump_texture</BumpTexture>
-    <BumpIntensity>2</BumpIntensity>
-    
-  </Material>
+  <Texture code="corridor_ns_0_diff_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_0_diff.dds" />
+  <Texture code="corridor_ns_0_spec_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_0_spec.dds" />
+  <Texture code="corridor_ns_1_diff_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_1_diff.dds" />
+  <Texture code="corridor_ns_1_spec_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_1_spec.dds" />
+  <Texture code="corridor_ns_1_norm_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_1_norm.dds" />
+  <Texture code="corridor_ns_1_bump_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_1_bump.dds" />
+  <Texture code="corridor_ns_2_diff_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_2_diff.dds" />
+  <Texture code="corridor_ns_2_spec_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_2_spec.dds" />
+  <Texture code="corridor_ns_2_norm_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_2_norm.dds" />
+  <Texture code="corridor_ns_2_bump_texture" dimension="Texture2D" filename="Ships\Tiles\CorridorTiles\corridor_ns\corridor_ns_2_bump.dds" />
   
+  <Material code="corridor_ns_0_material">
+    <DiffuseTexture>corridor_ns_0_diff_texture</DiffuseTexture>
+    <SpecularTexture>corridor_ns_0_spec_texture</SpecularTexture>
+    <SpecularPower>1.25</SpecularPower>
+  </Material>
+  <Material code="corridor_ns_1_material">
+    <DiffuseTexture>corridor_ns_1_diff_texture</DiffuseTexture>
+    <SpecularTexture>corridor_ns_1_spec_texture</SpecularTexture>
+    <NormalTexture>corridor_ns_1_norm_texture</NormalTexture>
+    <BumpTexture>corridor_ns_1_bump_texture</BumpTexture>
+    <SpecularPower>1.25</SpecularPower>
+    <BumpIntensity>4</BumpIntensity>
+  </Material>
+  <Material code="corridor_ns_2_material">
+    <DiffuseTexture>corridor_ns_2_diff_texture</DiffuseTexture>
+    <SpecularTexture>corridor_ns_2_spec_texture</SpecularTexture>
+    <!--NormalTexture>corridor_ns_2_norm_texture</NormalTexture-->
+    <BumpTexture>corridor_ns_2_bump_texture</BumpTexture>
+    <SpecularPower>1.25</SpecularPower>
+    <BumpIntensity>4</BumpIntensity>
+  </Material>
+
+
+
   <Model>
     <Code>corridor_ns_model</Code>
     <Type>ComplexShipTile</Type>
-    <Component file="Ships\Tiles\CorridorTiles\corridor_ns.rjm" material="corridor_ns_material" />
+    <Component file="Ships\Tiles\CorridorTiles\corridor_ns.rjm.0" material="corridor_ns_0_material" />
+    <Component file="Ships\Tiles\CorridorTiles\corridor_ns.rjm.1" material="corridor_ns_1_material" />
+    <Component file="Ships\Tiles\CorridorTiles\corridor_ns.rjm.2" material="corridor_ns_2_material" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
 

@@ -191,6 +191,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClInclude Include="..\Definitions\LightData.hlsl.h" />
     <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
     <ClInclude Include="..\Definitions\ModelData.h" />
+    <ClInclude Include="..\Definitions\ModelSizeProperties.h" />
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h" />
     <ClInclude Include="AssimpIntegration.h" />
     <ClInclude Include="AssimpLogStream.h" />
@@ -220,6 +221,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Definitions\ModelData.cpp" />
+    <ClCompile Include="..\Definitions\ModelSizeProperties.cpp" />
     <ClCompile Include="AssimpIntegration.cpp" />
     <ClCompile Include="BinaryOutputTransform.cpp" />
     <ClCompile Include="InputTransformerAssimp.cpp" />

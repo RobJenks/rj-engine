@@ -87,6 +87,9 @@
     <ClCompile Include="PipelineStageDirectPostprocess.cpp">
       <Filter>Transformer\Transforms</Filter>
     </ClCompile>
+    <ClCompile Include="..\Definitions\ModelSizeProperties.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="TransformResult.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelSizeProperties.h">
+      <Filter>Imported Definitions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -30,12 +30,16 @@ public:
 
 	CMPINLINE bool									HasErrors(void) const { return m_has_errors; }
 
+	CMPINLINE const ModelSizeProperties &			GetModelMetadata(void) const { return m_metadata; }
+	CMPINLINE bool									HasModelMetadata(void) const { return (m_metadata.HasData()); }
+
 private:
 
 	void ExecuteTransform(std::vector<std::unique_ptr<ModelData>> && input, fs::path output_file) const;
 	ByteString ExecuteTransformInMemory(std::unique_ptr<ModelData> input) const;
 
-	CMPINLINE void ResetPipelineState(void) const { m_has_errors = false; }
+	void ResetPipelineState(void) const;
+
 	CMPINLINE void ReportError(void) const { m_has_errors = true; }
 
 private:
@@ -45,5 +49,8 @@ private:
 	std::unique_ptr<TransformPipelineOutput>		m_output;
 
 	mutable bool									m_has_errors;
+	mutable ModelSizeProperties						m_metadata;
+
+	void											StoreModelMetadata(const ModelSizeProperties & metadata) const;
 
 };

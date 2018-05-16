@@ -26,6 +26,10 @@ public:
 	static bool					Float3Equal(const XMFLOAT3 & v0, const XMFLOAT3 & v1, float epsilon = 0.0f);
 	static bool					Float3AnyEqual(const XMFLOAT3 & v, float value, float epsilon = 0.0f);
 	static bool					Float3AllEqual(const XMFLOAT3 & v, float value, float epsilon = 0.0f);
+	static bool					Float3LessThan(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static bool					Float3LessOrEqual(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static bool					Float3GreaterThan(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static bool					Float3GreaterOrEqual(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
 
 	static ByteString			ReadBinaryFile(fs::path file);
 

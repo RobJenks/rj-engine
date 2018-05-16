@@ -910,6 +910,9 @@
     <ClCompile Include="ModelLoadingData.cpp">
       <Filter>Engine\Models\Static</Filter>
     </ClCompile>
+    <ClCompile Include="..\Definitions\ModelSizeProperties.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2126,6 +2129,9 @@
     </ClInclude>
     <ClInclude Include="ModelLoadingData.h">
       <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelSizeProperties.h">
+      <Filter>Imported Definitions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
