@@ -115,7 +115,9 @@ CoreEngine::CoreEngine(void)
 	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
 	m_hwnd( NULL ),
 	m_vsync( false ), 
-	m_render_device_failure_count(0U)
+	m_render_device_failure_count(0U), 
+	m_screen_space_adjustment(NULL_VECTOR), 
+	m_screen_space_adjustment_f(NULL_FLOAT2)
 {
 	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
@@ -731,6 +733,8 @@ void CoreEngine::WindowResized(void)
 	// Update any dependent calculations
 	m_projscreen = XMMatrixMultiply(XMMatrixTranslation(1.0f, -1.0f, 0.0f), XMMatrixScaling(Game::ScreenWidth * 0.5f, Game::ScreenHeight * -0.5f, 1.0f));
 
+	// Recalculate the screen-space adjustment which is dependent on screen dimensions
+	RecalculateScreenSpaceAdjustment();
 }
 
 // Set the visibility state of the system cursor
@@ -908,7 +912,7 @@ void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, 
 {
 	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
 	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
-	const XMFLOAT2 adjust = XMFLOAT2(Game::ScreenWidth * -0.5f, Game::ScreenHeight - (Game::ScreenHeight * 0.5f));
+	const XMFLOAT2 & adjust = ScreenSpaceAdjustmentF();
 
 	// Build a transform matrix based on the given screen-space properties
 	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
@@ -1021,6 +1025,7 @@ void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model
 	// Bind the model material, which will populate the relevant constant buffer and bind all required texture resources
 	// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
 	// Use override material if available, otherwise fall back to the model buffer material (which may also be null in [error] cases)
+	// Deliberate fallthrough from (!x) to (x) since model.Material may also be NULL
 	if (!material) material = model.Material;
 	if (material)
 	{
@@ -2264,6 +2269,14 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	
 	// Submit to the render queue
 	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), std::move(m), line.P1);
+}
+
+// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+void CoreEngine::RecalculateScreenSpaceAdjustment(void)
+{
+	m_screen_space_adjustment_f = XMFLOAT2(Game::ScreenWidth * -0.5f, Game::ScreenHeight - (Game::ScreenHeight * 0.5f));
+	m_screen_space_adjustment = XMLoadFloat2(&m_screen_space_adjustment_f);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

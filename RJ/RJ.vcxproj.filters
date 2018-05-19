@@ -913,6 +913,9 @@
     <ClCompile Include="..\Definitions\ModelSizeProperties.cpp">
       <Filter>Imported Definitions</Filter>
     </ClCompile>
+    <ClCompile Include="DecalRenderer.cpp">
+      <Filter>Engine\Decal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2133,6 +2136,9 @@
     <ClInclude Include="..\Definitions\ModelSizeProperties.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
+    <ClInclude Include="DecalRenderer.h">
+      <Filter>Engine\Decal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2479,6 +2485,9 @@
     </Filter>
     <Filter Include="_Tests\Models">
       <UniqueIdentifier>{fd51e35b-114e-44e7-a09d-e4c795e190f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Decal">
+      <UniqueIdentifier>{dbe6939b-41f3-4efb-899a-f47b4ff61742}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

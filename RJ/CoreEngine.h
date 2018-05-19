@@ -189,6 +189,10 @@ public:
 	// queue items multiple times through e.g. different shader pipelines
 	void					ClearRenderQueue(void);
 
+	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+	CMPINLINE XMVECTOR		ScreenSpaceAdjustment(void) const { return m_screen_space_adjustment; }
+	CMPINLINE XMFLOAT2		ScreenSpaceAdjustmentF(void) const { return m_screen_space_adjustment_f; }
 
 	// Method to render the system region
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SystemRegion, 
@@ -652,6 +656,12 @@ private:
 
 	// Renders an object within a particular environment
 	void					RenderEnvironmentObject(iEnvironmentObject *object);
+
+	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+	XMVECTOR				m_screen_space_adjustment;
+	XMFLOAT2				m_screen_space_adjustment_f;
+	void					RecalculateScreenSpaceAdjustment(void);
 
 	// Pre- and post-render debug processes; only active in debug builds
 	void					RunPreRenderDebugProcesses(void);

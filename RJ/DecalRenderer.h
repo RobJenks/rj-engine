@@ -1,0 +1,63 @@
+#pragma once
+
+#include "DX11_Core.h"
+#include "CompilerSettings.h"
+#include "IntVector.h"
+#include "DecalRenderingParams.h"
+class TextureDX11;
+
+class DecalRenderer
+{
+public:
+
+	// Constructor
+	DecalRenderer(void);
+
+	// Prepare the decal renderer for a new frame
+	void									BeginFrame(void);
+
+	// Set properties that are applied to all rendered decals
+	void									SetTexture(const TextureDX11 * texture);
+	void									SetBaseColour(const XMFLOAT4 & colour);
+	void									SetOutlineColour(const XMFLOAT4 & outline);
+
+	// Render a decal to the given screen-space location
+	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size);
+	void									RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max);
+
+	// End the frame
+	void									EndFrame(void);
+
+
+	// Shutdown the renderer and release any allocated resources
+	void									Shutdown(void);
+
+	// Destructor
+	~DecalRenderer(void);
+
+
+private:
+
+	// Render a decal instance using the provided, internally-calculated parameters
+	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+
+	// Get the currently-active rendering group
+	DecalRenderingParams &					GetActiveRenderGroup(void);
+
+	// Starts a new decal rendering group
+	void									StartNewRenderGroup(void);
+
+	// Start a new render group if the current group is in use, and the provided condition resolves to true
+	void									StartNewRenderGroupIf(bool condition);
+
+	// Clear all render groups and associated data
+	void									ClearAllRenderGroups(void);
+
+
+private:
+
+	// Collection of decal rendering params, which group similar rendering requests together for render-time efficiency
+	std::vector<DecalRenderingParams>		m_rendergroups;
+
+
+};

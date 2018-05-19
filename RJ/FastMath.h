@@ -185,6 +185,16 @@ CMPINLINE XMFLOAT2	Float2Subtract(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 	return XMFLOAT2(v1.x - v2.x, v1.y - v2.y);
 }
 
+CMPINLINE XMFLOAT2	Float2Multiply(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return XMFLOAT2(v1.x * v2.x, v1.y * v2.y);
+}
+
+CMPINLINE XMFLOAT2	Float2Divide(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return XMFLOAT2(v1.x / v2.x, v1.y / v2.y);
+}
+
 CMPINLINE bool		Float2Equal(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 {
 	return (v1.x == v2.x && v1.y == v2.y);
@@ -253,29 +263,42 @@ CMPINLINE XMFLOAT3	Float3Max(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 	return XMFLOAT3(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z));
 }
 
-// Determines whether all for EVERY component k, (v1[k] < v2[k])
+// Determines whether for EVERY component k, (v1[k] < v2[k])
 CMPINLINE bool Float3LessThan(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return (v1.x < v2.x && v1.y < v2.y && v1.z < v2.z);
 }
 
-// Determines whether all for EVERY component k, (v1[k] <= v2[k])
+// Determines whether for EVERY component k, (v1[k] <= v2[k])
 CMPINLINE bool Float3LessOrEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return (v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z);
 }
 
-// Determines whether all for EVERY component k, (v1[k] > v2[k])
+// Determines whether for EVERY component k, (v1[k] > v2[k])
 CMPINLINE bool Float3GreaterThan(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return (!Float3LessOrEqual(v1, v2));
 }
 
-// Determines whether all for EVERY component k, (v1[k] >= v2[k])
+// Determines whether for EVERY component k, (v1[k] >= v2[k])
 CMPINLINE bool Float3GreaterOrEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return (!Float3LessThan(v1, v2));
 }
+
+// Determines whether for EVERY component k, (v1[k] == v2[k])
+CMPINLINE bool Float4Equal(const XMFLOAT4 & v1, const XMFLOAT4 & v2)
+{
+	return (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z && v1.w == v2.w);
+}
+
+// Determines whether for ANY component k, (v1[k] != v2[k])
+CMPINLINE bool Float4NotEqual(const XMFLOAT4 & v1, const XMFLOAT4 & v2)
+{
+	return (!Float4Equal(v1, v2));
+}
+
 
 CMPINLINE XMFLOAT4	Float4MultiplyScalar(const XMFLOAT4 & v, const float s)
 {
