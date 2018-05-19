@@ -302,6 +302,7 @@ namespace ErrorCodes {
 	const Result		CouldNotInitialiseEffectManager					= 1357;
 	const Result		CannotInitialiseLightingManager					= 1358;
 	const Result		ModelHasNoValidComponents						= 1359;
+	const Result		CannotInitialiseDecalRenderer					= 1360;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;

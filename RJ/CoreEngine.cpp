@@ -14,6 +14,7 @@
 #include "TextureDX11.h"
 #include "InputLayoutDesc.h"
 #include "LightingManagerObject.h"
+#include "DecalRenderingManager.h"
 #include "ShaderFlags.h"
 #include "LightShader.h"
 #include "LightFadeShader.h"
@@ -101,6 +102,7 @@ CoreEngine::CoreEngine(void)
 	m_textureshader(NULL),
 	m_texcubeshader(NULL),
 	m_frustrum(NULL),
+	m_decalrenderer(NULL), 
 	m_textmanager(NULL),
 	m_fontshader(NULL),
 	m_fireshader(NULL),
@@ -207,6 +209,12 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Lighting manager initialisation complete\n";
 
+	// Initialise the decal render manager
+	res = InitialiseDecalRendering();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Decal renderer initialisation complete\n";
+
+
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -297,6 +305,8 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownShaderSupport();
 	ShutdownFrustrum();
 	ShutdownAudioManager();
+	ShutdownLightingManager();
+	ShutdownDecalRendering();
 	ShutdownTextRendering();
 	ShutdownEffectManager();
 	ShutdownParticleEngine();
@@ -477,6 +487,17 @@ Result CoreEngine::InitialiseLightingManager(void)
 	if (!LightingManager)
 	{
 		return ErrorCodes::CannotInitialiseLightingManager;
+	}
+
+	return ErrorCodes::NoError;
+}
+
+Result CoreEngine::InitialiseDecalRendering(void)
+{
+	m_decalrenderer = new DecalRenderingManager();
+	if (!m_decalrenderer)
+	{
+		return ErrorCodes::CannotInitialiseDecalRenderer;
 	}
 
 	return ErrorCodes::NoError;
@@ -673,6 +694,15 @@ void CoreEngine::ShutdownLightingManager(void)
 	if (LightingManager)
 	{
 		SafeDelete(LightingManager);
+	}
+}
+
+void CoreEngine::ShutdownDecalRendering(void)
+{
+	// Release the decal rendering manager
+	if (m_decalrenderer)
+	{
+		SafeDelete(m_decalrenderer);
 	}
 }
 

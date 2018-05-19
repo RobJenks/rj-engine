@@ -6,12 +6,12 @@
 #include "DecalRenderingParams.h"
 class TextureDX11;
 
-class DecalRenderer
+class DecalRenderingManager
 {
 public:
 
 	// Constructor
-	DecalRenderer(void);
+	DecalRenderingManager(void);
 
 	// Prepare the decal renderer for a new frame
 	void									BeginFrame(void);
@@ -33,7 +33,7 @@ public:
 	void									Shutdown(void);
 
 	// Destructor
-	~DecalRenderer(void);
+	~DecalRenderingManager(void);
 
 
 private:

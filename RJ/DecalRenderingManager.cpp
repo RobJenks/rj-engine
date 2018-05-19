@@ -1,13 +1,13 @@
-#include "DecalRenderer.h"
+#include "DecalRenderingManager.h"
 #include "CoreEngine.h"
 
 // Constructor
-DecalRenderer::DecalRenderer(void)
+DecalRenderingManager::DecalRenderingManager(void)
 {
 }
 
 // Prepare the decal renderer for a new frame
-void DecalRenderer::BeginFrame(void)
+void DecalRenderingManager::BeginFrame(void)
 {
 	// Clear all render group data ready for the current frame
 	ClearAllRenderGroups();
@@ -17,7 +17,7 @@ void DecalRenderer::BeginFrame(void)
 }
 
 // Set properties that are applied to all rendered decals
-void DecalRenderer::SetTexture(const TextureDX11 * texture)
+void DecalRenderingManager::SetTexture(const TextureDX11 * texture)
 {
 	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
 	StartNewRenderGroupIf( texture != GetActiveRenderGroup().GetTexture() );
@@ -27,7 +27,7 @@ void DecalRenderer::SetTexture(const TextureDX11 * texture)
 }
 
 // Set properties that are applied to all rendered decals
-void DecalRenderer::SetBaseColour(const XMFLOAT4 & colour)
+void DecalRenderingManager::SetBaseColour(const XMFLOAT4 & colour)
 {
 	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
 	StartNewRenderGroupIf( Float4NotEqual(colour, GetActiveRenderGroup().GetBaseColour()) );
@@ -37,7 +37,7 @@ void DecalRenderer::SetBaseColour(const XMFLOAT4 & colour)
 }
 
 // Set properties that are applied to all rendered decals
-void DecalRenderer::SetOutlineColour(const XMFLOAT4 & outline)
+void DecalRenderingManager::SetOutlineColour(const XMFLOAT4 & outline)
 {
 	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
 	StartNewRenderGroupIf(Float4NotEqual(outline, GetActiveRenderGroup().GetOutlineColour()));
@@ -47,19 +47,19 @@ void DecalRenderer::SetOutlineColour(const XMFLOAT4 & outline)
 }
 
 // Get the currently-active rendering group
-DecalRenderingParams & DecalRenderer::GetActiveRenderGroup(void)
+DecalRenderingParams & DecalRenderingManager::GetActiveRenderGroup(void)
 {
 	return (m_rendergroups.back());
 }
 
 // Starts a new decal rendering group
-void DecalRenderer::StartNewRenderGroup(void)
+void DecalRenderingManager::StartNewRenderGroup(void)
 {
 	m_rendergroups.push_back(DecalRenderingParams());
 }
 
 // Start a new render group if the current group is in use, and the provided condition resolves to true
-void DecalRenderer::StartNewRenderGroupIf(bool condition)
+void DecalRenderingManager::StartNewRenderGroupIf(bool condition)
 {
 	if (condition && GetActiveRenderGroup().IsInUse())
 	{
@@ -68,7 +68,7 @@ void DecalRenderer::StartNewRenderGroupIf(bool condition)
 }
 
 // Clear all render groups and associated data
-void DecalRenderer::ClearAllRenderGroups(void)
+void DecalRenderingManager::ClearAllRenderGroups(void)
 {
 	m_rendergroups.clear();
 }
@@ -77,13 +77,13 @@ void DecalRenderer::ClearAllRenderGroups(void)
 
 
 // Render a decal to the given screen-space location
-void DecalRenderer::RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size)
+void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size)
 {
 	RenderDecalScreenInstance(location, size, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));	// No shift, unit scale
 }
 
 // Render the specified subset of a decal to the given screen-space location
-void DecalRenderer::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max)
+void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max)
 {
 	// There must be an active texture assigned in order to make this call
 	const TextureDX11 * texture = GetActiveRenderGroup().GetTexture();
@@ -101,7 +101,7 @@ void DecalRenderer::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, U
 }
 
 // Render a decal instance using the provided, internally-calculated parameters
-void DecalRenderer::RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
+void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
 {
 	// World matrix is a straightforward scale & translate in screen-space
 	XMMATRIX world = XMMatrixMultiply(
@@ -114,20 +114,21 @@ void DecalRenderer::RenderDecalScreenInstance(const FXMVECTOR location, const FX
 }
 
 // End the frame
-void DecalRenderer::EndFrame(void)
+void DecalRenderingManager::EndFrame(void)
 {
 
 }
 
 
 // Shutdown the renderer and release any allocated resources
-void DecalRenderer::Shutdown(void)
+void DecalRenderingManager::Shutdown(void)
 {
 
 }
 
 // Destructor
-DecalRenderer::~DecalRenderer(void)
+DecalRenderingManager::~DecalRenderingManager(void)
 {
 
 }
+

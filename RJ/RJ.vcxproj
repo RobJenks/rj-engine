@@ -436,7 +436,8 @@
     <ClCompile Include="DataObjectEngineHeadingController.cpp" />
     <ClCompile Include="DataObjectEngineThrustController.cpp" />
     <ClCompile Include="DataObjectSwitch.cpp" />
-    <ClCompile Include="DecalRenderer.cpp" />
+    <ClCompile Include="DecalRenderingManager.cpp" />
+    <ClCompile Include="DecalRenderingParams.cpp" />
     <ClCompile Include="DeferredRenderProcess.cpp" />
     <ClCompile Include="DepthStencilStateDX11.cpp" />
     <ClCompile Include="DynamicTerrain.cpp" />
@@ -884,7 +885,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Data\Shaders\UIRenderingCommonData.hlsl.h" />
-    <ClInclude Include="DecalRenderer.h" />
+    <ClInclude Include="DecalRenderingManager.h" />
+    <ClInclude Include="DecalRenderingParams.h" />
     <ClInclude Include="DefaultingFloat4.h" />
     <ClInclude Include="DeferredRenderProcess.h" />
     <ClInclude Include="DepthStencilState.h" />

@@ -913,7 +913,10 @@
     <ClCompile Include="..\Definitions\ModelSizeProperties.cpp">
       <Filter>Imported Definitions</Filter>
     </ClCompile>
-    <ClCompile Include="DecalRenderer.cpp">
+    <ClCompile Include="DecalRenderingParams.cpp">
+      <Filter>Engine\Decal</Filter>
+    </ClCompile>
+    <ClCompile Include="DecalRenderingManager.cpp">
       <Filter>Engine\Decal</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2136,7 +2139,10 @@
     <ClInclude Include="..\Definitions\ModelSizeProperties.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
-    <ClInclude Include="DecalRenderer.h">
+    <ClInclude Include="DecalRenderingParams.h">
+      <Filter>Engine\Decal</Filter>
+    </ClInclude>
+    <ClInclude Include="DecalRenderingManager.h">
       <Filter>Engine\Decal</Filter>
     </ClInclude>
   </ItemGroup>

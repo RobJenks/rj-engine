@@ -43,6 +43,7 @@ class SkinnedNormalMapShader;
 class Frustum;
 class Light;
 class LightingManagerObject;
+class DecalRenderingManager;
 class FontShader;
 class AudioManager;
 class TextManager;
@@ -493,6 +494,7 @@ private:
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseAudioManager(void);
 	Result					InitialiseLightingManager(void);
+	Result					InitialiseDecalRendering(void);
 	Result					InitialiseTextRendering(void);
 	Result					InitialiseEffectManager(void);
 	Result					InitialiseParticleEngine(void);
@@ -510,6 +512,7 @@ private:
 	void					ShutdownFrustrum(void);
 	void					ShutdownAudioManager(void);
 	void					ShutdownLightingManager(void);
+	void					ShutdownDecalRendering(void);
 	void					ShutdownTextRendering(void);
 	void					ShutdownEffectManager(void);
 	void					ShutdownParticleEngine(void);
@@ -536,6 +539,7 @@ private:
 	Frustum							*m_frustrum;
 	FontShader						*m_fontshader;
 	AudioManager					*m_audiomanager;
+	DecalRenderingManager			*m_decalrenderer;
 	TextManager						*m_textmanager;
 	TexcubeShader					*m_texcubeshader;
 	FireShader						*m_fireshader;
