@@ -352,6 +352,7 @@ namespace HashedStrings
 	DefineHash(H_ScreenResolution, "screenresolution");
 	DefineHash(H_SoftwareRasterizerOverride, "softwarerasterizeroverride");
 	DefineHash(H_Font, "font");
+	DefineHash(H_Glyph, "glyph");
 
 }
 

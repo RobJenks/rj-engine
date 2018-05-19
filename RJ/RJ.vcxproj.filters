@@ -115,12 +115,6 @@
     <ClCompile Include="FireEffect.cpp">
       <Filter>Engine\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="FontData.cpp">
-      <Filter>Engine\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="Fonts.cpp">
-      <Filter>Engine\Text</Filter>
-    </ClCompile>
     <ClCompile Include="GameConsoleCommand.cpp">
       <Filter>Console</Filter>
     </ClCompile>
@@ -330,9 +324,6 @@
     </ClCompile>
     <ClCompile Include="RenderMouseEvent.cpp">
       <Filter>UI\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="TextManager.cpp">
-      <Filter>Engine\Text</Filter>
     </ClCompile>
     <ClCompile Include="XML\tinystr.cpp">
       <Filter>XML</Filter>
@@ -919,6 +910,24 @@
     <ClCompile Include="DecalRenderingManager.cpp">
       <Filter>Engine\Decal</Filter>
     </ClCompile>
+    <ClCompile Include="FontData.cpp">
+      <Filter>Engine\Text\Old</Filter>
+    </ClCompile>
+    <ClCompile Include="Fonts.cpp">
+      <Filter>Engine\Text\Old</Filter>
+    </ClCompile>
+    <ClCompile Include="TextManager.cpp">
+      <Filter>Engine\Text\Old</Filter>
+    </ClCompile>
+    <ClCompile Include="FontGlyph.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRenderer.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1061,12 +1070,6 @@
     </ClInclude>
     <ClInclude Include="FireEffect.h">
       <Filter>Engine\Effects</Filter>
-    </ClInclude>
-    <ClInclude Include="FontData.h">
-      <Filter>Engine\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Fonts.h">
-      <Filter>Engine\Text</Filter>
     </ClInclude>
     <ClInclude Include="GameConsoleCommand.h">
       <Filter>Console</Filter>
@@ -1341,9 +1344,6 @@
     <ClInclude Include="RenderMouseEvent.h">
       <Filter>UI\Components</Filter>
     </ClInclude>
-    <ClInclude Include="TextManager.h">
-      <Filter>Engine\Text</Filter>
-    </ClInclude>
     <ClInclude Include="XML\tinystr.h">
       <Filter>XML</Filter>
     </ClInclude>
@@ -1562,9 +1562,6 @@
     </ClInclude>
     <ClInclude Include="DynamicTileSet.h">
       <Filter>Objects\Ships\Tiles</Filter>
-    </ClInclude>
-    <ClInclude Include="SentenceType.h">
-      <Filter>Engine\Text</Filter>
     </ClInclude>
     <ClInclude Include="ModifierDetails.h">
       <Filter>Concepts\Modifiers</Filter>
@@ -2145,6 +2142,27 @@
     <ClInclude Include="DecalRenderingManager.h">
       <Filter>Engine\Decal</Filter>
     </ClInclude>
+    <ClInclude Include="FontData.h">
+      <Filter>Engine\Text\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="Fonts.h">
+      <Filter>Engine\Text\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="SentenceType.h">
+      <Filter>Engine\Text\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="TextManager.h">
+      <Filter>Engine\Text\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="TextRenderer.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="FontGlyph.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2494,6 +2512,9 @@
     </Filter>
     <Filter Include="Engine\Decal">
       <UniqueIdentifier>{dbe6939b-41f3-4efb-899a-f47b4ff61742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Text\Old">
+      <UniqueIdentifier>{d9865e71-699a-4758-ab52-f2e40291911f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

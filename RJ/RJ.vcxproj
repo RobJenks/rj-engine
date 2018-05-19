@@ -492,7 +492,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="FontData.cpp" />
+    <ClCompile Include="FontGlyph.cpp" />
     <ClCompile Include="Fonts.cpp" />
     <ClCompile Include="FontShader.cpp" />
     <ClCompile Include="FrameProfiler.cpp" />
@@ -614,6 +616,7 @@
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="StructuredBufferDX11.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureDX11.cpp" />
     <ClCompile Include="TextureDX11Util.cpp" />
@@ -939,6 +942,8 @@
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FontGlyph.h" />
     <ClInclude Include="FrameFlag.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="Frustum.h" />
@@ -1121,6 +1126,7 @@
     <ClInclude Include="TestError.h" />
     <ClInclude Include="TestResult.h" />
     <ClInclude Include="TestRunner.h" />
+    <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureDX11.h" />
     <ClInclude Include="TextureDX11Util.h" />

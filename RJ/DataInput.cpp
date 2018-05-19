@@ -81,6 +81,10 @@
 #include "ParticleEngine.h"
 #include "ParticleEmitter.h"
 
+#include "TextRenderer.h"
+#include "Font.h"
+#include "FontGlyph.h"
+
 #include "UserInterface.h"
 #include "AudioManager.h"
 #include "Render2DManager.h"
@@ -3532,8 +3536,11 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 {
 	if (!node) return ErrorCodes::CannotLoadNullFontData;
 
+	// Populate a new font object during loading
+	Font *font = new Font();
+
 	// Look at each child node in turn
-	std::string key, code, datafilename, texturename; HashVal hash;
+	std::string key, value; HashVal hash;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child = child->NextSiblingElement())
 	{
@@ -3544,20 +3551,65 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 		// Test for each required field
 		if (hash == HashedStrings::H_Code)
 		{
-			code = child->GetText();
-			StrLowerC(code);
+			std::string code = child->GetText(); StrLowerC(code);
+			font->SetCode(code);
 		}
-		else if (hash == HashedStrings::H_Data)		datafilename = child->GetText();
-		else if (hash == HashedStrings::H_Texture)	texturename = child->GetText();
+		else if (hash == HashedStrings::H_Texture)
+		{
+			font->SetTextureMap(Game::Engine->GetAssets().GetTexture(child->GetText()));
+		}
+		else if (hash == HashedStrings::H_Glyph)
+		{
+			FontGlyph glyph; unsigned int ch = 0U;
+			int val;
+
+			TiXmlAttribute *attr = node->FirstAttribute();
+			while (attr) 
+			{
+				const char *name = attr->Name();
+				if (strcmp(name, "ch") == 0) 
+				{
+					// Ugly C code to allow both decimal and hex character codes
+					const char *value = attr->Value();
+					auto len = strnlen(value, 128U); if (len == 128U) continue;
+					ch = ((len >= 2U && value[0] == '0' && value[1] == 'x')
+						? strtol(value, NULL, 16)
+						: strtol(value, NULL, 10));
+				}
+				else if (strcmp(name, "x") == 0) {
+					if (attr->QueryIntValue(&val) == TIXML_SUCCESS) glyph.Location.x = (unsigned int)val;
+				}
+				else if (strcmp(name, "y") == 0) {
+					if (attr->QueryIntValue(&val) == TIXML_SUCCESS) glyph.Location.y = (unsigned int)val;
+				}
+				else if (strcmp(name, "sx") == 0) {
+					if (attr->QueryIntValue(&val) == TIXML_SUCCESS) glyph.Size.x = (unsigned int)val;
+				}
+				else if (strcmp(name, "sy") == 0) {
+					if (attr->QueryIntValue(&val) == TIXML_SUCCESS) glyph.Size.y = (unsigned int)val;
+				}
+
+				attr = attr->Next();
+			}
+
+			font->SetGlyphData(ch, glyph);
+		}
 	}
 
-	// Make sure we have all mandatory parameters
-	if (code.empty() || datafilename.empty() || texturename.empty()) return ErrorCodes::CannotLoadFontWithMissingData;
+	// Attempt to register the new font and release the font object in case of failure
+	bool success = Game::Engine->GetTextRenderer()->RegisterFont(font);
+	if (!success) 
+	{
+		Game::Log << LOG_WARN << "Unable to register new font \"" << font->GetCode() << "\"\n";
+		SafeDelete(font);
+		return ErrorCodes::CannotRegisterNewFont;
+	}
 
-	// Attempt to initialise the new font and return the result
-	std::string fullDataFilename = DataRelativeFile(datafilename);
-	Result result = Game::Engine->GetTextManager()->InitializeFont(code, fullDataFilename, texturename);
-	return result;
+	// Report sucess
+	Font::ID id = Game::Engine->GetTextRenderer()->GetFontID(font->GetCode());
+	Game::Log << LOG_INFO << "Registered new font \"" << font->GetCode() << "\" with id-" << id << "\n";
+
+	return ErrorCodes::NoError;
 }
 
 Result IO::Data::LoadUILayout(TiXmlElement *node)

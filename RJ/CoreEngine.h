@@ -46,7 +46,7 @@ class LightingManagerObject;
 class DecalRenderingManager;
 class FontShader;
 class AudioManager;
-class TextManager;
+class TextRenderer;
 class EffectManager;
 class SimpleShip;
 class ComplexShip;
@@ -127,15 +127,16 @@ public:
 	void					ShutdownGameEngine();
 	
 	// Accessor/modifier methods for key game engine components
-	CMPINLINE RenderDeviceDX11 * GetRenderDevice()		{ return m_renderdevice; }
-	CMPINLINE CameraClass	*GetCamera()				{ return m_camera; }
-	CMPINLINE Frustum		*GetViewFrustrum()			{ return m_frustrum; }
-	CMPINLINE TextManager	*GetTextManager()			{ return m_textmanager; }
-	CMPINLINE EffectManager *GetEffectManager()			{ return m_effectmanager; }
-	CMPINLINE ParticleEngine *GetParticleEngine()		{ return m_particleengine; }
-	CMPINLINE Render2DManager *Get2DRenderManager()		{ return m_render2d; }
-	CMPINLINE OverlayRenderer *GetOverlayRenderer()		{ return m_overlayrenderer; }
-	CMPINLINE AudioManager	  *GetAudioManager()		{ return m_audiomanager; }
+	CMPINLINE RenderDeviceDX11 *			GetRenderDevice(void)			{ return m_renderdevice; }
+	CMPINLINE CameraClass *					GetCamera(void)					{ return m_camera; }
+	CMPINLINE Frustum *						GetViewFrustrum(void)			{ return m_frustrum; }
+	CMPINLINE DecalRenderingManager *		GetDecalRenderer(void)			{ return m_decalrenderer; }
+	CMPINLINE TextRenderer *				GetTextRenderer(void)			{ return m_textrenderer; }
+	CMPINLINE EffectManager *				GetEffectManager(void)			{ return m_effectmanager; }
+	CMPINLINE ParticleEngine *				GetParticleEngine(void)			{ return m_particleengine; }
+	CMPINLINE Render2DManager *				Get2DRenderManager(void)		{ return m_render2d; }
+	CMPINLINE OverlayRenderer *				GetOverlayRenderer(void)		{ return m_overlayrenderer; }
+	CMPINLINE AudioManager *				GetAudioManager(void)			{ return m_audiomanager; }
 
 	// Methods to retrieve the key render matrices from the engine
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
@@ -540,7 +541,7 @@ private:
 	FontShader						*m_fontshader;
 	AudioManager					*m_audiomanager;
 	DecalRenderingManager			*m_decalrenderer;
-	TextManager						*m_textmanager;
+	TextRenderer					*m_textrenderer;
 	TexcubeShader					*m_texcubeshader;
 	FireShader						*m_fireshader;
 	EffectManager					*m_effectmanager;

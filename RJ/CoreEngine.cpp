@@ -32,8 +32,7 @@
 #include "PipelineStateDX11.h"
 #include "FontShader.h"
 #include "AudioManager.h"
-#include "TextManager.h"
-#include "Fonts.h"
+#include "TextRenderer.h"
 #include "EffectManager.h"
 #include "ParticleEngine.h"
 #include "Render2DManager.h"
@@ -42,7 +41,6 @@
 #include "OverlayRenderer.h"
 #include "BasicColourDefinition.h"
 
-#include "Fonts.h"
 #include "Player.h"
 #include "Model.h"
 #include "Ship.h"
@@ -103,7 +101,7 @@ CoreEngine::CoreEngine(void)
 	m_texcubeshader(NULL),
 	m_frustrum(NULL),
 	m_decalrenderer(NULL), 
-	m_textmanager(NULL),
+	m_textrenderer(NULL),
 	m_fontshader(NULL),
 	m_fireshader(NULL),
 	m_skinnedshader(NULL),
@@ -213,7 +211,6 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseDecalRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Decal renderer initialisation complete\n";
-
 
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
@@ -505,25 +502,13 @@ Result CoreEngine::InitialiseDecalRendering(void)
 
 Result CoreEngine::InitialiseTextRendering(void)
 {
-	Result result;
-
-	// Create the text manager object
-	m_textmanager = new TextManager();
-	if (!m_textmanager)
+	m_textrenderer = new TextRenderer();
+	if (!m_textrenderer)
 	{
 		return ErrorCodes::CannotCreateTextRenderer;
 	}
 
-	// Now attempt to initialise the text rendering object
-	result = m_textmanager->Initialize(m_hwnd, Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
-
 }
 
 Result CoreEngine::InitialiseEffectManager(void)
@@ -709,10 +694,10 @@ void CoreEngine::ShutdownDecalRendering(void)
 void CoreEngine::ShutdownTextRendering(void)
 {
 	// Release the text manager object.
-	if(m_textmanager)
+	if (m_textrenderer)
 	{
-		m_textmanager->Shutdown();
-		SafeDelete(m_textmanager);
+		m_textrenderer->Shutdown();
+		SafeDelete(m_textrenderer);
 	}
 }
 
