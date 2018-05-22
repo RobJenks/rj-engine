@@ -20,6 +20,7 @@ public:
 	static const unsigned int FIRST_CHARACTER = 32U;
 	static const unsigned int LAST_CHARACTER = 255U;
 	static const unsigned int CHARACTER_MAP_SIZE = (LAST_CHARACTER - FIRST_CHARACTER + 1U);
+	static const unsigned int DEFAULT_CHARACTER = '?';		// If the requested glyph is not available
 
 	// Constructor
 	Font(void);
