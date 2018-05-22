@@ -2662,9 +2662,10 @@ void CoreEngine::DebugRenderEnvironmentNavNetwork(void)
 }
 
 // Renders the identifier of all visible objects in the player's immediate vicinity
+// TODO [textrender]: Redo this whole method with the new text rendering components
 void CoreEngine::DebugRenderObjectIdentifiers(void)
 {
-	static const XMFLOAT2 DEBUG_ID_TEXT_OFFSET = XMFLOAT2(0.0f, 0.0f);
+	/*static const XMFLOAT2 DEBUG_ID_TEXT_OFFSET = XMFLOAT2(0.0f, 0.0f);
 	static const XMFLOAT4 DEBUG_MAJOR_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f);
 	static const XMFLOAT4 DEBUG_MINOR_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 	static const float DEBUG_MAJOR_ID_TEXT_SIZE = 1.0f;
@@ -2798,7 +2799,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	for (size_t i = sentence_id; i < sentence_count; ++i)
 	{
 		if (m_debug_renderobjid_text.at(i)) m_textmanager->DisableSentenceRendering(m_debug_renderobjid_text.at(i));
-	}
+	}*/
 }
 
 

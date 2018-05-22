@@ -52,11 +52,12 @@ public:
 	void Shutdown(void);
 
 	// Sets properties of a sentence that do not require full regeneration of the vertex buffers: colour & render flag
-	CMPINLINE void EnableSentenceRendering(SentenceType *sentence) { sentence->render = true; }
-	CMPINLINE void DisableSentenceRendering(SentenceType *sentence) { sentence->render = false; }
-	CMPINLINE void SetSentenceRendering(SentenceType *sentence, bool render) { sentence->render = render; }
-	CMPINLINE void SetSentencePosition(SentenceType *sentence, int x, int y) { sentence->x = x; sentence->y = y; }
-	CMPINLINE void SetSentenceColour(SentenceType *sentence, XMFLOAT4 colour) { sentence->colour = colour; }
+	// TODO [textrender]: Update for new text rendering component
+	CMPINLINE void EnableSentenceRendering(SentenceType *sentence) {}// { sentence->render = true; }
+	CMPINLINE void DisableSentenceRendering(SentenceType *sentence) {}// { sentence->render = false; }
+	CMPINLINE void SetSentenceRendering(SentenceType *sentence, bool render) {}// { sentence->render = render; }
+	CMPINLINE void SetSentencePosition(SentenceType *sentence, int x, int y) {}// { sentence->x = x; sentence->y = y; }
+	CMPINLINE void SetSentenceColour(SentenceType *sentence, XMFLOAT4 colour) {}// { sentence->colour = colour; }
 
 	// Set the sentence text, which invokes regeneration of the vertex buffers
 	Result SetSentenceText(SentenceType *sentence, const char *text, float size);

@@ -36,7 +36,7 @@ public:
 	CMPINLINE void								SetTextureMap(const TextureDX11 * texture) { m_texture = texture; }
 
 	// Return glyph data for the given character
-	const FontGlyph &							GetGlyph(unsigned int ch);
+	const FontGlyph &							GetGlyph(unsigned int ch) const;
 
 	// Store glyph parameters for the given character
 	void										SetGlyphData(unsigned int ch, const FontGlyph & data);

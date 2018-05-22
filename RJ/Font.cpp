@@ -17,7 +17,7 @@ Font::Font(const std::string & code)
 
 
 // Return glyph data for the given character
-const FontGlyph & Font::GetGlyph(unsigned int ch)
+const FontGlyph & Font::GetGlyph(unsigned int ch) const
 {
 	if (ch < FIRST_CHARACTER || ch > LAST_CHARACTER) return m_map[DEFAULT_CHARACTER];
 

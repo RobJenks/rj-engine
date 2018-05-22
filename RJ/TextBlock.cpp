@@ -58,6 +58,8 @@ void TextBlock::SetText(const char *text, float size)
 {
 	// Store this text in the local string buffer.  Zero out first in case we are setting a shorter replacement
 	// string, and also to ensure that null terminators are correctly set at the end of the string
+	// TODO [textrender]: Update for new text rendering component
+	return;
 	memset(m_textbuffer, 0, m_maxlength+1);
 	strncpy(m_textbuffer, text, m_maxlength);
 	m_size = size;
@@ -122,22 +124,30 @@ const std::string & TextBlock::GetText(void)
 	
 INTVECTOR2 TextBlock::GetPosition(void)
 {
-	return (INTVECTOR2(m_sentence->x, m_sentence->y));
+	// TODO [textrender]: Update for new text rendering component
+	//return (INTVECTOR2(m_sentence->x, m_sentence->y));
+	return INTVECTOR2(0, 0);
 }
 
-XMFLOAT4	TextBlock::GetTextColour(void)
+XMFLOAT4 TextBlock::GetTextColour(void)
 {
-	return m_sentence->colour;
+	// TODO [textrender]: Update for new text rendering component
+	//return m_sentence->colour;
+	return XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 float TextBlock::GetTextWidth(void)
 {
-	return (m_sentence->sentencewidth);
+	// TODO [textrender]: Update for new text rendering component
+	//return (m_sentence->sentencewidth);
+	return 0.0f;
 }
 
 float TextBlock::GetTextHeight(void)
 {
-	return (m_sentence->sentenceheight);
+	// TODO [textrender]: Update for new text rendering component
+	//return (m_sentence->sentenceheight);
+	return 0.0f;
 }
 
 // Deallocates all resources and disposes of the text block

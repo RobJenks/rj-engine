@@ -541,8 +541,9 @@ void RJMain::PerformFPSCalculations(void)
 			#endif
 
 			// Update the text string for rendering next frame
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FPSCOUNTER,
-				D::UI->TextStrings.C_DBG_FPSCOUNTER, 1.0f);
+			// TODO [textrender]: update for new text rendering component
+			//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FPSCOUNTER,
+			//	D::UI->TextStrings.C_DBG_FPSCOUNTER, 1.0f);
 		}
 	}
 }
@@ -858,7 +859,8 @@ void RJMain::ProcessKeyboardInput(void)
 		
 	}
 
-	static SentenceType **dbg_b_sentences = NULL;
+	// TODO [textrender]: Update for new text rendering component
+	/*static SentenceType **dbg_b_sentences = NULL;
 	static const unsigned int dbg_b_text_limit = 32U;
 	if (!b[DIK_B])
 	{
@@ -914,7 +916,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 		for (unsigned int i = index; i < dbg_b_text_limit; ++i) dbg_b_sentences[i]->render = false;
 
-	}
+	}*/
 
 	if (b[DIK_I]) {
 
@@ -2574,7 +2576,8 @@ void RJMain::DEBUGDisplayInfo(void)
 			player_pos.x, player_pos.y, player_pos.z,
 			player_el.x, player_el.y, player_el.z
 		);
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_1, D::UI->TextStrings.C_DBG_FLIGHTINFO_1, 1.0f);
+		// TODO [textrender]: Update for new text rendering component
+		//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_1, D::UI->TextStrings.C_DBG_FLIGHTINFO_1, 1.0f);
 	}
 
 	// Debug info line 2 - engine rendering info
@@ -2591,7 +2594,8 @@ void RJMain::DEBUGDisplayInfo(void)
 			(renderinfo.TerrainRenderCount == 0 ? "" : concat(" Terrain = ")(renderinfo.TerrainRenderCount).str().c_str())
 		);
 
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_2, D::UI->TextStrings.C_DBG_FLIGHTINFO_2, 1.0f);
+		// TODO [textrender]: Update for new text rendering component
+		//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_2, D::UI->TextStrings.C_DBG_FLIGHTINFO_2, 1.0f);
 	}
 
 	// Debug info line 3 - object and collision data
@@ -2612,7 +2616,9 @@ void RJMain::DEBUGDisplayInfo(void)
 			coll.EnvironmentCollisions.ElementsChecked, coll.EnvironmentCollisions.ObjectsChecked, coll.EnvironmentCollisions.ElementsCheckedAroundObjects,
 			coll.EnvironmentCollisions.ObjectVsTerrainChecks, coll.EnvironmentCollisions.ObjectVsObjectChecks,
 			coll.EnvironmentCollisions.BroadphaseCollisions, coll.EnvironmentCollisions.Collisions);
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
+		
+		// TODO [textrender]: Update for new text rendering component
+		//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
 	}
 
 	// Debug info line 4 - temporary debug data as required
@@ -2641,7 +2647,8 @@ void RJMain::DEBUGDisplayInfo(void)
 			(Game::CurrentPlayer->GetMouseSelectedUsableTerrain() ? Game::CurrentPlayer->GetMouseSelectedUsableTerrain()->GetID() : -1)
 		);*/
 
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		// TODO [textrender]: Update for new text rendering component
+		//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 
 		// Tmp: Update player spotlight position and orientation to match camera

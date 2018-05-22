@@ -108,8 +108,9 @@ Result UserInterface::BuildUILayouts(void)
 
 Result UserInterface::InitialiseUITextComponents(void)
 {
+	// TODO [textrender]: Update for new text rendering component
 	// Get a handle to the engine text manager
-	if (!Game::Engine || !Game::Engine->GetTextManager()) return ErrorCodes::CannotInitialiseUIWithoutGameEngineComponents;
+/*	if (!Game::Engine || !Game::Engine->GetTextManager()) return ErrorCodes::CannotInitialiseUIWithoutGameEngineComponents;
 	TextManager *tm = Game::Engine->GetTextManager();
 
 	// Standard text colours for use in the text rendering
@@ -130,23 +131,25 @@ Result UserInterface::InitialiseUITextComponents(void)
 							 20, 120, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
 
 	// Return success, for now, although TODO: we have not checked the return values for each sentence
+	*/
 	return ErrorCodes::NoError;
-	
 }
 
 // Initialises a text block.  These are the managed wrapper objects for manipulating text strings in the interface
 TextBlock *UserInterface::CreateTextBlock(std::string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
-{
+{	
 	Result result;
 	SentenceType *sentence;
 
 	// Initialise a new sentence object which will hold the core text rendering data
-	result = InitialiseTextString(Game::Engine->GetTextManager(), &sentence, NULL, font, pos.x, pos.y, maxlength, size, col, render);
+	// TODO [textrender]: Update for new text rendering component
+	result = InitialiseTextString(/*Game::Engine->GetTextManager()*/NULL, &sentence, NULL, font, pos.x, pos.y, maxlength, size, col, render);
 	if (result != ErrorCodes::NoError) return NULL;
 
 	// Now create a new text block object to manage this sentence data
+	// TODO [textrender]: Update for new text rendering component
 	TextBlock *tb = new TextBlock();
-	tb->Initialise(code, Game::Engine->GetTextManager(), sentence, maxlength);
+	tb->Initialise(code, /*Game::Engine->GetTextManager()*/NULL, sentence, maxlength);
 
 	// Finally, update the text block contents if we have been provided an initial text string
 	if (text) tb->SetText(text, size);
@@ -156,14 +159,16 @@ TextBlock *UserInterface::CreateTextBlock(std::string code, const char *text, in
 }
 
 // Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
+// TODO [textrender]: Update for new text rendering component
 Result UserInterface::InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render)
 {
-	(*sentence) = tm->CreateSentence(fontID, maxlength);
+	/*(*sentence) = tm->CreateSentence(fontID, maxlength);
 	Result res = tm->UpdateSentence((*sentence), "", x, y, render, colour, size);
 	if (textbuffer) memset(textbuffer, 0, maxlength);
 
-	return res;
+	return res;*/
+	return ErrorCodes::NoError;
 }
 
 Result UserInterface::InitialiseUIComponentSets(void)
@@ -429,10 +434,11 @@ void UserInterface::ReleaseManagedControlDefinitions(void)
 void UserInterface::SetDebugFlightInfoDisplay(bool display)
 {
 	// Set the render flag on all UI debug flight info components
-	TextStrings.S_DBG_FLIGHTINFO_1->render = 
+	// TODO [textrender]: Update for new text rendering component
+	/*TextStrings.S_DBG_FLIGHTINFO_1->render = 
 	TextStrings.S_DBG_FLIGHTINFO_2->render = 
 	TextStrings.S_DBG_FLIGHTINFO_3->render = 
-	TextStrings.S_DBG_FLIGHTINFO_4->render = display;
+	TextStrings.S_DBG_FLIGHTINFO_4->render = display;*/
 }
 
 // Virtual inherited method to accept a command from the console
@@ -683,6 +689,8 @@ void UserInterface::WriteDebugOutput(int line, const char *text)
 	if (strlen(text) > UserInterface::DEBUG_STRING_MAX_LENGTH) return;
 
 	// Copy this string data into the debug string
+	// TODO [textrender]: Update for new text rendering component
+	/*
 	if (line == 1)
 	{
 		strcpy(D::UI->TextStrings.C_DBG_FLIGHTINFO_1, text);
@@ -703,6 +711,7 @@ void UserInterface::WriteDebugOutput(int line, const char *text)
 		strcpy(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, text);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
+	*/
 }
 
 // Writes a string to the debug output

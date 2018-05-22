@@ -1,5 +1,11 @@
 #include "TextRenderer.h"
 #include "Logging.h"
+#include "CoreEngine.h"
+#include "DecalRenderingManager.h"
+
+// Default font size; character scaling will use this as the baseline
+const float TextRenderer::DEFAULT_FONT_SIZE = 12.0f;
+const float TextRenderer::DEFAULT_FONT_SIZE_RECIP = (1.0f / TextRenderer::DEFAULT_FONT_SIZE);
 
 // Constructor
 TextRenderer::TextRenderer(void)
@@ -38,7 +44,7 @@ bool TextRenderer::RegisterFont(Font *font)
 }
 
 // Retrieve a font based on its ID
-Font & TextRenderer::GetFont(Font::ID id)
+const Font & TextRenderer::GetFont(Font::ID id) const
 {
 	if (!IsValidFont(id)) return Font();
 
@@ -56,7 +62,7 @@ Font::ID TextRenderer::GetFontID(const std::string & code) const
 }
 
 // Get a font based on its string  name
-Font & TextRenderer::GetFont(const std::string & code)
+const Font & TextRenderer::GetFont(const std::string & code) const
 {
 	const auto it = m_font_ids.find(code);
 	if (it == m_font_ids.end()) return Font();
@@ -74,6 +80,64 @@ bool TextRenderer::IsValidFont(Font::ID id) const
 bool TextRenderer::IsValidFont(const std::string & code) const
 {
 	return (m_font_ids.find(code) != m_font_ids.end());
+}
+
+// Returns the glyph scaling factor for the given font size
+float TextRenderer::GlyphScalingFactor(float font_size)
+{
+	return (font_size * TextRenderer::DEFAULT_FONT_SIZE_RECIP);
+}
+
+// Renders the given character to the screen
+void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
+										   const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+{
+	// Get the corresponding font and set decal rendering parameters accordingly
+	const auto & font_data = GetFont(font);
+	SetDecalRenderingParameters(font_data, basecolour, outlinecolour);
+	
+	// Glyph scaling can be determined based on desired font size
+	float glyph_scale = GlyphScalingFactor(font_size);
+
+	// Get glyph data and push a request to the decal renderer
+	const auto & glyph = font_data.GetGlyph(ch);
+	RenderGlyphDecal(glyph, screen_location, glyph_scale);
+}
+
+// Renders the given text string to the screen.  No wrapping is performed
+void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, const FXMVECTOR screen_location, float font_size,
+										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+{
+	// Get the corresponding font and set decal rendering parameters accordingly
+	const auto & font_data = GetFont(font);
+	SetDecalRenderingParameters(font_data, basecolour, outlinecolour);
+
+	// Glyph scaling can be determined based on desired font size
+	float glyph_scale = GlyphScalingFactor(font_size);
+
+	// Push consecutive requests to render each glyph in turn
+	for (unsigned int ch : str)
+	{
+		RenderGlyphDecal(font_data.GetGlyph(ch), screen_location, glyph_scale);
+	}
+}
+
+// Pass parameters to the decal renderer that will be used for all subsequent text rendering calls
+void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+{
+	auto * renderer = Game::Engine->GetDecalRenderer();
+
+	renderer->SetTexture(font.GetTextureMap());
+	renderer->SetBaseColour(basecolour);
+	renderer->SetOutlineColour(outlinecolour);
+}
+
+// Perform glyph calculation and dispatch a render call to the decal renderer
+void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale) const
+{
+	XMFLOAT2 size(static_cast<float>(glyph.Size.x) * glyph_scale, static_cast<float>(glyph.Size.y) * glyph_scale);
+
+	Game::Engine->GetDecalRenderer()->RenderDecalScreen(location, size, glyph.Location, (glyph.Location + glyph.Size));
 }
 
 

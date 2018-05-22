@@ -121,8 +121,9 @@ public:
 	void					ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex);
 
 	// Determines whether FPS info is displayed on screeen
-	CMPINLINE void			SetFPSCounterDisplay(bool display) { TextStrings.S_DBG_FPSCOUNTER->render = true; }
-	CMPINLINE bool			IsFPSCounterDisplayed(void) { return TextStrings.S_DBG_FPSCOUNTER->render; }
+	// TODO [textrender]: Update for new text rendering component
+	CMPINLINE void			SetFPSCounterDisplay(bool display) { /*TextStrings.S_DBG_FPSCOUNTER->render = true;*/ }
+	CMPINLINE bool			IsFPSCounterDisplayed(void) { return false; /* TextStrings.S_DBG_FPSCOUNTER->render;*/ }
 
 	// Methods for handling the set of managed control definitions
 	CMPINLINE bool							HaveManagedControlDefinition(std::string key)
