@@ -8,6 +8,14 @@ class RenderProcess
 {
 public:
 
+	enum class RenderProcessClass : size_t
+	{
+		Primary = 0U,
+		UI,
+		Decal,
+		_COUNT
+	};
+
 	// Constructor
 	RenderProcess(void);
 

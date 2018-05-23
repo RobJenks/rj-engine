@@ -248,8 +248,8 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	Game::Log << LOG_INFO << "Environment rendering initialised\n";
 
 	// Activate the required render processes for this configuration
-	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>();
-	Game::Engine->GetRenderDevice()->ActivateUIRenderProcess<UIRenderProcess>();
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>(RenderProcess::RenderProcessClass::Primary);
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<UIRenderProcess>(RenderProcess::RenderProcessClass::UI);
 
 	// If we succeed in all initialisation functions then return success now
 	Game::Log << LOG_INFO << "All game engine initialisation completed successfully\n\n";

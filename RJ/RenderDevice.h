@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 #include <unordered_map>
 #include <memory>
 #include "CompilerSettings.h"
@@ -12,13 +13,13 @@ class RenderDevice
 {
 public:
 
+	// Constructor
 	RenderDevice(void);
 
 	CMPINLINE std::string		GetRenderDeviceName(void) const { return m_renderdevice_name; }
 
 	// Set the active render process
-	template <class TRenderProcess> void ActivateRenderProcess(void);
-	template <class TRenderProcess> void ActivateUIRenderProcess(void);
+	template <class TRenderProcess> void ActivateRenderProcess(RenderProcess::RenderProcessClass process_type);
 
 	// Perform rendering; will delegate to the currently-active render process
 	void						Render(void);
@@ -33,13 +34,18 @@ public:
 
 protected:
 
+	void						ExecuteRenderProcess(RenderProcess::RenderProcessClass process_type);
+
 	CMPINLINE void				SetRenderDeviceName(const std::string & name) { m_renderdevice_name = name; }
 
 	template <class TRenderProcess>
-	RenderProcess *				ActivateInternalRenderProcess(void);
+	RenderProcess *				ActivateInternalRenderProcess(RenderProcess::RenderProcessClass process_type);
 
-	CMPINLINE RenderProcess *	GetActiveRenderProcess(void) { return m_render_process; }
-	CMPINLINE RenderProcess *	GetActiveUIRenderProcess(void) { return m_ui_render_process; }
+	CMPINLINE RenderProcess *	GetActiveRenderProcess(RenderProcess::RenderProcessClass process_type) 
+	{ 
+		assert(static_cast<size_t>(process_type) < static_cast<size_t>(RenderProcess::RenderProcessClass::_COUNT));
+		return m_active_render_processes[static_cast<size_t>(process_type)];
+	}
 
 protected:
 
@@ -47,8 +53,7 @@ protected:
 	std::string					m_renderdevice_name;
 
 	// Currently-active render processes
-	RenderProcess *				m_render_process;
-	RenderProcess *				m_ui_render_process;
+	std::array<RenderProcess*, static_cast<size_t>(RenderProcess::RenderProcessClass::_COUNT)> m_active_render_processes;
 
 	// Collection of all render processes that have been activated at some point; can be reactivated during 
 	// normal rendering, and will all be deallocated automatically on shutdown
@@ -60,21 +65,18 @@ protected:
 
 // Set the active primary render process
 template <class TRenderProcess>
-void RenderDevice::ActivateRenderProcess(void)
+void RenderDevice::ActivateRenderProcess(RenderProcess::RenderProcessClass process_type)
 {
-	m_render_process = ActivateInternalRenderProcess<TRenderProcess>();
+	assert(static_cast<size_t>(process_type) < static_cast<size_t>(RenderProcess::RenderProcessClass::_COUNT));
+
+	// Perform internal activation of this render process
+	m_active_render_processes[static_cast<size_t>(process_type)] = ActivateInternalRenderProcess<TRenderProcess>(process_type);
 }
 
-// Set the active primary render process
-template <class TRenderProcess>
-void RenderDevice::ActivateUIRenderProcess(void)
-{
-	m_ui_render_process = ActivateInternalRenderProcess<TRenderProcess>();
-}
 
 // Perform internal activation of a render process
 template <class TRenderProcess>
-RenderProcess * RenderDevice::ActivateInternalRenderProcess(void)
+RenderProcess * RenderDevice::ActivateInternalRenderProcess(RenderProcess::RenderProcessClass process_type)
 {
 	const std::string name = RenderProcess::Name<TRenderProcess>();
 	Game::Log << LOG_INFO << "Attempting to enable render process \"" << name << "\"\n";

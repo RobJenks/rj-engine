@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <unordered_map>
 #include "Font.h"
 
@@ -71,5 +72,8 @@ private:
 
 	// Reciprocal of default font size, for runtime efficiency
 	static const float							DEFAULT_FONT_SIZE_RECIP;
+
+	// Null font object, to be returned in case of invalid requests
+	std::unique_ptr<Font>						m_null_font;
 
 };

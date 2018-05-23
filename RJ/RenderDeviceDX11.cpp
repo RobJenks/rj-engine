@@ -836,11 +836,13 @@ HRESULT RenderDeviceDX11::PresentFrame(void)
 // Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
 bool RenderDeviceDX11::RepointBackbufferRenderTargetAttachment(const std::string & target)
 {
-	// Handle each supported render process that allows redirect of alternative buffer data
-	auto * render_process = GetActiveRenderProcess();
-	if (render_process->GetName() == RenderProcess::Name<DeferredRenderProcess>())
+	// Handle each active render process that allows redirect of alternative buffer data
+	for (auto & active_process : m_active_render_processes)
 	{
-		return ((DeferredRenderProcess*)render_process)->RepointBackbufferRenderTargetAttachment(target);
+		if (active_process->GetName() == RenderProcess::Name<DeferredRenderProcess>())
+		{
+			return ((DeferredRenderProcess*)active_process)->RepointBackbufferRenderTargetAttachment(target);
+		}
 	}
 
 	// Unsupported render process type

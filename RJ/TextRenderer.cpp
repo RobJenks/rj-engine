@@ -10,7 +10,8 @@ const float TextRenderer::DEFAULT_FONT_SIZE_RECIP = (1.0f / TextRenderer::DEFAUL
 // Constructor
 TextRenderer::TextRenderer(void)
 	:
-	m_font_count(0U)
+	m_font_count(0U),
+	m_null_font(new Font("null"))
 {
 }
 
