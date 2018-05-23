@@ -47,7 +47,7 @@ bool TextRenderer::RegisterFont(Font *font)
 // Retrieve a font based on its ID
 const Font & TextRenderer::GetFont(Font::ID id) const
 {
-	if (!IsValidFont(id)) return Font();
+	if (!IsValidFont(id)) return *m_null_font;
 
 	return *m_fonts[id];
 }
@@ -66,7 +66,7 @@ Font::ID TextRenderer::GetFontID(const std::string & code) const
 const Font & TextRenderer::GetFont(const std::string & code) const
 {
 	const auto it = m_font_ids.find(code);
-	if (it == m_font_ids.end()) return Font();
+	if (it == m_font_ids.end()) return *m_null_font;
 
 	return *m_fonts[it->second];
 }

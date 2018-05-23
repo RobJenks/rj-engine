@@ -15,7 +15,7 @@ class MaterialDX11 : public Material
 {
 public:
 
-	typedef std::array<TextureDX11*, (size_t)TextureType::TEXTURE_TYPE_COUNT> MaterialTextureSet;
+	typedef std::array<const TextureDX11*, (size_t)TextureType::TEXTURE_TYPE_COUNT> MaterialTextureSet;
 	static const MaterialTextureSet::size_type MaterialTextureTypeCount = (MaterialTextureSet::size_type)Material::TextureType::TEXTURE_TYPE_COUNT;
 
 	// Constructors
@@ -88,7 +88,7 @@ public:
 	// Texture collection for this material
 	const TextureDX11 *			GetTexture(TextureType type) const;
 	const MaterialTextureSet &	GetTextures(void) const;
-	void						SetTexture(TextureType type, TextureDX11 *texture);
+	void						SetTexture(TextureType type, const TextureDX11 *texture);
 	void						SetTextures(const MaterialTextureSet & textures);
 	void						ResetTextures(void);
 
@@ -110,11 +110,11 @@ private:
 
 	struct TextureBinding
 	{
-		TextureDX11 * texture;
+		const TextureDX11 * texture;
 		unsigned int slot;
 
 		TextureBinding(void) : texture(NULL), slot(0U) { }
-		TextureBinding(TextureDX11 * _texture, unsigned int _slot) : texture(_texture), slot(_slot) { }
+		TextureBinding(const TextureDX11 * _texture, unsigned int _slot) : texture(_texture), slot(_slot) { }
 	};
 
 

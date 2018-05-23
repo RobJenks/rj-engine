@@ -65,7 +65,7 @@ const MaterialDX11::MaterialTextureSet & MaterialDX11::GetTextures(void) const
 }
 
 // Texture collection for this material
-void MaterialDX11::SetTexture(TextureType type, TextureDX11 *texture)
+void MaterialDX11::SetTexture(TextureType type, const TextureDX11 *texture)
 {
 	assert((unsigned int)type < MaterialDX11::MaterialTextureTypeCount);
 

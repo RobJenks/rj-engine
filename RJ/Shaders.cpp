@@ -11,5 +11,8 @@ const std::string Shaders::DeferredLightingDebug		= "PS_Deferred_Debug";
 const std::string Shaders::BasicTextureVertexShader		= "VS_Basic_Texture";
 const std::string Shaders::BasicTexturePixelShader		= "PS_Basic_Texture";
 
+const std::string Shaders::SDFDecalVertexShader			= "VS_SDFDecal";
+const std::string Shaders::SDFDecalPixelShader			= "PS_SDFDecal";
+
 
 

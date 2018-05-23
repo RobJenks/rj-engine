@@ -601,6 +601,7 @@
     <ClCompile Include="RM_ModelData.cpp" />
     <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SamplerStateDX11.cpp" />
+    <ClCompile Include="SDFDecalRenderProcess.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderDX11.cpp" />
@@ -887,6 +888,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Data\Shaders\SDFDecalRenderingCommonData.hlsl.h" />
     <ClInclude Include="Data\Shaders\UIRenderingCommonData.hlsl.h" />
     <ClInclude Include="DecalRenderingManager.h" />
     <ClInclude Include="DecalRenderingParams.h" />
@@ -1095,6 +1097,7 @@
     <ClInclude Include="RM_ZSortedInstance.h" />
     <ClInclude Include="SamplerState.h" />
     <ClInclude Include="SamplerStateDX11.h" />
+    <ClInclude Include="SDFDecalRenderProcess.h" />
     <ClInclude Include="SentenceType.h" />
     <ClInclude Include="SequenceGenerationTests.h" />
     <ClInclude Include="Shader.h" />

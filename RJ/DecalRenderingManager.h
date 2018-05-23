@@ -10,6 +10,8 @@ class DecalRenderingManager
 {
 public:
 
+	typedef std::vector<DecalRenderingParams> DecalRenderingQueue;
+
 	// Constructor
 	DecalRenderingManager(void);
 
@@ -28,6 +30,8 @@ public:
 	// End the frame
 	void									EndFrame(void);
 
+	// Retrieve the set of decal rendering data that is queued for the render device this frame
+	CMPINLINE const DecalRenderingQueue &	GetQueuedRenderingData(void) const { return m_rendergroups; }
 
 	// Shutdown the renderer and release any allocated resources
 	void									Shutdown(void);
@@ -57,7 +61,7 @@ private:
 private:
 
 	// Collection of decal rendering params, which group similar rendering requests together for render-time efficiency
-	std::vector<DecalRenderingParams>		m_rendergroups;
+	DecalRenderingQueue						m_rendergroups;
 
 
 };

@@ -28,6 +28,8 @@ public:
 	// Add a new instance for rendering
 	void									AddInstance(const FXMMATRIX world, const XMFLOAT4 & uv_shift_scale);
 
+	// Return a reference to the instance data calculated for rendering
+	CMPINLINE const std::vector<RM_Instance> &	GetQueuedInstanceData(void) const { return m_instances; }
 
 	// Indicates whether this group is currently 'in use', i.e. if it has any instances assigned
 	CMPINLINE bool							IsInUse(void) const { return (!m_instances.empty()); }

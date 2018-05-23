@@ -17,4 +17,6 @@ public:
 	static const std::string BasicTextureVertexShader;
 	static const std::string BasicTexturePixelShader;
 
+	static const std::string SDFDecalVertexShader;
+	static const std::string SDFDecalPixelShader;
 };
