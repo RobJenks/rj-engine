@@ -1,10 +1,10 @@
-#ifndef __UIRenderingCommonDataH__
-#define __UIRenderingCommonDataH__
+#ifndef __BasicTextureRenderingCommonDataH__
+#define __BasicTextureRenderingCommonDataH__
 
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
 
 // Basic constant buffer holding minimum per-frame data required
-CBUFFER UIRenderingFrameBuffer REGISTER(b4)
+CBUFFER BasicTextureRenderingFrameBuffer REGISTER(b4)
 {
 	RJ_ROW_MAJOR_MATRIX ViewProjection;		// (View * Proj) matrix
 };
@@ -12,7 +12,7 @@ CBUFFER UIRenderingFrameBuffer REGISTER(b4)
 
 
 // String references to each buffer for application parameter binding
-#define UIRenderingFrameBufferName BUFFER_NAME(UIRenderingFrameBuffer)
+#define BasicTextureRenderingFrameBufferName BUFFER_NAME(BasicTextureRenderingFrameBuffer)
 
 
 

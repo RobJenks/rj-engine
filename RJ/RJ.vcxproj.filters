@@ -2112,9 +2112,6 @@
     <ClInclude Include="ShaderFlags.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Shaders\UIRenderingCommonData.hlsl.h">
-      <Filter>HLSL\Common\UI</Filter>
-    </ClInclude>
     <ClInclude Include="RM_ModelData.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
@@ -2171,6 +2168,9 @@
     </ClInclude>
     <ClInclude Include="Data\Shaders\SDFDecalRenderingCommonData.hlsl.h">
       <Filter>HLSL\Common\SDFDecal</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\BasicTextureRenderingCommonData.hlsl.h">
+      <Filter>HLSL\Common\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

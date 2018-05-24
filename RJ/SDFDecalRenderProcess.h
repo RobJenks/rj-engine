@@ -2,6 +2,7 @@
 
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
+#include "Data/Shaders/BasicTextureRenderingCommonData.hlsl.h"
 #include "Data/Shaders/SDFDecalRenderingCommonData.hlsl.h"
 class Model;
 class MaterialDX11;
@@ -32,9 +33,10 @@ private:
 	void							InitialiseRenderGeometry(void);
 	void 							InitialisePipelines(void);
 
-	void							PopulateFrameBuffer(const DecalRenderingParams & render_group);
+	void							PopulateBuffers(const DecalRenderingParams & render_group);
 
 	CMPINLINE ConstantBufferDX11 *	GetFrameDataBuffer(void) { return m_cb_frame; }
+	CMPINLINE ConstantBufferDX11 *	GetDecalRenderingConstantBuffer(void) { return m_cb_decal; }
 
 private:
 
@@ -46,8 +48,10 @@ private:
 	PipelineStateDX11 *						m_pipeline;
 
 	// Frame data buffer
-	ManagedPtr<DecalRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
+	ManagedPtr<BasicTextureRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *							m_cb_frame;					// Compiled CB
+	ManagedPtr<DecalRenderingDataBuffer>			m_cb_decal_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *							m_cb_decal;					// Compiled CB
 
 	// Pre-cached models for orthographic screen rendering
 	Model *									m_model_quad;
@@ -57,6 +61,7 @@ private:
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_decaldata;
 
 
 

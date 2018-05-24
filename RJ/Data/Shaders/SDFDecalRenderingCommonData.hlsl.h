@@ -3,16 +3,16 @@
 
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
 
-// Basic constant buffer holding minimum per-frame data required
-CBUFFER DecalRenderingFrameBuffer REGISTER(b4)
+// Basic constant buffer holding required decal rendering data
+CBUFFER DecalRenderingDataBuffer REGISTER(b4)
 {
-	RJ_ROW_MAJOR_MATRIX ViewProjection;		// [TODO: TO BE CHANGED]
+	float4 tmp;
 };
 
 
 
 // String references to each buffer for application parameter binding
-#define DecalRenderingFrameBufferName BUFFER_NAME(DecalRenderingFrameBuffer)
+#define DecalRenderingDataBufferName BUFFER_NAME(DecalRenderingDataBuffer)
 
 
 

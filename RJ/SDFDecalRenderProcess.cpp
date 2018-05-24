@@ -42,7 +42,7 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalVertexShader);
+	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::BasicTextureVertexShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [vs]\n";
 
 	m_ps = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalPixelShader);
@@ -50,7 +50,7 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, DecalRenderingFrameBufferName);
+	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, BasicTextureRenderingFrameBufferName);
 }
 
 // Initialisation
@@ -59,7 +59,7 @@ void SDFDecalRenderProcess::InitialiseStandardBuffers(void)
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering standard buffer resources\n";
 
 	// Frame data buffer
-	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DecalRenderingFrameBuffer>(DecalRenderingFrameBufferName, m_cb_frame_data.RawPtr);
+	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<BasicTextureRenderingFrameBuffer>(BasicTextureRenderingFrameBufferName, m_cb_frame_data.RawPtr);
 }
 
 // Initialisation
@@ -123,13 +123,14 @@ void SDFDecalRenderProcess::Render(void)
 		if (!group.IsInUse()) continue;
 
 		// Populate the shader CB with data for this render group
-		PopulateFrameBuffer(group);
+		PopulateBuffers(group);
 
 		// Update the decal rendering material with the correct texture
 		m_decal_material.RawPtr->SetTexture(Material::TextureType::Diffuse, group.GetTexture());
 
 		// Bind required buffer resources to shader parameters
 		m_pipeline->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetFrameDataBuffer());
+		m_pipeline->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_decaldata).Set(GetDecalRenderingConstantBuffer());
 
 		// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 		m_pipeline->Bind();
@@ -147,10 +148,15 @@ void SDFDecalRenderProcess::Render(void)
 
 
 // Populate standard data required for each pass of the decal rendering process
-void SDFDecalRenderProcess::PopulateFrameBuffer(const DecalRenderingParams & render_group)
+void SDFDecalRenderProcess::PopulateBuffers(const DecalRenderingParams & render_group)
 {
-	// Frame data buffer
-	// TODO: To be updated
+	// Frame data buffer (vs)
 	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();		// (View = ID, Proj = Ortho)
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
+
+	// Decal rendering buffer (ps)
+	m_cb_decal_data.RawPtr->tmp = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_cb_decal->Set(m_cb_decal_data.RawPtr);
+
 }
+

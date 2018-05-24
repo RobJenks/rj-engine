@@ -1,7 +1,7 @@
 #include "../../CommonShaderPipelineStructures.hlsl.h"
 #include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../../Definitions/VertexDefinitions.hlsl.h"
-#include "UIRenderingCommonData.hlsl.h"
+#include "BasicTextureRenderingCommonData.hlsl.h"
 
 
 // VS_Basic_Texture: Basic vertex texture which processes only position and texture data to clip space

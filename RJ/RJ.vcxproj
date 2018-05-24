@@ -889,7 +889,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Data\Shaders\SDFDecalRenderingCommonData.hlsl.h" />
-    <ClInclude Include="Data\Shaders\UIRenderingCommonData.hlsl.h" />
+    <ClInclude Include="Data\Shaders\BasicTextureRenderingCommonData.hlsl.h" />
     <ClInclude Include="DecalRenderingManager.h" />
     <ClInclude Include="DecalRenderingParams.h" />
     <ClInclude Include="DefaultingFloat4.h" />

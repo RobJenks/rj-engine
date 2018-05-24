@@ -2,7 +2,7 @@
 
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
-#include "Data/Shaders/UIRenderingCommonData.hlsl.h"
+#include "Data/Shaders/BasicTextureRenderingCommonData.hlsl.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 class ConstantBufferDX11;
@@ -46,8 +46,8 @@ private:
 	PipelineStateDX11 *					m_pipeline;
 
 	// Frame data buffer
-	ManagedPtr<UIRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *				m_cb_frame;					// Compiled CB
+	ManagedPtr<BasicTextureRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *							m_cb_frame;					// Compiled CB
 
 	// Pre-cached models for orthographic screen rendering
 	Model *								m_model_quad;

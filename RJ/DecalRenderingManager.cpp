@@ -104,6 +104,7 @@ void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2
 void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
 {
 	// World matrix is a straightforward scale & translate in screen-space
+	// TODO: Add rotation
 	XMMATRIX world = XMMatrixMultiply(
 		XMMatrixScalingFromVector(size),
 		XMMatrixTranslationFromVector(XMVectorAdd(location, Game::Engine->ScreenSpaceAdjustment()))

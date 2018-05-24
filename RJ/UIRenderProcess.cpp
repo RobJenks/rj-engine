@@ -44,7 +44,7 @@ void UIRenderProcess::InitialiseShaders()
 
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, UIRenderingFrameBufferName);
+	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, BasicTextureRenderingFrameBufferName);
 
 }
 
@@ -53,7 +53,7 @@ void UIRenderProcess::InitialiseStandardBuffers()
 	Game::Log << LOG_INFO << "Initialising UI rendering standard buffer resources\n";
 
 	// Frame data buffer
-	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<UIRenderingFrameBuffer>(UIRenderingFrameBufferName, m_cb_frame_data.RawPtr);
+	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<BasicTextureRenderingFrameBuffer>(BasicTextureRenderingFrameBufferName, m_cb_frame_data.RawPtr);
 
 }
 
