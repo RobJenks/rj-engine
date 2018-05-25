@@ -123,6 +123,8 @@
 #include "DataObjectDebugLogger.h"			// DBG
 #include "DataObjectEngineThrustController.h"	// DBG
 #include "DataObjectEngineHeadingController.h"	// DBG
+#include "TextRenderer.h"			// DBG
+#include "DecalRenderingManager.h"	// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -2689,6 +2691,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		//lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
 		//lt()->SetSize(XMVectorReplicate(45.0f));
 		//Game::Engine->RenderObject(lt2());
+		
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***

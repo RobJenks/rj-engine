@@ -42,7 +42,7 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::BasicTextureVertexShader);
+	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalVertexShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [vs]\n";
 
 	m_ps = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalPixelShader);
@@ -50,7 +50,8 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, BasicTextureRenderingFrameBufferName);
+	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, DecalRenderingFrameBufferName);
+	m_param_ps_decaldata = AttemptRetrievalOfShaderParameter(m_ps, DecalRenderingDataBufferName);
 }
 
 // Initialisation
@@ -59,7 +60,8 @@ void SDFDecalRenderProcess::InitialiseStandardBuffers(void)
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering standard buffer resources\n";
 
 	// Frame data buffer
-	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<BasicTextureRenderingFrameBuffer>(BasicTextureRenderingFrameBufferName, m_cb_frame_data.RawPtr);
+	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DecalRenderingFrameBuffer>(DecalRenderingFrameBufferName, m_cb_frame_data.RawPtr);
+	m_cb_decal = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DecalRenderingDataBuffer>(DecalRenderingDataBufferName, m_cb_decal_data.RawPtr);
 }
 
 // Initialisation
@@ -137,7 +139,7 @@ void SDFDecalRenderProcess::Render(void)
 
 		// Perform instanced rendering of the full queued render group through this pipeline
 		const auto & instances = group.GetQueuedInstanceData();
-		Game::Engine->RenderInstanced(*m_pipeline, *m_model_quad, m_decal_material.RawPtr, instances[0], instances.size());
+		Game::Engine->RenderInstanced(*m_pipeline, *m_model_quad, m_decal_material.RawPtr, instances[0], static_cast<UINT>(instances.size()));
 
 		// Unbind the geometry rendering pipeline
 		// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds

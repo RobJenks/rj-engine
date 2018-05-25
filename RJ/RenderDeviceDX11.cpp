@@ -58,6 +58,8 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_deferred_lighting_ps(NULL),
 	m_texture_vs(NULL), 
 	m_texture_ps(NULL), 
+	m_sdf_decal_vs(NULL), 
+	m_sdf_decal_ps(NULL), 
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
@@ -602,6 +604,10 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		// Basic texture/UI rendering shaders
 		{ &m_texture_vs, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout },
 		{ &m_texture_ps, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL },
+
+		// Signed-distance-field decal rendering shaders
+		{ &m_sdf_decal_vs, Shader::Type::VertexShader, Shaders::SDFDecalVertexShader, "Shaders\\vs_decal_sdf.vs.hlsl", "latest", &m_standard_input_layout }, 
+		{ &m_sdf_decal_ps, Shader::Type::PixelShader, Shaders::SDFDecalPixelShader, "Shaders\\ps_decal_sdf.ps.hlsl", "latest", NULL }, 
 
 
 		// Debug-only shaders

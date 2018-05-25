@@ -2,7 +2,6 @@
 
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
-#include "Data/Shaders/BasicTextureRenderingCommonData.hlsl.h"
 #include "Data/Shaders/SDFDecalRenderingCommonData.hlsl.h"
 class Model;
 class MaterialDX11;
@@ -48,10 +47,10 @@ private:
 	PipelineStateDX11 *						m_pipeline;
 
 	// Frame data buffer
-	ManagedPtr<BasicTextureRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *							m_cb_frame;					// Compiled CB
-	ManagedPtr<DecalRenderingDataBuffer>			m_cb_decal_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *							m_cb_decal;					// Compiled CB
+	ManagedPtr<DecalRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
+	ManagedPtr<DecalRenderingDataBuffer>	m_cb_decal_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *					m_cb_decal;					// Compiled CB
 
 	// Pre-cached models for orthographic screen rendering
 	Model *									m_model_quad;
