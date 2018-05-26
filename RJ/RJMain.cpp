@@ -337,6 +337,7 @@ bool RJMain::Display(void)
 		RJ_FRAME_PROFILER_CHECKPOINT("Initialising simulation cycle");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_BeginCycle)
 		{
+			Game::Engine->BeginFrame();
 			Game::Logic::BeginSimulationCycle();
 			Game::CurrentPlayer->BeginSimulationCycle();
 			Game::ObjectSearchManager::InitialiseFrame();
@@ -413,20 +414,9 @@ bool RJMain::Display(void)
 		// Calculate the current camera view matrix
 		Game::Engine->GetCamera()->CalculateViewMatrix();
 
-		// Begin generating this frame
-		Game::Engine->BeginFrame();
-
 		// Clear the register of all visible objects.  This is generated during rendering so should immediately 
 		// precede the call to CoreEngine::Render()
 		Game::ClearVisibleObjectCollection();
-
-		// Pass to the main rendering function in the core engine, to render everything required in turn
-		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render)
-		{
-			// Perform all rendering
-			Game::Engine->Render();
-		}
-		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render);
 
 		// Perform FPS calculations and render if required
 		PerformFPSCalculations();
@@ -438,6 +428,14 @@ bool RJMain::Display(void)
 			DEBUGDisplayInfo();
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_DebugInfoRendering);
+
+		// Pass to the main rendering function in the core engine, to render everything required in turn
+		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render)
+		{
+			// Perform all rendering
+			Game::Engine->Render();
+		}
+		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render);
 
 		// End the current frame
 		Game::Engine->EndFrame();
@@ -856,10 +854,19 @@ void RJMain::ProcessKeyboardInput(void)
 			});
 		}
 	}
+
+	static float g_coord = 0.0f;
 	if (b[DIK_G])
 	{
-		
+		if (Game::Keyboard.ShiftDown()) g_coord -= 1.0f;
+		if (!Game::Keyboard.ShiftDown()) g_coord += 1.0f;
+		OutputDebugString(concat("Coord: ")(g_coord)("\n").str().c_str());
+
 	}
+	Game::Engine->GetDecalRenderer()->SetBaseColour(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	Game::Engine->GetDecalRenderer()->SetOutlineColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
+	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));
 
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;
@@ -2691,7 +2698,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		//lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
 		//lt()->SetSize(XMVectorReplicate(45.0f));
 		//Game::Engine->RenderObject(lt2());
-		
+
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***

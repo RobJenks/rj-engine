@@ -4,6 +4,8 @@
 // Constructor
 DecalRenderingManager::DecalRenderingManager(void)
 {
+	// Make sure there is always an active render group so we can rely on !empty() 
+	StartNewRenderGroup();
 }
 
 // Prepare the decal renderer for a new frame
@@ -107,7 +109,7 @@ void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, 
 	// TODO: Add rotation
 	XMMATRIX world = XMMatrixMultiply(
 		XMMatrixScalingFromVector(size),
-		XMMatrixTranslationFromVector(XMVectorAdd(location, Game::Engine->ScreenSpaceAdjustment()))
+		XMMatrixTranslationFromVector(Game::Engine->AdjustIntoLinearScreenSpace(location, size))
 	);
 
 	// Add a new instance for rendering
@@ -117,7 +119,6 @@ void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, 
 // End the frame
 void DecalRenderingManager::EndFrame(void)
 {
-
 }
 
 

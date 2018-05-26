@@ -9,6 +9,8 @@ float4 PS_SDFDecal(SDFDecalRenderingVertexShaderOutput IN) : SV_TARGET
 	// Sample directly from the diffuse texture
 	float4 diffuse = DiffuseTexture.Sample(LinearRepeatSampler, IN.texCoord);
 
+	diffuse += tmp;
+
 	// Return the diffuse colour
 	return diffuse;
 }

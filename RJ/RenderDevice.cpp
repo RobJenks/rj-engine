@@ -19,6 +19,9 @@ void RenderDevice::Render(void)
 	// Perform primary rendering of all scene geometry through the active render process
 	ExecuteRenderProcess(RenderProcess::RenderProcessClass::Primary);
 
+	// Decal rendering handles all world- and screen-space decals, plus all text rendering in those same reference frames
+	ExecuteRenderProcess(RenderProcess::RenderProcessClass::Decal);
+
 	// Perform UI and other orthographic/textured rendering
 	ExecuteRenderProcess(RenderProcess::RenderProcessClass::UI);
 }

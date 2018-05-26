@@ -3,6 +3,8 @@
 #include "Utility.h"
 #include "ShaderDX11.h"
 class DeferredRenderProcess;
+class SDFDecalRenderProcess;
+class UIRenderProcess;
 
 class RenderProcess
 {
@@ -46,5 +48,7 @@ protected:
 // Static method which returns the name of a given render process; all render processes should be registered here
 template <class T>		constexpr const char * RenderProcess::Name(void) { return "<unknown>"; }
 template <>				constexpr const char * RenderProcess::Name<DeferredRenderProcess>(void) { return STRING(DeferredRenderProcess); }
+template <>				constexpr const char * RenderProcess::Name<SDFDecalRenderProcess>(void) { return STRING(SDFDecalRenderProcess); }
+template <>				constexpr const char * RenderProcess::Name<UIRenderProcess>(void) { return STRING(UIRenderProcess); }
 
 

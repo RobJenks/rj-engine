@@ -6,6 +6,7 @@
 #include "Logging.h"
 #include "RJMain.h"
 #include "DeferredRenderProcess.h"
+#include "SDFDecalRenderProcess.h"
 #include "UIRenderProcess.h"
 #include "Profiler.h"
 #include "FrameProfiler.h"
@@ -249,6 +250,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 
 	// Activate the required render processes for this configuration
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>(RenderProcess::RenderProcessClass::Primary);
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<SDFDecalRenderProcess>(RenderProcess::RenderProcessClass::Decal);
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<UIRenderProcess>(RenderProcess::RenderProcessClass::UI);
 
 	// If we succeed in all initialisation functions then return success now
@@ -758,6 +760,19 @@ void CoreEngine::SetSystemCursorVisibility(bool cursor_visible)
 	ShowCursor(cursor_visible ? TRUE : FALSE);
 }
 
+// Pre-frame initialisation for the engine and its components
+void CoreEngine::BeginFrame(void)
+{
+	// Delegate to engine components as required
+	GetDecalRenderer()->BeginFrame();
+}
+
+// Pre-frame tear-down for the engine and its components
+void CoreEngine::EndFrame(void)
+{
+	// Delegate to engine components as required
+	GetDecalRenderer()->EndFrame();
+}
 
 // The main rendering function; renders everything in turn as required
 void CoreEngine::Render(void)
@@ -925,21 +940,50 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 // Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
 void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity, float zorder)
 {
-	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
-	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
-	const XMFLOAT2 & adjust = ScreenSpaceAdjustmentF();
+	// Transform location to desired linear screen-space.  Specified as position of centre of object being rendered
+	XMFLOAT2 adjusted_pos = AdjustIntoLinearScreenSpace(position, size);
 
 	// Build a transform matrix based on the given screen-space properties
 	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
 		XMMatrixScaling(size.x, size.y, 1.0f),
 		XMMatrixRotationZ(rotation)),
-		XMMatrixTranslation(adjust.x + position.x + (size.x * 0.5f), adjust.y - (position.y + (size.y * 0.5f)), zorder));
+		XMMatrixTranslation(adjusted_pos.x, adjusted_pos.y, zorder));
 
 	// Delegate to the primary submission method
 	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, m_unit_quad_model->Components[0].Data.get(), &material,
 		RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f)));;
 }
 
+// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen
+XMVECTOR CoreEngine::AdjustIntoLinearScreenSpaceCentred(const FXMVECTOR location)
+{
+	const XMVECTOR & adjust = ScreenSpaceAdjustment();
+	return XMVectorSelect(XMVectorAdd(adjust, location), XMVectorSubtract(adjust, location), g_XMSelect0101);	// Need 01__ so this is fine
+}
+
+// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen
+XMFLOAT2 CoreEngine::AdjustIntoLinearScreenSpaceCentred(XMFLOAT2 location)
+{
+	const XMFLOAT2 & adjust = ScreenSpaceAdjustmentF();
+	return XMFLOAT2(adjust.x + location.x, adjust.y - location.y);
+}
+
+// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen, and coords
+// expressed relative to the top-left of the object being placed
+XMVECTOR CoreEngine::AdjustIntoLinearScreenSpace(const FXMVECTOR location, const FXMVECTOR size)
+{
+	const XMVECTOR & adjust = ScreenSpaceAdjustment();
+	XMVECTOR centrepos = XMVectorMultiplyAdd(size, HALF_VECTOR, location);										// Location + (Size * 0.5)
+	return XMVectorSelect(XMVectorAdd(adjust, centrepos), XMVectorSubtract(adjust, centrepos), g_XMSelect0101);	// Need 01__ so this is fine
+}
+
+// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen, and coords
+// expressed relative to the top-left of the object being placed
+XMFLOAT2 CoreEngine::AdjustIntoLinearScreenSpace(XMFLOAT2 location, XMFLOAT2 size)
+{
+	const XMFLOAT2 & adjust = ScreenSpaceAdjustmentF();
+	return XMFLOAT2(adjust.x + location.x + (size.x * 0.5f), adjust.y - (location.y + (size.y * 0.5f)));
+}
 
 // Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
 // will be rendered through the given rendering pipeline
@@ -2290,7 +2334,11 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 // and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
 void CoreEngine::RecalculateScreenSpaceAdjustment(void)
 {
+	// Float2 representation
 	m_screen_space_adjustment_f = XMFLOAT2(Game::ScreenWidth * -0.5f, Game::ScreenHeight - (Game::ScreenHeight * 0.5f));
+
+	// Ensure the z & w are set to zero so that we can ignore these components at runtime
+	XMFLOAT4 adj = XMFLOAT4(m_screen_space_adjustment_f.x, m_screen_space_adjustment_f.y, 0.0f, 0.0f);
 	m_screen_space_adjustment = XMLoadFloat2(&m_screen_space_adjustment_f);
 }
 

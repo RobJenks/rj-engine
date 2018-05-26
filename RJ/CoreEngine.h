@@ -168,9 +168,9 @@ public:
 	// Validation method to determine whether the engine has all critical frame-generatation components available
 	CMPINLINE bool			Operational()				{ return (m_renderdevice && m_renderdevice->GetDevice() ); }
 
-	// Methods to perform initialisation/tear-down for a frame; not currently used
-	CMPINLINE void			BeginFrame()				{ }
-	CMPINLINE void			EndFrame()					{ }
+	// Methods to perform initialisation/tear-down for a frame
+	void					BeginFrame(void);
+	void					EndFrame(void);
 
 
 	/* *** Main rendering function *** */
@@ -191,10 +191,6 @@ public:
 	// queue items multiple times through e.g. different shader pipelines
 	void					ClearRenderQueue(void);
 
-	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
-	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
-	CMPINLINE XMVECTOR		ScreenSpaceAdjustment(void) const { return m_screen_space_adjustment; }
-	CMPINLINE XMFLOAT2		ScreenSpaceAdjustmentF(void) const { return m_screen_space_adjustment_f; }
 
 	// Method to render the system region
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SystemRegion, 
@@ -352,6 +348,14 @@ public:
 	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
 	void									ChangePrimitiveTopologyIfRequired(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
 
+	// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen
+	XMVECTOR								AdjustIntoLinearScreenSpaceCentred(const FXMVECTOR location);
+	XMFLOAT2								AdjustIntoLinearScreenSpaceCentred(XMFLOAT2 location);
+
+	// Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen, and coords
+	// expressed relative to the top-left of the object being placed
+	XMVECTOR								AdjustIntoLinearScreenSpace(const FXMVECTOR location, const FXMVECTOR size);
+	XMFLOAT2								AdjustIntoLinearScreenSpace(XMFLOAT2 location, XMFLOAT2 size);
 
 	// Performs rendering of debug/special data
 	void RenderDebugData(void);
@@ -527,6 +531,11 @@ private:
 	// Update window size details based on these parameters, recalculating for windowed mode as required
 	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
+	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+	CMPINLINE XMVECTOR		ScreenSpaceAdjustment(void) const { return m_screen_space_adjustment; }
+	CMPINLINE XMFLOAT2		ScreenSpaceAdjustmentF(void) const { return m_screen_space_adjustment_f; }
+
 	// Pointer to each component that makes up this game engine
 	RenderDeviceDX11 *				m_renderdevice;
 	CameraClass						*m_camera;
@@ -666,6 +675,7 @@ private:
 	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
 	XMVECTOR				m_screen_space_adjustment;
 	XMFLOAT2				m_screen_space_adjustment_f;
+	XMVECTOR				m_screen_space_adjustment_controlvector;
 	void					RecalculateScreenSpaceAdjustment(void);
 
 	// Pre- and post-render debug processes; only active in debug builds
