@@ -24,6 +24,7 @@ namespace SdfDecalBuilder
             // Commandline data to be read, and defaults
             string ttf = "";
             string output = "sdf-output.png";
+            string outputData = "sdf-output.xml";
             string sdfgenex = "";
             int minchar = 32;
             int maxchar = 255;
@@ -41,6 +42,7 @@ namespace SdfDecalBuilder
 
                 if (key == "-ttf") ttf = val;
                 else if (key == "-o") output = val;
+                else if (key == "-od") outputData = val;
                 else if (key == "-min") minchar = int.Parse(val);
                 else if (key == "-max") maxchar = int.Parse(val);
                 else if (key == "-sdfEx") sdfgenex = val;
@@ -62,7 +64,7 @@ namespace SdfDecalBuilder
             if (sdfgenex.Length != 0) generator.setSdfGenExPath(sdfgenex);
             if (sdfMode.Length != 0) generator.setSdfMode(sdfMode);
 
-            generator.GenerateSDFTexture(ttf, output, minchar, maxchar);
+            generator.GenerateSDFTexture(ttf, output, outputData, minchar, maxchar);
             Environment.Exit(0);
         }
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Drawing;
+using System.Xml;
 
 namespace SdfDecalBuilder
 {
@@ -26,12 +27,17 @@ namespace SdfDecalBuilder
         private int decalSize = 16;
         private string sdfMode = SdfMode.SignedDistanceField;
 
-        public void GenerateSDFTexture(string sourceTTF, string outputFile, int minchar, int maxchar)
+        public void GenerateSDFTexture(string sourceTTF, string outputFile, string outputDataFile, int minchar, int maxchar)
         {
             // Determine a target directory and a place to store intermediate images
             FileInfo output = new FileInfo(outputFile);
+            FileInfo outputData = new FileInfo(outputDataFile);
             string tempDirPath = output.Directory.FullName + "\\sdfgen_tmp";
             PrepareTemporaryDirectory(tempDirPath);
+
+            // Create the xml data document for this font
+            var xmlDocument = createXmlDataDocument();
+            var fontNode = writeXmlDataHeader(xmlDocument);
 
             // Path to sdfgen executable
             string exPath = getSdfGenExPath();
@@ -85,7 +91,14 @@ namespace SdfDecalBuilder
 
                     // Add to combined texture
                     Bitmap source = new Bitmap(Bitmap.FromFile(componentPath));
-                    g.DrawImage(source, (col * decalSize), (row * decalSize));
+                    Point location = new Point((col * decalSize), (row * decalSize));
+                    g.DrawImage(source, location.X, location.Y);
+
+                    // Determine actual glyph size (TODO: analyse component image to allow variable-width font)
+                    Size size = new Size(decalSize, decalSize);
+
+                    // Write an entry to the xml data file 
+                    addFontGlyphDataEntry(xmlDocument, fontNode, ch, location, size);
                 }
             }
 
@@ -94,10 +107,58 @@ namespace SdfDecalBuilder
             if (output.Exists) output.Delete();
             combined.Save(output.FullName);
 
+            // Save the xml font data file
+            System.Console.Out.WriteLine("\nSaving SDF font data file to \"" + outputData.FullName + "\"");
+            if (outputData.Exists) outputData.Delete();
+            saveXmlDataDocument(xmlDocument, outputData.FullName);
+
             // Report success and exit
             System.Console.Out.WriteLine("\nSDF generation complete");
         }
 
+        private XmlDocument createXmlDataDocument()
+        {
+            return new XmlDocument();
+        }
+
+        private XmlNode writeXmlDataHeader(XmlDocument doc)
+        {
+            var root = doc.CreateElement("GameData");
+            doc.AppendChild(root);
+
+            var font = root.AppendChild(doc.CreateElement("Font"));
+
+            var code = font.AppendChild(doc.CreateElement("Code"));
+            code.InnerText = "(CODE)";
+
+            var texture = font.AppendChild(doc.CreateElement("Texture"));
+            texture.InnerText = "(TEXTURE)";
+
+            return font;
+        }
+
+        private void addFontGlyphDataEntry(XmlDocument document, XmlNode fontNode, int character, Point location, Size size)
+        {
+            var node = fontNode.AppendChild(document.CreateElement("Glyph"));
+            node.Attributes.Append(createAttribute(document, "ch", character));
+            node.Attributes.Append(createAttribute(document, "x", location.X));
+            node.Attributes.Append(createAttribute(document, "y", location.Y));
+            node.Attributes.Append(createAttribute(document, "sx", size.Width));
+            node.Attributes.Append(createAttribute(document, "sy", size.Height));
+        }
+
+        private XmlAttribute createAttribute(XmlDocument document, string name, object value)
+        {
+            var attr = document.CreateAttribute(name);
+            attr.Value = value.ToString();
+
+            return attr;
+        }
+
+        private void saveXmlDataDocument(XmlDocument document, string filename)
+        {
+            document.Save(filename);
+        }
 
         private string componentFilePath(String componentDirectory, int character)
         {
