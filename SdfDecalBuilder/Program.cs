@@ -65,6 +65,8 @@ namespace SdfDecalBuilder
             if (sdfMode.Length != 0) generator.setSdfMode(sdfMode);
 
             generator.GenerateSDFTexture(ttf, output, outputData, minchar, maxchar);
+
+            Console.ReadKey(true);
             Environment.Exit(0);
         }
     }
