@@ -29,6 +29,7 @@ namespace SdfDecalBuilder
             int minchar = 32;
             int maxchar = 255;
             int decalsize = SDFGenerator.DEFAULT_DECAL_SIZE;
+            int spaceWidth = SDFGenerator.DEFAULT_SPACE_WIDTH;
             string sdfMode = "";
 
             // All args are expected in pairs, +1 for the executable path
@@ -48,6 +49,7 @@ namespace SdfDecalBuilder
                 else if (key == "-sdfEx") sdfgenex = val;
                 else if (key == "-size") decalsize = int.Parse(val);
                 else if (key == "-sdfmode") sdfMode = val;
+                else if (key == "-space") spaceWidth = int.Parse(val);
             }
 
             // Verify arguments
@@ -61,6 +63,7 @@ namespace SdfDecalBuilder
             SDFGenerator generator = new SDFGenerator();
             
             generator.setDecalSize(decalsize);
+            generator.setSpaceWidth(spaceWidth);
             if (sdfgenex.Length != 0) generator.setSdfGenExPath(sdfgenex);
             if (sdfMode.Length != 0) generator.setSdfMode(sdfMode);
             

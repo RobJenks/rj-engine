@@ -21,10 +21,12 @@ namespace SdfDecalBuilder
 
         public static int DEFAULT_DECAL_SIZE = 16;
         public static string DEFAULT_SDF_MODE = SdfMode.SignedDistanceField;
+        public static int DEFAULT_SPACE_WIDTH = 8;
 
         private static int COMPONENT_DECAL_SCALE_FACTOR = 3;
         private string sdfGenExPath = MsdfgenEx.determineDefaultPath();
         private int decalSize = 16;
+        private int spaceWidth = DEFAULT_SPACE_WIDTH;
         private string sdfMode = SdfMode.SignedDistanceField;
 
         public void GenerateSDFTexture(string sourceTTF, string outputFile, string outputDataFile, int minchar, int maxchar)
@@ -100,6 +102,11 @@ namespace SdfDecalBuilder
             Point currentLocation = new Point(0, 0);
             int glyphHeight = (maxY - minY);
             System.Console.Out.WriteLine("Actual glyph height will be (" + maxY + " - " + minY + ") = " + glyphHeight + " to account for leading/trailing elements");
+
+            // Special case: set the ' ' glyph size based upon the input space width, since we can't determine it from TTF pixel data
+            var space = glyphs.Find(x => (x.Character == (int)' '));
+            if (space == null) throw new Exception("No ' ' entry in glyph map, font is invalid");
+            space.Bounds = new Rectangle(space.Bounds.X, space.Bounds.Y, spaceWidth, space.Bounds.Height);
 
             // Now generate the consolidated texture map based on this glyph data
             int maxPixelsPerSide = (exactCountPerSide * glyphHeight);
@@ -385,5 +392,8 @@ namespace SdfDecalBuilder
 
         public string getSdfMode() { return sdfMode; }
         public void setSdfMode(String mode) { sdfMode = mode; }
+
+        public int getSpaceWidth() { return spaceWidth; }
+        public void setSpaceWidth(int spacewidth) { spaceWidth = spacewidth; }
     }
 }

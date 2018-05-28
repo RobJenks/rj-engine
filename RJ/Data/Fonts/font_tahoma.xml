@@ -5,7 +5,7 @@
   <Font>
     <Code>font_tahoma</Code>
     <Texture>font_tahoma</Texture>
-    <Glyph ch="32" x="0" y="0" sx="16" sy="34" />
+    <Glyph ch="32" x="0" y="0" sx="8" sy="34" />
     <Glyph ch="33" x="16" y="0" sx="3" sy="34" />
     <Glyph ch="34" x="19" y="0" sx="7" sy="34" />
     <Glyph ch="35" x="26" y="0" sx="14" sy="34" />
