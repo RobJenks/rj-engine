@@ -353,6 +353,8 @@ namespace HashedStrings
 	DefineHash(H_SoftwareRasterizerOverride, "softwarerasterizeroverride");
 	DefineHash(H_Font, "font");
 	DefineHash(H_Glyph, "glyph");
+	DefineHash(H_Separation, "separation");
+	DefineHash(H_SpaceWidth, "spacewidth");
 
 }
 

@@ -1,6 +1,9 @@
 #include "Font.h"
 #include "Utility.h"
 
+const float Font::DEFAULT_CHARACTER_SEPARATION = 1.0f;
+
+
 // Constructor
 Font::Font(void)
 	:
@@ -11,7 +14,8 @@ Font::Font(void)
 // Constructor
 Font::Font(const std::string & code)
 	:
-	m_code(code)
+	m_code(code), 
+	m_char_separation(Font::DEFAULT_CHARACTER_SEPARATION)
 {
 }
 

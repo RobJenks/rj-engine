@@ -106,7 +106,7 @@ void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const
 }
 
 // Renders the given text string to the screen.  No wrapping is performed
-void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, const FXMVECTOR screen_location, float font_size,
+void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
 										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
@@ -115,11 +115,15 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 
 	// Glyph scaling can be determined based on desired font size
 	float glyph_scale = GlyphScalingFactor(font_size);
+	float separation = font_data.GetCharacterSeparation();
 
 	// Push consecutive requests to render each glyph in turn
 	for (unsigned int ch : str)
 	{
-		RenderGlyphDecal(font_data.GetGlyph(ch), screen_location, glyph_scale);
+		const auto & glyph = font_data.GetGlyph(ch);
+		RenderGlyphDecal(glyph, screen_location, glyph_scale);
+
+		screen_location = XMVectorAdd(screen_location, XMVectorSetX(NULL_VECTOR, (glyph.Size.x + separation) * glyph_scale));
 	}
 }
 

@@ -41,7 +41,7 @@ public:
 																		const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const;
 
 	// Renders the given text string to the screen.  No wrapping is performed
-	void										RenderStringToScreen(const std::string & str, Font::ID font, const FXMVECTOR screen_location, float font_size,
+	void										RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
 																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const;
 
 

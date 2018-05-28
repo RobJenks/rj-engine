@@ -22,6 +22,10 @@ public:
 	static const unsigned int CHARACTER_MAP_SIZE = (LAST_CHARACTER - FIRST_CHARACTER + 1U);
 	static const unsigned int DEFAULT_CHARACTER = '?';		// If the requested glyph is not available
 
+	// Other constants
+	static const float DEFAULT_CHARACTER_SEPARATION;
+
+
 	// Constructor
 	Font(void);
 	Font(const std::string & code);
@@ -34,6 +38,10 @@ public:
 	// Texture map containing all glyphs for this font
 	CMPINLINE const TextureDX11 *				GetTextureMap(void) const { return m_texture; }
 	CMPINLINE void								SetTextureMap(const TextureDX11 * texture) { m_texture = texture; }
+
+	// Separation between adjactent chars (pixels) at default size
+	CMPINLINE float								GetCharacterSeparation(void) const { return m_char_separation; }
+	CMPINLINE void								SetCharacterSeparation(float px) { m_char_separation = px; }
 
 	// Return glyph data for the given character
 	const FontGlyph &							GetGlyph(unsigned int ch) const;
@@ -54,6 +62,7 @@ private:
 
 	const TextureDX11 *							m_texture;
 	std::array<FontGlyph, CHARACTER_MAP_SIZE>	m_map;
-
+	float										m_char_separation;	// Separation between adjactent chars (pixels) at default size
+	
 
 };

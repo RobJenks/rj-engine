@@ -869,7 +869,7 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
-	Game::Engine->GetTextRenderer()->RenderCharacterToScreen('A', Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
 		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 48.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	// TODO [textrender]: Update for new text rendering component

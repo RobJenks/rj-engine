@@ -3558,6 +3558,10 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 		{
 			font->SetTextureMap(Game::Engine->GetAssets().GetTexture(child->GetText()));
 		}
+		else if (hash == HashedStrings::H_Separation)
+		{
+			font->SetCharacterSeparation(IO::GetFloatValue(child, Font::DEFAULT_CHARACTER_SEPARATION));
+		}
 		else if (hash == HashedStrings::H_Glyph)
 		{
 			FontGlyph glyph; unsigned int ch = 0U;
