@@ -63,7 +63,7 @@ namespace SdfDecalBuilder
             generator.setDecalSize(decalsize);
             if (sdfgenex.Length != 0) generator.setSdfGenExPath(sdfgenex);
             if (sdfMode.Length != 0) generator.setSdfMode(sdfMode);
-
+            
             generator.GenerateSDFTexture(ttf, output, outputData, minchar, maxchar);
 
             Console.ReadKey(true);
