@@ -91,15 +91,18 @@ void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2
 	const TextureDX11 * texture = GetActiveRenderGroup().GetTexture();
 	if (!texture) return;
 
-	// Size of decal = (6, 4)
-	// Desired texmin = (1, 3), texmax = (3, 5) -> texsize = (2, 2)
-	// -> uv_shift = (1, 3)
-	// -> uv_scale = (2, 2)/(6, 4) = (0.333, 0.5)
-	// ---> in shader, vertex.uv = (uv_shift + (vertex.uv * uv_scale))
-	XMFLOAT2 texsize = (tex_max - tex_min).ToFloat();
-	XMFLOAT2 uv_scale = Float2Divide(texsize, size);
+	// Texture size = (100, 100)
+	// Decal pos = (20, 50)
+	// Decal size = (5, 10)
+	// Decal pos% = (20/100, 50/100) = (0.2, 0.5)
+	// Decal size% = (5/100, 10/100) = (0.05, 0.1)
+	// In shader: UV = pos% + (UV * size%)
+	XMFLOAT2 texsize = texture->Get2DSizeF();
+	XMFLOAT2 decal_pos_pc(static_cast<float>(tex_min.x) / texsize.x, static_cast<float>(tex_min.y) / texsize.y);
+	XMFLOAT2 decal_size = (tex_max - tex_min).ToFloat();
+	XMFLOAT2 decal_size_pc(decal_size.x / texsize.x, decal_size.y / texsize.y);
 
-	RenderDecalScreenInstance(location, XMLoadFloat2(&size), XMFLOAT4(static_cast<float>(tex_min.x), static_cast<float>(tex_min.y), uv_scale.x, uv_scale.y));
+	RenderDecalScreenInstance(location, XMLoadFloat2(&size), XMFLOAT4(decal_pos_pc.x, decal_pos_pc.y, decal_size_pc.x, decal_size_pc.y));
 }
 
 // Render a decal instance using the provided, internally-calculated parameters

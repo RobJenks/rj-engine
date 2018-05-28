@@ -1,14 +1,6 @@
 <gamedata>
   
-  <!-- Font_Basic1 -->
-  
-  <Texture code="font_basic1" dimension="Texture2D" filename="Fonts\font_basic1.dds" />
-  
-  <Font>
-    <code>font_basic1</code>
-    <texture>font_basic1</texture>
-    <data>Fonts\font_basic1.txt</data>
-  </Font>
-  
+  <!-- Include all signed-distance-field rendering fonts -->
+  <include file="Fonts\font_tahoma.xml" />
   
 </gamedata>

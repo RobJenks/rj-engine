@@ -97,7 +97,9 @@ public:
 
 	// Return the image size in aggregate
 	INTVECTOR2 Get2DSize(void) const;
+	XMFLOAT2 Get2DSizeF(void) const;
 	INTVECTOR3 Get3DSize(void) const;
+	XMFLOAT3 Get3DSizeF(void) const;
 
 	// Get the bits-per-pixel of the texture.
 	uint8_t GetBPP() const;

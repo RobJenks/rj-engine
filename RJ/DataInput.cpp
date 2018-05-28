@@ -3563,7 +3563,7 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 			FontGlyph glyph; unsigned int ch = 0U;
 			int val;
 
-			TiXmlAttribute *attr = node->FirstAttribute();
+			TiXmlAttribute *attr = child->FirstAttribute();
 			while (attr) 
 			{
 				const char *name = attr->Name();

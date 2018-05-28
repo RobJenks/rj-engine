@@ -745,10 +745,20 @@ INTVECTOR2 TextureDX11::Get2DSize(void) const
 	return INTVECTOR2(m_width, m_height);
 }
 
+XMFLOAT2 TextureDX11::Get2DSizeF(void) const
+{
+	return XMFLOAT2(static_cast<float>(m_width), static_cast<float>(m_height));
+}
+
 // Return the image size in aggregate
 INTVECTOR3 TextureDX11::Get3DSize(void) const
 {
 	return INTVECTOR3(m_width, m_height, m_numslices);
+}
+
+XMFLOAT3 TextureDX11::Get3DSizeF(void) const
+{
+	return XMFLOAT3(static_cast<float>(m_width), static_cast<float>(m_height), static_cast<float>(m_numslices));
 }
 
 uint8_t TextureDX11::GetBPP(void) const

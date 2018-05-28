@@ -13,8 +13,11 @@ SDFDecalRenderingVertexShaderOutput VS_SDFDecal(Vertex_Inst_Standard input)
 	output.position = mul(float4(input.position, 1.0f), input.Transform);	// Model -> World space
 	output.position = mul(output.position, ViewProjection);					// -> View -> Projection space
 
+	// Texture coords are modified by the UV shift & scale calculated by the text renderer
+	// UV = uv_shift + (UV * uv_scale)
+	output.texCoord = input.Highlight.xy + (input.tex * input.Highlight.zw);
+
 	// Other required data is simply passed through from vertex and instance parameters
-	output.texCoord = input.tex;
 	output.uv_shift = input.Highlight.xy;
 	output.uv_scale = input.Highlight.zw;
 
