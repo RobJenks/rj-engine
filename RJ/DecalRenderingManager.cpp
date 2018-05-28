@@ -48,6 +48,17 @@ void DecalRenderingManager::SetOutlineColour(const XMFLOAT4 & outline)
 	GetActiveRenderGroup().SetOutlineColour(outline);
 }
 
+// Set properties that are applied to all rendered decals
+void DecalRenderingManager::SetOutlineWidthFactor(float widthFactor)
+{
+	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
+	StartNewRenderGroupIf(widthFactor != GetActiveRenderGroup().GetOutlineWidthFactor());
+
+	// Store this new parameter in the active group
+	GetActiveRenderGroup().SetOutlineWidthFactor(widthFactor);
+}
+
+
 // Get the currently-active rendering group
 DecalRenderingParams & DecalRenderingManager::GetActiveRenderGroup(void)
 {

@@ -19,11 +19,13 @@ public:
 	CMPINLINE const TextureDX11 *			GetTexture(void) const { return m_texture; }
 	CMPINLINE XMFLOAT4						GetBaseColour(void) const { return m_basecolour; }
 	CMPINLINE XMFLOAT4						GetOutlineColour(void) const { return m_outlinecolour; }
+	CMPINLINE float							GetOutlineWidthFactor(void) const { return m_outlinewidthfactor; }
 
 	// Update render group params
 	CMPINLINE void							SetTexture(const TextureDX11 * texture) { m_texture = texture; }
 	CMPINLINE void							SetBaseColour(const XMFLOAT4 & basecolour) { m_basecolour = basecolour; }
 	CMPINLINE void							SetOutlineColour(const XMFLOAT4 & outlinecolour) { m_outlinecolour = outlinecolour; }
+	CMPINLINE void							SetOutlineWidthFactor(float widthfactor) { m_outlinewidthfactor = widthfactor; }
 
 	// Add a new instance for rendering
 	void									AddInstance(const FXMMATRIX world, const XMFLOAT4 & uv_shift_scale);
@@ -47,6 +49,7 @@ private:
 	const TextureDX11 *						m_texture;
 	XMFLOAT4								m_basecolour;
 	XMFLOAT4								m_outlinecolour;
+	float									m_outlinewidthfactor;
 
 	// Passed in RM_Instance instance params
 	// - matrix world		- determines pos & size of individual decal

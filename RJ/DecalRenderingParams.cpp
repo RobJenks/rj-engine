@@ -11,9 +11,10 @@ DecalRenderingParams::DecalRenderingParams(void)
 // Constructor
 DecalRenderingParams::DecalRenderingParams(const TextureDX11 * texture, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour)
 	:
-	m_texture(texture), 
-	m_basecolour(basecolour), 
-	m_outlinecolour(outlinecolour)
+	m_texture(texture),
+	m_basecolour(basecolour),
+	m_outlinecolour(outlinecolour),
+	m_outlinewidthfactor(0.0f)
 {
 }
 

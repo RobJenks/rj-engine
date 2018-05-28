@@ -91,11 +91,11 @@ float TextRenderer::GlyphScalingFactor(float font_size)
 
 // Renders the given character to the screen
 void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
-										   const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+										   const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineFactor) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
-	SetDecalRenderingParameters(font_data, basecolour, outlinecolour);
+	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor);
 	
 	// Glyph scaling can be determined based on desired font size
 	float glyph_scale = GlyphScalingFactor(font_size);
@@ -107,11 +107,11 @@ void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const
 
 // Renders the given text string to the screen.  No wrapping is performed
 void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
-										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineFactor) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
-	SetDecalRenderingParameters(font_data, basecolour, outlinecolour);
+	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor);
 
 	// Glyph scaling can be determined based on desired font size
 	float glyph_scale = GlyphScalingFactor(font_size);
@@ -128,13 +128,14 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 }
 
 // Pass parameters to the decal renderer that will be used for all subsequent text rendering calls
-void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const
+void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineWidth) const
 {
 	auto * renderer = Game::Engine->GetDecalRenderer();
 
 	renderer->SetTexture(font.GetTextureMap());
 	renderer->SetBaseColour(basecolour);
 	renderer->SetOutlineColour(outlinecolour);
+	renderer->SetOutlineWidthFactor(outlineWidth);
 }
 
 // Perform glyph calculation and dispatch a render call to the decal renderer

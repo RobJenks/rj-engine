@@ -22,6 +22,7 @@ public:
 	void									SetTexture(const TextureDX11 * texture);
 	void									SetBaseColour(const XMFLOAT4 & colour);
 	void									SetOutlineColour(const XMFLOAT4 & outline);
+	void									SetOutlineWidthFactor(float widthFactor);
 
 	// Render a decal to the given screen-space location
 	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size);

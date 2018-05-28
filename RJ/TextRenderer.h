@@ -38,11 +38,13 @@ public:
 
 	// Renders the given character to the screen
 	void										RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
-																		const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const;
+																		const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
+																		float outlineFactor = 0.0f) const;
 
 	// Renders the given text string to the screen.  No wrapping is performed
 	void										RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
-																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const;
+																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
+																	 float outlineFactor = 0.0f) const;
 
 
 	// Shutdown and release all owned resources
@@ -55,7 +57,7 @@ public:
 private:
 
 	// Pass parameters to the decal renderer that will be used for all subsequent text rendering calls
-	void										SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) const;
+	void										SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineWidth) const;
 
 	// Perform glyph calculation and dispatch a render call to the decal renderer
 	void										RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale) const;

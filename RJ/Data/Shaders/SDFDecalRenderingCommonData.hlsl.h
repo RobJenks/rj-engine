@@ -25,7 +25,11 @@ CBUFFER DecalRenderingFrameBuffer REGISTER(b4)
 // Basic constant buffer holding required decal rendering data
 CBUFFER DecalRenderingDataBuffer REGISTER(b4)
 {
-	float4 tmp;
+	float4		baseColour;
+	float4		outlineColour;
+	float		outlineDistanceFactor;	// In the range 0.0 (no outline) to 1.0 (thick outline)
+
+	float3		_padding;
 };
 
 
