@@ -19,18 +19,22 @@ namespace SdfDecalBuilder
             public static readonly string MultiChannelSignedDistanceField = "msdf";
         }
 
+        public static int DEFAULT_TEXTURE_MAP_SIZE = 512;
         public static int DEFAULT_DECAL_SIZE = 16;
         public static string DEFAULT_SDF_MODE = SdfMode.SignedDistanceField;
         public static int DEFAULT_SPACE_WIDTH = 8;
 
-        private static int COMPONENT_DECAL_SCALE_FACTOR = 3;
+        private static int COMPONENT_DECAL_SCALE_FACTOR = 3;    // Scale factor to desired decal size, to ensure leading/trailing glyph data is captured
+        private static int GLYPH_MAP_SEPARATION = 2;            // Separation (px) between components on the glyph map, to prevent texture sampling bleed
         private string sdfGenExPath = MsdfgenEx.determineDefaultPath();
-        private int decalSize = 16;
+        private int textureSize = DEFAULT_TEXTURE_MAP_SIZE;
+        private int decalSize = DEFAULT_DECAL_SIZE;
         private int spaceWidth = DEFAULT_SPACE_WIDTH;
         private string sdfMode = SdfMode.SignedDistanceField;
 
         public void GenerateSDFTexture(string sourceTTF, string outputFile, string outputDataFile, int minchar, int maxchar)
         {
+            int glyphCount = (maxchar - minchar + 1);
             List<GlyphData> glyphs = new List<GlyphData>();
 
             // Determine a target directory and a place to store intermediate images
@@ -56,12 +60,6 @@ namespace SdfDecalBuilder
             int minY = int.MaxValue;
             int maxY = int.MinValue;
 
-            // Determine the dimensions and size of the target texture; closest to square as possible is 
-            // optimum due to power-of-two optimisations
-            int count = (maxchar - minchar + 1);
-            double exactDimension = Math.Sqrt(count);
-            int exactCountPerSide = (int)Math.Ceiling(exactDimension);
-            
             // Iterate through all characters for the SDF texture map
             for (int ch = minchar; ch <= maxchar; ++ch)
             {
@@ -98,7 +96,7 @@ namespace SdfDecalBuilder
             }
 
             // Glyphs will be arranged as optimally as possible on a 2D grid within the pow2 texture
-            int row = 0, col = 0;
+            int row = 0;
             Point currentLocation = new Point(0, 0);
             int glyphHeight = (maxY - minY);
             System.Console.Out.WriteLine("Actual glyph height will be (" + maxY + " - " + minY + ") = " + glyphHeight + " to account for leading/trailing elements");
@@ -109,11 +107,8 @@ namespace SdfDecalBuilder
             space.Bounds = new Rectangle(space.Bounds.X, space.Bounds.Y, spaceWidth, space.Bounds.Height);
 
             // Now generate the consolidated texture map based on this glyph data
-            int maxPixelsPerSide = (exactCountPerSide * glyphHeight);
-            int actualDimension = getClosestPower2Fit(maxPixelsPerSide);
-            System.Console.Out.WriteLine("\nGenerating consolidated SDF texture resource with size " + actualDimension + "x" + actualDimension);
-
-            Bitmap combined = new Bitmap(actualDimension, actualDimension);
+            System.Console.Out.WriteLine("\nGenerating consolidated SDF texture resource with size " + textureSize + "x" + textureSize);
+            Bitmap combined = new Bitmap(textureSize, textureSize);
             using (Graphics g = Graphics.FromImage(combined))
             {
                 foreach (GlyphData glyph in glyphs)
@@ -123,6 +118,14 @@ namespace SdfDecalBuilder
                     Rectangle glyphBounds = new Rectangle(
                         new Point(glyph.Bounds.Location.X, minY), 
                         new Size(glyph.Bounds.Width, glyphHeight));
+
+                    // Test whether we need to move to a new row, if this glyph will not fit in the remaining space
+                    if ((currentLocation.X + glyph.Bounds.Width + GLYPH_MAP_SEPARATION) >= textureSize)
+                    {
+                        // Calculate our new starting position in the next row of the texture map
+                        ++row;
+                        currentLocation = new Point(0, row * glyphHeight);
+                    }
 
                     // Render glyph within the combined texture
                     g.DrawImage(source, currentLocation.X, currentLocation.Y, glyphBounds, GraphicsUnit.Pixel);
@@ -134,19 +137,8 @@ namespace SdfDecalBuilder
                     addFontGlyphDataEntry(xmlDocument, fontNode, glyph.Character, 
                         new Rectangle(new Point(currentLocation.X, currentLocation.Y), glyphBounds.Size));
 
-                    // Move the current rendering position on
-                    currentLocation.X += glyphBounds.Width;
-
-                    // Update grid position in the consolidated texture
-                    if (++col == exactCountPerSide)
-                    {
-                        // Move to the first column of the next row
-                        col = 0;
-                        ++row;
-
-                        // Calculate our new starting position and reset the glyph height record
-                        currentLocation = new Point(0, row * glyphHeight);
-                    }
+                    // Move the current rendering position on and add some padding to avoid texture sampling bleed
+                    currentLocation.X += (glyphBounds.Width + GLYPH_MAP_SEPARATION);
                 }
             }
 
@@ -387,8 +379,11 @@ namespace SdfDecalBuilder
         public string getSdfGenExPath() { return sdfGenExPath; }
         public void setSdfGenExPath(string path) { sdfGenExPath = path; }
 
+        public int getTextureMapSize() { return textureSize; }
+        public void setTextureMapSize(int size) { if (size > 0) textureSize = size; }
+
         public int getDecalSize() { return decalSize; }
-        public void setDecalSize(int size) { decalSize = size; }
+        public void setDecalSize(int size) { if (size > 0) decalSize = size; }
 
         public string getSdfMode() { return sdfMode; }
         public void setSdfMode(String mode) { sdfMode = mode; }
