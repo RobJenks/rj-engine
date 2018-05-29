@@ -10,7 +10,7 @@ float4 PS_SDFDecal(SDFDecalRenderingVertexShaderOutput IN) : SV_TARGET
 	float distance = DiffuseTexture.Sample(LinearRepeatSampler, IN.texCoord).r;
 
 	// Optional outline around decal edges
-	const float smoothing = 1.0f / 16.0f;
+	const float smoothing = 1.0f / 4.0f;
 	float outlineEffect = smoothstep(0.5f - smoothing, 0.5f + smoothing, distance);
 	float4 color = lerp(outlineColour, baseColour, outlineEffect);
 

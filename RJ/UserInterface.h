@@ -121,9 +121,8 @@ public:
 	void					ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex);
 
 	// Determines whether FPS info is displayed on screeen
-	// TODO [textrender]: Update for new text rendering component
-	CMPINLINE void			SetFPSCounterDisplay(bool display) { /*TextStrings.S_DBG_FPSCOUNTER->render = true;*/ }
-	CMPINLINE bool			IsFPSCounterDisplayed(void) { return false; /* TextStrings.S_DBG_FPSCOUNTER->render;*/ }
+	CMPINLINE void			SetFPSCounterDisplay(bool display) { m_show_fps = display; }
+	CMPINLINE bool			IsFPSCounterDisplayed(void) { return m_show_fps; }
 
 	// Methods for handling the set of managed control definitions
 	CMPINLINE bool							HaveManagedControlDefinition(std::string key)
@@ -187,6 +186,8 @@ public:
 
 private:
 	
+	bool					m_show_fps;
+
 	// Broadcasts a mouse up event within a class of iUIControl-derived components.  Internal private method.
 	void BroadcastMouseUpEventToClass(RenderComponentGroup<iUIControl*> *cclass, bool lmb, bool rmb, iUIComponent *component, INTVECTOR2 mouselocation);
 

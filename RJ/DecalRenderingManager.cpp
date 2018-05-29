@@ -14,48 +14,48 @@ void DecalRenderingManager::BeginFrame(void)
 	// Clear all render group data ready for the current frame
 	ClearAllRenderGroups();
 
-	// Start a new render group so that we are guaranteed to have an 'active' group at all times
+	// Make sure there is always an active render group so we can always rely on !empty()
 	StartNewRenderGroup();
 }
 
 // Set properties that are applied to all rendered decals
 void DecalRenderingManager::SetTexture(const TextureDX11 * texture)
 {
-	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
-	StartNewRenderGroupIf( texture != GetActiveRenderGroup().GetTexture() );
+	// If no change is requested then exit immediately
+	if (texture == GetActiveRenderGroup().GetTexture()) return;
 
-	// Store this new parameter in the active group
-	GetActiveRenderGroup().SetTexture(texture);
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetTexture(texture);
 }
 
 // Set properties that are applied to all rendered decals
 void DecalRenderingManager::SetBaseColour(const XMFLOAT4 & colour)
 {
-	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
-	StartNewRenderGroupIf( Float4NotEqual(colour, GetActiveRenderGroup().GetBaseColour()) );
+	// If no change is requested then exit immediately
+	if (Float4Equal(colour, GetActiveRenderGroup().GetBaseColour())) return;
 
-	// Store this new parameter in the active group
-	GetActiveRenderGroup().SetBaseColour(colour);
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetBaseColour(colour);
 }
 
 // Set properties that are applied to all rendered decals
 void DecalRenderingManager::SetOutlineColour(const XMFLOAT4 & outline)
 {
-	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
-	StartNewRenderGroupIf(Float4NotEqual(outline, GetActiveRenderGroup().GetOutlineColour()));
+	// If no change is requested then exit immediately
+	if (Float4Equal(outline, GetActiveRenderGroup().GetOutlineColour())) return;
 
-	// Store this new parameter in the active group
-	GetActiveRenderGroup().SetOutlineColour(outline);
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetOutlineColour(outline);
 }
 
 // Set properties that are applied to all rendered decals
 void DecalRenderingManager::SetOutlineWidthFactor(float widthFactor)
 {
-	// Start a new decal rendering group if this changes the rendering params, and if we do already have one active
-	StartNewRenderGroupIf(widthFactor != GetActiveRenderGroup().GetOutlineWidthFactor());
+	// If no change is requested then exit immediately
+	if (widthFactor == GetActiveRenderGroup().GetOutlineWidthFactor()) return;
 
-	// Store this new parameter in the active group
-	GetActiveRenderGroup().SetOutlineWidthFactor(widthFactor);
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetOutlineWidthFactor(widthFactor);
 }
 
 
@@ -71,14 +71,20 @@ void DecalRenderingManager::StartNewRenderGroup(void)
 	m_rendergroups.push_back(DecalRenderingParams());
 }
 
-// Start a new render group if the current group is in use, and the provided condition resolves to true
-void DecalRenderingManager::StartNewRenderGroupIf(bool condition)
+// Get a reference to the next available render group for use, creating a new one if necessary
+DecalRenderingParams & DecalRenderingManager::GetNextAvailableRenderGroup(void)
 {
-	if (condition && GetActiveRenderGroup().IsInUse())
+	// Create a new group if the current group is already in use.  New group should
+	// begin with same setup as the current group to account for previous calls to Set...
+	if (GetActiveRenderGroup().IsInUse())
 	{
-		StartNewRenderGroup();
+		m_rendergroups.push_back(DecalRenderingParams());
+		m_rendergroups.back().CloneData(m_rendergroups[m_rendergroups.size() - 2]);
 	}
+
+	return GetActiveRenderGroup();
 }
+
 
 // Clear all render groups and associated data
 void DecalRenderingManager::ClearAllRenderGroups(void)

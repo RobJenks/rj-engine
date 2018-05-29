@@ -16,12 +16,14 @@ public:
 	DecalRenderingParams(const TextureDX11 * texture, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour);
 
 	// Return render group params
+	// NOTE: Update CloneData() if additional properties are added
 	CMPINLINE const TextureDX11 *			GetTexture(void) const { return m_texture; }
 	CMPINLINE XMFLOAT4						GetBaseColour(void) const { return m_basecolour; }
 	CMPINLINE XMFLOAT4						GetOutlineColour(void) const { return m_outlinecolour; }
 	CMPINLINE float							GetOutlineWidthFactor(void) const { return m_outlinewidthfactor; }
 
 	// Update render group params
+	// NOTE: Update CloneData() if additional properties are added
 	CMPINLINE void							SetTexture(const TextureDX11 * texture) { m_texture = texture; }
 	CMPINLINE void							SetBaseColour(const XMFLOAT4 & basecolour) { m_basecolour = basecolour; }
 	CMPINLINE void							SetOutlineColour(const XMFLOAT4 & outlinecolour) { m_outlinecolour = outlinecolour; }
@@ -36,7 +38,8 @@ public:
 	// Indicates whether this group is currently 'in use', i.e. if it has any instances assigned
 	CMPINLINE bool							IsInUse(void) const { return (!m_instances.empty()); }
 
-
+	// Clones data from another group into this one.  Instance data is NOT copied
+	void									CloneData(const DecalRenderingParams & other);
 
 
 

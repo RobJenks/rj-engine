@@ -525,27 +525,26 @@ void RJMain::PerformFPSCalculations(void)
 		m_framecount = m_elapsedtime = 0.0f;
 
 		// If we are recording memory allocations, do so at the same time as the FPS calculation
-		#if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
+#		if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
 			_CrtMemCheckpoint(&m_memstate);
-		#endif
-
-		// Update the FPS text object, if it is being rendered
-		if (D::UI->IsFPSCounterDisplayed() && Game::FPS > 0 && Game::FPS < 99999)
-		{
-			// Two versions of this display, depending on whether we are in debug mode and logging current allocations
-			#if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
-				sprintf(D::UI->TextStrings.C_DBG_FPSCOUNTER, "FPS: %d, Allocations: %Ld [%Ld blocks]",
-					(int)Game::FPS, m_memstate.lSizes[1], m_memstate.lCounts[1]);
-			#else
-				sprintf(D::UI->TextStrings.C_DBG_FPSCOUNTER, "FPS: %d", (int)Game::FPS);
-			#endif
-
-			// Update the text string for rendering next frame
-			// TODO [textrender]: update for new text rendering component
-			//Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FPSCOUNTER,
-			//	D::UI->TextStrings.C_DBG_FPSCOUNTER, 1.0f);
-		}
+#		endif
 	}
+		// Update the FPS text object, if it is being rendered
+	if (Game::FPSDisplay && Game::FPS > 0.0f && Game::FPS < 99999.0f)
+	{
+		// Two versions of this display, depending on whether we are in debug mode and logging current allocations
+		XMFLOAT4 font_colour(255.0f / 255.0f, 196.0f / 255.0f, 104.0f / 255.0f, 0.75f);
+#		if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
+			Game::Engine->GetTextRenderer()->RenderStringToScreen(concat("FPS: ")((int)Game::FPS)
+				(", Allocations: ")(m_memstate.lSizes[1])(" [")(m_memstate.lCounts[1])(" blocks]").str(),
+				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
+#		else
+			Game::Engine->GetTextRenderer()->RenderStringToScreen(concat("FPS: ")((int)Game::FPS).str(),
+				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
+#		endif
+
+	}
+	
 }
 
 // Reads the current state of all input controllers
@@ -690,7 +689,7 @@ void RJMain::ProcessKeyboardInput(void)
 				}
 			}
 		}
-		else 
+		else
 		{
 			// Actor-attached light
 			iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
@@ -750,17 +749,17 @@ void RJMain::ProcessKeyboardInput(void)
 		else if (b[DIK_LCONTROL])	cs()->RemoveOverrideOfPortalBasedRenderingSupport();
 
 		else						Game::Engine->SetDebugPortalRenderingTarget(cs()->GetID());
-		
+
 		//Game::Keyboard.LockKey(DIK_MINUS);
 	}
 
 	if (b[DIK_EQUALS])
 	{
 		cs()->SetTargetSpeedPercentage(b[DIK_LCONTROL] ? 0.0f : 1.0f);
-		
+
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
-	
+
 	if (b[DIK_SEMICOLON]) {
 		if (b[DIK_LSHIFT])
 		{
@@ -864,7 +863,7 @@ void RJMain::ProcessKeyboardInput(void)
 		OutputDebugString(concat("Coord: ")(g_coord)("\n").str().c_str());
 
 	}
-	
+
 	/*Game::Engine->GetDecalRenderer()->SetBaseColour(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	Game::Engine->GetDecalRenderer()->SetOutlineColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));

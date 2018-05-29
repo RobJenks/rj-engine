@@ -52,8 +52,8 @@ private:
 	// Starts a new decal rendering group
 	void									StartNewRenderGroup(void);
 
-	// Start a new render group if the current group is in use, and the provided condition resolves to true
-	void									StartNewRenderGroupIf(bool condition);
+	// Get a reference to the next available render group for use, creating a new one if necessary
+	DecalRenderingParams &					GetNextAvailableRenderGroup(void);
 
 	// Clear all render groups and associated data
 	void									ClearAllRenderGroups(void);

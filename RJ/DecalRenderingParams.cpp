@@ -25,7 +25,14 @@ void DecalRenderingParams::AddInstance(const FXMMATRIX world, const XMFLOAT4 & u
 }
 
 
-
+// Clones data from another group into this one.  Instance data is NOT copied
+void DecalRenderingParams::CloneData(const DecalRenderingParams & other)
+{
+	SetTexture(other.GetTexture());
+	SetBaseColour(other.GetBaseColour());
+	SetOutlineColour(other.GetOutlineColour());
+	SetOutlineWidthFactor(other.GetOutlineWidthFactor());
+}
 
 
 

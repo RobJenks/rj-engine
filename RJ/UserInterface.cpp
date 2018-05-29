@@ -45,6 +45,7 @@ UserInterface::UserInterface(void)
 	m_mousecurrenthovercomponent = NULL;
 	m_console_active = false;
 	m_pre_console_controller = NULL;
+	m_show_fps = false;
 
 	m_lmb = m_rmb = false;
 }
