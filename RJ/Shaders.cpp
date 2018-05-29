@@ -12,7 +12,5 @@ const std::string Shaders::BasicTextureVertexShader		= "VS_Basic_Texture";
 const std::string Shaders::BasicTexturePixelShader		= "PS_Basic_Texture";
 
 const std::string Shaders::SDFDecalVertexShader			= "VS_SDFDecal";
-const std::string Shaders::SDFDecalPixelShader			= "PS_SDFDecal";
-
-
+const std::string Shaders::SDFDecalPixelShader			= "PS_SDFDecal"; // = "PS_MSDFDecal"; [for multi-channel SDF, not fully polished]
 

@@ -855,11 +855,12 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 
-	static float g_coord = 0.0f;
+	static float g_coord = 0.5f;
 	if (b[DIK_G])
 	{
-		if (Game::Keyboard.ShiftDown()) g_coord -= 1.0f;
-		if (!Game::Keyboard.ShiftDown()) g_coord += 1.0f;
+		if (Game::Keyboard.ShiftDown()) g_coord -= 0.1f;
+		if (!Game::Keyboard.ShiftDown()) g_coord += 0.1f;
+		Game::Keyboard.LockKey(DIK_G);
 		OutputDebugString(concat("Coord: ")(g_coord)("\n").str().c_str());
 
 	}
@@ -870,7 +871,10 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
 	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 48.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f);
+		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 48.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);
+
+	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is test of normal-sized text and some characters such as \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+		XMVectorSet(100.0f, 300.0f, 0.0f, 0.0f), 12.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);
 
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;
@@ -2678,8 +2682,8 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 
 
-		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
-			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));
+		/*Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
+			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));*/
 		
 		
 
