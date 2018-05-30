@@ -2727,7 +2727,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	{
 		for (unsigned int i = 0; i < DEBUG_ID_MAX_DISPLAYED; ++i)
 		{
-			SentenceType *s = m_textmanager->CreateSentence(Game::Fonts::FONT_BASIC1, 256);
+			SentenceType *s = m_textmanager->CreateSentence(Font::DEFAULT_FONT_ID, 256);
 			if (!s) break;
 
 			s->render = false;

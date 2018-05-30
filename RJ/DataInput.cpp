@@ -101,7 +101,6 @@
 #include "UIButton.h"
 #include "UITextBox.h"
 #include "UIComboBox.h"
-#include "Fonts.h"
 
 #include "DataInput.h"
 
@@ -3717,11 +3716,11 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 
 			// Default font
 			int font;
-			if (cfont) font = atoi(cfont); else font = Game::Fonts::FONT_BASIC1;
+			if (cfont) font = atoi(cfont); else font = Font::DEFAULT_FONT_ID;
 
 			// Default size
 			float size;
-			if (csize) size = (float)atof(csize); else size = 1.0f;
+			if (csize) size = (float)atof(csize); else size = TextRenderer::DEFAULT_FONT_SIZE;
 
 			// Default colour
 			if (r && g && b && a) 
@@ -3784,11 +3783,11 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			if (mode) opmode = MultiLineTextBlock::TranslateOperationModeFromString(mode);
 
 			// Default font
-			int font = Game::Fonts::FONT_BASIC1;
+			int font = Font::DEFAULT_FONT_ID;
 			if (cfont) font = atoi(cfont);
 
 			// Default size
-			float fontsize = 1.0f;
+			float fontsize = TextRenderer::DEFAULT_FONT_SIZE;
 			if (csize) fontsize = (float)atof(csize); 
 
 			// Default colour

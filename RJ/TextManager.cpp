@@ -1,5 +1,4 @@
 #include "DX11_Core.h"
-#include "Fonts.h"
 #include "FontData.h"
 #include "FontShader.h"
 #include "SentenceType.h"
@@ -10,7 +9,7 @@
 
 // Initialise static map of standard fonts that will have space & index preallocated within the font collection
 const std::vector<std::pair<std::string, int*>> TextManager::m_standard_font_indices = {
-	{ "font_basic1", &Game::Fonts::FONT_BASIC1 }
+	
 };
 
 

@@ -12,8 +12,7 @@ public:
 
 	// Default font size; character scaling will use this as the baseline
 	static const float							DEFAULT_FONT_SIZE;
-	static const Font::ID						DEFAULT_FONT_ID = 0U;
-
+	
 	// Constructor
 	TextRenderer(void);
 
@@ -35,7 +34,7 @@ public:
 	bool										IsValidFont(const std::string & name) const;
 
 	// Returns the default font ID
-	CMPINLINE Font::ID							GetDefaultFontId(void) const { return TextRenderer::DEFAULT_FONT_ID; }
+	CMPINLINE Font::ID							GetDefaultFontId(void) const { return Font::DEFAULT_FONT_ID; }
 
 	// Returns the glyph scaling factor for the given font size
 	static float								GlyphScalingFactor(float font_size);

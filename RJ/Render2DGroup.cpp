@@ -91,6 +91,7 @@ iUIComponent *Render2DGroup::FindUIComponent(const std::string & code)
 // Renders the render group by processing its queue of renderable components in sequence
 void RJ_XM_CALLCONV Render2DGroup::Render(void)
 {
+	// 2D image components
 	Image2D *comp = NULL;
 	for (auto & entry : m_components)
 	{
@@ -98,6 +99,12 @@ void RJ_XM_CALLCONV Render2DGroup::Render(void)
 		if (!comp || !comp->GetMaterial()) continue;
 		
 		Game::Engine->RenderMaterialToScreen(*comp->GetMaterial(), comp->GetPosition(), comp->GetSize(), comp->GetRotation(), comp->GetOpacity(), comp->GetZOrder());
+	}
+
+	// UI text rendering
+	for (auto & entry : m_textblocks)
+	{
+		if (entry.second) entry.second->Render();
 	}
 }
 

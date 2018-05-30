@@ -14,12 +14,12 @@
     <Image2D code="textbox_frame_focus" material="textbox_focus" x="0" y="268" z="0.001" width="1366" height="32" acceptsmouse="true" render="true" />
      
     <!-- Console input textbox -->
-    <TextBlock code="txt_input_text_prefix" text=">" x="12" y="280" render="true" capacity="4" size="1.000000" />
-    <TextBlock code="txt_input_text" text="" x="24" y="280" render="true" capacity="1024" size="1.000000" />
+    <TextBlock code="txt_input_text_prefix" text=">" x="12" y="280" render="true" capacity="4" size="10.0" />
+    <TextBlock code="txt_input_text" text="" x="24" y="280" render="true" capacity="1024" size="10.0" />
     <TextBox code="txt_input" frame="textbox_frame" frame_key="txt_input_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_input_frf" text="txt_input_text" render="true" />
 
     <!-- Console history text display -->
-    <MultiLineTextBlock code="mltb_history" mode="IndividualLines" x="12" y="12" z="0.001" linecount="14" maxlinelength="512" />
+    <MultiLineTextBlock code="mltb_history" mode="IndividualLines" x="12" y="12" z="0.001" size="10.0" linecount="14" maxlinelength="512" />
 
 
 

@@ -15,6 +15,7 @@ Font::Font(void)
 Font::Font(const std::string & code)
 	:
 	m_code(code), 
+	m_texture(NULL), 
 	m_char_separation(Font::DEFAULT_CHARACTER_SEPARATION)
 {
 }

@@ -910,9 +910,6 @@
     <ClCompile Include="FontData.cpp">
       <Filter>Engine\Text\Old</Filter>
     </ClCompile>
-    <ClCompile Include="Fonts.cpp">
-      <Filter>Engine\Text\Old</Filter>
-    </ClCompile>
     <ClCompile Include="TextManager.cpp">
       <Filter>Engine\Text\Old</Filter>
     </ClCompile>
@@ -2142,9 +2139,6 @@
     <ClInclude Include="FontData.h">
       <Filter>Engine\Text\Old</Filter>
     </ClInclude>
-    <ClInclude Include="Fonts.h">
-      <Filter>Engine\Text\Old</Filter>
-    </ClInclude>
     <ClInclude Include="SentenceType.h">
       <Filter>Engine\Text\Old</Filter>
     </ClInclude>
@@ -2556,6 +2550,7 @@
     <None Include="Data\Shaders\DeferredRenderingGBuffer.hlsl.h">
       <Filter>HLSL\Common\Deferred</Filter>
     </None>
+    <None Include="Data\Shaders\hlsl_math.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2587,9 +2582,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_decal_sdf.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\hlsl_math.hlsl">
-      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

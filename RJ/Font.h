@@ -13,6 +13,7 @@ public:
 
 	// ID type used to reference fonts.  Unique IDs maintained by the TextRenderer component
 	typedef size_t ID;
+	static const Font::ID	  DEFAULT_FONT_ID = 0U;
 
 	// For now, we only support characters in the ASCII and Latin Supplemental set.  All characters from 32/0x20/' ' 
 	// to 255/FF/'y-with-umlaut' inclusive are printable and can be stored in the character map

@@ -57,7 +57,7 @@ const Font & TextRenderer::GetFont(Font::ID id) const
 Font::ID TextRenderer::GetFontID(const std::string & code) const
 {
 	const auto it = m_font_ids.find(code);
-	if (it == m_font_ids.end()) return TextRenderer::DEFAULT_FONT_ID;
+	if (it == m_font_ids.end()) return Font::DEFAULT_FONT_ID;
 
 	return it->second;
 }

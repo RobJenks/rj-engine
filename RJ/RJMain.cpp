@@ -125,8 +125,7 @@
 #include "DataObjectEngineHeadingController.h"	// DBG
 #include "TextRenderer.h"			// DBG
 #include "DecalRenderingManager.h"	// DBG
-#include "Frustum.h"						
-#include "Fonts.h"
+#include "Frustum.h"
 
 #include "Equipment.h"
 #include "Engine.h"
@@ -899,7 +898,7 @@ void RJMain::ProcessKeyboardInput(void)
 			dbg_b_sentences = new SentenceType*[dbg_b_text_limit];
 			for (int i = 0; i < dbg_b_text_limit; ++i)
 			{
-				dbg_b_sentences[i] = Game::Engine->GetTextManager()->CreateSentence(Game::Fonts::FONT_BASIC1, 256);
+				dbg_b_sentences[i] = Game::Engine->GetTextManager()->CreateSentence(Font::DEFAULT_FONT_ID, 256);
 				dbg_b_sentences[i]->render = false;
 			}
 		}

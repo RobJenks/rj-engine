@@ -7,7 +7,6 @@
 #include "RJMain.h"
 #include "TextManager.h"
 #include "TextBlock.h"
-#include "Fonts.h"
 #include "GameDataExtern.h"
 #include "Render2DManager.h"
 #include "Render2DGroup.h"
@@ -118,17 +117,17 @@ Result UserInterface::InitialiseUITextComponents(void)
 	XMFLOAT4 colYellow = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.75f);
 
 	// FPS counter
-	InitialiseTextString(tm, &TextStrings.S_DBG_FPSCOUNTER, TextStrings.C_DBG_FPSCOUNTER, Game::Fonts::FONT_BASIC1, 
+	InitialiseTextString(tm, &TextStrings.S_DBG_FPSCOUNTER, TextStrings.C_DBG_FPSCOUNTER, Font::DEFAULT_FONT_ID, 
 						     20, 20, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
 
 	// Debug flight info
-	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_1, TextStrings.C_DBG_FLIGHTINFO_1, Game::Fonts::FONT_BASIC1, 
+	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_1, TextStrings.C_DBG_FLIGHTINFO_1, Font::DEFAULT_FONT_ID, 
 							 20, 60, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
-	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_2, TextStrings.C_DBG_FLIGHTINFO_2, Game::Fonts::FONT_BASIC1, 
+	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_2, TextStrings.C_DBG_FLIGHTINFO_2, Font::DEFAULT_FONT_ID, 
 							 20, 80, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
-	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_3, TextStrings.C_DBG_FLIGHTINFO_3, Game::Fonts::FONT_BASIC1, 
+	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_3, TextStrings.C_DBG_FLIGHTINFO_3, Font::DEFAULT_FONT_ID, 
 							 20, 100, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
-	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_4, TextStrings.C_DBG_FLIGHTINFO_4, Game::Fonts::FONT_BASIC1,
+	InitialiseTextString(tm, &TextStrings.S_DBG_FLIGHTINFO_4, TextStrings.C_DBG_FLIGHTINFO_4, Font::DEFAULT_FONT_ID,
 							 20, 120, DEBUG_STRING_MAX_LENGTH, 1.0f, colYellow, false);
 
 	// Return success, for now, although TODO: we have not checked the return values for each sentence

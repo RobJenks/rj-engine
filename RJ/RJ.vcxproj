@@ -495,7 +495,6 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="FontData.cpp" />
     <ClCompile Include="FontGlyph.cpp" />
-    <ClCompile Include="Fonts.cpp" />
     <ClCompile Include="FontShader.cpp" />
     <ClCompile Include="FrameProfiler.cpp" />
     <ClCompile Include="Frustum.cpp" />
@@ -1035,7 +1034,6 @@
     </ClInclude>
     <ClInclude Include="FiringArc.h" />
     <ClInclude Include="FontData.h" />
-    <ClInclude Include="Fonts.h" />
     <ClInclude Include="FontShader.h" />
     <ClInclude Include="GameConsole.h" />
     <ClInclude Include="GameConsoleCommand.h" />
