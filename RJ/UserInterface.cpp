@@ -137,40 +137,19 @@ Result UserInterface::InitialiseUITextComponents(void)
 }
 
 // Initialises a text block.  These are the managed wrapper objects for manipulating text strings in the interface
-TextBlock *UserInterface::CreateTextBlock(std::string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
+TextBlock *UserInterface::CreateTextBlock(const std::string & code, const std::string & text, Font::ID font, INTVECTOR2 pos, float font_size, const XMFLOAT4 & col, bool render)
 {	
-	Result result;
-	SentenceType *sentence;
+	TextBlock *tb = new TextBlock(code);
+	tb->SetText(text);
+	tb->SetFont(font);
+	tb->SetColour(col);
+	tb->SetPosition(pos.ToFloat());
+	tb->SetFontSize(font_size);
+	tb->SetRenderActive(render);
 
-	// Initialise a new sentence object which will hold the core text rendering data
-	// TODO [textrender]: Update for new text rendering component
-	result = InitialiseTextString(/*Game::Engine->GetTextManager()*/NULL, &sentence, NULL, font, pos.x, pos.y, maxlength, size, col, render);
-	if (result != ErrorCodes::NoError) return NULL;
-
-	// Now create a new text block object to manage this sentence data
-	// TODO [textrender]: Update for new text rendering component
-	TextBlock *tb = new TextBlock();
-	tb->Initialise(code, /*Game::Engine->GetTextManager()*/NULL, sentence, maxlength);
-
-	// Finally, update the text block contents if we have been provided an initial text string
-	if (text) tb->SetText(text, size);
-
-	// Return a reference to the new text block
 	return tb;
 }
 
-// Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
-// TODO [textrender]: Update for new text rendering component
-Result UserInterface::InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
-										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render)
-{
-	/*(*sentence) = tm->CreateSentence(fontID, maxlength);
-	Result res = tm->UpdateSentence((*sentence), "", x, y, render, colour, size);
-	if (textbuffer) memset(textbuffer, 0, maxlength);
-
-	return res;*/
-	return ErrorCodes::NoError;
-}
 
 Result UserInterface::InitialiseUIComponentSets(void)
 {

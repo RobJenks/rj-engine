@@ -32,6 +32,7 @@ MultiLineTextBlock::MultiLineTextBlock(void)
 	m_colour = NULL_FLOAT4;
 	m_back = NULL;
 	m_backcode = "";
+	m_textdimensions = XMFLOAT2(0.0f, 0.0f);
 }
 
 // Initialise the component and set up all resources
@@ -78,7 +79,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	{
 		// Attempt to create the line
 		std::string line_code = concat(m_code)(".line")(i).str();
-		tb = D::UI->CreateTextBlock(line_code.c_str(), "", (int)m_maxlinelength, m_font, pos, m_fontsize, m_colour, m_render);
+		tb = D::UI->CreateTextBlock(line_code, NullString, m_font, pos, m_fontsize, m_colour, m_render);
 		if (!tb) return ErrorCodes::CouldNotCreateLineWithinMLTBlock;
 
 		// Store the line and add it to our parent render group 
@@ -92,12 +93,14 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 		{
 			std::string s = std::string(m_maxlinelength, 'o');
 			tb->SetText(s);
-			m_size.x = ((int)ceilf(tb->GetTextWidth()) + (2 * MultiLineTextBlock::TEXT_MARGIN));
+			m_textdimensions = tb->CalculateTextDimensions();
 			tb->SetText(NullString);
+
+			m_size.x = ((int)ceilf(m_textdimensions.x) + (2 * MultiLineTextBlock::TEXT_MARGIN));
 		}
 
 		// Move to the next line
-		pos.y += ((int)ceilf(tb->GetTextHeight()) + MultiLineTextBlock::LINE_SPACING);
+		pos.y += ((int)ceilf(m_textdimensions.y) + MultiLineTextBlock::LINE_SPACING);
 	}
 
 	// The final pos.y value minus its starting location (and plus lower margin) will be the height value for this control (if not already provided)
@@ -193,7 +196,7 @@ void MultiLineTextBlock::SetText(int line_number, const std::string & text)
 
 
 // Returns the text in this component
-const std::string & MultiLineTextBlock::GetText(void)
+std::string MultiLineTextBlock::GetText(void)
 {
 	// If we are in individual-line mode then we first want to concatenate all lines and populate the local text property
 	if (m_mode == MultiLineTextBlock::OperationMode::IndividualLines)
@@ -217,7 +220,7 @@ const std::string & MultiLineTextBlock::GetText(void)
 }
 
 // Returns the text on one line of this component
-const std::string & MultiLineTextBlock::GetText(int line)
+std::string MultiLineTextBlock::GetText(int line)
 {
 	// Make sure the line index is valid
 	if (line < 0 || line >= m_linecount || !m_lines[line])
@@ -265,10 +268,10 @@ void MultiLineTextBlock::SetPosition(INTVECTOR2 pos)
 		tb = m_lines[i]; if (!tb) continue;
 
 		// Set the position of this line
-		tb->SetPosition(pos);
+		tb->SetPosition(pos.ToFloat());
 
 		// Move to the next line
-		pos.y += ((int)ceilf(tb->GetTextHeight()) + MultiLineTextBlock::LINE_SPACING);
+		pos.y += ((int)ceilf(m_textdimensions.y) + MultiLineTextBlock::LINE_SPACING);
 	}
 
 	// Update the backdrop component
@@ -330,7 +333,7 @@ int MultiLineTextBlock::GetLineAtLocation(const INTVECTOR2 & location) const
 
 	// We can now determine the line number using basic division.  Remove the margin first
 	float y = (float)(location.y - MultiLineTextBlock::TEXT_MARGIN);
-	float line_height = m_lines[0]->GetTextHeight() + (float)MultiLineTextBlock::LINE_SPACING;
+	float line_height = m_textdimensions.y + (float)MultiLineTextBlock::LINE_SPACING;
 
 	// Determine which line this should be by dividing through by the individual text block height
 	int line = (int)floorf(y / line_height);

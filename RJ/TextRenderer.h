@@ -50,6 +50,9 @@ public:
 																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
 																	 float outlineFactor = 0.0f) const;
 
+	// Calculates the dimensions of a text string with the given properties
+	XMFLOAT2									CalculateTextDimensions(const std::string & text, Font::ID font, float font_size) const;
+
 
 	// Shutdown and release all owned resources
 	void										Shutdown(void);

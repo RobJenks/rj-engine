@@ -5,7 +5,7 @@
 
 #include <string>
 #include "ErrorCodes.h"
-#include "TextManager.h"
+#include "Font.h"
 #include "Image2DRenderGroup.h"
 #include "RenderComponentGroup.h"
 #include "UIManagedControlDefinition.h"
@@ -64,11 +64,7 @@ public:
 	Result					InitialiseUITextComponents(void);
 
 	// Initialises a new text block.  These are the wrapper classes used for manipulation of string data in the interface
-	TextBlock *				CreateTextBlock(std::string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render);
-
-	// Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
-	Result					InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
-										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
+	TextBlock *				CreateTextBlock(const std::string & code, const std::string & text, Font::ID font, INTVECTOR2 pos, float font_size, const XMFLOAT4 & col, bool render);
 
 	// Initialise the different components sets used for rendering the UI in different scenarios
 	Result					InitialiseUIComponentSets(void);

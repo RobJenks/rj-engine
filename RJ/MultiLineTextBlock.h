@@ -47,10 +47,10 @@ public:
 	void										SetText(int line_number, const std::string & text);
 
 	// Returns the text in this component
-	const std::string &							GetText(void);
+	std::string 								GetText(void);
 
 	// Returns the text on one line of this component
-	const std::string &							GetText(int line);
+	std::string 								GetText(int line);
 
 	// Set the text colour for a particular line of this component
 	void										SetColour(int line_number, const XMFLOAT4 & colour);
@@ -107,6 +107,7 @@ protected:
 	XMFLOAT4									m_colour;
 	Image2D *									m_back;
 	std::string									m_backcode;
+	XMFLOAT2									m_textdimensions;
 
 };
 

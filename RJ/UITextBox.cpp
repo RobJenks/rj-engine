@@ -3,6 +3,7 @@
 #include "Image2DRenderGroup.h"
 #include "TextBlock.h"
 #include "Utility.h"
+#include "FastMath.h"
 #include "GameDataExtern.h"
 #include "GameInput.h"
 #include "UserInterface.h"
@@ -30,7 +31,7 @@ UITextBox::UITextBox(std::string code,
 
 	// Calculate the offset between textbox location and text location, to be maintained in any further position changes
 	if (m_textcomponent && m_framecomponent)
-		m_textoffset = (m_textcomponent->GetPosition() - INTVECTOR2(m_framecomponent->GetPosition()));
+		m_textoffset = (INTVECTOR2(m_textcomponent->GetPosition()) - INTVECTOR2(m_framecomponent->GetPosition()));
 	else
 		m_textoffset = INTVECTOR2(0, 0);
 
@@ -46,17 +47,15 @@ void UITextBox::SetPosition(INTVECTOR2 pos)
 {
 	// Store the new position
 	m_position = pos;
+	XMFLOAT2 fpos = pos.ToFloat();
 
 	// Set the position of all components to match
-	if (m_framecomponent) m_framecomponent->SetPosition(pos.ToFloat());
+	if (m_framecomponent) m_framecomponent->SetPosition(fpos);
 
 	// Also incorporate the text offset when positioning the text block
 	if (m_textcomponent) 
 	{
-		INTVECTOR2 pos = m_textcomponent->GetPosition();
-		std::string text = m_textcomponent->GetText();
-		m_textcomponent->UpdateTextBlock(text.c_str(), pos.x, pos.y, m_textcomponent->GetRenderActive(),
-										 m_textcomponent->GetTextColour(), m_textcomponent->GetSize());
+		m_textcomponent->SetPosition(Float2Add(fpos, m_textoffset.ToFloat()));
 	}
 }
 
@@ -98,12 +97,11 @@ void UITextBox::SetTextOffset(INTVECTOR2 offset)
 	m_textoffset.x = offset.x; m_textoffset.y = offset.y;
 
 	// Now reposition the text block according to this new offset
-	m_textcomponent->UpdateTextBlock(m_textcomponent->GetText().c_str(), (m_position.x + m_textoffset.x), (m_position.y + m_textoffset.y), 
-									 m_textcomponent->GetRenderActive(), m_textcomponent->GetTextColour(), m_textcomponent->GetSize());
+	m_textcomponent->SetPosition((m_position + m_textoffset).ToFloat());
 }
 
 // Returns the text currently held in this textbox control
-const std::string & UITextBox::GetText(void)
+std::string UITextBox::GetText(void)
 {
 	if (m_textcomponent)
 		return m_textcomponent->GetText();

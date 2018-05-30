@@ -34,7 +34,7 @@ public:
 	// Methods to retrieve key properties
 	CMPINLINE INTVECTOR2						GetPosition(void) { return m_position; }
 	CMPINLINE INTVECTOR2						GetSize(void) { return m_size; }
-	const std::string & 						GetText(void);
+	std::string  								GetText(void);
 	void										SetText(std::string text);
 	CMPINLINE bool								GetRenderActive(void) const { return m_render; }
 	CMPINLINE INTVECTOR2						GetTextOffset(void) { return m_textoffset; }

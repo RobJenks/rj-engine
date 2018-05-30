@@ -85,15 +85,14 @@ Result UIComboBox::Initialise(UIManagedControlDefinition *def, std::string code,
 	m_scrollbardown->SetRotation(PI);
 
 	// Now create the main text block
-	m_maintext = D::UI->CreateTextBlock(concat(m_code)(".maintext").str(), "", 256, 0, INTVECTOR2(0,0), 1.0f, XMFLOAT4(1.0, 1.0f, 1.0f, 1.0f), true);
+	m_maintext = D::UI->CreateTextBlock(concat(m_code)(".maintext").str(), NullString, 0U, INTVECTOR2(0, 0), 12.0f, ONE_FLOAT4, true);
 	if (!m_maintext) return ErrorCodes::CouldNotCreateTextComponentForManagedControl;
 
 	// Create text blocks for each of the entries potentially visible in the expanded drop-down 
 	for (int i=0; i<expandsize; i++)
 	{
 		// Create a new text block; note that all start with rendering disabled
-		TextBlock *t = D::UI->CreateTextBlock(	concat(m_code)(".expandtext.")(i).str(), "", UIComboBox::DEFAULT_TEXT_CAPACITY, 0, 
-												INTVECTOR2(0, 0), 1.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), false);
+		TextBlock *t = D::UI->CreateTextBlock(concat(m_code)(".expandtext.")(i).str(), NullString, 0U, INTVECTOR2(0, 0), 12.0f, ONE_FLOAT4, false);
 
 		// Make sure we could create the text block
 		if (!t) return ErrorCodes::CouldNotCreateTextComponentForManagedControl;
@@ -156,10 +155,8 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 		m_mainback->SetZOrder(zorder);
 
 		// Main text block is displayed within this back panel
-		m_maintext->UpdateTextBlock( m_maintext->GetText().c_str(), location.x + UIComboBox::TEXT_OFFSET_X, 
-									 (int)(location.y + ((m_mainback->GetSize().y / 2.0f) - (m_maintext->GetTextHeight() / 2.0f)) + 2.0f),
-									 m_maintext->GetRenderActive(),
-									 m_maintext->GetTextColour(), m_maintext->GetSize());
+		m_maintext->SetPosition(XMFLOAT2(static_cast<float>(location.x + UIComboBox::TEXT_OFFSET_X),
+			static_cast<float>(location.y + ((m_mainback->GetSize().y / 2.0f) - (m_maintext->CalculateTextDimensions().y / 2.0f)))));
 	}
 
 	// Expand button is set just to the side of the main back panel
@@ -177,7 +174,7 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 		
 		// Calculate a height value for each item, based on the rasterised height of item #0
 		m_expanditemheight = 16;
-		if (m_expandtext.size() > 0) m_expanditemheight = ((int)m_expandtext[0]->GetTextHeight() + (2 * UIComboBox::TEXT_SEPARATION));
+		if (m_expandtext.size() > 0) m_expanditemheight = ((int)m_expandtext[0]->CalculateTextDimensions().y + (2 * UIComboBox::TEXT_SEPARATION));
 
 		// Now position each text item in the drop-down list in turn
 		for (std::vector<TextBlock*>::size_type i = 0; i < expandcount; ++i)
@@ -185,8 +182,7 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 			// Update the position of this text block
 			TextBlock *tb = m_expandtext.at(i);
 			if (!tb) continue;
-			tb->UpdateTextBlock(tb->GetText().c_str(), textpos.x, UIComboBox::TEXT_SEPARATION + textpos.y, 
-								tb->GetRenderActive(), tb->GetTextColour(), tb->GetSize());
+			tb->SetPosition(XMFLOAT2(static_cast<float>(textpos.x), static_cast<float>(UIComboBox::TEXT_SEPARATION + textpos.y)));
 
 			// Update the position of the next text block to be offset below this one
 			textpos = INTVECTOR2(textpos.x, textpos.y + m_expanditemheight);

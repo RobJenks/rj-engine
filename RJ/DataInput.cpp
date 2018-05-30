@@ -3740,8 +3740,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			}
 			
 			// Now initialise a new sentence object, via the main UI interface
-			TextBlock *textblock = D::UI->CreateTextBlock(code, textbuffer, maxlength, font, INTVECTOR2(ix, iy), 
-					 									  size, col, render);
+			TextBlock *textblock = D::UI->CreateTextBlock(std::string(code), std::string(text), font, INTVECTOR2(ix, iy), size, col, render);
 			
 			// If successful then add this text block to the render group collection
 			if (textblock) group->Components.TextBlocks.AddItem(code, textblock);			

@@ -3,75 +3,70 @@
 #ifndef __TextBlockH__
 #define __TextBlockH__
 
+#include <string>
 #include "CompilerSettings.h"
 #include "Utility.h"
-#include "iUIComponent.h"
-class TextManager;
-struct SentenceType;
+#include "Font.h"
+#include "iUIComponentRenderable.h"
 
-#define DEBUG_LOGINSTANCECREATION
 
 
 // Class has no special alignment requirements
-class TextBlock : public iUIComponent
+class TextBlock : public iUIComponentRenderable
 {
 public:
+
+	// Constructor
 	TextBlock(void);
-	~TextBlock(void);
+	TextBlock(const std::string & code);
 
-	// Initialises the text block object
-	Result Initialise(std::string code, TextManager *tm, SentenceType *sentence, int maxlength);
+	// Set properties of the text block
+	CMPINLINE void SetText(const std::string & text) { m_text = text; }
+	CMPINLINE void SetFont(Font::ID font) { m_font = font; }
+	CMPINLINE void SetFontSize(float size) { m_fontsize = size; }
+	CMPINLINE void SetColour(const XMFLOAT4 & colour) { m_basecolour = m_outlinecolour = colour; }
+	CMPINLINE void SetColour(const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour) { m_basecolour = basecolour; m_outlinecolour = outlinecolour; }
+	CMPINLINE void SetOutlineFactor(float factor) { m_outlinefactor = factor; }
 
-	// Methods to set the text block contents
-	void SetText(std::string text);
-	void SetText(std::string text, float size);
-	void SetText(const char *text);
-	void SetText(const char *text, float size);
+	// Return text block properties
+	CMPINLINE std::string GetText(void) const { return m_text; }
+	CMPINLINE Font::ID GetFont(void) const { return m_font; }
+	CMPINLINE float GetFontSize(void) const { return m_fontsize; }
+	CMPINLINE XMFLOAT4 GetBaseColour(void) const { return m_basecolour; }
+	CMPINLINE XMFLOAT4 GetOutlineColour(void) const { return m_outlinecolour; }
+	CMPINLINE float GetOutlineFactor(void) const { return m_outlinefactor; }
 
-	// Method to peform a full update of the text block
-	void UpdateTextBlock(const char *text, int positionX, int positionY, bool render, XMFLOAT4 textcolour, float size);
 
 	// Methods to change the render state of the textblock
-	void SetRenderActive(bool render);
+	//void SetRenderActive(bool render);
 	void ParentRenderStateChanged(bool parentstate);
 	bool GetRenderActive(void) const { return m_render; }
 	bool IsActuallyVisible(void) { return (m_render && m_parentrender); }
 
-	// Set the position of this text block
-	void SetPosition(const INTVECTOR2 & pos);
+	// Calculate the rendered size of the text inside this text block
+	XMFLOAT2			CalculateTextDimensions(void) const;
 
-	// Sets the colour of the text in this block
-	void SetColour(const XMFLOAT4 & colour);
+	// Render the text block 
+	void				Render(void);
 
-	CMPINLINE float		GetSize(void) { return m_size; }
-	const std::string &	GetText(void);
-	INTVECTOR2			GetPosition(void);
-	XMFLOAT4			GetTextColour(void);
-	float				GetTextWidth(void);
-	float				GetTextHeight(void);
 	
 	// Shutdown method to deallocate all resources assigned to this text block
 	void				Shutdown(void);
 
+	// Destructor
+	~TextBlock(void);
+
+
 private:
 	
-	TextManager *								m_textmanager;
-	SentenceType *								m_sentence;
-	
-	char *										m_textbuffer;
-	std::string									m_string_textbuffer;	// Updated when a std::string 'text' value is requested
-	int											m_maxlength;
-	float										m_size;
+	std::string							m_text;
+	Font::ID							m_font;
+	float								m_fontsize;
+	XMFLOAT4							m_basecolour;
+	XMFLOAT4							m_outlinecolour;
+	float								m_outlinefactor;
 
-	bool										m_parentrender;
-
-
-public:
-	// Debug variables to log instance creation
-	#if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
-		static long inst_con;
-		static long inst_des;
-	#endif
+	bool								m_parentrender;
 
 };
 

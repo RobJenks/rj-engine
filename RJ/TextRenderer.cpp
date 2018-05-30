@@ -146,6 +146,30 @@ void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR loc
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(location, size, glyph.Location, (glyph.Location + glyph.Size));
 }
 
+// Calculates the dimensions of a text string with the given properties
+XMFLOAT2 TextRenderer::CalculateTextDimensions(const std::string & text, Font::ID font, float font_size) const
+{
+	XMFLOAT2 dimensions(0.0f, 0.0f);
+
+	// Retrieve font details
+	const Font & fontdata = GetFont(font);
+	float separation = fontdata.GetCharacterSeparation();
+
+	// Determine a glyph scaling factor based on this font size
+	float scalefactor = GlyphScalingFactor(font_size);
+
+	// Determine size of each glyph and separators in turn
+	for (auto ch : text)
+	{
+		const auto & size = fontdata.GetGlyph((unsigned int)ch).Size;
+
+		dimensions.x += (scalefactor * (size.x + separation));
+		dimensions.y = max(dimensions.y, size.y);
+	}
+
+	// Return overall dimensions
+	return dimensions;
+}
 
 
 // Shutdown and release all owned resources

@@ -1,5 +1,6 @@
 #include <string>
 #include "Utility.h"
+#include "FastMath.h"
 #include "Image2D.h"
 #include "TextManager.h"
 #include "TextBlock.h"
@@ -44,20 +45,17 @@ void UIButton::CentreTextInControl(void)
 	{
 		// Get the size of the text string and the component
 		INTVECTOR2 csize(m_upcomponent->GetSize());
-		float twidth = m_textcomponent->GetTextWidth();
-		float theight = m_textcomponent->GetTextHeight();
+		XMFLOAT2 textsize = m_textcomponent->CalculateTextDimensions();
+
 
 		// Now determine the relative left & top position for the text based on the relative size of the control itself
-		float xoffset = (csize.x / 2.0f) - (twidth / 2.0f);			// Calculate x offset
-		float yoffset = (csize.y / 2.0f) - (theight / 2.0f) + 2.0f; // Calculate y offset (note: includes small offset to account for misalignment)
+		XMFLOAT2 offset(
+			(csize.x / 2.0f) - (textsize.x / 2.0f),			// Calculate x offset
+			(csize.y / 2.0f) - (textsize.y / 2.0f) + 2.0f   // Calculate y offset (note: includes small offset to account for misalignment)
+		);
 
 		// Set the text position using these offsets
-		auto pos = m_upcomponent->GetPosition();
-		m_textcomponent->UpdateTextBlock(	m_textcomponent->GetText().c_str(), 
-											static_cast<int>(pos.x + xoffset),					// New x position
-											static_cast<int>(pos.y + yoffset),					// New y position
-											m_textcomponent->GetRenderActive(), 
-											m_textcomponent->GetTextColour(), m_textcomponent->GetSize() );
+		m_textcomponent->SetPosition(Float2Add(m_upcomponent->GetPosition(), offset));
 
 		// Call the method to recalculate the text offset, so that the text moves with this control if the position changes
 		CalculateTextOffset();
@@ -68,7 +66,7 @@ void UIButton::CentreTextInControl(void)
 void UIButton::CalculateTextOffset(void)
 {
 	if (m_textcomponent && m_upcomponent)
-		m_textoffset = (m_textcomponent->GetPosition() - INTVECTOR2(m_upcomponent->GetPosition()));
+		m_textoffset = (INTVECTOR2(m_textcomponent->GetPosition()) - INTVECTOR2(m_upcomponent->GetPosition()));
 	else
 		m_textoffset = INTVECTOR2(0, 0);
 }
@@ -77,17 +75,16 @@ void UIButton::SetPosition(INTVECTOR2 pos)
 {
 	// Store the new position
 	m_position = pos;
+	XMFLOAT2 fpos = pos.ToFloat();
 
 	// Set the position of all components to match
-	if (m_upcomponent) m_upcomponent->SetPosition(pos.ToFloat());
-	if (m_downcomponent) m_downcomponent->SetPosition(pos.ToFloat());
+	if (m_upcomponent) m_upcomponent->SetPosition(fpos);
+	if (m_downcomponent) m_downcomponent->SetPosition(fpos);
 
 	// Also incorporate the text offset when positioning the text block
 	if (m_textcomponent) 
 	{
-		INTVECTOR2 pos = m_textcomponent->GetPosition();
-		m_textcomponent->UpdateTextBlock(m_textcomponent->GetText().c_str(), pos.x, pos.y, m_textcomponent->GetRenderActive(),
-										 m_textcomponent->GetTextColour(), m_textcomponent->GetSize());
+		m_textcomponent->SetPosition(Float2Add(fpos, m_textoffset.ToFloat()));
 	}
 }
 
@@ -130,8 +127,7 @@ void UIButton::SetTextOffset(INTVECTOR2 offset)
 	m_textoffset.x = offset.x; m_textoffset.y = offset.y;
 
 	// Now reposition the text block according to this new offset
-	m_textcomponent->UpdateTextBlock(m_textcomponent->GetText().c_str(), (m_position.x + m_textoffset.x), (m_position.y + m_textoffset.y), 
-									 m_textcomponent->GetRenderActive(), m_textcomponent->GetTextColour(), m_textcomponent->GetSize());
+	m_textcomponent->SetPosition((m_position + m_textoffset).ToFloat());
 }
 
 // Determines whether the supplied point lies within the control bounds; part of the iUIControl interface
