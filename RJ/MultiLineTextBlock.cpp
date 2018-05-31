@@ -11,7 +11,7 @@
 #include "MultiLineTextBlock.h"
 
 // Initialise constant values
-const std::string MultiLineTextBlock::BACKDROP_COMPONENT = "(DISABLED)mltb_back";
+const std::string MultiLineTextBlock::BACKDROP_COMPONENT = "mltb_back";
 
 // Default constructor
 MultiLineTextBlock::MultiLineTextBlock(void)
@@ -74,7 +74,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 
 	// We now want to create a new text block for each of these lines
 	TextBlock *tb; 
-	INTVECTOR2 pos = INTVECTOR2(m_location.x + MultiLineTextBlock::TEXT_MARGIN, m_location.y + MultiLineTextBlock::TEXT_MARGIN);
+	INTVECTOR2 pos = INTVECTOR2(m_location.x + MultiLineTextBlock::TEXT_MARGIN, m_location.y + MultiLineTextBlock::TEXT_MARGIN - MultiLineTextBlock::OVERLAP_TEXT_BOUNDS);
 	for (int i = 0; i < linecount; ++i)
 	{
 		// Attempt to create the line
@@ -94,9 +94,11 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 			std::string s = std::string(m_maxlinelength, 'o');
 			tb->SetText(s);
 			m_textdimensions = tb->CalculateTextDimensions();
+			m_textdimensions.y -= static_cast<float>(MultiLineTextBlock::OVERLAP_TEXT_BOUNDS);
 			tb->SetText(NullString);
 
 			m_size.x = ((int)ceilf(m_textdimensions.x) + (2 * MultiLineTextBlock::TEXT_MARGIN));
+			if (m_size.x > Game::ScreenWidth) m_size.x = Game::ScreenWidth;
 		}
 
 		// Move to the next line
@@ -116,7 +118,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	// Create a backdrop component for the control
 	m_backcode = concat(m_code)(".back").str();
 	m_back = new Image2D(m_backcode, Game::Engine->GetAssets().GetMaterial(MultiLineTextBlock::BACKDROP_COMPONENT), 
-		m_location.ToFloat(), m_size.ToFloat(), 0.0f, 1.0f, m_zvalue);
+		m_location.ToFloat(), (m_size + INTVECTOR2(0, MultiLineTextBlock::TEXT_MARGIN)).ToFloat(), 0.0f, 1.0f, m_zvalue);
 
 	if (m_back)
 	{

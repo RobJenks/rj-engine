@@ -21,7 +21,8 @@ public:
 	enum OperationMode							{ IndividualLines = 0, WordWrap };
 
 	// Static constants
-	static const int							LINE_SPACING = 2;
+	static const int							LINE_SPACING = 0;
+	static const int							OVERLAP_TEXT_BOUNDS = 12;
 
 	// Default constructor
 	MultiLineTextBlock(void);
