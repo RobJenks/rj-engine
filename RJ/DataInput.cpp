@@ -3561,6 +3561,10 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 		{
 			font->SetCharacterSeparation(IO::GetFloatValue(child, Font::DEFAULT_CHARACTER_SEPARATION));
 		}
+		else if (hash == HashedStrings::H_GlyphScaleFactor)
+		{
+			font->SetGlyphScalingFactor(IO::GetFloatValue(child, 1.0f));
+		}
 		else if (hash == HashedStrings::H_Glyph)
 		{
 			FontGlyph glyph; unsigned int ch = 0U;

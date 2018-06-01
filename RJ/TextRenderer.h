@@ -37,7 +37,7 @@ public:
 	CMPINLINE Font::ID							GetDefaultFontId(void) const { return Font::DEFAULT_FONT_ID; }
 
 	// Returns the glyph scaling factor for the given font size
-	static float								GlyphScalingFactor(float font_size);
+	static float								GlyphScalingFactor(const Font & font, float font_size);
 
 	// Renders the given character to the screen
 	void										RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
@@ -80,6 +80,9 @@ private:
 
 	// Reciprocal of default font size, for runtime efficiency
 	static const float							DEFAULT_FONT_SIZE_RECIP;
+
+	// Height (in pixels) of a font glyph at DEFAULT_FONT_SIZE
+	static const float							DEFAULT_FONT_SIZE_HEIGHT_PX;
 
 	// Null font object, to be returned in case of invalid requests
 	std::unique_ptr<Font>						m_null_font;

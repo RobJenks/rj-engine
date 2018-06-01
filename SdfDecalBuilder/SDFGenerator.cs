@@ -59,7 +59,7 @@ namespace SdfDecalBuilder
             // Keep track of cross-glyph sizes so we can generate a consistently-arranged font
             int minY = int.MaxValue;
             int maxY = int.MinValue;
-
+            
             // Iterate through all characters for the SDF texture map
             for (int ch = minchar; ch <= maxchar; ++ch)
             {
@@ -70,7 +70,7 @@ namespace SdfDecalBuilder
                 runGenProcess(
                     sdfMode +
                     " -size " + componentDecalSize + " " + componentDecalSize +
-                    " -translate " + decalSize + " " + decalSize +
+                    " -translate " + translate + " " + translate +
                     " -scale " + scale.ToString() +
                     " -o " + ("\"" + componentPath + "\"") +
                     " -font " + sourceTTF + " " + ch);

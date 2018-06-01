@@ -44,6 +44,10 @@ public:
 	CMPINLINE float								GetCharacterSeparation(void) const { return m_char_separation; }
 	CMPINLINE void								SetCharacterSeparation(float px) { m_char_separation = px; }
 
+	// Scaling factor that will convert an unscaled glyph to the 'default' font size, to account for different-sized source glyphs
+	CMPINLINE float								GetGlyphScalingFactor(void) const { return m_glyph_scale_factor; }
+	CMPINLINE void								SetGlyphScalingFactor(float factor) { m_glyph_scale_factor = factor; }
+
 	// Return glyph data for the given character
 	const FontGlyph &							GetGlyph(unsigned int ch) const;
 
@@ -64,6 +68,7 @@ private:
 	const TextureDX11 *							m_texture;
 	std::array<FontGlyph, CHARACTER_MAP_SIZE>	m_map;
 	float										m_char_separation;	// Separation between adjactent chars (pixels) at default size
-	
+	float										m_glyph_scale_factor;
+
 
 };

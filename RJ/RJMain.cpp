@@ -868,11 +868,10 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
-	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 48.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);
-
-	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is test of normal-sized text and some characters such as \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 300.0f, 0.0f, 0.0f), 12.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);
+	/*Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+			XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 32.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f);
+	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 6.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);*/
 
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;

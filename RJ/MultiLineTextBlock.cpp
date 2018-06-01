@@ -74,7 +74,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 
 	// We now want to create a new text block for each of these lines
 	TextBlock *tb; 
-	INTVECTOR2 pos = INTVECTOR2(m_location.x + MultiLineTextBlock::TEXT_MARGIN, m_location.y + MultiLineTextBlock::TEXT_MARGIN - MultiLineTextBlock::OVERLAP_TEXT_BOUNDS);
+	INTVECTOR2 pos = INTVECTOR2(m_location.x + MultiLineTextBlock::TEXT_MARGIN, m_location.y + MultiLineTextBlock::TEXT_MARGIN - 2);
 	for (int i = 0; i < linecount; ++i)
 	{
 		// Attempt to create the line
@@ -94,7 +94,6 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 			std::string s = std::string(m_maxlinelength, 'o');
 			tb->SetText(s);
 			m_textdimensions = tb->CalculateTextDimensions();
-			m_textdimensions.y -= static_cast<float>(MultiLineTextBlock::OVERLAP_TEXT_BOUNDS);
 			tb->SetText(NullString);
 
 			m_size.x = ((int)ceilf(m_textdimensions.x) + (2 * MultiLineTextBlock::TEXT_MARGIN));

@@ -6,6 +6,7 @@
 // Default font size; character scaling will use this as the baseline
 const float TextRenderer::DEFAULT_FONT_SIZE = 12.0f;
 const float TextRenderer::DEFAULT_FONT_SIZE_RECIP = (1.0f / TextRenderer::DEFAULT_FONT_SIZE);
+const float TextRenderer::DEFAULT_FONT_SIZE_HEIGHT_PX = 16.0f;
 
 // Constructor
 TextRenderer::TextRenderer(void)
@@ -84,9 +85,10 @@ bool TextRenderer::IsValidFont(const std::string & code) const
 }
 
 // Returns the glyph scaling factor for the given font size
-float TextRenderer::GlyphScalingFactor(float font_size)
+float TextRenderer::GlyphScalingFactor(const Font & font, float font_size)
 {
-	return (font_size * TextRenderer::DEFAULT_FONT_SIZE_RECIP);
+	return ((font_size * TextRenderer::DEFAULT_FONT_SIZE_RECIP)		// (fontsize * default_size_recip) == 1.0 when fontsize == the default size
+					  * font.GetGlyphScalingFactor());				// Scaling factor to convert unscaled glyph to 'default' size
 }
 
 // Renders the given character to the screen
@@ -98,7 +100,7 @@ void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const
 	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor);
 	
 	// Glyph scaling can be determined based on desired font size
-	float glyph_scale = GlyphScalingFactor(font_size);
+	float glyph_scale = GlyphScalingFactor(font_data, font_size);
 
 	// Get glyph data and push a request to the decal renderer
 	const auto & glyph = font_data.GetGlyph(ch);
@@ -114,7 +116,7 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor);
 
 	// Glyph scaling can be determined based on desired font size
-	float glyph_scale = GlyphScalingFactor(font_size);
+	float glyph_scale = GlyphScalingFactor(font_data, font_size);
 	float separation = font_data.GetCharacterSeparation();
 
 	// Push consecutive requests to render each glyph in turn
@@ -152,19 +154,19 @@ XMFLOAT2 TextRenderer::CalculateTextDimensions(const std::string & text, Font::I
 	XMFLOAT2 dimensions(0.0f, 0.0f);
 
 	// Retrieve font details
-	const Font & fontdata = GetFont(font);
-	float separation = fontdata.GetCharacterSeparation();
+	const Font & font_data = GetFont(font);
+	float separation = font_data.GetCharacterSeparation();
 
 	// Determine a glyph scaling factor based on this font size
-	float scalefactor = GlyphScalingFactor(font_size);
+	float scalefactor = GlyphScalingFactor(font_data, font_size);
 
 	// Determine size of each glyph and separators in turn
 	for (auto ch : text)
 	{
-		const auto & size = fontdata.GetGlyph((unsigned int)ch).Size;
+		const auto & size = font_data.GetGlyph((unsigned int)ch).Size;
 
 		dimensions.x += (scalefactor * (size.x + separation));
-		dimensions.y = max(dimensions.y, size.y);
+		dimensions.y = max(dimensions.y, (size.y * scalefactor));
 	}
 
 	// Return overall dimensions
