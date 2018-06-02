@@ -6,6 +6,11 @@
   </Model>
 
   <Model>
+    <Code>unit_cube_model</Code>
+    <Filename>Models\Misc\unit_cube.rjm</Filename>
+  </Model>
+  
+  <Model>
     <Code>unit_sphere_model</Code>
     <Component file="Models\Misc\unit_sphere.rjm" material="null_material" />
   </Model>
