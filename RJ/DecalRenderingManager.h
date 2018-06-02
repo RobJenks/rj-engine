@@ -23,6 +23,7 @@ public:
 	void									SetBaseColour(const XMFLOAT4 & colour);
 	void									SetOutlineColour(const XMFLOAT4 & outline);
 	void									SetOutlineWidthFactor(float widthFactor);
+	void									SetSmoothingFactor(float factor);
 
 	// Render a decal to the given screen-space location
 	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size);

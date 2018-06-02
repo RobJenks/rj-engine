@@ -160,6 +160,7 @@ void SDFDecalRenderProcess::PopulateBuffers(const DecalRenderingParams & render_
 	m_cb_decal_data.RawPtr->baseColour = render_group.GetBaseColour();
 	m_cb_decal_data.RawPtr->outlineColour = render_group.GetOutlineColour();
 	m_cb_decal_data.RawPtr->outlineDistanceFactor = render_group.GetOutlineWidthFactor();
+	m_cb_decal_data.RawPtr->smoothingFactor = render_group.GetSmoothingFactor();
 	m_cb_decal->Set(m_cb_decal_data.RawPtr);
 
 }

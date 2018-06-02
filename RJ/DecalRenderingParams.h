@@ -21,6 +21,7 @@ public:
 	CMPINLINE XMFLOAT4						GetBaseColour(void) const { return m_basecolour; }
 	CMPINLINE XMFLOAT4						GetOutlineColour(void) const { return m_outlinecolour; }
 	CMPINLINE float							GetOutlineWidthFactor(void) const { return m_outlinewidthfactor; }
+	CMPINLINE float							GetSmoothingFactor(void) const { return m_smoothingfactor; }
 
 	// Update render group params
 	// NOTE: Update CloneData() if additional properties are added
@@ -28,6 +29,7 @@ public:
 	CMPINLINE void							SetBaseColour(const XMFLOAT4 & basecolour) { m_basecolour = basecolour; }
 	CMPINLINE void							SetOutlineColour(const XMFLOAT4 & outlinecolour) { m_outlinecolour = outlinecolour; }
 	CMPINLINE void							SetOutlineWidthFactor(float widthfactor) { m_outlinewidthfactor = widthfactor; }
+	CMPINLINE void							SetSmoothingFactor(float factor) { m_smoothingfactor = factor; }
 
 	// Add a new instance for rendering
 	void									AddInstance(const FXMMATRIX world, const XMFLOAT4 & uv_shift_scale);
@@ -53,6 +55,7 @@ private:
 	XMFLOAT4								m_basecolour;
 	XMFLOAT4								m_outlinecolour;
 	float									m_outlinewidthfactor;
+	float									m_smoothingfactor;
 
 	// Passed in RM_Instance instance params
 	// - matrix world		- determines pos & size of individual decal

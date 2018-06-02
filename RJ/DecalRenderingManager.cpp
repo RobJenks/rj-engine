@@ -58,6 +58,15 @@ void DecalRenderingManager::SetOutlineWidthFactor(float widthFactor)
 	GetNextAvailableRenderGroup().SetOutlineWidthFactor(widthFactor);
 }
 
+// Set properties that are applied to all rendered decals
+void DecalRenderingManager::SetSmoothingFactor(float factor)
+{
+	// If no change is requested then exit immediately
+	if (factor == GetActiveRenderGroup().GetSmoothingFactor()) return;
+
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetSmoothingFactor(factor);
+}
 
 // Get the currently-active rendering group
 DecalRenderingParams & DecalRenderingManager::GetActiveRenderGroup(void)

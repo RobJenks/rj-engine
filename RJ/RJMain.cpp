@@ -853,13 +853,13 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 
-	static float g_coord = 0.5f;
+	static float g_coord = 1.0f/4.0f;
 	if (b[DIK_G])
 	{
-		if (Game::Keyboard.ShiftDown()) g_coord -= 0.1f;
-		if (!Game::Keyboard.ShiftDown()) g_coord += 0.1f;
+		if (Game::Keyboard.ShiftDown()) g_coord /= 2.0f;
+		if (!Game::Keyboard.ShiftDown()) g_coord *= 2.0f;
 		Game::Keyboard.LockKey(DIK_G);
-		OutputDebugString(concat("Coord: ")(g_coord)("\n").str().c_str());
+		OutputDebugString(concat("Coord: ")(g_coord)(" == 1/")(1.0f/g_coord)("\n").str().c_str());
 
 	}
 
@@ -868,10 +868,10 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
-	/*Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-			XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 32.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.0f);
+	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+			XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 72.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f, 1.0f/4.0f);
 	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 6.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), g_coord);*/
+		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f, 1.0f/4.0f);
 
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;
@@ -2709,3 +2709,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
+

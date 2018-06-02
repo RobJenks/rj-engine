@@ -28,8 +28,9 @@ CBUFFER DecalRenderingDataBuffer REGISTER(b4)
 	float4		baseColour;
 	float4		outlineColour;
 	float		outlineDistanceFactor;	// In the range 0.0 (no outline) to 1.0 (thick outline)
+	float		smoothingFactor;		// Typical values range from 1/4 to 1/16
 
-	float3		_padding;
+	float2		_padding;
 };
 
 

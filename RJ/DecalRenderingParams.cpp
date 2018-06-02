@@ -14,7 +14,8 @@ DecalRenderingParams::DecalRenderingParams(const TextureDX11 * texture, const XM
 	m_texture(texture),
 	m_basecolour(basecolour),
 	m_outlinecolour(outlinecolour),
-	m_outlinewidthfactor(0.0f)
+	m_outlinewidthfactor(0.0f),
+	m_smoothingfactor(1.0f / 4.0f)
 {
 }
 
@@ -32,6 +33,7 @@ void DecalRenderingParams::CloneData(const DecalRenderingParams & other)
 	SetBaseColour(other.GetBaseColour());
 	SetOutlineColour(other.GetOutlineColour());
 	SetOutlineWidthFactor(other.GetOutlineWidthFactor());
+	SetSmoothingFactor(other.GetSmoothingFactor());
 }
 
 
