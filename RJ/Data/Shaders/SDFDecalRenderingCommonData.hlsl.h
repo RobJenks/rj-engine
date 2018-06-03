@@ -9,9 +9,6 @@ struct SDFDecalRenderingVertexShaderOutput
 {
 	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
 	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);		// Texture coordinate
-
-	float2 uv_shift				RJ_SEMANTIC(UVSHIFT);		// Linear shift of UV coords within the texture being sampled
-	float2 uv_scale				RJ_SEMANTIC(UVSCALE);		// Linear scale of UV coords within the texture being sampled
 };
 
 

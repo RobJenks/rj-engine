@@ -17,9 +17,5 @@ SDFDecalRenderingVertexShaderOutput VS_SDFDecal(Vertex_Inst_Standard input)
 	// UV = uv_shift + (UV * uv_scale)
 	output.texCoord = input.Highlight.xy + (input.tex * input.Highlight.zw);
 
-	// Other required data is simply passed through from vertex and instance parameters
-	output.uv_shift = input.Highlight.xy;
-	output.uv_scale = input.Highlight.zw;
-
 	return output;
 }
