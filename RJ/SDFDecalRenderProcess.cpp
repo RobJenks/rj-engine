@@ -216,7 +216,11 @@ void SDFDecalRenderProcess::PopulateFrameDataBuffer(SDFDecalRenderProcess::Frame
 		if (m_cb_frame_mode == FrameBufferMode::ScreenSpace) return;		// Already populated
 		m_cb_frame_mode = FrameBufferMode::ScreenSpace;
 
-		m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();		// (View = ID, Proj = Ortho)
+		// (View = ID, Proj = Ortho)
+		m_cb_frame_data.RawPtr->ViewMatrix = ID_MATRIX_F;
+		m_cb_frame_data.RawPtr->ProjMatrix = Game::Engine->GetRenderOrthographicMatrixF();		
+		m_cb_frame_data.RawPtr->FarClipDistance = Game::Engine->GetViewFrustrum()->GetFarClipPlaneDistance();
+
 		m_cb_frame->Set(m_cb_frame_data.RawPtr);
 	}
 	else if (frame_buffer_mode == FrameBufferMode::WorldSpace)
@@ -224,7 +228,10 @@ void SDFDecalRenderProcess::PopulateFrameDataBuffer(SDFDecalRenderProcess::Frame
 		if (m_cb_frame_mode == FrameBufferMode::WorldSpace) return;			// Already populated
 		m_cb_frame_mode = FrameBufferMode::WorldSpace;
 
-		m_cb_frame_data.RawPtr->ViewProjection = ID_MATRIX_F;	// TODO: UPDATE.  MAY NEED TO SPLIT VIEW VS PROJ (OR POPULATE BOTH OPTIONS)
+		m_cb_frame_data.RawPtr->ViewMatrix = Game::Engine->GetRenderViewMatrixF();
+		m_cb_frame_data.RawPtr->ProjMatrix = Game::Engine->GetRenderProjectionMatrixF();
+		m_cb_frame_data.RawPtr->FarClipDistance = Game::Engine->GetViewFrustrum()->GetFarClipPlaneDistance();
+
 		m_cb_frame->Set(m_cb_frame_data.RawPtr);
 	}
 }
