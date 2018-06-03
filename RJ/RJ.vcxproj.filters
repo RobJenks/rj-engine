@@ -2166,6 +2166,9 @@
     <ClInclude Include="Data\Shaders\BasicTextureRenderingCommonData.hlsl.h">
       <Filter>HLSL\Common\UI</Filter>
     </ClInclude>
+    <ClInclude Include="DecalRenderingMode.h">
+      <Filter>Engine\Decal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2577,10 +2580,13 @@
     <FxCompile Include="Data\Shaders\ps_basic_texture.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\ps_decal_sdf.ps.hlsl">
+    <FxCompile Include="Data\Shaders\vs_decal_sdf.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\vs_decal_sdf.vs.hlsl">
+    <FxCompile Include="Data\Shaders\ps_decal_sdf_direct.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_decal_sdf_deferred.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

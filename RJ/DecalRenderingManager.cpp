@@ -19,6 +19,16 @@ void DecalRenderingManager::BeginFrame(void)
 }
 
 // Set properties that are applied to all rendered decals
+void DecalRenderingManager::SetRenderingMode(DecalRenderingMode mode)
+{
+	// If no change is requested then exit immediately
+	if (mode == GetActiveRenderGroup().GetRenderingMode()) return;
+
+	// Otherwise, start a new group (if necessary, i.e. if current group is already in use) and store the parameter
+	GetNextAvailableRenderGroup().SetRenderMode(mode);
+}
+
+// Set properties that are applied to all rendered decals
 void DecalRenderingManager::SetTexture(const TextureDX11 * texture)
 {
 	// If no change is requested then exit immediately
@@ -134,6 +144,9 @@ void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2
 // Render a decal instance using the provided, internally-calculated parameters
 void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
 {
+	// Set the render mode accordingly
+	SetRenderingMode(DecalRenderingMode::ScreenSpace);
+
 	// World matrix is a straightforward scale & translate in screen-space
 	// TODO: Add rotation
 	XMMATRIX world = XMMatrixMultiply(

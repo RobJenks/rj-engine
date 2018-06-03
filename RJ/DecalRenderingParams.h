@@ -4,6 +4,7 @@
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
 #include "RM_Instance.h"
+#include "DecalRenderingMode.h"
 class TextureDX11;
 
 
@@ -17,6 +18,7 @@ public:
 
 	// Return render group params
 	// NOTE: Update CloneData() if additional properties are added
+	CMPINLINE DecalRenderingMode			GetRenderingMode(void) const { return m_rendermode; }
 	CMPINLINE const TextureDX11 *			GetTexture(void) const { return m_texture; }
 	CMPINLINE XMFLOAT4						GetBaseColour(void) const { return m_basecolour; }
 	CMPINLINE XMFLOAT4						GetOutlineColour(void) const { return m_outlinecolour; }
@@ -25,6 +27,7 @@ public:
 
 	// Update render group params
 	// NOTE: Update CloneData() if additional properties are added
+	CMPINLINE void							SetRenderMode(DecalRenderingMode rendermode) { m_rendermode = rendermode; }
 	CMPINLINE void							SetTexture(const TextureDX11 * texture) { m_texture = texture; }
 	CMPINLINE void							SetBaseColour(const XMFLOAT4 & basecolour) { m_basecolour = basecolour; }
 	CMPINLINE void							SetOutlineColour(const XMFLOAT4 & outlinecolour) { m_outlinecolour = outlinecolour; }
@@ -51,6 +54,7 @@ public:
 private:
 
 	// Properties common to all instances in this set
+	DecalRenderingMode						m_rendermode;
 	const TextureDX11 *						m_texture;
 	XMFLOAT4								m_basecolour;
 	XMFLOAT4								m_outlinecolour;

@@ -167,7 +167,8 @@ private:
 	ShaderDX11 *							m_texture_vs;
 	ShaderDX11 *							m_texture_ps;
 	ShaderDX11 *							m_sdf_decal_vs;
-	ShaderDX11 *							m_sdf_decal_ps;
+	ShaderDX11 *							m_sdf_decal_direct_ps;
+	ShaderDX11 *							m_sdf_decal_deferred_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
 

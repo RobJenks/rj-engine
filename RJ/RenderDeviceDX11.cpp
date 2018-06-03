@@ -59,7 +59,8 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_texture_vs(NULL), 
 	m_texture_ps(NULL), 
 	m_sdf_decal_vs(NULL), 
-	m_sdf_decal_ps(NULL), 
+	m_sdf_decal_direct_ps(NULL), 
+	m_sdf_decal_deferred_ps(NULL),
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
@@ -607,7 +608,8 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 
 		// Signed-distance-field decal rendering shaders
 		{ &m_sdf_decal_vs, Shader::Type::VertexShader, Shaders::SDFDecalVertexShader, "Shaders\\vs_decal_sdf.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_sdf_decal_ps, Shader::Type::PixelShader, Shaders::SDFDecalPixelShader, "Shaders\\ps_decal_sdf.ps.hlsl", "latest", NULL }, 
+		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL }, 
+		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL },
 
 
 		// Debug-only shaders

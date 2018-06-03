@@ -3,8 +3,8 @@
 #include "../../../Definitions/VertexDefinitions.hlsl.h"
 #include "SDFDecalRenderingCommonData.hlsl.h"
 
-// PS_SDFDecal: Performs basic linear sampling from the supplied diffuse texture
-float4 PS_SDFDecal(SDFDecalRenderingVertexShaderOutput IN) : SV_TARGET
+// PS_SDFDecal_Direct: Renders a decal directly based on a source signed-distance field representation
+float4 PS_SDFDecal_Direct(SDFDecalRenderingVertexShaderOutput IN) : SV_TARGET
 {
 	// Sample distance directly from the diffuse texture alpha channel
 	float distance = DiffuseTexture.Sample(LinearRepeatSampler, IN.texCoord).r;

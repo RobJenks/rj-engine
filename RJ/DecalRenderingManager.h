@@ -3,6 +3,7 @@
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
 #include "IntVector.h"
+#include "DecalRenderingMode.h"
 #include "DecalRenderingParams.h"
 class TextureDX11;
 
@@ -43,6 +44,9 @@ public:
 
 
 private:
+
+	// Set rendering mode; this is not public like other properties since it is set by the relevant render method in this class
+	void									SetRenderingMode(DecalRenderingMode mode);
 
 	// Render a decal instance using the provided, internally-calculated parameters
 	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);

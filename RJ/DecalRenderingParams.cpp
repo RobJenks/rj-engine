@@ -11,6 +11,7 @@ DecalRenderingParams::DecalRenderingParams(void)
 // Constructor
 DecalRenderingParams::DecalRenderingParams(const TextureDX11 * texture, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour)
 	:
+	m_rendermode(DecalRenderingMode::ScreenSpace), 
 	m_texture(texture),
 	m_basecolour(basecolour),
 	m_outlinecolour(outlinecolour),
@@ -29,6 +30,7 @@ void DecalRenderingParams::AddInstance(const FXMMATRIX world, const XMFLOAT4 & u
 // Clones data from another group into this one.  Instance data is NOT copied
 void DecalRenderingParams::CloneData(const DecalRenderingParams & other)
 {
+	SetRenderMode(other.GetRenderingMode());
 	SetTexture(other.GetTexture());
 	SetBaseColour(other.GetBaseColour());
 	SetOutlineColour(other.GetOutlineColour());

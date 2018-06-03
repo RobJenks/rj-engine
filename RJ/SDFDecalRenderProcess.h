@@ -26,29 +26,40 @@ public:
 
 private:
 
+	enum class						FrameBufferMode { Uninitialised = 0, ScreenSpace, WorldSpace };
+
 	void							InitialiseShaders(void);
 	void							InitialiseStandardBuffers(void);
 	void							InitialiseStandardMaterials(void);
 	void							InitialiseRenderGeometry(void);
 	void 							InitialisePipelines(void);
+	void							InitialiseShaderResourceBindings(void);
 
-	void							PopulateBuffers(const DecalRenderingParams & render_group);
+	void							PopulateFrameDataBuffer(FrameBufferMode frame_buffer_mode);
+	void							PopulateDecalDataBuffer(const DecalRenderingParams & render_group);
 
 	CMPINLINE ConstantBufferDX11 *	GetFrameDataBuffer(void) { return m_cb_frame; }
 	CMPINLINE ConstantBufferDX11 *	GetDecalRenderingConstantBuffer(void) { return m_cb_decal; }
+
+	// Process a render group through the specified pipeline
+	void							ExecuteRenderingPipeline(PipelineStateDX11 * pipeline, const DecalRenderingParams & render_group);
 
 private:
 
 	// Shaders
 	ShaderDX11 *							m_vs;
-	ShaderDX11 *							m_ps;
+	ShaderDX11 *							m_ps_direct;
+	ShaderDX11 *							m_ps_deferred;
 
-	// Render pipeline for standard orthographic texture rendering
-	PipelineStateDX11 *						m_pipeline;
+	// Render pipelines for each supported decal rendering mode
+	PipelineStateDX11 *						m_pipeline_direct;
+	PipelineStateDX11 *						m_pipeline_deferredproj;
 
 	// Frame data buffer
+	FrameBufferMode							m_cb_frame_mode;
 	ManagedPtr<DecalRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
+
 	ManagedPtr<DecalRenderingDataBuffer>	m_cb_decal_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_decal;					// Compiled CB
 
@@ -60,7 +71,8 @@ private:
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_decaldata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_direct_decaldata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_deferred_decaldata;
 
 
 
