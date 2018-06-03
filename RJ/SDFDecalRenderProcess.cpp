@@ -11,7 +11,8 @@
 // Constructor
 SDFDecalRenderProcess::SDFDecalRenderProcess(void)
 	:
-	m_vs(NULL),
+	m_vs_direct(NULL),
+	m_vs_deferred(NULL), 
 	m_ps_direct(NULL),
 	m_ps_deferred(NULL), 
 	m_pipeline_direct(NULL),
@@ -20,7 +21,8 @@ SDFDecalRenderProcess::SDFDecalRenderProcess(void)
 	m_cb_frame_mode(FrameBufferMode::Uninitialised), 
 	m_model_quad(NULL),
 	m_decal_material(NULL), 
-	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_vs_direct_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_vs_deferred_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_direct_decaldata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_deferred_decaldata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
@@ -49,8 +51,11 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalVertexShader);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [vs]\n";
+	m_vs_direct = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalDirectVertexShader);
+	if (m_vs_direct == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [vs_dir]\n";
+
+	m_vs_deferred = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalDeferredVertexShader);
+	if (m_vs_deferred == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [vs_def]\n";
 
 	m_ps_direct = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::SDFDecalDirectPixelShader);
 	if (m_ps_direct == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [ps_dir]\n";
@@ -59,7 +64,8 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 	if (m_ps_deferred == NULL) Game::Log << LOG_ERROR << "Cannot load SDF decal rendering shader resources [ps_def]\n";
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, DecalRenderingFrameBufferName);
+	m_param_vs_direct_framedata = AttemptRetrievalOfShaderParameter(m_vs_direct, DecalRenderingFrameBufferName);
+	m_param_vs_deferred_framedata = AttemptRetrievalOfShaderParameter(m_vs_deferred, DecalRenderingFrameBufferName);
 	m_param_ps_direct_decaldata = AttemptRetrievalOfShaderParameter(m_ps_direct, DecalRenderingDataBufferName);
 	m_param_ps_deferred_decaldata = AttemptRetrievalOfShaderParameter(m_ps_deferred, DecalRenderingDataBufferName);
 }
@@ -111,7 +117,7 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 	// Direct rendering pipeline
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering pipeline [dir]\n";
 	m_pipeline_direct= Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("SDF_Decal_Rendering_Direct");
-	m_pipeline_direct->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_direct->SetShader(Shader::Type::VertexShader, m_vs_direct);
 	m_pipeline_direct->SetShader(Shader::Type::PixelShader, m_ps_direct);
 	m_pipeline_direct->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
 
@@ -123,7 +129,7 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 	// Deferred screen-space projection rendering pipeline
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering pipeline [def]\n";
 	m_pipeline_deferredproj = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("SDF_Decal_Rendering_Deferred");
-	m_pipeline_deferredproj->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_deferredproj->SetShader(Shader::Type::VertexShader, m_vs_deferred);
 	m_pipeline_deferredproj->SetShader(Shader::Type::PixelShader, m_ps_deferred);
 	m_pipeline_deferredproj->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
 
@@ -136,8 +142,9 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 // Bind required buffer resources to shader parameters
 void SDFDecalRenderProcess::InitialiseShaderResourceBindings(void)
 {
-	// Vertex shader
-	m_vs->GetParameter(m_param_vs_framedata).Set(GetFrameDataBuffer());
+	// Vertex shaders
+	m_vs_direct->GetParameter(m_param_vs_direct_framedata).Set(GetFrameDataBuffer());
+	m_vs_deferred->GetParameter(m_param_vs_deferred_framedata).Set(GetFrameDataBuffer());
 
 	// Pixel shaders
 	m_ps_direct->GetParameter(m_param_ps_direct_decaldata).Set(GetDecalRenderingConstantBuffer());

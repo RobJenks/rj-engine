@@ -47,7 +47,8 @@ private:
 private:
 
 	// Shaders
-	ShaderDX11 *							m_vs;
+	ShaderDX11 *							m_vs_direct;
+	ShaderDX11 *							m_vs_deferred;
 	ShaderDX11 *							m_ps_direct;
 	ShaderDX11 *							m_ps_deferred;
 
@@ -70,7 +71,8 @@ private:
 	ManagedPtr<MaterialDX11>				m_decal_material;
 
 	// Indices of required shader parameters
-	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_vs_direct_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_vs_deferred_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_direct_decaldata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_deferred_decaldata;
 

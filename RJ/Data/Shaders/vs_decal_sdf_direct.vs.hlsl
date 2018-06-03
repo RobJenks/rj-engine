@@ -4,8 +4,8 @@
 #include "SDFDecalRenderingCommonData.hlsl.h"
 
 
-// VS_SDFDecal: Basic vertex texture which largely passes through instance data
-SDFDecalRenderingVertexShaderOutput VS_SDFDecal(Vertex_Inst_Standard input)
+// VS_SDFDecal: Vertex transformations for direct SDF decal rendering
+SDFDecalRenderingVertexShaderOutput VS_SDFDecal_Direct(Vertex_Inst_Standard input)
 {
 	SDFDecalRenderingVertexShaderOutput output;
 

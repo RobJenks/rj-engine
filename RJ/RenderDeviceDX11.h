@@ -166,7 +166,8 @@ private:
 	ShaderDX11 *							m_deferred_debug_ps;
 	ShaderDX11 *							m_texture_vs;
 	ShaderDX11 *							m_texture_ps;
-	ShaderDX11 *							m_sdf_decal_vs;
+	ShaderDX11 *							m_sdf_decal_direct_vs;
+	ShaderDX11 *							m_sdf_decal_deferred_vs;
 	ShaderDX11 *							m_sdf_decal_direct_ps;
 	ShaderDX11 *							m_sdf_decal_deferred_ps;
 

@@ -4,13 +4,19 @@
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
-// Output of SDF decal rendering VS stage
+// Output of SDF decal rendering VS stage (direct rendering)
 struct SDFDecalRenderingVertexShaderOutput
 {
 	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
 	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);		// Texture coordinate
 };
 
+// Output of SDF decal rendering VS stage (deferred screenspace rendering)
+struct SDFDecalRenderingDeferredVertexShaderOutput
+{
+	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
+	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);		// Texture coordinate
+};
 
 // Basic constant buffer holding minimum per-frame data required
 CBUFFER DecalRenderingFrameBuffer REGISTER(b4)
