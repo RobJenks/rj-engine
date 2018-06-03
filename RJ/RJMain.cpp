@@ -873,6 +873,15 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
 		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f, 1.0f/4.0f);
 
+
+	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
+	Game::Engine->GetDecalRenderer()->SetBaseColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	Game::Engine->GetDecalRenderer()->SetOutlineColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	Game::Engine->GetDecalRenderer()->SetOutlineWidthFactor(0.5f);
+	Game::Engine->GetDecalRenderer()->SetSmoothingFactor(0.25f);
+	Game::Engine->GetDecalRenderer()->RenderDecalWorld(XMVectorMultiplyAdd(Game::Engine->GetCamera()->GetCameraHeading(), XMVectorReplicate(1.0f),
+		Game::Engine->GetCamera()->GetPosition()), Game::Engine->GetCamera()->GetOrientation(), XMVectorReplicate(10.0f));
+
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;
 	static const unsigned int dbg_b_text_limit = 32U;

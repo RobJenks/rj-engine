@@ -20,11 +20,13 @@ SDFDecalRenderProcess::SDFDecalRenderProcess(void)
 	m_cb_frame(NULL),
 	m_cb_frame_mode(FrameBufferMode::Uninitialised), 
 	m_model_quad(NULL),
+	m_model_cube(NULL), 
 	m_decal_material(NULL), 
 	m_param_vs_direct_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_vs_deferred_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_direct_decaldata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_deferred_decaldata(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_ps_deferred_decaldata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_deferred_framedata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	SetName(RenderProcess::Name<SDFDecalRenderProcess>());
 
@@ -68,6 +70,7 @@ void SDFDecalRenderProcess::InitialiseShaders(void)
 	m_param_vs_deferred_framedata = AttemptRetrievalOfShaderParameter(m_vs_deferred, DecalRenderingFrameBufferName);
 	m_param_ps_direct_decaldata = AttemptRetrievalOfShaderParameter(m_ps_direct, DecalRenderingDataBufferName);
 	m_param_ps_deferred_decaldata = AttemptRetrievalOfShaderParameter(m_ps_deferred, DecalRenderingDataBufferName);
+	m_param_ps_deferred_framedata = AttemptRetrievalOfShaderParameter(m_ps_deferred, DecalRenderingFrameBufferName);
 }
 
 // Initialisation
@@ -96,7 +99,8 @@ void SDFDecalRenderProcess::InitialiseRenderGeometry(void)
 
 	// Load all required model geometry
 	std::vector<std::tuple<std::string, std::string, Model**>> models = {
-		{ "texture quad", "unit_square_model", &m_model_quad }
+		{ "texture quad", "unit_square_model", &m_model_quad },
+		{ "texture_cube", "unit_cube_model", &m_model_cube }
 	};
 
 	for (auto & model : models)
@@ -142,13 +146,16 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 // Bind required buffer resources to shader parameters
 void SDFDecalRenderProcess::InitialiseShaderResourceBindings(void)
 {
-	// Vertex shaders
+	// Direct SDF rendering
 	m_vs_direct->GetParameter(m_param_vs_direct_framedata).Set(GetFrameDataBuffer());
-	m_vs_deferred->GetParameter(m_param_vs_deferred_framedata).Set(GetFrameDataBuffer());
-
-	// Pixel shaders
 	m_ps_direct->GetParameter(m_param_ps_direct_decaldata).Set(GetDecalRenderingConstantBuffer());
+
+	// Deferred screenspace SDF rendering
+	m_vs_deferred->GetParameter(m_param_vs_deferred_framedata).Set(GetFrameDataBuffer());
+	m_ps_deferred->GetParameter(m_param_ps_deferred_framedata).Set(GetFrameDataBuffer());
 	m_ps_deferred->GetParameter(m_param_ps_deferred_decaldata).Set(GetDecalRenderingConstantBuffer());
+	
+
 }
 
 
@@ -177,29 +184,29 @@ void SDFDecalRenderProcess::Render(void)
 		{
 			case DecalRenderingMode::ScreenSpace:
 				PopulateFrameDataBuffer(FrameBufferMode::ScreenSpace);
-				ExecuteRenderingPipeline(m_pipeline_direct, group);
+				ExecuteRenderingPipeline(m_pipeline_direct, *m_model_quad, group);
 				break;
 			case DecalRenderingMode::WorldSpace:
 				PopulateFrameDataBuffer(FrameBufferMode::WorldSpace);
-				ExecuteRenderingPipeline(m_pipeline_direct, group);
+				ExecuteRenderingPipeline(m_pipeline_direct, *m_model_quad, group);
 				break;
 			case DecalRenderingMode::DeferredWorldProjection:
 				PopulateFrameDataBuffer(FrameBufferMode::WorldSpace);
-				ExecuteRenderingPipeline(m_pipeline_deferredproj, group);
+				ExecuteRenderingPipeline(m_pipeline_deferredproj, *m_model_cube, group);
 				break;
 		}
 		
 	}
 }
 
-void SDFDecalRenderProcess::ExecuteRenderingPipeline(PipelineStateDX11 * pipeline, const DecalRenderingParams & render_group)
+void SDFDecalRenderProcess::ExecuteRenderingPipeline(PipelineStateDX11 * pipeline, Model & geometry, const DecalRenderingParams & render_group)
 {
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	pipeline->Bind();
 
 	// Perform instanced rendering of the full queued render group through this pipeline
 	const auto & instances = render_group.GetQueuedInstanceData();
-	Game::Engine->RenderInstanced(*pipeline, *m_model_quad, m_decal_material.RawPtr, instances[0], static_cast<UINT>(instances.size()));
+	Game::Engine->RenderInstanced(*pipeline, geometry, m_decal_material.RawPtr, instances[0], static_cast<UINT>(instances.size()));
 
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
@@ -219,7 +226,9 @@ void SDFDecalRenderProcess::PopulateFrameDataBuffer(SDFDecalRenderProcess::Frame
 		// (View = ID, Proj = Ortho)
 		m_cb_frame_data.RawPtr->ViewMatrix = ID_MATRIX_F;
 		m_cb_frame_data.RawPtr->ProjMatrix = Game::Engine->GetRenderOrthographicMatrixF();		
+		m_cb_frame_data.RawPtr->InvViewMatrix = ID_MATRIX_F;
 		m_cb_frame_data.RawPtr->FarClipDistance = Game::Engine->GetViewFrustrum()->GetFarClipPlaneDistance();
+		m_cb_frame_data.RawPtr->performZTest = _false;
 
 		m_cb_frame->Set(m_cb_frame_data.RawPtr);
 	}
@@ -230,7 +239,9 @@ void SDFDecalRenderProcess::PopulateFrameDataBuffer(SDFDecalRenderProcess::Frame
 
 		m_cb_frame_data.RawPtr->ViewMatrix = Game::Engine->GetRenderViewMatrixF();
 		m_cb_frame_data.RawPtr->ProjMatrix = Game::Engine->GetRenderProjectionMatrixF();
+		m_cb_frame_data.RawPtr->InvViewMatrix = Game::Engine->GetRenderInverseViewMatrixF();
 		m_cb_frame_data.RawPtr->FarClipDistance = Game::Engine->GetViewFrustrum()->GetFarClipPlaneDistance();
+		m_cb_frame_data.RawPtr->performZTest = _false;
 
 		m_cb_frame->Set(m_cb_frame_data.RawPtr);
 	}

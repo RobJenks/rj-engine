@@ -30,6 +30,9 @@ public:
 	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size);
 	void									RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max);
 
+	// Render a decal to the given world-space location
+	void									RenderDecalWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size);
+
 	// End the frame
 	void									EndFrame(void);
 
@@ -50,6 +53,10 @@ private:
 
 	// Render a decal instance using the provided, internally-calculated parameters
 	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+
+	// Render a decal instance in world space using the provided, internally-calculated parameters
+	void									RenderDecalWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+
 
 	// Get the currently-active rendering group
 	DecalRenderingParams &					GetActiveRenderGroup(void);

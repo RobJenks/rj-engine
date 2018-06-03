@@ -42,7 +42,7 @@ private:
 	CMPINLINE ConstantBufferDX11 *	GetDecalRenderingConstantBuffer(void) { return m_cb_decal; }
 
 	// Process a render group through the specified pipeline
-	void							ExecuteRenderingPipeline(PipelineStateDX11 * pipeline, const DecalRenderingParams & render_group);
+	void							ExecuteRenderingPipeline(PipelineStateDX11 * pipeline, Model & geometry, const DecalRenderingParams & render_group);
 
 private:
 
@@ -66,6 +66,7 @@ private:
 
 	// Pre-cached models for orthographic screen rendering
 	Model *									m_model_quad;
+	Model *									m_model_cube;
 
 	// Single material updated and used for rendering of all decals
 	ManagedPtr<MaterialDX11>				m_decal_material;
@@ -73,6 +74,7 @@ private:
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_direct_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_vs_deferred_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_deferred_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_direct_decaldata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_deferred_decaldata;
 

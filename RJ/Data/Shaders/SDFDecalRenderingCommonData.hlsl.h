@@ -26,17 +26,21 @@ CBUFFER DecalRenderingFrameBuffer REGISTER(b4)
 {
 	RJ_ROW_MAJOR_MATRIX ViewMatrix;
 	RJ_ROW_MAJOR_MATRIX ProjMatrix;
-	float FarClipDistance;
+	RJ_ROW_MAJOR_MATRIX InvViewMatrix;
 
-	float3 _padding_drfb;
+	float FarClipDistance;
+	_bool performZTest;
+
+	float2 _padding_drfb;
 };
 
 
 // Basic constant buffer holding required decal rendering data
-CBUFFER DecalRenderingDataBuffer REGISTER(b4)
+CBUFFER DecalRenderingDataBuffer REGISTER(b5)
 {
 	float4		baseColour;
 	float4		outlineColour;
+
 	float		outlineDistanceFactor;	// In the range 0.0 (no outline) to 1.0 (thick outline)
 	float		smoothingFactor;		// Typical values range from 1/4 to 1/16
 

@@ -7,7 +7,7 @@
 
   <Model>
     <Code>unit_cube_model</Code>
-    <Filename>Models\Misc\unit_cube.rjm</Filename>
+    <Component file="Models\Misc\unit_cube.rjm" material="null_material" />
   </Model>
   
   <Model>

@@ -158,6 +158,29 @@ void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, 
 	GetActiveRenderGroup().AddInstance(world, uv_shift_scale);
 }
 
+
+// Render a decal to the given world-space location
+void DecalRenderingManager::RenderDecalWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size)
+{
+	RenderDecalWorldInstance(position, orientation, size, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));	// No shift, unit scale
+}
+
+void DecalRenderingManager::RenderDecalWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
+{
+	// Set the render mode accordingly
+	SetRenderingMode(DecalRenderingMode::DeferredWorldProjection);
+
+	// World matrix is a straightforward scale & translate in screen-space
+	XMMATRIX world = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScalingFromVector(size),
+		XMMatrixRotationQuaternion(orientation)), 
+		XMMatrixTranslationFromVector(position)
+	);
+
+	// Add a new instance for rendering
+	GetActiveRenderGroup().AddInstance(world, uv_shift_scale);
+}
+
 // End the frame
 void DecalRenderingManager::EndFrame(void)
 {
