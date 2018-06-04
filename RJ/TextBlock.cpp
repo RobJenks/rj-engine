@@ -34,7 +34,7 @@ void TextBlock::Render(void)
 	if (!m_text.empty())
 	{
 		// TODO: Have base component store the position in XMVECTOR form as well, to save many SSE loads per frame
-		Game::Engine->GetTextRenderer()->RenderStringToScreen(m_text, m_font, XMLoadFloat2(&m_position), m_fontsize, m_basecolour, m_outlinecolour, m_outlinefactor);
+		Game::Engine->GetTextRenderer()->RenderStringToScreen(m_text, m_font, XMLoadFloat2(&m_position), m_fontsize, m_basecolour, m_outlinecolour, TextAnchorPoint::TopLeft, m_outlinefactor);
 	}
 }
 

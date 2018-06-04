@@ -539,7 +539,7 @@ void RJMain::PerformFPSCalculations(void)
 				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
 #		else
 			Game::Engine->GetTextRenderer()->RenderStringToScreen(concat("FPS: ")((int)Game::FPS).str(),
-				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
+				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, TextAnchorPoint::TopLeft, 0.6f);
 #		endif
 
 	}
@@ -853,13 +853,14 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 
-	static float g_coord = 1.0f/4.0f;
+	static float g_coord = 0.0f;
+	g_coord += Game::TimeFactor;
 	if (b[DIK_G])
 	{
-		if (Game::Keyboard.ShiftDown()) g_coord /= 2.0f;
-		if (!Game::Keyboard.ShiftDown()) g_coord *= 2.0f;
+		/*if (Game::Keyboard.ShiftDown()) g_coord += (PIBY180 * 10.0f);
+		if (!Game::Keyboard.ShiftDown()) g_coord -= (PIBY180 * 10.0f);
 		Game::Keyboard.LockKey(DIK_G);
-		OutputDebugString(concat("Coord: ")(g_coord)(" == 1/")(1.0f/g_coord)("\n").str().c_str());
+		OutputDebugString(concat("Coord: ")(g_coord)(" == 1/")(1.0f/g_coord)("\n").str().c_str());*/
 
 	}
 
@@ -869,18 +870,20 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
 	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-			XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 72.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f, 1.0f/4.0f);
+		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 72.0f, XMQuaternionRotationAxis(FORWARD_VECTOR, g_coord), 
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f/4.0f);
 	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.5f, 1.0f/4.0f);
+		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMQuaternionRotationAxis(UP_VECTOR, g_coord), 
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f / 4.0f);
 
 
-	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
+	/*Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
 	Game::Engine->GetDecalRenderer()->SetBaseColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	Game::Engine->GetDecalRenderer()->SetOutlineColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	Game::Engine->GetDecalRenderer()->SetOutlineWidthFactor(0.5f);
 	Game::Engine->GetDecalRenderer()->SetSmoothingFactor(0.25f);
 	Game::Engine->GetDecalRenderer()->RenderDecalWorld(XMVectorMultiplyAdd(Game::Engine->GetCamera()->GetCameraHeading(), XMVectorReplicate(1.0f),
-		Game::Engine->GetCamera()->GetPosition()), Game::Engine->GetCamera()->GetOrientation(), XMVectorReplicate(10.0f));
+		Game::Engine->GetCamera()->GetPosition()), Game::Engine->GetCamera()->GetOrientation(), XMVectorReplicate(10.0f));*/
 
 	// TODO [textrender]: Update for new text rendering component
 	/*static SentenceType **dbg_b_sentences = NULL;

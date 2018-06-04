@@ -2169,6 +2169,9 @@
     <ClInclude Include="DecalRenderingMode.h">
       <Filter>Engine\Decal</Filter>
     </ClInclude>
+    <ClInclude Include="TextAnchorPoint.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

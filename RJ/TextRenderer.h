@@ -4,7 +4,9 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include "FastMath.h"
 #include "Font.h"
+#include "TextAnchorPoint.h"
 
 class TextRenderer
 {
@@ -42,11 +44,19 @@ public:
 	// Renders the given character to the screen
 	void										RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
 																		const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
-																		float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f) const;
+																		float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f, 
+																		const FXMVECTOR orientation = ID_QUATERNION) const;
 
 	// Renders the given text string to the screen.  No wrapping is performed
 	void										RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
 																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
+																	 TextAnchorPoint anchorpoint = TextAnchorPoint::TopLeft, 
+																	 float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f) const;
+	void										RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
+																	 const FXMVECTOR orientation, 
+																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour,
+																	 TextAnchorPoint anchorpoint = TextAnchorPoint::TopLeft,
+																	 TextAnchorPoint rotationpoint = TextAnchorPoint::TopLeft,
 																	 float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f) const;
 
 	// Calculates the dimensions of a text string with the given properties
@@ -67,7 +77,7 @@ private:
 																			float outlineWidth, float smoothingFactor) const;
 
 	// Perform glyph calculation and dispatch a render call to the decal renderer
-	void										RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale) const;
+	void										RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale, const FXMVECTOR orientation = ID_QUATERNION) const;
 
 
 private:

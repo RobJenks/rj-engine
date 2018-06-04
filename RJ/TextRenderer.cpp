@@ -94,7 +94,7 @@ float TextRenderer::GlyphScalingFactor(const Font & font, float font_size)
 // Renders the given character to the screen
 void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
 										   const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineFactor, 
-										   float smoothingFactor) const
+										   float smoothingFactor, const FXMVECTOR orientation) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
@@ -105,13 +105,13 @@ void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const
 
 	// Get glyph data and push a request to the decal renderer
 	const auto & glyph = font_data.GetGlyph(ch);
-	RenderGlyphDecal(glyph, screen_location, glyph_scale);
+	RenderGlyphDecal(glyph, screen_location, glyph_scale, orientation);
 }
 
 // Renders the given text string to the screen.  No wrapping is performed
 void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
-										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineFactor, 
-										float smoothingFactor) const
+										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint, 
+										float outlineFactor, float smoothingFactor) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
@@ -120,6 +120,13 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 	// Glyph scaling can be determined based on desired font size
 	float glyph_scale = GlyphScalingFactor(font_data, font_size);
 	float separation = font_data.GetCharacterSeparation();
+
+	// Account for alternative anchor points (default == top-left)
+	if (anchorpoint == TextAnchorPoint::Centre)
+	{
+		XMFLOAT2 dimensions = CalculateTextDimensions(str, font, font_size);
+		screen_location = XMVectorSubtract(screen_location, XMVectorSet(dimensions.x * 0.5f, dimensions.y * 0.5f, 0.0f, 0.0f));
+	}
 
 	// Push consecutive requests to render each glyph in turn
 	for (unsigned int ch : str)
@@ -130,6 +137,57 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 		screen_location = XMVectorAdd(screen_location, XMVectorSetX(NULL_VECTOR, (glyph.Size.x + separation) * glyph_scale));
 	}
 }
+
+// Renders the given text string to the screen.  No wrapping is performed.  Allows orientation of 
+// text blocks calculated with respect to the centre point of the string
+void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size, const FXMVECTOR orientation,
+										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint,
+										TextAnchorPoint rotationpoint, float outlineFactor, float smoothingFactor) const
+{
+	// Get the corresponding font and set decal rendering parameters accordingly
+	const auto & font_data = GetFont(font);
+	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor, smoothingFactor);
+
+	// Glyph scaling can be determined based on desired font size
+	float glyph_scale = GlyphScalingFactor(font_data, font_size);
+	float separation = font_data.GetCharacterSeparation();
+
+	// Calculate overall text bounds so we can identify the centre point of the rendered string
+	XMFLOAT2 dimensions = CalculateTextDimensions(str, font, font_size);
+	XMVECTOR half_dim = XMVectorSet(dimensions.x * 0.5f, dimensions.y * 0.5f, 0.0f, 0.0f);
+
+	// Account for alternative text anchor point if required (default == top-left)
+	if (anchorpoint == TextAnchorPoint::Centre)
+	{
+		screen_location = XMVectorSubtract(screen_location, half_dim);
+	}
+
+	// Derive transforms required to transform all characters of the string in a consistent rotation
+	XMMATRIX string_rotation_transform = XMMatrixRotationQuaternion(XMQuaternionInverse(orientation));
+	if (rotationpoint == TextAnchorPoint::Centre)
+	{
+		string_rotation_transform = XMMatrixMultiply(XMMatrixMultiply(		// Adjust existing (top-left) rotation transformation by:
+			XMMatrixTranslationFromVector(XMVectorNegate(half_dim)),		// 1. Translating target point to string centre point
+			string_rotation_transform),										// 2. Applying the original rotation
+			XMMatrixTranslationFromVector(half_dim)							// 3. Translating target point back by same translation, in rotated reference frame
+		);
+	}
+
+	// Push consecutive requests to render each glyph in turn
+	float xpos = 0.0f;
+	for (unsigned int ch : str)
+	{
+		const auto & glyph = font_data.GetGlyph(ch);
+
+		// Determine a render position based upon the given rotation transform
+		XMVECTOR delta = XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR, xpos + (glyph.Size.x * glyph_scale * 0.5f)), string_rotation_transform);
+		RenderGlyphDecal(glyph, XMVectorAdd(screen_location, delta), glyph_scale, orientation);
+
+		// Move along the string
+		xpos += ((glyph.Size.x + separation) * glyph_scale);
+	}
+}
+
 
 // Pass parameters to the decal renderer that will be used for all subsequent text rendering calls
 void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
@@ -145,11 +203,11 @@ void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4
 }
 
 // Perform glyph calculation and dispatch a render call to the decal renderer
-void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale) const
+void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale, const FXMVECTOR orientation) const
 {
 	XMFLOAT2 size(static_cast<float>(glyph.Size.x) * glyph_scale, static_cast<float>(glyph.Size.y) * glyph_scale);
 
-	Game::Engine->GetDecalRenderer()->RenderDecalScreen(location, size, glyph.Location, (glyph.Location + glyph.Size));
+	Game::Engine->GetDecalRenderer()->RenderDecalScreen(location, size, glyph.Location, (glyph.Location + glyph.Size), orientation);
 }
 
 // Calculates the dimensions of a text string with the given properties

@@ -2,6 +2,7 @@
 
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
+#include "FastMath.h"
 #include "IntVector.h"
 #include "DecalRenderingMode.h"
 #include "DecalRenderingParams.h"
@@ -27,11 +28,11 @@ public:
 	void									SetSmoothingFactor(float factor);
 
 	// Render a decal to the given screen-space location
-	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size);
-	void									RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max);
+	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size, const FXMVECTOR orientation = ID_QUATERNION);
+	void									RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max, const FXMVECTOR orientation = ID_QUATERNION);
 
 	// Render a decal to the given world-space location
-	void									RenderDecalWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size);
+	void									RenderDecalProjectedWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size);
 
 	// End the frame
 	void									EndFrame(void);
@@ -52,10 +53,10 @@ private:
 	void									SetRenderingMode(DecalRenderingMode mode);
 
 	// Render a decal instance using the provided, internally-calculated parameters
-	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
 
 	// Render a decal instance in world space using the provided, internally-calculated parameters
-	void									RenderDecalWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+	void									RenderDecalProjectedWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
 
 
 	// Get the currently-active rendering group
