@@ -27,12 +27,9 @@ public:
 	void									SetOutlineWidthFactor(float widthFactor);
 	void									SetSmoothingFactor(float factor);
 
-	// Render a decal to the given screen-space location
-	void									RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size, const FXMVECTOR orientation = ID_QUATERNION);
-	void									RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max, const FXMVECTOR orientation = ID_QUATERNION);
-
-	// Render a decal to the given world-space location
-	void									RenderDecalProjectedWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size);
+	// Render a decal to the given location
+	void									RenderDecal(DecalRenderingMode mode, const FXMVECTOR location, const FXMVECTOR size, const FXMVECTOR orientation = ID_QUATERNION);
+	void									RenderDecal(DecalRenderingMode mode, const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max, const FXMVECTOR orientation = ID_QUATERNION);
 
 	// End the frame
 	void									EndFrame(void);
@@ -53,10 +50,7 @@ private:
 	void									SetRenderingMode(DecalRenderingMode mode);
 
 	// Render a decal instance using the provided, internally-calculated parameters
-	void									RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
-
-	// Render a decal instance in world space using the provided, internally-calculated parameters
-	void									RenderDecalProjectedWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
+	void									RenderDecalInstance(DecalRenderingMode mode, const FXMVECTOR location, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale);
 
 
 	// Get the currently-active rendering group

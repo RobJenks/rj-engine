@@ -869,12 +869,15 @@ void RJMain::ProcessKeyboardInput(void)
 	Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));
 	Game::Engine->GetDecalRenderer()->RenderDecalScreen(XMVectorSet(g_coord, g_coord, 0.0f, 0.0f), XMVectorSet(300.0f, 300.0f, 1.0f, 0.0f));*/
 
-	Game::Engine->GetTextRenderer()->RenderStringToScreen("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 72.0f, XMQuaternionRotationAxis(FORWARD_VECTOR, g_coord), 
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f/4.0f);
-	Game::Engine->GetTextRenderer()->RenderStringToScreen("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
-		XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMQuaternionRotationAxis(UP_VECTOR, g_coord), 
+	/*Game::Engine->GetTextRenderer()->RenderString("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"), DecalRenderingMode::ScreenSpace,
+		XMVectorSet(100.0f, 100.0f, 0.0f, 0.0f), 72.0f, XMQuaternionRotationAxis(FORWARD_VECTOR, g_coord),
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f / 4.0f);
+	Game::Engine->GetTextRenderer()->RenderString("This is a test including some special characters \\!#'{}[]()*&%$", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"),
+		DecalRenderingMode::ScreenSpace, XMVectorSet(100.0f, 400.0f, 0.0f, 0.0f), 18.0f, XMQuaternionRotationAxis(UP_VECTOR, g_coord),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f / 4.0f);
+	Game::Engine->GetTextRenderer()->RenderString("Hello World", Game::Engine->GetTextRenderer()->GetFontID("font_tahoma"), DecalRenderingMode::WorldSpace,
+		XMVectorSet(300, 225, 200, 0), 72.0f, XMQuaternionRotationAxis(FORWARD_VECTOR, g_coord),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), TextAnchorPoint::TopLeft, TextAnchorPoint::Centre, 0.5f, 1.0f / 4.0f);*/
 
 
 	/*Game::Engine->GetDecalRenderer()->SetTexture(Game::Engine->GetAssets().GetTexture("debug_texture"));

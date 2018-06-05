@@ -114,14 +114,14 @@ void DecalRenderingManager::ClearAllRenderGroups(void)
 
 
 
-// Render a decal to the given screen-space location
-void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, const FXMVECTOR size, const FXMVECTOR orientation)
+// Render a decal to the given location
+void DecalRenderingManager::RenderDecal(DecalRenderingMode mode, const FXMVECTOR location, const FXMVECTOR size, const FXMVECTOR orientation)
 {
-	RenderDecalScreenInstance(location, orientation, size, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));	// No shift, unit scale
+	RenderDecalInstance(mode, location, orientation, size, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));	// No shift, unit scale
 }
 
 // Render the specified subset of a decal to the given screen-space location
-void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max, const FXMVECTOR orientation)
+void DecalRenderingManager::RenderDecal(DecalRenderingMode mode, const FXMVECTOR location, XMFLOAT2 size, UINTVECTOR2 tex_min, UINTVECTOR2 tex_max, const FXMVECTOR orientation)
 {
 	// There must be an active texture assigned in order to make this call
 	const TextureDX11 * texture = GetActiveRenderGroup().GetTexture();
@@ -138,44 +138,36 @@ void DecalRenderingManager::RenderDecalScreen(const FXMVECTOR location, XMFLOAT2
 	XMFLOAT2 decal_size = (tex_max - tex_min).ToFloat();
 	XMFLOAT2 decal_size_pc(decal_size.x / texsize.x, decal_size.y / texsize.y);
 
-	RenderDecalScreenInstance(location, orientation, XMLoadFloat2(&size), XMFLOAT4(decal_pos_pc.x, decal_pos_pc.y, decal_size_pc.x, decal_size_pc.y));
+	RenderDecalInstance(mode, location, orientation, XMLoadFloat2(&size), XMFLOAT4(decal_pos_pc.x, decal_pos_pc.y, decal_size_pc.x, decal_size_pc.y));
 }
 
 // Render a decal instance using the provided, internally-calculated parameters
-void DecalRenderingManager::RenderDecalScreenInstance(const FXMVECTOR location, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
+void DecalRenderingManager::RenderDecalInstance(DecalRenderingMode mode, const FXMVECTOR location, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
 {
+	// Calculate fields which differ between rendering modes
+	XMVECTOR translation;
+	if (mode == DecalRenderingMode::ScreenSpace)
+	{
+		translation = Game::Engine->AdjustIntoLinearScreenSpaceCentred(location);
+	}
+	else if (mode == DecalRenderingMode::WorldSpace)
+	{
+		translation = location;
+	}
+	else
+	{
+		return;	// Invalid rendering mode
+	}
+
 	// Set the render mode accordingly
-	SetRenderingMode(DecalRenderingMode::ScreenSpace);
+	SetRenderingMode(mode);
 
 	// World matrix is a straightforward scale & translate in screen-space
 	// TODO: Add rotation
 	XMMATRIX world = XMMatrixMultiply(XMMatrixMultiply(
 		XMMatrixScalingFromVector(size),
 		XMMatrixRotationQuaternion(orientation)), 
-		XMMatrixTranslationFromVector(Game::Engine->AdjustIntoLinearScreenSpaceCentred(location))
-	);
-
-	// Add a new instance for rendering
-	GetActiveRenderGroup().AddInstance(world, uv_shift_scale);
-}
-
-
-// Render a decal to the given world-space location
-void DecalRenderingManager::RenderDecalProjectedWorld(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size)
-{
-	RenderDecalProjectedWorldInstance(position, orientation, size, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));	// No shift, unit scale
-}
-
-void DecalRenderingManager::RenderDecalProjectedWorldInstance(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & uv_shift_scale)
-{
-	// Set the render mode accordingly
-	SetRenderingMode(DecalRenderingMode::DeferredWorldProjection);
-
-	// World matrix is a straightforward scale & translate in screen-space
-	XMMATRIX world = XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixScalingFromVector(size),
-		XMMatrixRotationQuaternion(orientation)), 
-		XMMatrixTranslationFromVector(position)
+		XMMatrixTranslationFromVector(translation)
 	);
 
 	// Add a new instance for rendering

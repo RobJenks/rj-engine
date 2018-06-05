@@ -105,7 +105,7 @@ void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const
 
 	// Get glyph data and push a request to the decal renderer
 	const auto & glyph = font_data.GetGlyph(ch);
-	RenderGlyphDecal(glyph, screen_location, glyph_scale, orientation);
+	RenderGlyphDecal(glyph, DecalRenderingMode::ScreenSpace, screen_location, glyph_scale, orientation);
 }
 
 // Renders the given text string to the screen.  No wrapping is performed
@@ -132,7 +132,7 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 	for (unsigned int ch : str)
 	{
 		const auto & glyph = font_data.GetGlyph(ch);
-		RenderGlyphDecal(glyph, screen_location, glyph_scale);
+		RenderGlyphDecal(glyph, DecalRenderingMode::ScreenSpace, screen_location, glyph_scale);
 
 		screen_location = XMVectorAdd(screen_location, XMVectorSetX(NULL_VECTOR, (glyph.Size.x + separation) * glyph_scale));
 	}
@@ -140,7 +140,7 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 
 // Renders the given text string to the screen.  No wrapping is performed.  Allows orientation of 
 // text blocks calculated with respect to the centre point of the string
-void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size, const FXMVECTOR orientation,
+void TextRenderer::RenderString(const std::string & str, Font::ID font, DecalRenderingMode mode, XMVECTOR location, float font_size, const FXMVECTOR orientation,
 										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint,
 										TextAnchorPoint rotationpoint, float outlineFactor, float smoothingFactor) const
 {
@@ -159,11 +159,14 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 	// Account for alternative text anchor point if required (default == top-left)
 	if (anchorpoint == TextAnchorPoint::Centre)
 	{
-		screen_location = XMVectorSubtract(screen_location, half_dim);
+		location = XMVectorSubtract(location, half_dim);
 	}
 
+	// String rotation quaternion differs between screen- and world-space rendering, likely due to +z/-z coord system in use
+	XMVECTOR invorient = XMQuaternionInverse(orientation);
+	XMMATRIX string_rotation_transform = XMMatrixRotationQuaternion(mode == DecalRenderingMode::ScreenSpace ? orientation : invorient);
+
 	// Derive transforms required to transform all characters of the string in a consistent rotation
-	XMMATRIX string_rotation_transform = XMMatrixRotationQuaternion(XMQuaternionInverse(orientation));
 	if (rotationpoint == TextAnchorPoint::Centre)
 	{
 		string_rotation_transform = XMMatrixMultiply(XMMatrixMultiply(		// Adjust existing (top-left) rotation transformation by:
@@ -181,7 +184,7 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 
 		// Determine a render position based upon the given rotation transform
 		XMVECTOR delta = XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR, xpos + (glyph.Size.x * glyph_scale * 0.5f)), string_rotation_transform);
-		RenderGlyphDecal(glyph, XMVectorAdd(screen_location, delta), glyph_scale, orientation);
+		RenderGlyphDecal(glyph, mode, XMVectorAdd(location, delta), glyph_scale, invorient);
 
 		// Move along the string
 		xpos += ((glyph.Size.x + separation) * glyph_scale);
@@ -203,11 +206,11 @@ void TextRenderer::SetDecalRenderingParameters(const Font & font, const XMFLOAT4
 }
 
 // Perform glyph calculation and dispatch a render call to the decal renderer
-void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, const FXMVECTOR location, float glyph_scale, const FXMVECTOR orientation) const
+void TextRenderer::RenderGlyphDecal(const FontGlyph & glyph, DecalRenderingMode mode, const FXMVECTOR location, float glyph_scale, const FXMVECTOR orientation) const
 {
 	XMFLOAT2 size(static_cast<float>(glyph.Size.x) * glyph_scale, static_cast<float>(glyph.Size.y) * glyph_scale);
 
-	Game::Engine->GetDecalRenderer()->RenderDecalScreen(location, size, glyph.Location, (glyph.Location + glyph.Size), orientation);
+	Game::Engine->GetDecalRenderer()->RenderDecal(mode, location, size, glyph.Location, (glyph.Location + glyph.Size), orientation);
 }
 
 // Calculates the dimensions of a text string with the given properties
