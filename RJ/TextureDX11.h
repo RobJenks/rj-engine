@@ -182,9 +182,10 @@ private:
 	void ResizeCube(uint16_t size);
 
 	bool LoadDDSTexture2D(const fs::path & filePath);			// DDS resources using DirectXTK
-	bool LoadNonDDSTexture2D(const fs::path & filePath);		// Non-DDS resources using FreeImage
 	static bool IsDDSFile(const fs::path & filePath);			// Determines whether a texture resource is DDS or not (based solely on the filename)
 
+	// Non-DDS resources can be loaded using FreeImage, but currently removed from project since not required and adds large static link-time burden
+	bool LoadNonDDSTexture2D(const fs::path & filePath);		
 	
 
 	// Instance fields

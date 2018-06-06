@@ -5,7 +5,7 @@
 #include "CoreEngine.h"
 
 #include "DirectXTK\Inc\DDSTextureLoader.h"		// For loading DDS resource data
-#include "FreeImage.h"							// External dependency; used to read image/texture metadata and properties
+//#include "FreeImage.h"							// External dependency; used to read image/texture metadata and properties
 #include "TextureDX11Util.h"
 
 
@@ -437,9 +437,13 @@ bool TextureDX11::LoadDDSTexture2D(const fs::path & filePath)
 	return true;
 }
 
+// Non-DDS resources can be loaded using FreeImage, but currently removed from project since not required and adds large static link-time burden
 bool TextureDX11::LoadNonDDSTexture2D(const fs::path & filePath)
 {
-	auto device = Game::Engine->GetDevice();
+	Game::Log << LOG_ERROR << "Non-DDS texture resources not currently supported (failed loading \"" << filePath.string() << "\"\n";
+	return false;
+
+	/*auto device = Game::Engine->GetDevice();
 	auto devicecontext = Game::Engine->GetDeviceContext();
 
 	// Try to determine the file type from the image file.
@@ -661,11 +665,13 @@ bool TextureDX11::LoadNonDDSTexture2D(const fs::path & filePath)
 	FreeImage_Unload(dib);
 
 	return true;
+	*/
 }
 
 bool TextureDX11::LoadTextureCube(const std::wstring& fileName)
 {
-	auto device = Game::Engine->GetDevice();
+	return false;
+	/*auto device = Game::Engine->GetDevice();
 	auto devicecontext = Game::Engine->GetDeviceContext();
 
 	fs::path filePath(fileName);
@@ -702,6 +708,7 @@ bool TextureDX11::LoadTextureCube(const std::wstring& fileName)
 	// TODO: DDS cubemap loading with FreeImage?
 
 	return false;
+	*/
 }
 
 void TextureDX11::GenerateMipMaps()

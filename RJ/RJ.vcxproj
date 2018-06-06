@@ -135,7 +135,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -154,8 +154,8 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -174,7 +174,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -194,8 +194,8 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\Debug\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -214,7 +214,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -233,8 +233,8 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -252,7 +252,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -271,8 +271,8 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\Debug\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -291,7 +291,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -307,8 +307,8 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -329,7 +329,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -346,8 +346,8 @@
       <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -1518,9 +1518,6 @@
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="External\FreeImage-3.17.0\Source\FreeImageLib\FreeImageLib.2013.vcxproj">
-      <Project>{9e219df2-315d-478e-8a07-8960c377ce1e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
