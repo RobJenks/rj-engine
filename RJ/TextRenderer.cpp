@@ -92,27 +92,37 @@ float TextRenderer::GlyphScalingFactor(const Font & font, float font_size)
 }
 
 // Renders the given character to the screen
-void TextRenderer::RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
-										   const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, float outlineFactor, 
-										   float smoothingFactor, const FXMVECTOR orientation) const
+void TextRenderer::RenderCharacter(	unsigned int ch, Font::ID font, DecalRenderingMode mode, XMVECTOR location, float font_size,
+									const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint, float outlineFactor, 
+									float smoothingFactor, const FXMVECTOR orientation) const
 {
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
 	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor, smoothingFactor);
 	
 	// Glyph scaling can be determined based on desired font size
+	const auto & glyph = font_data.GetGlyph(ch);
 	float glyph_scale = GlyphScalingFactor(font_data, font_size);
 
-	// Get glyph data and push a request to the decal renderer
-	const auto & glyph = font_data.GetGlyph(ch);
-	RenderGlyphDecal(glyph, DecalRenderingMode::ScreenSpace, screen_location, glyph_scale, orientation);
+	// Account for alternative anchor points (default == centre in this case, since individual decals are rendered from their centre point)
+	if (anchorpoint == TextAnchorPoint::TopLeft)
+	{
+		location = XMVectorAdd(location, 
+			XMVectorSet(static_cast<float>(glyph.Size.x) * glyph_scale * 0.5f, static_cast<float>(glyph.Size.y) * glyph_scale * 0.5f, 0.0f, 0.0f));
+	}
+
+	// Push a request to the decal renderer
+	RenderGlyphDecal(glyph, DecalRenderingMode::ScreenSpace, location, glyph_scale, orientation);
 }
 
 // Renders the given text string to the screen.  No wrapping is performed
-void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
+void TextRenderer::RenderString(const std::string & str, Font::ID font, DecalRenderingMode mode, XMVECTOR location, float font_size,
 										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint, 
 										float outlineFactor, float smoothingFactor) const
 {
+	// Make sure the string is non-empty
+	if (str.empty()) return;
+
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
 	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor, smoothingFactor);
@@ -125,16 +135,26 @@ void TextRenderer::RenderStringToScreen(const std::string & str, Font::ID font, 
 	if (anchorpoint == TextAnchorPoint::Centre)
 	{
 		XMFLOAT2 dimensions = CalculateTextDimensions(str, font, font_size);
-		screen_location = XMVectorSubtract(screen_location, XMVectorSet(dimensions.x * 0.5f, dimensions.y * 0.5f, 0.0f, 0.0f));
+		location = XMVectorSubtract(location, XMVectorSet(dimensions.x * 0.5f, dimensions.y * 0.5f, 0.0f, 0.0f));
 	}
 
+	// String starting point should be the top-left - not centre - of the first glyph so add a delta.  We know the string is non-empty so this is safe
+	const auto & first_glyph = font_data.GetGlyph(str[0]);
+	location = XMVectorAdd(location,
+		XMVectorSet(static_cast<float>(first_glyph.Size.x) * glyph_scale, static_cast<float>(first_glyph.Size.y) * glyph_scale, 0.0f, 0.0f));
+
 	// Push consecutive requests to render each glyph in turn
+	float xpos = 0.0f;
 	for (unsigned int ch : str)
 	{
 		const auto & glyph = font_data.GetGlyph(ch);
-		RenderGlyphDecal(glyph, DecalRenderingMode::ScreenSpace, screen_location, glyph_scale);
 
-		screen_location = XMVectorAdd(screen_location, XMVectorSetX(NULL_VECTOR, (glyph.Size.x + separation) * glyph_scale));
+		// Determine a render position for this glyph
+		XMVECTOR delta = XMVectorSetX(NULL_VECTOR, xpos + (static_cast<float>(glyph.Size.x) * glyph_scale * 0.5f));
+		RenderGlyphDecal(glyph, mode, XMVectorAdd(location, delta), glyph_scale);
+
+		// Move along the string
+		xpos += ((glyph.Size.x + separation) * glyph_scale);
 	}
 }
 
@@ -144,6 +164,9 @@ void TextRenderer::RenderString(const std::string & str, Font::ID font, DecalRen
 										const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint,
 										TextAnchorPoint rotationpoint, float outlineFactor, float smoothingFactor) const
 {
+	// Make sure the string is non-empty
+	if (str.empty()) return;
+
 	// Get the corresponding font and set decal rendering parameters accordingly
 	const auto & font_data = GetFont(font);
 	SetDecalRenderingParameters(font_data, basecolour, outlinecolour, outlineFactor, smoothingFactor);
@@ -176,6 +199,11 @@ void TextRenderer::RenderString(const std::string & str, Font::ID font, DecalRen
 		);
 	}
 
+	// String starting point should be the top-left - not centre - of the first glyph so add a delta.  We know the string is non-empty so this is safe
+	const auto & first_glyph = font_data.GetGlyph(str[0]);
+	location = XMVectorAdd(location,
+		XMVectorSet(static_cast<float>(first_glyph.Size.x) * glyph_scale, static_cast<float>(first_glyph.Size.y) * glyph_scale, 0.0f, 0.0f));
+
 	// Push consecutive requests to render each glyph in turn
 	float xpos = 0.0f;
 	for (unsigned int ch : str)
@@ -183,7 +211,7 @@ void TextRenderer::RenderString(const std::string & str, Font::ID font, DecalRen
 		const auto & glyph = font_data.GetGlyph(ch);
 
 		// Determine a render position based upon the given rotation transform
-		XMVECTOR delta = XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR, xpos + (glyph.Size.x * glyph_scale * 0.5f)), string_rotation_transform);
+		XMVECTOR delta = XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR, xpos + (static_cast<float>(glyph.Size.x) * glyph_scale * 0.5f)), string_rotation_transform);
 		RenderGlyphDecal(glyph, mode, XMVectorAdd(location, delta), glyph_scale, invorient);
 
 		// Move along the string

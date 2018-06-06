@@ -534,12 +534,13 @@ void RJMain::PerformFPSCalculations(void)
 		// Two versions of this display, depending on whether we are in debug mode and logging current allocations
 		XMFLOAT4 font_colour(255.0f / 255.0f, 196.0f / 255.0f, 104.0f / 255.0f, 0.75f);
 #		if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
-			Game::Engine->GetTextRenderer()->RenderStringToScreen(concat("FPS: ")((int)Game::FPS)
+			Game::Engine->GetTextRenderer()->RenderString(concat("FPS: ")((int)Game::FPS)
 				(", Allocations: ")(m_memstate.lSizes[1])(" [")(m_memstate.lCounts[1])(" blocks]").str(),
-				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
+				Game::Engine->GetTextRenderer()->GetDefaultFontId(), DecalRenderingMode::ScreenSpace, 
+				XMVectorSet(0.0f, -8.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, 0.6f);
 #		else
-			Game::Engine->GetTextRenderer()->RenderStringToScreen(concat("FPS: ")((int)Game::FPS).str(),
-				Game::Engine->GetTextRenderer()->GetDefaultFontId(), XMVectorSet(6.0f, 2.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, TextAnchorPoint::TopLeft, 0.6f);
+			Game::Engine->GetTextRenderer()->RenderString(concat("FPS: ")((int)Game::FPS).str(), Game::Engine->GetTextRenderer()->GetDefaultFontId(), 
+				DecalRenderingMode::ScreenSpace, XMVectorSet(0.0f, -8.0f, 0.0, 0.0f), 10.0f, font_colour, font_colour, TextAnchorPoint::TopLeft, 0.6f);
 #		endif
 
 	}

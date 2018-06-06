@@ -43,16 +43,16 @@ public:
 	static float								GlyphScalingFactor(const Font & font, float font_size);
 
 	// Renders the given character to the screen
-	void										RenderCharacterToScreen(unsigned int ch, Font::ID font, const FXMVECTOR screen_location, float font_size,
-																		const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
-																		float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f, 
-																		const FXMVECTOR orientation = ID_QUATERNION) const;
+	void										RenderCharacter(unsigned int ch, Font::ID font, DecalRenderingMode mode, XMVECTOR location, float font_size,
+																const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, TextAnchorPoint anchorpoint = TextAnchorPoint::TopLeft, 
+																float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f, 
+																const FXMVECTOR orientation = ID_QUATERNION) const;
 
 	// Renders the given text string to the screen.  No wrapping is performed
-	void										RenderStringToScreen(const std::string & str, Font::ID font, XMVECTOR screen_location, float font_size,
-																	 const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
-																	 TextAnchorPoint anchorpoint = TextAnchorPoint::TopLeft, 
-																	 float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f) const;
+	void										RenderString(	const std::string & str, Font::ID font, DecalRenderingMode mode, XMVECTOR location,
+																float font_size, const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour, 
+																TextAnchorPoint anchorpoint = TextAnchorPoint::TopLeft, 
+																float outlineFactor = 0.5f, float smoothingFactor = 1.0f / 4.0f) const;
 	void										RenderString(	const std::string & str, Font::ID font, DecalRenderingMode mode, 
 																XMVECTOR location, float font_size, const FXMVECTOR orientation, 
 																const XMFLOAT4 & basecolour, const XMFLOAT4 & outlinecolour,
