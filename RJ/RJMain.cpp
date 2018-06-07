@@ -858,11 +858,11 @@ void RJMain::ProcessKeyboardInput(void)
 	g_coord += Game::TimeFactor;
 	if (b[DIK_G])
 	{
-		/*if (Game::Keyboard.ShiftDown()) g_coord += (PIBY180 * 10.0f);
-		if (!Game::Keyboard.ShiftDown()) g_coord -= (PIBY180 * 10.0f);
-		Game::Keyboard.LockKey(DIK_G);
-		OutputDebugString(concat("Coord: ")(g_coord)(" == 1/")(1.0f/g_coord)("\n").str().c_str());*/
+		if (b[DIK_LCONTROL])			Game::Log << LOG_DEBUG << ((LightSource*)Game::GetObjectByInstanceCode("clight"))->DebugString();
+		else if (b[DIK_LSHIFT])			((LightSource*)Game::GetObjectByInstanceCode("clight"))->LightObject().Toggle();
+		else							lt2()->LightObject().Toggle();
 
+		Game::Keyboard.LockKey(DIK_G);
 	}
 
 	/*Game::Engine->GetDecalRenderer()->SetBaseColour(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -1609,6 +1609,7 @@ Result RJMain::InitialisePlayer(void)
 	Game::CurrentPlayer->SetActor(actor);
 	if (Game::CurrentPlayer->GetActor() == NULL) return ErrorCodes::CouldNotCreatePlayerActor;
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
+	Game::CurrentPlayer->GetActor()->OverrideInstanceCode("a1");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 
 	// Temporary: create a player ship.  Also assign to an application variable so we can reference it in global scope
@@ -2406,23 +2407,17 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 	// Temp: Create a new actor
-	if (true)
-	{
-		Actor *a1_actor = D::Actors.Get("human_soldier_basic")->CreateInstance();
-		a1_actor->SetName("A1");
-		a1_actor->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
-		a1_actor->MoveIntoEnvironment(cs());
-		if (cs()->GetTileCountOfType(D::TileClass::Corridor) > 0)
-		{
-			//ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor)[0].value;
-			ComplexShipTile *t = cs()->GetElement(4, 4, 0)->GetTile();
-			if (t)
-				a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetElementPosition(), Game::C_CS_ELEMENT_MIDPOINT_V), ID_QUATERNION);
-			else
-				a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
-		}
-		a1 = a1_actor; 
-	}
+	Actor *a1_actor = D::Actors.Get("human_soldier_basic")->CreateInstance();
+	a1_actor->SetName("Other actor");
+	a1_actor->OverrideInstanceCode("otheractor");
+	a1_actor->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
+	a1_actor->MoveIntoEnvironment(cs());
+	ComplexShipTile *other_actor_tile = cs()->GetElement(4, 4, 0)->GetTile();
+	XMVECTOR other_actor_env_position = XMVectorAdd(other_actor_tile->GetElementPosition(), Game::C_CS_ELEMENT_MIDPOINT_V);
+	a1_actor->SetEnvironmentPositionAndOrientation(other_actor_env_position, ID_QUATERNION);
+			
+	a1 = a1_actor; 
+	
 
 	Ship *_s[3] = { ss(), s2(), s3[0]() };
 	for (int i = 0; i < 3; ++i)
@@ -2485,6 +2480,15 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->LightObject().SetIntensity(1.0f);
 	//player_light->LightObject().Deactivate();
 	lt2 = player_light;
+
+	LightSource *clight = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
+	clight->OverrideInstanceCode("clight");
+	clight->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	clight->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	clight->SetPosition(XMVectorSet(145.0f, 223.0f, 0.0f, 0.0f));
+	clight->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
+	clight->LightObject().SetRange(25.0f);
+	clight->LightObject().SetIntensity(0.5f);
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
@@ -2694,6 +2698,9 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
+		Game::Engine->GetTextRenderer()->RenderString("*", 0U, DecalRenderingMode::WorldSpace, Game::GetObjectByInstanceCode("clight")->GetPosition(),
+			14.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), TextAnchorPoint::Centre);
+
 
 		/*Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
 			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));*/
@@ -2725,3 +2732,4 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+

@@ -135,6 +135,10 @@ public:
 	{
 		SetPosition(XMVectorAdd(m_position, delta));
 	}
+	CMPINLINE void							ChangePosition(const FXMVECTOR delta)
+	{
+		AddDeltaPosition(delta);
+	}
 
 	CMPINLINE const XMVECTOR				GetOrientation(void) const				{ return m_orientation; }
 	CMPINLINE void							SetOrientation(const FXMVECTOR orient)
