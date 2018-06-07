@@ -528,7 +528,7 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 
 // Redirects debug processing based on the specified trigger command
 #	define REGISTER_DEBUG_FN_REDIRECT(trigger, redirect_to)										\
-						else if (fn == #trigger) { redirect_to(command); }		\
+						else if (fn == StrLower(#trigger)) { redirect_to(command); }		\
 
 // Redirected debug testing allows us to specify "parameter_level", which is the level at which 
 // useful parameters (firstly, the command name) begin in the parameter list
