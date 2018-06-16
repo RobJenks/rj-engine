@@ -79,6 +79,16 @@ void DeferredRenderProcess::PerformPostDataLoadInitialisation(void)
 	InitialiseRenderVolumes();
 }
 
+// Response to a change in shader configuration or a reload of shader bytecode
+void DeferredRenderProcess::ShadersReloaded(void)
+{
+	Game::Log << LOG_INFO << "Reinitialising deferred render processes following shader reload\n";
+
+	InitialiseShaders();
+	InitialiseGBufferResourceMappings();
+}
+
+
 void DeferredRenderProcess::InitialiseShaders(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";

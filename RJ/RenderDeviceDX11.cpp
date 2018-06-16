@@ -892,6 +892,14 @@ void RenderDeviceDX11::ReloadAllShaders(void)
 	{
 		Game::Log << LOG_ERROR << "Failed to reload " << failcount << " of " << Assets.GetShaders().size() << " shader resources\n";
 	}
+
+	// Reinitialise render processes (where necessary) following the reload of shader bytecode
+	Game::Log << LOG_INFO << "Reinitialising engine render processes following reload of shader bytecode\n";
+	for (auto & render_process : m_render_processes)
+	{
+		if (render_process.second) render_process.second->ShadersReloaded();
+	}
+
 }
 
 // Attempt to reload material data from disk

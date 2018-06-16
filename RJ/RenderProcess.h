@@ -28,6 +28,9 @@ public:
 	// data that is read in from disk during the data load process
 	virtual void					PerformPostDataLoadInitialisation(void) = 0;
 
+	// Response to a change in shader configuration or a reload of shader bytecode
+	virtual void					ShadersReloaded(void) { }
+
 	// Return the name of this render process instance
 	std::string						GetName(void) const { return m_name; }
 

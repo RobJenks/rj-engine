@@ -25,6 +25,9 @@ public:
 	// data that is read in from disk during the data load process
 	virtual void PerformPostDataLoadInitialisation(void);
 
+	// Response to a change in shader configuration or a reload of shader bytecode
+	virtual void ShadersReloaded(void);
+
 	// GBuffer holding all deferred rendering data and render targets
 	DeferredGBuffer GBuffer;
 
@@ -115,7 +118,9 @@ private:
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseStandardBuffers(void);
+public:
 	void InitialiseGBufferResourceMappings(void);
+private:
 	void InitialiseRenderVolumes(void);
 	void InitialiseGeometryPipelines(void);
 	void InitialiseDeferredLightingPipelines(void);
