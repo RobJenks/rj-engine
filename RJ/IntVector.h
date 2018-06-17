@@ -36,6 +36,8 @@ template <typename T> inline IntegralVector2<T> operator -(IntegralVector2<T> lh
 template <typename T> inline IntegralVector2<T> operator *(IntegralVector2<T> lhs, const T scalar) { lhs *= scalar; return lhs; }
 template <typename T> inline IntegralVector2<T> operator *(IntegralVector2<T> lhs, const float scalar) { lhs *= scalar; return lhs; }
 
+template <typename T> std::ostream & operator<<(std::ostream & out, IntegralVector2<T> const& x) { return out << x.ToString(); }
+
 typedef IntegralVector2<int>			INTVECTOR2;
 typedef IntegralVector2<unsigned int>	UINTVECTOR2;
 
@@ -90,6 +92,9 @@ template <typename T> inline IntegralVector3<T> operator *(IntegralVector3<T> lh
 template <typename T> inline IntegralVector3<T> operator *(IntegralVector3<T> lhs, const float scalar) { lhs *= scalar; return lhs; }
 template <typename T> inline IntegralVector3<T> operator /(IntegralVector3<T> lhs, const int scalar) { lhs /= scalar; return lhs; }
 template <typename T> inline IntegralVector3<T> operator /(IntegralVector3<T> lhs, const float scalar) { lhs /= scalar; return lhs; }
+
+template <typename T> std::ostream & operator<<(std::ostream & out, IntegralVector3<T> const& x) { return out << x.ToString(); }
+
 
 typedef IntegralVector3<int>			INTVECTOR3;
 typedef IntegralVector3<UINT>			UINTVECTOR3;

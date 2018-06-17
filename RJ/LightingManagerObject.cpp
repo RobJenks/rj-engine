@@ -246,6 +246,7 @@ void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 	outLight.Type = LightType::Point;
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
+	outLight.Attenuation.Linear = 1.0f;
 	outLight.Enabled = true;
 }
 
@@ -256,6 +257,7 @@ void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 	outLight.Type = LightType::Spotlight;
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 20.0f;
+	outLight.Attenuation.Linear = 1.0f;
 	outLight.Enabled = true;
 	outLight.SpotlightAngle = (PIBY180 * 30.0f);
 }

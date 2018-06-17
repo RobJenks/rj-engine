@@ -110,6 +110,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetRange)
 	REGISTER_DEBUG_ACCESSOR_FN(GetIntensity)
 	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightAngle)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuation)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(Activate)
@@ -124,7 +125,10 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetRange, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetIntensity, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetSpotlightAngle, command.ParameterAsFloat(3))
-
+	REGISTER_DEBUG_FN(SetAttenuation, AttenuationData(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(SetAttenuationConstant, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetAttenuationLinear, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetAttenuationQuadratic, command.ParameterAsFloat(3))
 }
 
 

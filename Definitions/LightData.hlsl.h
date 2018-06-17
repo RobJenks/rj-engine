@@ -1,6 +1,10 @@
 #ifndef __LightDataHLSLH__
 #define __LightDataHLSLH__
 
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
+	#include <iostream>
+#endif
+
 #include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
@@ -23,6 +27,34 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 #	define LightType::Directional 2
 #endif
 
+	// Attenuation parameters
+	struct AttenuationData
+	{
+		float					Constant; 
+		float					Linear;
+		float					Quadratic;
+
+		// CPP implementation
+#		if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
+
+			inline AttenuationData(void)
+				:
+				Constant(0.0f), Linear(0.0f), Quadratic(0.0f)
+			{}
+
+			inline AttenuationData(float constant, float linear, float quadratic)
+				:
+				Constant(constant), Linear(linear), Quadratic(quadratic)
+			{}
+
+			inline friend std::ostream & operator<<(std::ostream & out, AttenuationData & data)
+			{
+				out << "{ Constant: " << data.Constant << ", Linear: " << data.Linear << ", Quadratic: " << data.Quadratic << " }";
+				return out;
+			}
+#		endif
+	};
+
 	// Primary structure holding light data
 	struct LightData
 	{
@@ -42,7 +74,7 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 		float					Intensity;							// Overall intensity of the light
 		//------------------------------------------ ( 16 bytes )
 		float					SpotlightAngle;						// Spotlight angle (radians).  Must be in the range [0 PI].  Relevant to spotlights only
-		float3					_padding;							// To maintain alignment and packing requirements
+		AttenuationData			Attenuation;						// Light attenuation as a function of distance
 		//------------------------------------------ ( 16 bytes )
 		//------------------------------------------ ( 16 * 7 = 112 bytes)
 

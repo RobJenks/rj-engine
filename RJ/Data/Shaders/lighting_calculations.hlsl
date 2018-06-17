@@ -28,7 +28,7 @@ float4 CalculateSpecular(LightData light, MaterialData material, float4 V, float
 // Compute attenuation based on the range of the light
 float CalculateAttenuation(LightData light, float d)
 {
-	return 1.0f - smoothstep(light.Range * 0.75f, light.Range, d);
+	return 1.0f / (light.Attenuation.Constant + (light.Attenuation.Linear * d) + (light.Attenuation.Quadratic * d * d));
 }
 
 // Calculate extent of the spotlight cone and influence on the current fragment

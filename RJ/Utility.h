@@ -7,6 +7,7 @@
 #include "DX11_Core.h"
 
 #include <time.h>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <locale>
@@ -175,8 +176,9 @@ public:
 	}
 
 private:
-	std::ostringstream m_out ;
-} ;
+	std::ostringstream m_out;
+};
+
 
 template <typename T>
 void StreamToDebugOutput(T obj)
@@ -213,18 +215,13 @@ CMPINLINE const float* ValuePtr(const XMFLOAT2 & xmf) { return &(xmf.x); }
 CMPINLINE const float* ValuePtr(const XMFLOAT3 & xmf) { return &(xmf.x); }
 CMPINLINE const float* ValuePtr(const XMFLOAT4 & xmf) { return &(xmf.x); }
 
-// Generic 'ToString' method that can be specialised as required
-template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }
-template <> CMPINLINE std::string				StringValue<bool>(bool value) { return (value ? "true" : "false"); }
-template <> CMPINLINE std::string				StringValue<XMFLOAT2>(XMFLOAT2 value) { return VectorToString(value); }
-template <> CMPINLINE std::string				StringValue<XMFLOAT3>(XMFLOAT3 value) { return VectorToString(value); }
-template <> CMPINLINE std::string				StringValue<XMFLOAT4>(XMFLOAT4 value) { return VectorToString(value); }
-template <> CMPINLINE std::string				StringValue<XMVECTOR>(XMVECTOR value) { return Vector4ToString(value); }
-template <> CMPINLINE std::string				StringValue<INTVECTOR2>(INTVECTOR2 value) { return IntVectorToString(value); }
-template <> CMPINLINE std::string				StringValue<INTVECTOR3>(INTVECTOR3 value) { return IntVectorToString(value); }
-template <> CMPINLINE std::string				StringValue<XMMATRIX>(XMMATRIX value) { return MatrixToString(value); }
-template <> CMPINLINE std::string				StringValue<const XMMATRIX &>(const XMMATRIX & value) { return MatrixToString(value); }
-
+// Output stream overloads for common types
+//std::ostream & operator<<(std::ostream & out, bool const& x) { return out << (x ? "true" : "false"); }
+CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT2 const& x) { return out << VectorToString(x); }
+CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT3 const& x) { return out << VectorToString(x); }
+CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT4 const& x) { return out << VectorToString(x); }
+CMPINLINE std::ostream & operator<<(std::ostream & out, XMVECTOR const& x) { return out << Vector4ToString(x); }
+CMPINLINE std::ostream & operator<<(std::ostream & out, XMMATRIX const& x) { return out << MatrixToString(x); }
 
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize);
 
@@ -523,8 +520,12 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 						else if (fn == StrLower(#fn_name)) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
 			command.SetSuccessOutput(concat("Function \"")(#fn_name)("\" executed on object \"")(command.Parameter(0))("\"").str()); } 
 #	define REGISTER_DEBUG_ACCESSOR_FN(fn_name, ...)										\
-						else if (fn == StrLower(#fn_name)) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
-			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); } 
+						else if (fn == StrLower(#fn_name)) { \
+							std::ostringstream out; \
+							out << fn_name(SINGLE_ARG(__VA_ARGS__)); \
+							std::string tmp_output_##fn_name = out.str();		\
+							command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); \
+						} 
 
 // Redirects debug processing based on the specified trigger command
 #	define REGISTER_DEBUG_FN_REDIRECT(trigger, redirect_to)										\
@@ -541,7 +542,7 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 						else if (fn == StrLower(#fn_name)) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
 			command.SetSuccessOutput(concat("Function \"")(#fn_name)("\" executed on object \"")(command.Parameter(0))("\", tile ")(command.Parameter(2)).str()); } 
 #	define REGISTER_DEBUG_TILE_ACCESSOR_FN(fn_name, ...)										\
-						else if (fn == StrLower(#fn_name)) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
+						else if (fn == StrLower(#fn_name)) { std::string tmp_output_##fn_name = concat(fn_name(SINGLE_ARG(__VA_ARGS__))).str();		\
 			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").Tile(")(command.Parameter(2))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); } 
 
 
