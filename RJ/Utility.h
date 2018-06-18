@@ -156,7 +156,8 @@ public:
 	template <typename T>
 	explicit concat(const T & t)
 	{
-		m_out << t ;
+		// Add std::boolalpha manipulator to force {0,1}->localised {false,true} in all output
+		m_out << std::boolalpha << t ;
 	}
 	template <typename T>
 	concat & operator()(const T & t)
@@ -216,7 +217,6 @@ CMPINLINE const float* ValuePtr(const XMFLOAT3 & xmf) { return &(xmf.x); }
 CMPINLINE const float* ValuePtr(const XMFLOAT4 & xmf) { return &(xmf.x); }
 
 // Output stream overloads for common types
-//std::ostream & operator<<(std::ostream & out, bool const& x) { return out << (x ? "true" : "false"); }
 CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT2 const& x) { return out << VectorToString(x); }
 CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT3 const& x) { return out << VectorToString(x); }
 CMPINLINE std::ostream & operator<<(std::ostream & out, XMFLOAT4 const& x) { return out << VectorToString(x); }
@@ -522,7 +522,7 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 #	define REGISTER_DEBUG_ACCESSOR_FN(fn_name, ...)										\
 						else if (fn == StrLower(#fn_name)) { \
 							std::ostringstream out; \
-							out << fn_name(SINGLE_ARG(__VA_ARGS__)); \
+							out << std::boolalpha << fn_name(SINGLE_ARG(__VA_ARGS__)); \
 							std::string tmp_output_##fn_name = out.str();		\
 							command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); \
 						} 
