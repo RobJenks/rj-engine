@@ -1386,6 +1386,9 @@
     <None Include="Data\Shaders\hlsl_math.hlsl">
       <FileType>Document</FileType>
     </None>
+    <None Include="Data\Shaders\noise_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>

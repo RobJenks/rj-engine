@@ -1,0 +1,1 @@
+.\texassemble.exe array "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ\Data\Rendering\Noise\src\HDR_RGBA_*.png"

@@ -2595,5 +2595,8 @@
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Data\Shaders\noise_calculations.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

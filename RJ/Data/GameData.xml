@@ -14,6 +14,7 @@
   <!-- General rendering resources -->
   <include file="Rendering\emissive_materials.xml" />
   <include file="Rendering\misc_rendering_materials.xml" />
+  <include file="Rendering\Noise\noise_materials.xml" />
 
   <!-- Load shared static model data -->
   <include file="Models\BasicModels.xml" />

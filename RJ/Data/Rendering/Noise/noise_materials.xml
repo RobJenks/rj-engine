@@ -1,0 +1,23 @@
+<gamedata>
+  
+  <!-- === Blue noise texture array & material resources === -->
+
+  <!-- HDR, 2DArray, 64x64, 64 slices, R16_UNORM -->
+  <Texture code="blnoise_hdr_u16_texture" dimension="Texture2D" filename="Rendering/Noise/blnoise-hdr-u16.dds" />
+  <Material code="blnoise_hdr_u16">
+    <DiffuseTexture>blnoise_hdr_u16_texture</DiffuseTexture>
+  </Material>
+
+  <!-- HDR, 2DArray, 64x64, 64 slices, R16G16B16A16_UNORM -->
+  <Texture code="blnoise_hdr_rgba_texture" dimension="Texture2D" filename="Rendering/Noise/blnoise-hdr-rgba.dds" />
+  <Material code="blnoise_hdr_rgba">
+    <DiffuseTexture>blnoise_hdr_rgba_texture</DiffuseTexture>
+  </Material>
+
+  <!-- LDR, 2DArray, 64x64, 64 slices, B8G8R8A8_UNORM -->
+  <Texture code="blnoise_ldr_rgba_texture" dimension="Texture2D" filename="Rendering/Noise/blnoise-ldr-rgba.dds" />
+  <Material code="blnoise_ldr_rgba">
+    <DiffuseTexture>blnoise_ldr_rgba_texture</DiffuseTexture>
+  </Material>
+
+</gamedata>
