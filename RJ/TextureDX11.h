@@ -54,14 +54,10 @@ public:
 	// Load a texture based on the supplied dimension type
 	bool LoadTexture(const std::wstring & fileName, Texture::Dimension dimension);
 
-	/**
-	* Load a 2D texture from a file path.
-	*/
-	bool LoadTexture2D(const std::wstring& fileName);
+	// Load a 2D texture from a file path
+	bool LoadTexture2D(const std::wstring & filename);
 
-	/**
-	* Load a cubemap texture from a file path.
-	*/
+	// Load a cubemap texture from a file path
 	bool LoadTextureCube(const std::wstring& fileName);
 
 
@@ -94,6 +90,9 @@ public:
 	uint16_t GetHeight() const;
 	// Get the depth of the texture in texels.
 	uint16_t GetDepth() const;
+
+	// Normal textures have one slice; array textures have >1
+	bool IsArrayTexture(void) const;
 
 	// Return the image size in aggregate
 	INTVECTOR2 Get2DSize(void) const;

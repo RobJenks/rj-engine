@@ -2481,14 +2481,16 @@ void RJMain::__CreateDebugScenario(void)
 	//player_light->LightObject().Deactivate();
 	lt2 = player_light;
 
+	// TODO: Need environment-local light sources
 	LightSource *clight = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
 	clight->OverrideInstanceCode("clight");
 	clight->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	clight->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	clight->SetPosition(XMVectorSet(145.0f, 223.0f, 0.0f, 0.0f));
+	clight->SetPosition(XMVectorSet(145.0f, 222.0f, 0.0f, 0.0f));
 	clight->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
-	clight->LightObject().SetRange(25.0f);
-	clight->LightObject().SetIntensity(0.5f);
+	clight->LightObject().SetRange(20.0f);
+	clight->LightObject().SetIntensity(16.0f);
+	clight->LightObject().SetAttenuation(AttenuationData(0.0f, 0.6f, 0.4));
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }

@@ -11,9 +11,7 @@ public:
 	enum class Dimension
 	{
 		Texture1D,
-		Texture1DArray,
 		Texture2D,
-		Texture2DArray,
 		Texture3D,
 		TextureCube,
 		_COUNT

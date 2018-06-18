@@ -62,10 +62,6 @@ TextureDX11::TextureDX11(uint16_t width, uint16_t slices, const TextureFormat& f
 	m_numslices = max(slices, (uint16_t)1);
 
 	m_dimension = Dimension::Texture1D;
-	if (m_numslices > 1)
-	{
-		m_dimension = Dimension::Texture1DArray;
-	}
 
 	// Translate to DXGI format
 	DXGI_FORMAT dxgiFormat = TextureDX11Util::TranslateFormat(format);
@@ -142,10 +138,7 @@ TextureDX11::TextureDX11(uint16_t width, uint16_t height, uint16_t slices, const
 	m_numslices = max(slices, (uint16_t)1);
 
 	m_dimension = Dimension::Texture2D;
-	if (m_numslices > 1)
-	{
-		m_dimension = Dimension::Texture2DArray;
-	}
+
 
 	// Translate to DXGI format.
 	DXGI_FORMAT dxgiFormat = TextureDX11Util::TranslateFormat(format);
@@ -352,16 +345,16 @@ bool TextureDX11::LoadTexture(const std::wstring & fileName, Texture::Dimension 
 	}
 }
 
-bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
+bool TextureDX11::LoadTexture2D(const std::wstring & filename)
 {
-	fs::path filePath(fileName);
+	fs::path filePath(filename);
 	if (!fs::exists(filePath) || !fs::is_regular_file(filePath))
 	{
 		Game::Log << LOG_ERROR << "Could not load texture: " << filePath.string() << "\n";
 		return false;
 	}
 
-	m_filename = fileName;
+	m_filename = filename;
 
 	// Use different components depending on the type of resource
 	if (TextureDX11::IsDDSFile(filePath))
@@ -410,14 +403,14 @@ bool TextureDX11::LoadDDSTexture2D(const fs::path & filePath)
 	D3D11_TEXTURE2D_DESC desc;
 	m_texture2d->GetDesc(&desc);
 	
-	m_dimension = Texture::Dimension::Texture2D;
 	m_width = desc.Width;
 	m_height = desc.Height;
-	m_numslices = 1U;
-	
+	m_numslices = desc.ArraySize;
+
 	m_TextureResourceFormat = desc.Format;
 	m_ShaderResourceViewFormat = m_RenderTargetViewFormat = m_TextureResourceFormat;
 	m_SampleDesc = TextureDX11Util::GetSupportedSampleCount(m_TextureResourceFormat, 1);
+
 
 	if (FAILED(Game::Engine->GetDevice()->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
@@ -744,6 +737,12 @@ uint16_t TextureDX11::GetHeight(void) const
 uint16_t TextureDX11::GetDepth(void) const
 {
 	return m_numslices;
+}
+
+// Normal textures have one slice; array textures have >1
+bool TextureDX11::IsArrayTexture(void) const
+{
+	return (m_numslices > 1U);
 }
 
 // Return the image size in aggregate
@@ -1200,11 +1199,9 @@ void TextureDX11::Resize(uint16_t width, uint16_t height, uint16_t depth)
 	switch (m_dimension)
 	{
 		case Dimension::Texture1D:
-		case Dimension::Texture1DArray:
 			Resize1D(width);
 			break;
 		case Dimension::Texture2D:
-		case Dimension::Texture2DArray:
 			Resize2D(width, height);
 			break;
 		case Dimension::Texture3D:
@@ -1259,11 +1256,9 @@ void TextureDX11::Copy(TextureDX11 * srcTexture)
 			switch (m_dimension)
 			{
 			case Dimension::Texture1D:
-			case Dimension::Texture1DArray:
 				devicecontext->CopyResource(m_texture1d, srcTexture->m_texture1d);
 				break;
 			case Texture::Dimension::Texture2D:
-			case Texture::Dimension::Texture2DArray:
 				devicecontext->CopyResource(m_texture2d, srcTexture->m_texture2d);
 				break;
 			case Texture::Dimension::Texture3D:
@@ -1402,11 +1397,9 @@ ID3D11Resource* TextureDX11::GetTextureResource() const
 	switch (m_dimension)
 	{
 	case Texture::Dimension::Texture1D:
-	case Texture::Dimension::Texture1DArray:
 		resource = m_texture1d;
 		break;
 	case Texture::Dimension::Texture2D:
-	case Texture::Dimension::Texture2DArray:
 		resource = m_texture2d;
 		break;
 	case Texture::Dimension::Texture3D:
