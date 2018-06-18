@@ -60,6 +60,7 @@ class SkinnedModelInstance;
 class ArticulatedModel;
 class TurretController;
 class OverlayRenderer;
+class NoiseGenerator;
 class BasicProjectileSet;
 class VolLineShader;
 class EnvironmentTree;
@@ -137,6 +138,7 @@ public:
 	CMPINLINE Render2DManager *				Get2DRenderManager(void)		{ return m_render2d; }
 	CMPINLINE OverlayRenderer *				GetOverlayRenderer(void)		{ return m_overlayrenderer; }
 	CMPINLINE AudioManager *				GetAudioManager(void)			{ return m_audiomanager; }
+	CMPINLINE NoiseGenerator *				GetNoiseGenerator(void)			{ return m_noisegenerator; }
 
 	// Methods to retrieve the key render matrices from the engine
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
@@ -505,6 +507,7 @@ private:
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
 	Result					InitialiseOverlayRenderer(void);
+	Result					InitialiseNoiseGenerator(void); 
 	Result					InitialiseEnvironmentRendering(void);
 
 	// Private methods to release each component in turn
@@ -523,6 +526,7 @@ private:
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
 	void					ShutdownOverlayRenderer(void);
+	void					ShutdownNoiseGenerator(void);
 	void					ShutdownEnvironmentRendering(void);
 
 	// Post-data load initialisation for the core engine component itself
@@ -559,6 +563,7 @@ private:
 	ParticleEngine					*m_particleengine;
 	Render2DManager					*m_render2d;
 	OverlayRenderer					*m_overlayrenderer;
+	NoiseGenerator					*m_noisegenerator;
 
 	// Game engine parameters
 	HWND					m_hwnd;							// Handle to the target window

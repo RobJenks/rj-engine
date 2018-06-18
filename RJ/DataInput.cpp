@@ -80,6 +80,7 @@
 #include "FireEffect.h"
 #include "ParticleEngine.h"
 #include "ParticleEmitter.h"
+#include "NoiseGenerator.h"
 
 #include "TextRenderer.h"
 #include "Font.h"
@@ -261,6 +262,8 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 				res = IO::Data::LoadMaterialData(child);
 			} else if (hash == HashedStrings::H_Font) {
 				res = IO::Data::LoadFont(child);
+			} else if (hash == HashedStrings::H_NoiseResource) { 
+				res = IO::Data::LoadNoiseResource(child);
 			} else {
 				// Unknown level one node type
 				res = ErrorCodes::UnknownDataNodeType;
@@ -3374,6 +3377,34 @@ Result IO::Data::LoadSystem(TiXmlElement *node)
 
 	// Finally, add this system to the universe and return success
 	Game::Universe->AddSystem(s);
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::LoadNoiseResource(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadNullNoiseResource;
+
+	// Pull required data
+	const char *ccode = node->Attribute("code");
+	const char *ctex = node->Attribute("texture");
+	if (!ccode || !ctex) return ErrorCodes::CannotLoadNoiseResourceWithMissingData;
+
+	// Texture resource must already be loaded and stored in engine assets
+	const TextureDX11 *tex = Game::Engine->GetAssets().GetTexture(std::string(ctex));
+	if (!tex)
+	{
+		Game::Log << LOG_ERROR << "Cannot load noise texture resource \"" << ccode << "\"; no texture resource exists with code \"" << ctex << "\"\n";
+		return ErrorCodes::CannotLoadNoiseResourceWithInvalidTexture;
+	}
+
+	// Attempt to add the resource to the engine
+	bool result = Game::Engine->GetNoiseGenerator()->AddResource(std::string(ccode), tex);
+	if (!result)
+	{
+		Game::Log << LOG_ERROR << "Failed to load noise generation resource \"" << ccode << "\"\n";
+		return ErrorCodes::CannotAddNoiseGenerationResource;
+	}
+
 	return ErrorCodes::NoError;
 }
 

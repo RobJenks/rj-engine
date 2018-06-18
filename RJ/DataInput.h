@@ -166,7 +166,7 @@ namespace IO { namespace Data
 	// Look ahead within a node definition to locate the given string property
 	std::string LookaheadNodeTextField(TiXmlElement *node, const std::string & field);
 
-
+	Result LoadNoiseResource(TiXmlElement *node);
 	Result LoadFireEffect(TiXmlElement *node);
 	Result LoadParticleEmitter(TiXmlElement *node);
 	Result LoadSystem(TiXmlElement *node);

@@ -40,6 +40,7 @@
 #include "SkinnedNormalMapShader.h"
 #include "VolLineShader.h"
 #include "OverlayRenderer.h"
+#include "NoiseGenerator.h"
 #include "BasicColourDefinition.h"
 
 #include "Player.h"
@@ -112,6 +113,7 @@ CoreEngine::CoreEngine(void)
 	m_particleengine(NULL),
 	m_render2d(NULL),
 	m_overlayrenderer(NULL),
+	m_noisegenerator(NULL), 
 	m_instancebuffer(NULL),
 	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
 	m_hwnd( NULL ),
@@ -238,6 +240,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Overlay renderer initialised\n";
 	
+	// Initialise the rendering noise generator
+	res = InitialiseNoiseGenerator();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Noise generator initialised\n";
+
 	// Initialise the render queue for geometry instancing & batching (dependent on initialisation of relevant shaders)
 	res = InitialiseRenderQueue();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -311,6 +318,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
 	ShutdownOverlayRenderer();
+	ShutdownNoiseGenerator();
 	ShutdownRenderQueue();
 	ShutdownEnvironmentRendering();
 	ShutdownTextureData();
@@ -609,6 +617,13 @@ Result CoreEngine::InitialiseOverlayRenderer(void)
 	return ErrorCodes::NoError;
 }
 
+Result CoreEngine::InitialiseNoiseGenerator(void)
+{
+	m_noisegenerator = new NoiseGenerator();
+
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseEnvironmentRendering(void)
 {
 	// Pre-allocate space in the temporary rendering vectors to limit the amount of reallocation required at runtime
@@ -736,6 +751,14 @@ void CoreEngine::ShutdownOverlayRenderer(void)
 	{
 		m_overlayrenderer->Shutdown();
 		SafeDelete(m_overlayrenderer);
+	}
+}
+
+void CoreEngine::ShutdownNoiseGenerator(void)
+{
+	if (m_noisegenerator)
+	{
+		SafeDelete(m_noisegenerator);
 	}
 }
 

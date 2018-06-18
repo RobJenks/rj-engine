@@ -573,6 +573,7 @@
     <ClCompile Include="ModifierDetails.cpp" />
     <ClCompile Include="Modifiers.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
+    <ClCompile Include="NoiseGenerator.cpp" />
     <ClCompile Include="ObjectPicking.cpp" />
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
@@ -984,6 +985,7 @@
     <ClInclude Include="ModifierDetails.h" />
     <ClInclude Include="Modifiers.h" />
     <ClInclude Include="MValue.h" />
+    <ClInclude Include="NoiseGenerator.h" />
     <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
@@ -1363,7 +1365,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Deferred_Lighting</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <None Include="Data\Shaders\hlsl_common.hlsl">
+    <None Include="Data\Shaders\hlsl_projection_common.hlsl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">

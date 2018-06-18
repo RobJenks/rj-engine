@@ -928,6 +928,9 @@
     <ClCompile Include="SDFDecalRenderProcess.cpp">
       <Filter>Engine\Rendering\DirectX11\Render Processes\Decal</Filter>
     </ClCompile>
+    <ClCompile Include="NoiseGenerator.cpp">
+      <Filter>Engine\Noise</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2172,6 +2175,9 @@
     <ClInclude Include="TextAnchorPoint.h">
       <Filter>Engine\Text</Filter>
     </ClInclude>
+    <ClInclude Include="NoiseGenerator.h">
+      <Filter>Engine\Noise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2537,13 +2543,13 @@
     <Filter Include="HLSL\Common\SDFDecal">
       <UniqueIdentifier>{b5ae5339-8e3e-4cc6-bacb-b5f33366d76d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Noise">
+      <UniqueIdentifier>{81076a7b-56c5-438d-8e12-767459f81f6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
     <None Include="Engine components.cd" />
-    <None Include="Data\Shaders\hlsl_common.hlsl">
-      <Filter>HLSL\Common</Filter>
-    </None>
     <None Include="Data\Shaders\LightDataBuffers.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
@@ -2557,6 +2563,10 @@
       <Filter>HLSL\Common\Deferred</Filter>
     </None>
     <None Include="Data\Shaders\hlsl_math.hlsl" />
+    <None Include="Data\Shaders\noise_calculations.hlsl" />
+    <None Include="Data\Shaders\hlsl_projection_common.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2594,9 +2604,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\noise_calculations.hlsl">
-      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

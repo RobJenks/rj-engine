@@ -461,6 +461,11 @@ namespace ErrorCodes {
 	const Result		CannotReloadObjectWithMissingCode				= 2705;
 	const Result		CannotReloadObjectWithUnrecognisedCode			= 2706;
 	const Result		CouldNotInitialiseModel							= 2707;
+	const Result		CannotLoadNullNoiseResource						= 2708;
+	const Result		CannotLoadNoiseResourceWithMissingData			= 2709;
+	const Result		CannotLoadNoiseResourceWithInvalidTexture		= 2710;
+	const Result		CannotAddNoiseGenerationResource				= 2711;
+
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

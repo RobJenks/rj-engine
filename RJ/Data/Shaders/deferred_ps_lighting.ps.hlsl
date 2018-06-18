@@ -3,7 +3,7 @@
 #include "../../../Definitions/MaterialData.hlsl.h"
 #include "../../../Definitions/LightData.hlsl.h"
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
-#include "hlsl_common.hlsl"
+#include "hlsl_projection_common.hlsl"
 #include "lighting_calculations.hlsl"
 #include "LightDataBuffers.hlsl"
 #include "DeferredRenderingBuffers.hlsl"
