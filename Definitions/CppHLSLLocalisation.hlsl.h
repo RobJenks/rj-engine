@@ -23,6 +23,9 @@
 	typedef DirectX::XMFLOAT4 float4;
 	typedef DirectX::XMFLOAT3X3 float3x3;
 	typedef DirectX::XMFLOAT4X4 float4x4;
+	typedef DirectX::XMUINT2 uint2;
+	typedef DirectX::XMUINT3 uint3;
+	typedef DirectX::XMUINT4 uint4;
 	typedef uint32_t _uint32;
 	typedef BOOL _bool;							// We must use BOOL/int for bool values when crossing CPU/GPU border since sizeof(bool) in HLSL == 1, sizeof(bool) in C++ == 4
 	using RM_SortKey = _uint32;
@@ -46,6 +49,8 @@
 
 #endif
 
+// Convert buffer type names to their string representation
+#define BUFFER_NAME(buffer) #buffer
 
 // Values common to both CPP and HLSL
 static const _bool _true = 1;

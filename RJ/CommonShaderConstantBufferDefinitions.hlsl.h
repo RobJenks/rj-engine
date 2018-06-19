@@ -4,8 +4,6 @@
 #include "../Definitions/CppHLSLLocalisation.hlsl.h"
 #include "../Definitions/MaterialData.hlsl.h"
 
-#define BUFFER_NAME(buffer) #buffer
-
 // Holds standard per-frame data such as view/projection transforms
 CBUFFER FrameDataBuffer REGISTER(b0)
 {

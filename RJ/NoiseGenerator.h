@@ -1,9 +1,13 @@
 #pragma once
 
 #include <string>
+#include <random>
 #include <unordered_map>
+#include "ManagedPtr.h"
+#include "Data/Shaders/noise_buffers.hlsl.h"
 class TextureDX11;
 class PipelineDX11;
+class ConstantBufferDX11;
 
 
 class NoiseGenerator
@@ -20,8 +24,10 @@ public:
 	const TextureDX11 *GetResource(const std::string & code);
 
 	// Bind noise data to the given render pipeline
-	void BindNoiseResource(const std::string & code, PipelineDX11 *pipeline);
-	void BindNoiseResource(const TextureDX11 * code, PipelineDX11 *pipeline);
+	void BindNoiseResources(const std::string & code);
+	void BindNoiseResources(const TextureDX11 * resource);
+
+	// Called per-frame to update the noise data buffers and any resources
 
 
 	// Destructor
@@ -31,5 +37,10 @@ private:
 
 	std::unordered_map<std::string, const TextureDX11*>		m_resources;
 
+	const TextureDX11 *										m_active_resource;			// Noise texture resource that has currently been bound
+	std::uniform_int_distribution<unsigned int>				m_random_dist;				// Uniform random distribution for generating seed values
+
+	ManagedPtr<NoiseDataBuffer>								m_cb_noise_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *									m_cb_noise;					// Compiled CB
 
 };

@@ -582,6 +582,7 @@
     <ClCompile Include="PipelineStateDX11.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="Power.cpp" />
+    <ClCompile Include="Random.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderAssetsDX11.cpp" />
@@ -997,6 +998,7 @@
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="RasterizerStateDX11.h" />
     <ClInclude Include="Rect.h" />
@@ -1389,6 +1391,9 @@
       <FileType>Document</FileType>
     </None>
     <None Include="Data\Shaders\noise_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Shaders\noise_buffers.hlsl.h">
       <FileType>Document</FileType>
     </None>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
