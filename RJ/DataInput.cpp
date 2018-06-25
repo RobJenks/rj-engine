@@ -3390,7 +3390,7 @@ Result IO::Data::LoadNoiseResource(TiXmlElement *node)
 	if (!ccode || !ctex) return ErrorCodes::CannotLoadNoiseResourceWithMissingData;
 
 	// Texture resource must already be loaded and stored in engine assets
-	const TextureDX11 *tex = Game::Engine->GetAssets().GetTexture(std::string(ctex));
+	TextureDX11 *tex = Game::Engine->GetAssets().GetTexture(std::string(ctex));
 	if (!tex)
 	{
 		Game::Log << LOG_ERROR << "Cannot load noise texture resource \"" << ccode << "\"; no texture resource exists with code \"" << ctex << "\"\n";

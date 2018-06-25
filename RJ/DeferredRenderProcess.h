@@ -3,6 +3,7 @@
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
 #include "DeferredGBuffer.h"
+#include "NoiseGenerator.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "LightData.hlsl.h"
@@ -107,21 +108,25 @@ private:
 	XMMATRIX								m_transform_fullscreen_quad;
 	XMMATRIX								m_transform_fullscreen_quad_farplane;
 
+	// ID of the render noise generation method used in this render process
+	NoiseGenerator::NoiseResourceID			m_render_noise_method;
+
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseStandardBuffers(void);
-public:
 	void InitialiseGBufferResourceMappings(void);
-private:
 	void InitialiseRenderVolumes(void);
+	void InitialiseRenderingDependencies(void);
 	void InitialiseGeometryPipelines(void);
 	void InitialiseDeferredLightingPipelines(void);
 	void InitialiseDeferredLightingPass1Pipeline(void);
@@ -136,6 +141,8 @@ private:
 	// Render a subset of the deferred lighting phase using the given pipeline and light render volume
 	void RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume, const FXMMATRIX transform);
 
+	// Set the class of render noise generation used during the render process
+	void SetRenderNoiseGeneration(const std::string & code);
 
 	// Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
 	bool GBufferDebugRendering(void);

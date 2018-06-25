@@ -5,6 +5,7 @@
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
 #include "hlsl_projection_common.hlsl"
 #include "lighting_calculations.hlsl"
+#include "noise_calculations.hlsl"
 #include "LightDataBuffers.hlsl"
 #include "DeferredRenderingBuffers.hlsl"
 #include "DeferredRenderingGBuffer.hlsl.h"
@@ -60,5 +61,15 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	}
 
 	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
-	return (diffuse * lit.Diffuse) + (specular * lit.Specular);
+	int2 seed = texCoord; // or IN.position.xy
+	float3 noise = RandomNoise(seed);
+
+	noise = mad(noise, 2.0f, -1.0f);
+	noise = sign(noise)*(1.0f - sqrt(1.0f - abs(noise)));
+
+	float3 noisevec = float3(RandomNoise(IN.position.xy).r, RandomNoise(IN.position.yx).r, RandomNoise(texCoord*255).r);
+	//lit.Diffuse = (diffuse*0.8f) + (0.2f * float4(noisevec, 0));
+
+	//return (diffuse * lit.Diffuse) + (specular * lit.Specular) + (noisevec.x == 23243U ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0));
+	return (diffuse * lit.Diffuse)*.9 + (specular * lit.Specular) + float4(noisevec, 0)*lit.Diffuse*.1;
 }

@@ -621,6 +621,12 @@ Result CoreEngine::InitialiseNoiseGenerator(void)
 {
 	m_noisegenerator = new NoiseGenerator();
 
+	Result result = m_noisegenerator->Initialise();
+	if (result != ErrorCodes::NoError)
+	{
+		return result;
+	}
+
 	return ErrorCodes::NoError;
 }
 
@@ -788,6 +794,7 @@ void CoreEngine::BeginFrame(void)
 {
 	// Delegate to engine components as required
 	GetDecalRenderer()->BeginFrame();
+	GetNoiseGenerator()->BeginFrame();
 }
 
 // Pre-frame tear-down for the engine and its components

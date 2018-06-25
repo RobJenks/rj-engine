@@ -44,6 +44,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
@@ -52,6 +54,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_transform_fullscreen_quad(ID_MATRIX),
 	m_transform_fullscreen_quad_farplane(ID_MATRIX),
 	m_frame_buffer_state(FrameBufferState::Unknown),
+	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
@@ -77,6 +80,7 @@ void DeferredRenderProcess::PerformPostDataLoadInitialisation(void)
 
 	// Can only be performed once model data is read from external data files
 	InitialiseRenderVolumes();
+	InitialiseRenderingDependencies();
 }
 
 // Response to a change in shader configuration or a reload of shader bytecode
@@ -114,6 +118,8 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
+	m_param_ps_light_noisetexture = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseTextureDataName);
+	m_param_ps_light_noisedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseDataBufferName);
 }
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
@@ -148,7 +154,7 @@ void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 		{ GBufferDiffuseTextureName, GBuffer.DiffuseTexture },
 		{ GBufferSpecularTextureName, GBuffer.SpecularTexture },
 		{ GBufferNormalTextureName, GBuffer.NormalTexture },
-		{ GBufferDepthTextureName, GBuffer.DepthStencilTexture },
+		{ GBufferDepthTextureName, GBuffer.DepthStencilTexture }
 	};
 
 	// Map all resources that can be assigned
@@ -193,6 +199,12 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
 	);
+}
+
+void DeferredRenderProcess::InitialiseRenderingDependencies(void)
+{
+	// TODO: Shouldn't just hardcode this here
+	SetRenderNoiseGeneration("blnoise_hdr_rgba");
 }
 
 // Geometry pipeline will render all opaque geomeetry to the GBuffer RT
@@ -531,13 +543,22 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisedata).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Directional lighting pass uses both VS and PS
 	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisedata).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
+	// Bind the required noise resources to PS lighting shaders
+	Game::Engine->GetNoiseGenerator()->BindNoiseResources(m_render_noise_method);
+	TextureDX11 *noiseresource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
+	if (noiseresource)
+	{
+		m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisetexture).Set(noiseresource);
+	}
 }
 
 // Render a subset of the deferred lighting phase using the given pipeline and light render volume
@@ -550,13 +571,20 @@ void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Mod
 	pipeline->Unbind();
 }
 
+
 // TODO: Add a non-instanced rendering method to the CoreEngine and use it for rendering the single light volumes above
 
+// Perform all transparent object rendering
 void DeferredRenderProcess::RenderTransparency(void)
 {
 
 }
 
+// Set the class of render noise generation used during the render process
+void DeferredRenderProcess::SetRenderNoiseGeneration(const std::string & code)
+{
+	m_render_noise_method = Game::Engine->GetNoiseGenerator()->GetResourceID(code);
+}
 
 
 // Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer

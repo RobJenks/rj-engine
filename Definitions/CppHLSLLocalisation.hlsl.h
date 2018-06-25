@@ -12,6 +12,9 @@
 
 #	define CBUFFER struct
 #	define TEXTURE2D struct
+#	define TEXTURE2D_T(T) struct
+#	define TEXTURE2DARRAY struct
+#	define TEXTURE2DARRAY_T(T) struct
 #	define REGISTER(x) 
 #	define ALIGNED16(T) : public ALIGN16<T>
 
@@ -35,6 +38,9 @@
 
 #	define CBUFFER cbuffer
 #	define TEXTURE2D Texture2D
+#	define TEXTURE2D_T(T) Texture2D<T>
+#	define TEXTURE2DARRAY Texture2DArray
+#	define TEXTURE2DARRAY_T(T) Texture2DArray<T>
 #	define REGISTER(x) : register(x)
 #	define ALIGNED16(T)
 
