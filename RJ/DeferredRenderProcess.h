@@ -8,11 +8,12 @@
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "LightData.hlsl.h"
 #include "ModelInstance.h"
+#include "iAcceptsConsoleCommands.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
 
-class DeferredRenderProcess : public RenderProcessDX11
+class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCommands
 {
 public:
 
@@ -73,6 +74,9 @@ protected:
 	// Retrieve standard buffer data
 	CMPINLINE ConstantBufferDX11 *					GetCommonFrameDataBuffer(void) { return m_cb_frame; }
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
+
+	// Virtual inherited method to accept a command from the console
+	bool ProcessConsoleCommand(GameConsoleCommand & command);
 
 private:
 

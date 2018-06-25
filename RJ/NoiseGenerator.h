@@ -33,6 +33,9 @@ public:
 	TextureDX11 *											GetResource(const std::string & code);
 	TextureDX11 *											GetResource(NoiseResourceID id);
 
+	// Tests whether the given noise resource ID is valid
+	bool													IsValidID(NoiseResourceID id);
+
 	// Return the ID of the resource matching this code, or INVALID_NOISE_RESOURCE if no match exists
 	NoiseResourceID											GetResourceID(const std::string & code);
 
@@ -47,6 +50,11 @@ public:
 	// Returns a pointer to the active noise resources
 	TextureDX11 *											GetActiveNoiseResource(void) const;
 	ConstantBufferDX11 *									GetActiveNoiseBuffer(void) const;
+
+	// Look up the string code of the given noise resource; requires linear search of resources.  Returns a
+	// null string if the given resource is invalid
+	std::string												DetermineNoiseGenerationMethodName(NoiseResourceID id);
+	std::string												DetermineNoiseGenerationMethodName(TextureDX11 *resource);
 
 	// Destructor
 	~NoiseGenerator(void);

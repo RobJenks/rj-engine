@@ -659,6 +659,34 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	return true;
 }
 
+// Virtual inherited method to accept a command from the console
+bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "defrend_setnoise")
+	{
+		SetRenderNoiseGeneration(command.Parameter(0));
+		if (m_render_noise_method == NoiseGenerator::INVALID_NOISE_RESOURCE)
+		{
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidNoiseGenerationMethod,
+				concat("Invalid noise generation method \"")(command.Parameter(0))("\"; noise disabled").str()); 
+		}
+		else
+		{
+			command.SetSuccessOutput(concat("Updated deferred rendering noise generation method to \"")(command.Parameter(0))("\"").str());
+		}
+		return true;
+	}
+	else if (command.InputCommand == "defrend_getnoise")
+	{
+		std::string method = Game::Engine->GetNoiseGenerator()->DetermineNoiseGenerationMethodName(m_render_noise_method);
+		command.SetSuccessOutput(concat("Deferred rendering noise generation method = \"")(method.empty() ? "<null>" : method)("\" (")(m_render_noise_method)(")").str());
+		return true;
+	}
+
+	// We did not recognise the command
+	return false;
+}
+
 
 DeferredRenderProcess::~DeferredRenderProcess(void)
 {

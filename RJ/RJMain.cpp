@@ -2474,10 +2474,13 @@ void RJMain::__CreateDebugScenario(void)
 	// Add a spotlight to the player actor
 	LightSource *player_light = LightSource::Create(Game::Engine->LightingManager->GetDefaultSpotLightData());
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	player_light->OverrideInstanceCode("plight");
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	player_light->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
-	player_light->LightObject().SetIntensity(1.0f);
+	player_light->LightObject().SetIntensity(16.0f);
+	player_light->LightObject().SetRange(5.0f);
+	player_light->LightObject().SetAttenuation(AttenuationData(0.0f, 0.6f, 0.4));
 	//player_light->LightObject().Deactivate();
 	lt2 = player_light;
 

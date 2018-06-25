@@ -63,6 +63,12 @@ bool NoiseGenerator::AddResource(const std::string & code, TextureDX11 *resource
 	return true;
 }
 
+// Tests whether the given noise resource ID is valid
+bool NoiseGenerator::IsValidID(NoiseGenerator::NoiseResourceID id)
+{
+	return (id < m_resource_count);
+}
+
 // Return the ID of the resource matching this code, or INVALID_NOISE_RESOURCE if no match exists
 NoiseGenerator::NoiseResourceID NoiseGenerator::GetResourceID(const std::string & code)
 {
@@ -83,7 +89,7 @@ TextureDX11 * NoiseGenerator::GetResource(const std::string & code)
 
 TextureDX11 * NoiseGenerator::GetResource(NoiseGenerator::NoiseResourceID id)
 {
-	return (id < m_resource_count ? m_resources[id] : NULL);
+	return (IsValidID(id) ? m_resources[id] : NULL);
 }
 
 // Bind noise data to the given render pipeline
@@ -159,6 +165,34 @@ TextureDX11 * NoiseGenerator::GetActiveNoiseResource(void) const
 ConstantBufferDX11 * NoiseGenerator::GetActiveNoiseBuffer(void) const
 {
 	return m_cb_noise;
+}
+
+// Look up the string code of the given noise resource; requires linear search of resources.  Returns a
+// null string if the given resource is invalid
+std::string NoiseGenerator::DetermineNoiseGenerationMethodName(NoiseGenerator::NoiseResourceID id)
+{
+	if (!IsValidID(id)) return NullString;
+
+	for (const auto it : m_resource_ids)
+	{
+		if (it.second == id) return it.first;
+	}
+
+	return NullString;
+}
+
+// Look up the string code of the given noise resource; requires linear search of resources.  Returns a
+// null string if the given resource is invalid
+std::string NoiseGenerator::DetermineNoiseGenerationMethodName(TextureDX11 *resource)
+{
+	if (resource == NULL) return NullString;
+	const auto it = std::find(m_resources.begin(), m_resources.end(), resource);
+	if (it == m_resources.end())
+	{
+		return NullString;
+	}
+
+	return DetermineNoiseGenerationMethodName(std::distance(m_resources.begin(), it));
 }
 
 // Destructor
