@@ -11,6 +11,11 @@
 #include "DeferredRenderingGBuffer.hlsl.h"
 
 
+// Determines the relative strength of generated noise when modulating the calculated lighting values
+static const float LIGHTING_NOISE_STRENGTH = 0.1f;
+
+
+
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
 float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
@@ -60,16 +65,9 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 			break;
 	}
 
+	// Generate rendering noise to apply to the calculated lighting values
+	float4 noise = float4(RandomNoise(IN.position.xy), RandomNoise(IN.position.yx), RandomNoise(texCoord*255), 0.0f);
+	
 	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
-	int2 seed = texCoord; // or IN.position.xy
-	float3 noise = RandomNoise(seed);
-
-	noise = mad(noise, 2.0f, -1.0f);
-	noise = sign(noise)*(1.0f - sqrt(1.0f - abs(noise)));
-
-	float3 noisevec = float3(RandomNoise(IN.position.xy).r, RandomNoise(IN.position.yx).r, RandomNoise(texCoord*255).r);
-	//lit.Diffuse = (diffuse*0.8f) + (0.2f * float4(noisevec, 0));
-
-	//return (diffuse * lit.Diffuse) + (specular * lit.Specular) + (noisevec.x == 23243U ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0));
-	return (diffuse * lit.Diffuse)*.9 + (specular * lit.Specular) + float4(noisevec, 0)*lit.Diffuse*.1;
+	return (diffuse * lit.Diffuse * (1.0f - LIGHTING_NOISE_STRENGTH)) + (specular * lit.Specular) + (noise * lit.Diffuse * LIGHTING_NOISE_STRENGTH);
 }

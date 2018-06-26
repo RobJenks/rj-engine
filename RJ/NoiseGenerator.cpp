@@ -120,15 +120,11 @@ void NoiseGenerator::BindNoiseResources(TextureDX11 * resource)
 	// Update the constant buffer with any resource-dependent data
 	if (resource)
 	{
-		m_cb_noise_data.RawPtr->TextureWidth = resource->GetWidth();
-		m_cb_noise_data.RawPtr->TextureHeight = resource->GetHeight();
-		m_cb_noise_data.RawPtr->TextureDepth = resource->GetDepth();
+		m_cb_noise_data.RawPtr->NoiseResourceAvailable = TRUE;
 	}
 	else
 	{
-		m_cb_noise_data.RawPtr->TextureWidth = 0;
-		m_cb_noise_data.RawPtr->TextureHeight = 0;
-		m_cb_noise_data.RawPtr->TextureDepth = 0;
+		m_cb_noise_data.RawPtr->NoiseResourceAvailable = FALSE;
 	}
 
 	// Compile the buffer to include this data immediately (alongside per-frame data
