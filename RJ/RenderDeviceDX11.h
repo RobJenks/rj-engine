@@ -88,6 +88,10 @@ public:
 	const MaterialDX11 *							NullMaterial(void) const { return m_material_null; }
 	const MaterialDX11 *							DefaultMaterial(void) const { return m_material_null; }
 
+	// Return configuration for the primary render target buffers
+	Texture::TextureFormat							PrimaryRenderTargetColourBufferFormat(void) const;
+	Texture::TextureFormat							PrimaryRenderTargetDepthStencilBufferFormat(void) const;
+
 	// Viewport configuration
 	void											SetDisplaySize(INTVECTOR2 display_size);
 	void											SetVsyncEnabled(bool vsync_enabled);

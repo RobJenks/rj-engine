@@ -29,6 +29,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_ps_lighting(NULL),
 	m_ps_debug(NULL),
 	m_depth_only_rt(NULL),
+	m_colour_buffer(NULL), 
+	m_colour_rt(NULL), 
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
 	m_cb_debug(NULL),
@@ -126,10 +128,39 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering render targets\n";
 
+	UINTVECTOR2 displaysize = Game::Engine->GetRenderDevice()->GetDisplaySize().Convert<UINT>();
+
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", Game::Engine->GetRenderDevice()->GetDisplaySize());
+	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", displaysize.Convert<int>());
 	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
+
+	// Colour render target will contain all colour buffer data; this is generally the primary render output before post-processing
+	Texture::TextureFormat primary_colour_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetColourBufferFormat();
+	m_colour_buffer = Game::Engine->GetRenderDevice()->Assets.CreateTexture2D("Deferred_Colour", displaysize.x, displaysize.y, 1, primary_colour_buffer_format);
+	m_colour_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Colour", displaysize.Convert<int>());
+	m_colour_rt->AttachTexture(RenderTarget::AttachmentPoint::Color0, m_colour_buffer);
+
+
+	// Assert that all objects were created as expected
+	std::vector<std::tuple<std::string, void**>> components = { 
+		{ "depth-only render target", (void**)&m_depth_only_rt }, 
+		{ "primary colour buffer", (void**)&m_colour_buffer }, 
+		{ "primary colour render target", (void**)&m_colour_rt }
+	};
+
+	// Verify each component in turn and report issues
+	for (const auto & entry : components)
+	{
+		if (*(std::get<1>(entry)) == NULL)
+		{
+			Game::Log << LOG_ERROR << "Deferred renderer failed to initialise deferred " << std::get<0>(entry) << "\n";
+		}
+		else
+		{
+			Game::Log << LOG_INFO << "Initialised deferred " << std::get<0>(entry) << "\n";
+		}
+	}
 }
 
 void DeferredRenderProcess::InitialiseStandardBuffers(void)
@@ -262,7 +293,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass2");
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_pass2->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_lighting_pass2->SetRenderTarget(m_colour_rt);
 
 	// Perform culling of front faces since we want to render only back faces of the light volume
 	m_pipeline_lighting_pass2->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
@@ -294,7 +325,7 @@ void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Directional");
 	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_directional->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_lighting_directional->SetRenderTarget(m_colour_rt);
 	m_pipeline_lighting_directional->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
 	m_pipeline_lighting_directional->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
@@ -338,7 +369,7 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->SetShader(Shader::Type::PixelShader, m_ps_debug);
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
 	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
-	m_pipeline_debug_rendering->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_debug_rendering->SetRenderTarget(m_colour_rt);
 }
 
 // Primary rendering method; executes all deferred rendering operations
@@ -356,8 +387,8 @@ void DeferredRenderProcess::Render(void)
 void DeferredRenderProcess::BeginFrame(void)
 {
 	/*
-	1. Initialise per-frame data
-	2. Clear GBuffer render target
+		1. Initialise per-frame data
+		2. Clear GBuffer render target
 	*/
 
 	/* 1. Initialise per-frame data */
@@ -367,19 +398,24 @@ void DeferredRenderProcess::BeginFrame(void)
 
 	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
+
+	/* 3. Clear all deferred render targets */
+	m_colour_rt->Clear(ClearFlags::Colour, NULL_FLOAT4);
 }
 
 // Perform all rendering of the frame
 void DeferredRenderProcess::RenderFrame(void)
 {
 	/*
-	1. Render all opaque geometry
-	2. Copy GBuffer depth/stencil to primary render target
-	3a. Lighting pass 1: determine lit pixels (non-directional lights)
-	3b. Lighting pass 2: render lit pixels (non-directional lights)
-	3c: Lighting: render directional lights
-	4. Render transparent objects
-	5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+		1. Render all opaque geometry
+		2. Copy GBuffer depth/stencil to primary render target
+		3a. Lighting pass 1: determine lit pixels (non-directional lights)
+		3b. Lighting pass 2: render lit pixels (non-directional lights)
+		3c: Lighting: render directional lights
+		4. Render transparent objects
+		5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+		...
+		N. Copy final prepared render buffer into the primary render target
 	*/
 
 	/* 1. Render opaque geometry */
@@ -400,6 +436,10 @@ void DeferredRenderProcess::RenderFrame(void)
 #ifdef _DEBUG
 	GBufferDebugRendering();
 #endif
+
+	/* N. Copy final prepared colour buffer into the primary render target */
+	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
+		GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(m_colour_buffer);
 }
 
 // End the frame; perform any post-render cleanup for the render process

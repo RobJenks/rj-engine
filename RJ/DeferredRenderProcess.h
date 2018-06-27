@@ -96,6 +96,8 @@ private:
 
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
 	RenderTargetDX11 *	m_depth_only_rt;
+	RenderTargetDX11 *	m_colour_rt;
+	TextureDX11 *		m_colour_buffer;
 
 	// Standard constant buffers; keep single instance for binding efficiency
 	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation

@@ -545,19 +545,11 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 	m_rendertarget = Assets.CreateRenderTarget("PrimaryRenderTarget", screen_size);
 
 	// Initialise depth/stencil buffer
-	Texture::TextureFormat depthStencilTextureFormat(
-		Texture::Components::DepthStencil,
-		Texture::Type::UnsignedNormalized,
-		m_sampledesc.Count,
-		0, 0, 0, 0, 24, 8);
+	Texture::TextureFormat depthStencilTextureFormat = PrimaryRenderTargetDepthStencilBufferFormat();
 	TextureDX11 *depthStencilTexture = Assets.CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
 
 	// Initialise colour buffer (Color0)
-	Texture::TextureFormat colorTextureFormat(
-		Texture::Components::RGBA,
-		Texture::Type::UnsignedNormalized,
-		m_sampledesc.Count,
-		8, 8, 8, 8, 0, 0);
+	Texture::TextureFormat colorTextureFormat = PrimaryRenderTargetColourBufferFormat();
 	TextureDX11 *colorTexture = Assets.CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
 
 	// Bind colour and depth/stencil to the primary render target
@@ -784,6 +776,30 @@ void RenderDeviceDX11::SetSampleDesc(UINT count, UINT quality)
 {
 	m_sampledesc.Count = count;
 	m_sampledesc.Quality = quality;
+}
+
+// Return configuration for the primary render target buffers
+Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetColourBufferFormat(void) const
+{
+	return Texture::TextureFormat 
+	(
+		Texture::Components::RGBA,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		8, 8, 8, 8, 0, 0
+	);
+}
+
+// Return configuration for the primary render target buffers
+Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthStencilBufferFormat(void) const
+{
+	return Texture::TextureFormat
+	(
+		Texture::Components::DepthStencil,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		0, 0, 0, 0, 24, 8
+	);
 }
 
 void RenderDeviceDX11::RecalculateProjectionMatrix(void)
