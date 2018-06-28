@@ -129,6 +129,7 @@ private:
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
+	void InitialiseGBuffer(void); 
 	void InitialiseStandardBuffers(void);
 	void InitialiseGBufferResourceMappings(void);
 	void InitialiseRenderVolumes(void);

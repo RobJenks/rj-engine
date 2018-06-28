@@ -26,6 +26,13 @@ public:
 	void							Bind(Shader::Type shader_type);
 	void							Unbind(Shader::Type shader_type);
 
+	// Bind an existing colour buffer as the light accumulation target for this GBuffer
+	void							BindToTargetLightAccumulationBuffer(TextureDX11 *targetbuffer);
+	
+	// Unbind the light accumulation target for this render buffer.  Target should never be
+	// unbound when executing a render cycle
+	void							UnbindTargetLightAccumulationBuffer(void);
+
 	~DeferredGBuffer(void);
 
 

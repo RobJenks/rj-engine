@@ -68,19 +68,32 @@ DeferredGBuffer::DeferredGBuffer(void)
 
 
 	// Now initialise the GBuffer render target
-	// The light accumulation buffer in Color0 can be bound directly to the primary colour RT (i.e. backbuffer)
-	// since we do not currently need any separation between final GBuffer colour accumulation and the backbuffer itself
+	// NOTE: The light accumulation buffer in Color0 should be bound by the calling render process.  It is left unbound
+	// on GBuffer initialisation for this reason.  Expectation is that the caller must bind the light accumulation
+	// target before performing a render cycle
 	Game::Log << LOG_INFO << "Initialising GBuffer RT\n";
 	
 	RenderTarget = Game::Engine->GetAssets().CreateRenderTarget("GBufferRenderTarget", Game::Engine->GetRenderDevice()->GetDisplaySize());
-	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0,
-		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0));
+	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, NULL);				// Light accumulation buffer to be bound by caller
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color1, DiffuseTexture);
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color2, SpecularTexture);
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color3, NormalTexture);
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, DepthStencilTexture);
 
 	Game::Log << LOG_INFO << "GBuffer initialisation complete\n";
+}
+
+// Bind an existing colour buffer as the light accumulation target for this GBuffer
+void DeferredGBuffer::BindToTargetLightAccumulationBuffer(TextureDX11 *targetbuffer)
+{
+	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, targetbuffer);
+}
+
+// Unbind the light accumulation target for this render buffer.  Target should never be
+// unbound when executing a render cycle
+void DeferredGBuffer::UnbindTargetLightAccumulationBuffer(void)
+{
+	BindToTargetLightAccumulationBuffer(NULL);
 }
 
 

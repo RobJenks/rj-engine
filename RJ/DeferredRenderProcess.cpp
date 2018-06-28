@@ -64,6 +64,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	InitialiseShaders();
 	InitialiseRenderTargets();
+	InitialiseGBuffer();
 	InitialiseStandardBuffers();
 	InitialiseGBufferResourceMappings();
 
@@ -161,6 +162,15 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 			Game::Log << LOG_INFO << "Initialised deferred " << std::get<0>(entry) << "\n";
 		}
 	}
+}
+
+void DeferredRenderProcess::InitialiseGBuffer(void)
+{
+	Game::Log << LOG_INFO << "Initialising deferred rendering GBuffer\n";
+
+	// Calling render process (us) must bind the GBuffer target light accumulation buffer on initialisation
+	GBuffer.BindToTargetLightAccumulationBuffer(m_colour_buffer);
+	Game::Log << LOG_INFO << "Initialised GBuffer light accumulation target buffer bindings\n";
 }
 
 void DeferredRenderProcess::InitialiseStandardBuffers(void)
