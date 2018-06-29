@@ -134,6 +134,9 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	// from Michiel van der Leeuw, Guerrilla (2007)
 	OUT.Specular = float4(specular.rgb, log2(specularPower) / 10.5f);
 
+	// TEMP: VELOCITY
+	OUT.VelocitySS = float2(((float)((uint)IN.position.x) % 100) / 100.0f, ((float)((uint)IN.position.y) % 100) / 100.0f);
+
 	return OUT;
 }
 

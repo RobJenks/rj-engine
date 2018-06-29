@@ -10,7 +10,7 @@ class DeferredGBuffer
 {
 public:
 
-	enum class GBufferTexture { Diffuse = 0, Specular = 1, Normal = 2, Depth = 3 };
+	enum class GBufferTexture { Diffuse = 0, Specular = 1, Normal = 2, Depth = 3, Velocity = 4 };
 
 	DeferredGBuffer(void);
 
@@ -20,6 +20,7 @@ public:
 	TextureDX11 *					SpecularTexture;
 	TextureDX11 *					NormalTexture;
 	TextureDX11 *					DepthStencilTexture;
+	TextureDX11 *					VelocityTexture;
 
 	TextureDX11 *					LookupTexture(GBufferTexture texture);
 	

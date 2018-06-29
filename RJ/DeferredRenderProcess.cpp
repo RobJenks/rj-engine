@@ -195,6 +195,7 @@ void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 		{ GBufferDiffuseTextureName, GBuffer.DiffuseTexture },
 		{ GBufferSpecularTextureName, GBuffer.SpecularTexture },
 		{ GBufferNormalTextureName, GBuffer.NormalTexture },
+		{ GBufferVelocityTextureName, GBuffer.VelocityTexture }, 
 		{ GBufferDepthTextureName, GBuffer.DepthStencilTexture }
 	};
 
@@ -645,6 +646,7 @@ bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::s
 	if (type == "diffuse")				m_debug_render_mode = DebugRenderMode::Diffuse;
 	else if (type == "specular")		m_debug_render_mode = DebugRenderMode::Specular;
 	else if (type == "normal")			m_debug_render_mode = DebugRenderMode::Normal;
+	else if (type == "velocity")		m_debug_render_mode = DebugRenderMode::Velocity;
 	else if (type == "depth")			m_debug_render_mode = DebugRenderMode::Depth;
 	else
 	{
@@ -662,10 +664,11 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 	switch (debug_mode)
 	{
 		// GBuffer textures
-	case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
-	case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
-	case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
-	case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
+		case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
+		case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
+		case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
+		case DebugRenderMode::Velocity:		return GBuffer.VelocityTexture;
+		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
 
 		// Other textures
 

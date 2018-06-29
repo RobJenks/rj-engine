@@ -18,7 +18,7 @@ class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCo
 public:
 
 	// Possible debug rendering modes
-	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Depth = 8 };
+	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Velocity = 8, Depth = 16 };
 
 	// Default constructor
 	DeferredRenderProcess(void);

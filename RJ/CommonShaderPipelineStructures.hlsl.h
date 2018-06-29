@@ -30,7 +30,8 @@ struct DeferredPixelShaderGeometryOutput
 	float4 LightAccumulation    RJ_SEMANTIC(SV_Target0);   // Ambient + emissive (R8G8B8_ ) UNUSED (A8_UNORM)
 	float4 Diffuse              RJ_SEMANTIC(SV_Target1);   // Diffuse Albedo (R8G8B8_UNORM) UNUSED (A8_UNORM)
 	float4 Specular             RJ_SEMANTIC(SV_Target2);   // Specular Color (R8G8B8_UNORM) Specular Power(A8_UNORM)
-	float4 NormalVS             RJ_SEMANTIC(SV_Target3);   // View space normal (R32G32B32_FLOAT) UNUSED(A32_FLOAT)
+	float4 NormalVS             RJ_SEMANTIC(SV_Target3);   // View-space normal (R32G32B32_FLOAT) UNUSED(A32_FLOAT)
+	float2 VelocitySS			RJ_SEMANTIC(SV_Target4);   // Projection-space pixel velocity vector (R8G8_UNORM)
 };
 
 

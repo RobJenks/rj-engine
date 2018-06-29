@@ -609,22 +609,27 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_F5])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("velocity");
 		Game::Keyboard.LockKey(DIK_F5);
+	}
+	if (b[DIK_F6])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Keyboard.LockKey(DIK_F6);
 	}
 
 	// Debug resource loading
-	if (b[DIK_F6])
+	if (b[DIK_F7])
 	{
 		Game::Engine->GetRenderDevice()->ReloadAllShaders();
 		Game::Keyboard.LockKey(DIK_F6);
 	}
-	if (b[DIK_F7])
+	if (b[DIK_F8])
 	{
 		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
 		Game::Keyboard.LockKey(DIK_F7);
 	}
-	if (b[DIK_F8])
+	if (b[DIK_F9])
 	{
 		Model::ReloadAllModels();
 		Game::Keyboard.LockKey(DIK_F8);
@@ -2703,15 +2708,28 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
-		Game::Engine->GetTextRenderer()->RenderString("*", 0U, DecalRenderingMode::WorldSpace, Game::GetObjectByInstanceCode("clight")->GetPosition(),
-			14.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), TextAnchorPoint::Centre);
+		static float accum = 0.0f;
+		static std::string msg = "";
+		if ((accum += Game::TimeFactor) > 1.0f)
+		{
+			iObject *obj = ss();
+			
+			XMFLOAT4X4 wm, last, diff;
+			XMStoreFloat4x4(&wm, obj->GetWorldMatrix());
+			XMStoreFloat4x4(&last, obj->GetLastWorldMatrix());
+			for (int i = 0; i < 4; ++i)
+				for (int j = 0; j < 4; ++j)
+					diff.m[i][j] = (wm.m[i][j] - last.m[i][j]);
 
+			msg = concat("Transform diff: ")(MatrixToString(diff)).str();
+		}
+		Game::Engine->GetTextRenderer()->RenderString(msg, 0U, DecalRenderingMode::ScreenSpace, XMVectorSet(10.0f, 20.0f, 0.0f, 0.0f), 12.0f, ONE_FLOAT4, ONE_FLOAT4);
 
+		/*Game::Engine->GetTextRenderer()->RenderString("*", 0U, DecalRenderingMode::WorldSpace, Game::GetObjectByInstanceCode("clight")->GetPosition(),
+			14.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), TextAnchorPoint::Centre);*/
+		
 		/*Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
 			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));*/
-		
-		
-
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 /*		auto renderinfo = Game::Engine->GetRenderInfo();
