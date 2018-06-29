@@ -159,6 +159,7 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseOrthographicMatrixF(void) const		{ return r_invorthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const				{ return r_viewproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
+	CMPINLINE const XMFLOAT4X4 & GetPriorFrameViewProjectionMatrixF(void) const			{ return r_priorframe_viewproj_f; }
 
 	// Pass-through accessor methods for key engine components
 	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
@@ -592,6 +593,9 @@ private:
 	XMFLOAT4X4				r_invorthographic_f;	// Local float representation of the current frame inverse orthographic matrix
 	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
+
+	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
+	XMFLOAT4X4				r_priorframe_viewproj_f;	// Prior frame; local float representation of view projection matrix
 
 
 	VertexBufferDX11 *			m_instancebuffer;

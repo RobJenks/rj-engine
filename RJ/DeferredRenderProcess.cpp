@@ -491,7 +491,9 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	// Frame data buffer
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
+	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
+	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
@@ -502,9 +504,11 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	SetFrameBufferState(FrameBufferState::Fullscreen);
 
 	// Frame data buffer
-	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;														// View matrix == identity
-	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();				// Proj matrix == orthographic
-	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();	// Inv proj == inv orthographic
+	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;															// View matrix == identity
+	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();					// Proj matrix == orthographic
+	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();				// ViewProj matrix == (orthographic * ID) == orthographic
+	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();		// Inv proj == inv orthographic
+	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }

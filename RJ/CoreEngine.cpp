@@ -143,7 +143,8 @@ CoreEngine::CoreEngine(void)
 	// Initialise all key matrices to the identity
 	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
 		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
-	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f 
+		= r_invviewproj_f = r_priorframe_viewproj_f = ID_MATRIX_F;
 	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -869,6 +870,11 @@ void CoreEngine::Render(void)
 // Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
 void CoreEngine::RetrieveRenderCycleData(void)
 {
+	// Store prior-frame data before recalculating
+	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
+	r_priorframe_viewproj_f = r_viewproj_f;
+	
+	// Store new render matrices
 	r_devicecontext = m_renderdevice->GetDeviceContext();
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
