@@ -2570,7 +2570,8 @@
     </None>
     <None Include="Data\Shaders\hlsl_math.hlsl" />
     <None Include="Data\Shaders\noise_calculations.hlsl" />
-    <None Include="Data\Shaders\hlsl_projection_common.hlsl">
+    <None Include="Data\Shaders\noise_buffers.hlsl.h" />
+    <None Include="Data\Shaders\hlsl_common.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
   </ItemGroup>
@@ -2611,7 +2612,7 @@
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\noise_buffers.hlsl">
+    <FxCompile Include="Data\Shaders\velocity_calculations.hlsl">
       <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>

@@ -1367,7 +1367,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Deferred_Lighting</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <None Include="Data\Shaders\hlsl_projection_common.hlsl">
+    <None Include="Data\Shaders\hlsl_common.hlsl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
@@ -1460,6 +1460,9 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Standard</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <None Include="Data\Shaders\velocity_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Data\Shaders\vs_basic_texture.vs.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS_Basic_Texture</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

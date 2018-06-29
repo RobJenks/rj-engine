@@ -49,7 +49,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Components::RG,
 		Texture::Type::UnsignedNormalized,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
-		8U, 8U, 0U, 0U, 0U, 0U
+		8, 8, 0, 0, 0, 0
 	);
 	VelocityTexture = Game::Engine->GetRenderDevice()->Assets.CreateTexture2D(GBufferVelocityTextureName, Game::ScreenWidth, Game::ScreenHeight, 1U, velocityTextureFormat);
 

@@ -1,6 +1,7 @@
 #include "../../CommonShaderPipelineStructures.hlsl.h"
 #include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../../Definitions/MaterialData.hlsl.h"
+#include "velocity_calculations.hlsl"
 
 // Forward declarations
 float4 DoNormalMapping(float3x3 TBN, Texture2D tex, sampler s, float2 uv);
@@ -134,8 +135,8 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	// from Michiel van der Leeuw, Guerrilla (2007)
 	OUT.Specular = float4(specular.rgb, log2(specularPower) / 10.5f);
 
-	// TEMP: VELOCITY
-	OUT.VelocitySS = float2(((float)((uint)IN.position.x) % 100) / 100.0f, ((float)((uint)IN.position.y) % 100) / 100.0f);
+	// Calculate per-pixel velocity vector based on current and prior frame object geometry
+	OUT.VelocitySS = CalculateScreenSpacePixelVelocity(IN.lastframeposition, IN.thisframeposition);
 
 	return OUT;
 }

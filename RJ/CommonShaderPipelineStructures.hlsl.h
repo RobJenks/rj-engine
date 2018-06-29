@@ -12,7 +12,12 @@ struct VertexShaderStandardOutput
 	float3 tangentVS			RJ_SEMANTIC(TANGENT);		// View space tangent
 	float3 binormalVS			RJ_SEMANTIC(BINORMAL);		// View space binormal
 	float3 normalVS 			RJ_SEMANTIC(NORMAL);		// View space normal
-	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip space position
+	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
+
+	// Non-perspective-corrected position values, since we cannot otherwise compare a TEXCOORD with the SV_POSITION in the PS
+	// due to perspective correction of the latter only
+	float4 lastframeposition	RJ_SEMANTIC(TEXCOORD2);		// Projection-space position in the prior frame
+	float4 thisframeposition	RJ_SEMANTIC(TEXCOORD3);		// Projection-space position in the current frame
 };
 
 // Output of basic texture-sampling VS stage; returns only pos/texcoord basic data
