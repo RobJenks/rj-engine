@@ -30,7 +30,7 @@ struct BasicProjectile;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iObject : public ALIGN16<iObject>, public iTakesDamage
+class iObject : public iTakesDamage
 {
 public:
 
@@ -190,7 +190,7 @@ public:
 	// The world matrix of this object
 	CMPINLINE XMMATRIX						GetWorldMatrix(void) const { return m_worldmatrix; }
 	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const { return m_inverseworld; }
-	CMPINLINE void RJ_XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
+	CMPINLINE void RJ_XM_CALLCONV			SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
 		m_worldmatrix = m;
@@ -201,6 +201,13 @@ public:
 
 	// Derives a new object world matrix
 	CMPINLINE void							DeriveNewWorldMatrix(void);
+
+	// Return the previous-frame world transform, where applicable.  If it was not calculated last frame, returns the current transform
+	CMPINLINE XMMATRIX						GetLastWorldMatrix(void) const 
+	{ 
+		return (m_worldcurrent.IsSet() ? m_lastworld : m_worldmatrix);
+	}
+
 
 	// Indicates whether we should skip world matrix derivation for this object, because it will be derived elsewhere
 	// For example, for environment objects which have their world-space data calculated by their parent
@@ -594,6 +601,9 @@ protected:
 	bool								m_overrides_world_derivation;	// Flag indicating whether the object subclass will handle world matrix derivation
 																		// instead of via the base object-level logic
 
+	FrameFlag							m_worldcurrent;					// Indicates whether the world matrix was calculated this frame (and that m_lastworld is also relevant)
+	XMMATRIX							m_lastworld;					// World transform from the prior frame.  Relevant if m_worldcalculated == true
+
 	Game::CollisionMode					m_collisionmode;				// Value indicating how/whether this object collides with others
 	float								m_collisionsphereradius;		// Radius of the object collision sphere
 	float								m_collisionsphereradiussq;		// Squared radius of the collision sphere for runtime efficiency
@@ -627,11 +637,21 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
 
+	// Store the previous transform if it is genuinely from the prior frame, for use in 
+	// calculating velocity buffers at render-time
+	if (m_worldcurrent.WasSetInPriorFrame())
+	{
+		m_lastworld = m_worldmatrix;
+	}
+
 	// World = (BaseModelWorld * Rotation * Translation)
 	SetWorldMatrix(XMMatrixMultiply(XMMatrixMultiply(
 		m_model.GetWorldMatrix(), 
 		m_orientationmatrix), 
 		XMMatrixTranslationFromVector(m_position)));
+
+	// Record the fact that we have calculated the new world matrix
+	m_worldcurrent.Set();
 }
 
 

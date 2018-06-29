@@ -10,7 +10,7 @@ class SpaceSystem;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iSpaceObject : public ALIGN16<iSpaceObject>, public iActiveObject
+class iSpaceObject : public iActiveObject
 {
 public:
 

@@ -21,6 +21,8 @@
 \
 	RJ_ROW_MAJOR_MATRIX		Transform		RJ_SEMANTIC(Transform); \
 	/*--------------------------------------------------------------------- ( 64 bytes ) */ \
+	RJ_ROW_MAJOR_MATRIX		LastTransform	RJ_SEMANTIC(LastTransform); \
+	/*--------------------------------------------------------------------- ( 64 bytes ) */ \
 	_uint32					Flags			RJ_SEMANTIC(Flags);									/* Flags defined in Definitions/InstanceProperties.hlsl.h */ \
 	RM_SortKey				SortKey			RJ_SEMANTIC(SortKey); \
 	float2					_padding		RJ_SEMANTIC(padding); \

@@ -1427,19 +1427,19 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		if (alpha < Game::C_EPSILON) return;			
 
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), 
-			std::move(RM_Instance(object->GetWorldMatrix())), object->GetPosition());
+			std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix())), object->GetPosition());
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
 }
@@ -1469,8 +1469,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 		ArticulatedModelComponent **component = model->GetComponents();
 		for (int i = 0; i < n; ++i, ++component)
 		{
+			const auto comp = (*component);
 			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
-				RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
+				RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), comp->GetPosition());
 		}
 	}
 	else
@@ -1483,8 +1484,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
-					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
+				const auto comp = (*component);
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
+					RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
 			}
 		}
 		else
@@ -1493,8 +1495,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+				const auto comp = (*component);
+				SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+					RM_Instance(comp->GetWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 			}
 		}
 	}
@@ -1766,8 +1769,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+					auto comp = (*component);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2073,8 +2077,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+					auto comp = (*component);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2246,8 +2251,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 				component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
+					auto comp = (*component);
+					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, comp->Model.GetModel(), std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), comp->GetPosition());
 				}
 			}
 		});
@@ -2279,8 +2285,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
-							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
+						auto comp = (*component);
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
+							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
 					}
 				}
 			}
@@ -2305,8 +2312,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+						auto comp = (*component);
+						SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 					}
 				}
 			}
