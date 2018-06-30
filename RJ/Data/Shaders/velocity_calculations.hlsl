@@ -2,17 +2,7 @@
 #define __VelocityCalculationsH__
 
 #include "hlsl_common.hlsl"
-
-
-// Maximum permitted screen-space pixel velocity
-static const float MAX_SCREEN_SPACE_PIXEL_VELOCITY = 20.0f;
-static const float2 MAX_SCREEN_SPACE_PIXEL_VELOCITY_VEC = float2(MAX_SCREEN_SPACE_PIXEL_VELOCITY, MAX_SCREEN_SPACE_PIXEL_VELOCITY);
-
-// ****** TEMPORARY ******
-static const float exposure = 1.0f;
-static const float frame_delta = (1.0f / 60.0f);
-static const float frame_delta_half_exposure = (0.5f * (exposure / frame_delta));
-static const float K = 2.0f;
+#include "DeferredRenderingBuffers.hlsl"
 
 
 // Calculate the normalised screen-space velocity of the given pixel, based on supplied data
@@ -20,10 +10,10 @@ static const float K = 2.0f;
 // range [0 1] for screen-space velocity [0 MAX_SCREEN_SPACE_PIXEL_VELOCITY]
 float2 CalculateScreenSpacePixelVelocity(float4 prior_pos, float4 current_pos)
 {
-	float2 vraw = ((current_pos.xy / current_pos.w) - (prior_pos.xy / prior_pos.w)) * frame_delta_half_exposure;
+	float2 vraw = ((current_pos.xy / current_pos.w) - (prior_pos.xy / prior_pos.w)) * C_half_frame_exposure;
 	float vmagnitude = length(vraw);
 
-	float weight = max(0.5f, min(vmagnitude, K));
+	float weight = max(0.5f, min(vmagnitude, C_k));
 	weight /= (vmagnitude + 0.01f);
 
 	vraw *= weight;

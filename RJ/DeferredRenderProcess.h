@@ -118,6 +118,10 @@ private:
 	// ID of the render noise generation method used in this render process
 	NoiseGenerator::NoiseResourceID			m_render_noise_method;
 
+	// Velocity calculation parameters
+	float									m_velocity_k;
+	float									m_exposure;
+
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_geometry_deferreddata;

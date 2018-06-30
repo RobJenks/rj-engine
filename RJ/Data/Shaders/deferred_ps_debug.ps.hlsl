@@ -14,7 +14,7 @@ float4 PS_Deferred_Debug(VertexShaderStandardOutput IN) : SV_Target0
 {
 	static const float DEPTH_EXP_FACTOR = 6.0f;
 
-	if (debug_view_is_depth_texture)
+	if (C_debug_view_is_depth_texture)
 	{
 		return pow(DebugSourceTextureVS.Sample(LinearRepeatSampler, IN.texCoord).rrrr, DEPTH_EXP_FACTOR);
 	}

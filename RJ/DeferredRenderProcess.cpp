@@ -58,7 +58,11 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_transform_fullscreen_quad(ID_MATRIX),
 	m_transform_fullscreen_quad_farplane(ID_MATRIX),
 	m_frame_buffer_state(FrameBufferState::Unknown),
+	
 	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
+
+	m_velocity_k(2.0f), 
+	m_exposure(1.0f), 
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
@@ -120,7 +124,7 @@ void DeferredRenderProcess::InitialiseShaders(void)
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
-	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
+	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName);
 	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
@@ -521,7 +525,17 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 
 void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 {
-	m_cb_deferred_data.RawPtr->debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
+	// General data
+	m_cb_deferred_data.RawPtr->C_frametime = Game::TimeFactor;
+
+	// Velocity calculation data
+	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;
+	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
+
+	// Debug visualisation data
+	m_cb_deferred_data.RawPtr->C_debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
+
+	// Commit all changes to the CB
 	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);
 }
 
@@ -532,6 +546,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 	// Bind required buffer resources to shader parameters
 	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_geometry_deferreddata).Set(m_cb_deferred);
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	m_pipeline_geometry->Bind();
