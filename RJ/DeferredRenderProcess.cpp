@@ -33,7 +33,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_colour_rt(NULL), 
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
-	m_cb_debug(NULL),
+	m_cb_deferred(NULL),
 
 	m_pipeline_geometry(NULL),
 	m_pipeline_lighting_pass1(NULL),
@@ -43,12 +43,14 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_debug_rendering(NULL),
 
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_debug_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
 	m_model_cone(NULL),
@@ -113,11 +115,13 @@ void DeferredRenderProcess::InitialiseShaders(void)
 #ifdef _DEBUG
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
 	if (m_ps_debug == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering debug shader resources [ps_d]\n";
-	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredDebugBufferName);
+	m_param_ps_debug_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
 #endif
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
+	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
+	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
@@ -179,10 +183,8 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
 	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
+	m_cb_deferred = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
 
-#ifdef _DEBUG
-	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredDebugBuffer>(DeferredDebugBufferName, m_cb_debug_data.RawPtr);
-#endif
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
@@ -418,6 +420,7 @@ void DeferredRenderProcess::BeginFrame(void)
 void DeferredRenderProcess::RenderFrame(void)
 {
 	/*
+		0. Populate deferred rendering parameter buffer
 		1. Render all opaque geometry
 		2. Copy GBuffer depth/stencil to primary render target
 		3a. Lighting pass 1: determine lit pixels (non-directional lights)
@@ -428,6 +431,9 @@ void DeferredRenderProcess::RenderFrame(void)
 		...
 		N. Copy final prepared render buffer into the primary render target
 	*/
+
+	/* 0. Populate deferred rendering parameter buffer */
+	PopulateDeferredRenderingParamBuffer();
 
 	/* 1. Render opaque geometry */
 	RenderGeometry();
@@ -511,6 +517,12 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
+}
+
+void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
+{
+	m_cb_deferred_data.RawPtr->debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
+	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);
 }
 
 void DeferredRenderProcess::RenderGeometry(void)
@@ -696,13 +708,9 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	// Debug views are generated via full-screen rendering
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
-	// Populate debug rendering constant buffer
-	m_cb_debug_data.RawPtr->is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
-	m_cb_debug->Set(m_cb_debug_data.RawPtr);
-
 	// Bind shader parameters to the debug pipeline
 	m_pipeline_debug_rendering->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_debugdata).Set(m_cb_debug);
+	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_deferreddata).Set(m_cb_deferred);
 
 	// Bind the debug pipeline
 	m_pipeline_debug_rendering->Bind();

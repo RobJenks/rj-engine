@@ -67,6 +67,7 @@ protected:
 	void PopulateFrameBuffer(FrameBufferState state);
 	void PopulateFrameBufferBufferForNormalRendering(void);
 	void PopulateFrameBufferForFullscreenQuadRendering(void);
+	void PopulateDeferredRenderingParamBuffer(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
 	void RenderTransparency(void);
@@ -100,12 +101,12 @@ private:
 	TextureDX11 *		m_colour_buffer;
 
 	// Standard constant buffers; keep single instance for binding efficiency
-	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
-	ManagedPtr<LightIndexBuffer>			m_cb_lightindex_data;		// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *					m_cb_lightindex;			// Compiled CB
-	ManagedPtr<DeferredDebugBuffer>			m_cb_debug_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *					m_cb_debug;					// Compiled CB
+	ManagedPtr<FrameDataBuffer>					m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *						m_cb_frame;					// Compiled CB
+	ManagedPtr<LightIndexBuffer>				m_cb_lightindex_data;		// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *						m_cb_lightindex;			// Compiled CB
+	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
@@ -119,12 +120,14 @@ private:
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_geometry_deferreddata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_deferreddata;
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
