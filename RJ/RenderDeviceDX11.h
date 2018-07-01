@@ -176,11 +176,16 @@ private:
 	ShaderDX11 *							m_sdf_decal_deferred_vs;
 	ShaderDX11 *							m_sdf_decal_direct_ps;
 	ShaderDX11 *							m_sdf_decal_deferred_ps;
+	ShaderDX11 *							m_post_motionblur_tilegen_ps;
+	ShaderDX11 *							m_post_motionblur_neighbour_ps;
+	ShaderDX11 *							m_post_motionblur_gather_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
+	SamplerStateDX11 *						m_sampler_pointclamp;
+	SamplerStateDX11 *						m_sampler_pointrepeat;
 
 	const MaterialDX11 *					m_material_null;
 	const MaterialDX11 *					m_material_default;

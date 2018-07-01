@@ -19,7 +19,7 @@ class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCo
 public:
 
 	// Possible debug rendering modes
-	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Velocity = 8, Depth = 16 };
+	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Velocity = 8, Depth = 16, MotionBlurTileGen = 32, MotionBlurNeighbourhood = 64, MotionBlurFinal = 128 };
 
 	// Default constructor
 	DeferredRenderProcess(void);
@@ -46,6 +46,21 @@ public:
 	// End the frame; perform any post-render cleanup for the render process
 	void EndFrame(void);
 
+	// Execute a full-screen quad rendering through the given pipeline
+	void RenderFullScreenQuad(PipelineStateDX11 & pipeline);
+	void RenderFullScreenQuad(PipelineStateDX11 & pipeline, FXMMATRIX quad_transform);
+
+	// Retrieve standard buffer data
+	CMPINLINE ConstantBufferDX11 * GetCommonFrameDataBuffer(void) const { return m_cb_frame; }
+	CMPINLINE ConstantBufferDX11 * GetDeferredRenderingParameterBuffer(void) const { return m_cb_deferred; }
+
+	// Populate the frame buffer for the given rendering mode
+	enum class FrameBufferState { Unknown = 0, Normal, Fullscreen };
+	void PopulateFrameBuffer(FrameBufferState state);
+
+	// Calculate the transform for full-screen quad rendering with the specified dimensions
+	XMMATRIX CalculateFullScreenQuadRenderingTransform(const XMFLOAT2 & dimensions);
+
 	// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
 	bool RepointBackbufferRenderTargetAttachment(const std::string & target);
 
@@ -56,7 +71,6 @@ public:
 protected:
 
 	// Record which set of data is active in the frame buffer to minimise rebinding and state changes
-	enum class FrameBufferState				{ Unknown = 0, Normal, Fullscreen };
 	FrameBufferState						m_frame_buffer_state;
 	CMPINLINE FrameBufferState				GetFrameBufferState(void) const { return m_frame_buffer_state; }
 	CMPINLINE void							SetFrameBufferState(FrameBufferState state) { m_frame_buffer_state = state; }
@@ -65,7 +79,6 @@ protected:
 protected:
 
 	// Primary stages in deferred rendering process
-	void PopulateFrameBuffer(FrameBufferState state);
 	void PopulateFrameBufferBufferForNormalRendering(void);
 	void PopulateFrameBufferForFullscreenQuadRendering(void);
 	void PopulateDeferredRenderingParamBuffer(void);
@@ -74,7 +87,6 @@ protected:
 	void RenderTransparency(void);
 
 	// Retrieve standard buffer data
-	CMPINLINE ConstantBufferDX11 *					GetCommonFrameDataBuffer(void) { return m_cb_frame; }
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
 
 	// Virtual inherited method to accept a command from the console

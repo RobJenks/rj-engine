@@ -194,6 +194,7 @@ public:
 	{
 	public:
 
+		static const BlendMode		NoBlend;
 		static const BlendMode		AlphaBlend;
 		static const BlendMode		AdditiveBlend;
 

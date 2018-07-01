@@ -7,6 +7,8 @@
 #include "RenderDeviceDX11.h"
 #include "RenderProcessDX11.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
+#include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
+#include "Data/Shaders/motion_blur_resources.hlsl"
 
 const std::string PostProcessMotionBlur::RT_NAME_TILEGEN = "MotionBlur_Tilegen_RT";
 const std::string PostProcessMotionBlur::RT_NAME_NEIGHBOUR = "MotionBlur_Neighbour_RT";
@@ -14,6 +16,9 @@ const std::string PostProcessMotionBlur::RT_NAME_GATHER = "MotionBlur_Gather_RT"
 const std::string PostProcessMotionBlur::TX_NAME_TILEGEN = "MotionBlur_Tilegen_TX";
 const std::string PostProcessMotionBlur::TX_NAME_NEIGHBOUR = "MotionBlur_Neighbour_TX";
 const std::string PostProcessMotionBlur::TX_NAME_GATHER = "MotionBlur_Gather_TX";
+const std::string PostProcessMotionBlur::RP_NAME_TILEGEN = "MotionBlur_Tilegen_Pipeline";
+const std::string PostProcessMotionBlur::RP_NAME_NEIGHBOUR = "MotionBlur_Neighbour_Pipeline";
+const std::string PostProcessMotionBlur::RP_NAME_GATHER = "MotionBlur_Gather_Pipeline";
 
 
 PostProcessMotionBlur::PostProcessMotionBlur(void)
@@ -38,8 +43,15 @@ PostProcessMotionBlur::PostProcessMotionBlur(DeferredRenderProcess * render_proc
 	m_tx_neighbour(NULL), 
 	m_tx_gather(NULL), 
 
+	m_pipeline_tilegen(NULL), 
+	m_pipeline_neighbour(NULL), 
+	m_pipeline_gather(NULL), 
+
+	m_downsampled_fullscreen_transform(ID_MATRIX), 
+
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_tilegen_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_tilgen_velocitybuffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_neighbour_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_gather_deferred(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
@@ -62,6 +74,11 @@ void PostProcessMotionBlur::PerformPostConfigInitialisation(void)
 	Game::Log << LOG_INFO << "Initialising post-process motion blur config-dependent assets\n";
 
 	InitialiseRenderTargets();
+	InitialiseRenderGeometry();
+
+	InitialiseTileGenerationPipeline();
+	InitialiseNeighbourhoodCalculationPipeline();
+	InitialiseGatherPhasePipeline();
 }
 
 void PostProcessMotionBlur::InitialiseShaders(void)
@@ -85,6 +102,7 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
 	m_param_ps_tilegen_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, DeferredRenderingParamBufferName);
+	m_param_ps_tilgen_velocitybuffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, MotionBlurVelocityBufferInputName);
 	m_param_ps_neighbour_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_neighbourhood, DeferredRenderingParamBufferName);
 	m_param_ps_gather_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, DeferredRenderingParamBufferName);
 }
@@ -120,6 +138,10 @@ void PostProcessMotionBlur::InitialiseRenderTargets(void)
 		{
 			Game::Engine->GetAssets().DeleteAsset<TextureDX11>(txname);
 		}
+		else
+		{
+			Game::Log << LOG_INFO << "Initialising motion blur " << desc << " texture resource\n";	// Only log on application startup, not re-initialisation
+		}
 
 		*ppTex = Game::Engine->GetAssets().CreateTexture2D(txname, size.x, size.y, 1U, txformat);
 		if (!(*ppTex)) Game::Log << LOG_ERROR << "Failed to create motion blur " << desc << " texture resource\n";
@@ -129,10 +151,28 @@ void PostProcessMotionBlur::InitialiseRenderTargets(void)
 		{
 			Game::Engine->GetAssets().DeleteAsset<RenderTargetDX11>(rtname);
 		}
+		else
+		{
+			Game::Log << LOG_INFO << "Initialising motion blur " << desc << " render target\n";		// Only log on application startup, not re-initialisation
+		}
 
 		*ppRT = Game::Engine->GetAssets().CreateRenderTarget(rtname, size.Convert<int>());
-		if (!(*ppRT)) Game::Log << LOG_ERROR << "Failed to create motion blur " << desc << " render target\n";
+		if (*ppRT)
+		{
+			(*ppRT)->AttachTexture(RenderTarget::AttachmentPoint::Color0, *ppTex);
+		}
+		else
+		{
+			Game::Log << LOG_ERROR << "Failed to create motion blur " << desc << " render target\n";
+		}
 	}
+}
+
+void PostProcessMotionBlur::InitialiseRenderGeometry(void)
+{
+	// Calculate full-screen quad rendering transform for the downsampled render targets
+	m_downsampled_fullscreen_transform = m_renderprocess->CalculateFullScreenQuadRenderingTransform(m_tiled_dimensions.ToFloat());
+
 }
 
 void PostProcessMotionBlur::InitialiseStandardBuffers(void)
@@ -141,16 +181,119 @@ void PostProcessMotionBlur::InitialiseStandardBuffers(void)
 
 }
 
+void PostProcessMotionBlur::InitialiseTileGenerationPipeline(void)
+{
+	// Recreate existing pipeline state if it exists
+	if (Game::Engine->GetAssets().AssetExists<PipelineStateDX11>(RP_NAME_TILEGEN))
+	{
+		Game::Engine->GetAssets().DeleteAsset<PipelineStateDX11>(RP_NAME_TILEGEN);
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "Initialising motion blur render pipeline [t]\n";
+	}
+
+	m_pipeline_tilegen = Game::Engine->GetAssets().CreatePipelineState(RP_NAME_TILEGEN);
+	if (!m_pipeline_tilegen)
+	{
+		Game::Log << LOG_ERROR << "Failed to initialise motion blur tile generation render pipeline\n";
+		return;
+	}
+
+	// Pipeline configuration
+	m_pipeline_tilegen->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_tilegen->SetShader(Shader::Type::PixelShader, m_ps_tilegen);
+	m_pipeline_tilegen->SetRenderTarget(m_rt_tilegen);
+
+	// Disable all depth/stencil operations
+	DepthStencilState::DepthMode depthMode(false, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Never);
+	m_pipeline_tilegen->GetDepthStencilState().SetDepthMode(depthMode);
+
+	// Disable all culling and update raster state for downsampled rendering
+	m_pipeline_tilegen->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+	m_pipeline_tilegen->GetRasterizerState().SetViewport(m_downsampled_viewport);
+	m_pipeline_tilegen->GetRasterizerState().SetMultisampleEnabled(true);
+
+	// Disable all blending operations in the target buffer
+	m_pipeline_tilegen->GetBlendState().SetBlendMode(BlendState::BlendModes::NoBlend);
+
+}
+
+void PostProcessMotionBlur::InitialiseNeighbourhoodCalculationPipeline(void)
+{
+
+}
+
+void PostProcessMotionBlur::InitialiseGatherPhasePipeline(void)
+{
+
+}
+
 
 // Tiled dimensions (per-dimension tile count, K) for this postprocess
 void PostProcessMotionBlur::SetTileScalingFactor(unsigned int K)
 {
 	m_tilesize_k = max(1U, K);
+
 	m_tiled_dimensions = IntegralVector2<unsigned int>(
 		static_cast<unsigned int>(Game::ScreenWidth) / m_tilesize_k,
 		static_cast<unsigned int>(Game::ScreenHeight) / m_tilesize_k
 	);
+
+	m_downsampled_viewport = Viewport(0.0f, 0.0f, static_cast<float>(m_tiled_dimensions.x), static_cast<float>(m_tiled_dimensions.y));
 }
+
+// Execute the post-process over the source buffer.  Returns a pointer to the final buffer
+// following post-processing
+TextureDX11 * PostProcessMotionBlur::Execute(TextureDX11 *source_colour, TextureDX11 *source_vel)
+{
+	assert(source_colour);
+	assert(source_vel);
+
+	// Populate shader parameters common to multiple phases before entering the pipeline
+	m_vs->GetParameter(m_param_vs_framedata).Set(m_renderprocess->GetCommonFrameDataBuffer());
+
+	// All rendering will be against a full-screen quad in orthographic projection space
+	m_renderprocess->PopulateFrameBuffer(DeferredRenderProcess::FrameBufferState::Fullscreen);
+
+	/* 
+		1. Velocity-space tile generation
+		2. Velocity-space neighbourhood determination
+		3. Colour sampling and gather to final output
+	*/
+	ExecuteTileGenerationPass(source_vel);
+	ExecuteNeighbourhoodDeterminationPass();
+	ExecuteGatherPass();
+
+	// Return the final result of the post-processing
+	return NULL;
+}
+
+// 1. Velocity-space tile generation
+void PostProcessMotionBlur::ExecuteTileGenerationPass(TextureDX11 *source_vel)
+{
+	// Populate shader parameters
+	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilgen_velocitybuffer).Set(source_vel);
+	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilegen_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
+	
+	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
+	m_pipeline_tilegen->Bind();
+	m_renderprocess->RenderFullScreenQuad(*m_pipeline_tilegen, m_downsampled_fullscreen_transform);
+	m_pipeline_tilegen->Unbind();
+}
+
+// 2. Velocity-space neighbourhood determination
+void PostProcessMotionBlur::ExecuteNeighbourhoodDeterminationPass(void)
+{
+
+}
+
+// 3. Colour sampling and gather to final output
+void PostProcessMotionBlur::ExecuteGatherPass(void)
+{
+
+}
+
 
 
 // Destructor

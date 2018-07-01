@@ -246,8 +246,14 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 
 	// Also precalculate a fullscreen quad transform for rendering directional lights via the quad model
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
-	m_transform_fullscreen_quad = XMMatrixMultiply(
-		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
+	m_transform_fullscreen_quad = CalculateFullScreenQuadRenderingTransform(Game::Engine->GetRenderDevice()->GetDisplaySizeF());
+}
+
+// Calculate the transform for full-screen quad rendering with the specified dimensions
+XMMATRIX DeferredRenderProcess::CalculateFullScreenQuadRenderingTransform(const XMFLOAT2 & dimensions)
+{
+	return XMMatrixMultiply(
+		XMMatrixScaling(dimensions.x, dimensions.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
 	);
 }
@@ -469,6 +475,10 @@ void DeferredRenderProcess::RenderFrame(void)
 #ifdef _DEBUG
 	GBufferDebugRendering();
 #endif
+
+// TMP
+	m_post_motionblur.RawPtr->Execute(m_colour_buffer, GBuffer.VelocityTexture);
+
 
 	/* N. Copy final prepared colour buffer into the primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
@@ -694,6 +704,7 @@ bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::s
 	else if (type == "normal")			m_debug_render_mode = DebugRenderMode::Normal;
 	else if (type == "velocity")		m_debug_render_mode = DebugRenderMode::Velocity;
 	else if (type == "depth")			m_debug_render_mode = DebugRenderMode::Depth;
+	else if (type == "motion_tilegen")	m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
 	else
 	{
 		// Unrecognised mode
@@ -716,11 +727,13 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::Velocity:		return GBuffer.VelocityTexture;
 		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
 
+		case DebugRenderMode::MotionBlurTileGen:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
+
 		// Other textures
 
 
 		// Unknown texture
-	default:							return NULL;
+		default:							return NULL;
 	}
 }
 
@@ -746,12 +759,25 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	m_pipeline_debug_rendering->Bind();
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
-	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, *m_model_quad, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
+	RenderFullScreenQuad(*m_pipeline_debug_rendering);
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();
 
 	return true;
+}
+
+// Execute a full-screen quad rendering through the given pipeline
+void DeferredRenderProcess::RenderFullScreenQuad(PipelineStateDX11 & pipeline)
+{
+	Game::Engine->RenderInstanced(pipeline, *m_model_quad, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
+}
+
+// Execute a full-screen quad rendering through the given pipeline.  Uses the supplied transform instead of the
+// default fullscreen scale; allows support for down/up-samping or other viewport sizes
+void DeferredRenderProcess::RenderFullScreenQuad(PipelineStateDX11 & pipeline, FXMMATRIX quad_transform)
+{
+	Game::Engine->RenderInstanced(pipeline, *m_model_quad, NULL, RM_Instance(quad_transform), 1U);
 }
 
 // Virtual inherited method to accept a command from the console

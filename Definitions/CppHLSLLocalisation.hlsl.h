@@ -55,8 +55,13 @@
 
 #endif
 
+// General purpose stringification
+#ifndef STR
+#	define STR(x) #x
+#endif
+
 // Convert buffer type names to their string representation
-#define BUFFER_NAME(buffer) #buffer
+#define BUFFER_NAME(buffer) STR(buffer)
 
 // Values common to both CPP and HLSL
 static const _bool _true = 1;

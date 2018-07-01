@@ -18,6 +18,8 @@ Texture2D OpacityTexture        : register(t7);
 // Sampler states that may be bound to the shader execution
 sampler LinearRepeatSampler     : register(s0);
 sampler LinearClampSampler      : register(s1);
+sampler PointRepeatSampler		: register(s2); 
+sampler PointClampSampler		: register(s3);
 
 
 #endif

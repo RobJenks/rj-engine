@@ -16,6 +16,7 @@
 #include "PipelineStateDX11.h"
 #include "ConstantBufferDX11.h"
 #include "BlendState.h"
+#include "SamplerStates.h"
 #include "DeferredRenderProcess.h"
 #include "DeferredGBuffer.h"
 
@@ -62,10 +63,15 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_sdf_decal_deferred_vs(NULL), 
 	m_sdf_decal_direct_ps(NULL), 
 	m_sdf_decal_deferred_ps(NULL),
+	m_post_motionblur_tilegen_ps(NULL), 
+	m_post_motionblur_neighbour_ps(NULL), 
+	m_post_motionblur_gather_ps(NULL), 
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
 	m_sampler_linearrepeat(NULL), 
+	m_sampler_pointclamp(NULL), 
+	m_sampler_pointrepeat(NULL), 
 
 	m_material_null(NULL), 
 	m_material_default(NULL)
@@ -605,6 +611,10 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL }, 
 		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL },
 
+		// Post-process motion blur rendering shaders
+		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL },
+		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL },
+		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL },
 
 		// Debug-only shaders
 #ifdef _DEBUG
@@ -653,13 +663,22 @@ Result RenderDeviceDX11::InitialisePreAssignableShaderParameters(void)
 // Initialise all sampler states that will be bound during shader rendering
 Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 {
-	m_sampler_linearclamp = Assets.CreateSamplerState("LinearClampSampler");
+	m_sampler_linearclamp = Assets.CreateSamplerState(SamplerStates::LinearClampSampler);
 	m_sampler_linearclamp->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
 
-	m_sampler_linearrepeat = Assets.CreateSamplerState("LinearRepeatSampler");
+	m_sampler_linearrepeat = Assets.CreateSamplerState(SamplerStates::LinearRepeatSampler);
 	m_sampler_linearrepeat->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
+
+	m_sampler_pointclamp = Assets.CreateSamplerState(SamplerStates::PointClampSampler);
+	m_sampler_pointclamp->SetFilter(SamplerState::MinFilter::MinNearest, SamplerState::MagFilter::MagNearest, SamplerState::MipFilter::MipNearest);
+	m_sampler_pointclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
+
+	m_sampler_pointrepeat = Assets.CreateSamplerState(SamplerStates::PointRepeatSampler);
+	m_sampler_pointrepeat->SetFilter(SamplerState::MinFilter::MinNearest, SamplerState::MagFilter::MagNearest, SamplerState::MipFilter::MipNearest);
+	m_sampler_pointrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
+
 
 	Game::Log << LOG_INFO << "Sample state definitions initialised\n";
 	return ErrorCodes::NoError;

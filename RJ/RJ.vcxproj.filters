@@ -937,6 +937,9 @@
     <ClCompile Include="PostProcessMotionBlur.cpp">
       <Filter>Engine\Rendering\DirectX11\Postprocess\Motion Blur</Filter>
     </ClCompile>
+    <ClCompile Include="SamplerStates.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2190,6 +2193,9 @@
     <ClInclude Include="PostProcessMotionBlur.h">
       <Filter>Engine\Rendering\DirectX11\Postprocess\Motion Blur</Filter>
     </ClInclude>
+    <ClInclude Include="SamplerStates.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2586,7 +2592,9 @@
     <None Include="Data\Shaders\hlsl_common.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
-    <None Include="Data\Shaders\velocity_calculations.hlsl" />
+    <None Include="Data\Shaders\velocity_calculations.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2624,6 +2632,21 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\motion_blur_calculations.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_gather.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_neighbour.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_tilegen.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\motion_blur_resources.hlsl">
+      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
