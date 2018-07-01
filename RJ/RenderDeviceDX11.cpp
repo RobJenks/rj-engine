@@ -708,6 +708,7 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 
 	// Calculate derived fields
 	m_displaysize = display_size;
+	m_displaysize_u = display_size.Convert<unsigned int>();
 	m_displaysize_f = XMFLOAT2((float)m_displaysize.x, (float)m_displaysize.y);
 	m_aspectratio = (static_cast<float>(display_size.x )/ static_cast<float>(display_size.y));
 

@@ -10,6 +10,7 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "PostProcessMotionBlur.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
@@ -389,6 +390,14 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->SetRenderTarget(m_colour_rt);
 }
 
+void DeferredRenderProcess::InitialisePostProcessingComponents(void)
+{
+	Game::Log << LOG_INFO << "Initialising deferred rendering post-process components\n";
+
+	// Screen-space pixel neighbourhood motion blur
+	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
+}
+
 // Primary rendering method; executes all deferred rendering operations
 void DeferredRenderProcess::Render(void)
 {
@@ -525,8 +534,11 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 
 void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 {
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+
 	// General data
 	m_cb_deferred_data.RawPtr->C_frametime = Game::TimeFactor;
+	m_cb_deferred_data.RawPtr->C_buffersize = XMUINT2(displaysize.x, displaysize.y);
 
 	// Velocity calculation data
 	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;

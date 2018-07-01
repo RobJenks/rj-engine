@@ -19,6 +19,7 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 {
 	// General data
 	float C_frametime;							// Elapsed time for the frame (secs)
+	uint2 C_buffersize;							// Size of the primary render buffers (px)
 
 	// Velocity calculation data
 	float C_k;									// Constant K in the velocity calculation, determining the screen-space radius considered
@@ -28,7 +29,7 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 	_bool C_debug_view_is_depth_texture;		// Indicates whether the debug view is a depth texture, otherwise will treat as three-component & alpha colour
 	
 	// Padding
-	//float# _padding_def;						// CB size must be a multiple of 16 bytes
+	float2 _padding_def;						// CB size must be a multiple of 16 bytes
 };
 
 

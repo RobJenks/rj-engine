@@ -12,6 +12,7 @@
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
+class PostProcessMotionBlur;
 
 class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCommands
 {
@@ -108,6 +109,9 @@ private:
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
 
+	// Post-processing components
+	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
+
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
 	Model *									m_model_cone;
@@ -148,6 +152,7 @@ private:
 	void InitialiseDeferredDirectionalLightingPipeline(void);
 	void InitialiseTransparentRenderingPipelines(void);
 	void InitialiseDebugRenderingPipelines(void);
+	void InitialisePostProcessingComponents(void);
 
 	// Bind shader resources required for the deferred lighting stage
 	void BindDeferredLightingShaderResources(void);

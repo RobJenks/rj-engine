@@ -581,6 +581,7 @@
     <ClCompile Include="DynamicTerrainInteractionType.cpp" />
     <ClCompile Include="PipelineStateDX11.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
+    <ClCompile Include="PostProcessMotionBlur.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />
@@ -996,6 +997,7 @@
     <ClInclude Include="PipelineStateDX11.h" />
     <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
+    <ClInclude Include="PostProcessMotionBlur.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="Random.h" />

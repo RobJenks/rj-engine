@@ -75,6 +75,7 @@ public:
 	CMPINLINE float									GetNearClipDistance(void) const { return m_screen_near; }
 	CMPINLINE float									GetFarClipDistance(void) const { return m_screen_far; }
 	CMPINLINE INTVECTOR2							GetDisplaySize(void) const { return m_displaysize; }
+	CMPINLINE UINTVECTOR2							GetDisplaySizeU(void) const { return m_displaysize_u; }
 	CMPINLINE XMFLOAT2								GetDisplaySizeF(void) const { return m_displaysize_f; }
 
 	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
@@ -150,6 +151,7 @@ private:
 	float									m_fov;
 	float									m_halffovtan;
 	INTVECTOR2								m_displaysize;
+	UINTVECTOR2								m_displaysize_u;
 	XMFLOAT2								m_displaysize_f;
 	Viewport								m_viewport;			// Primary, full-screen viewport
 	float									m_aspectratio;

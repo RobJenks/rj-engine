@@ -21,4 +21,8 @@ public:
 	static const std::string SDFDecalDeferredVertexShader;
 	static const std::string SDFDecalDirectPixelShader;
 	static const std::string SDFDecalDeferredPixelShader;
+
+	static const std::string MotionBlurTileGen;
+	static const std::string MotionBlurNeighbourhood;
+	static const std::string MotionBlurGather;
 };

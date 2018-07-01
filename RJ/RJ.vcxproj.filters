@@ -934,6 +934,9 @@
     <ClCompile Include="Random.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessMotionBlur.cpp">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Motion Blur</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2184,6 +2187,9 @@
     <ClInclude Include="Random.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessMotionBlur.h">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Motion Blur</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2552,6 +2558,12 @@
     <Filter Include="Engine\Noise">
       <UniqueIdentifier>{81076a7b-56c5-438d-8e12-767459f81f6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Postprocess">
+      <UniqueIdentifier>{29191b78-3f03-41cb-9f7a-4c07ce12545d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Postprocess\Motion Blur">
+      <UniqueIdentifier>{5a1de5e6-1c63-4ae1-aba5-0227176b43bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2574,6 +2586,7 @@
     <None Include="Data\Shaders\hlsl_common.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
+    <None Include="Data\Shaders\velocity_calculations.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2611,9 +2624,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\velocity_calculations.hlsl">
-      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
