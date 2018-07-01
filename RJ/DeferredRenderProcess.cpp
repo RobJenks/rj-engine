@@ -80,6 +80,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseDeferredDirectionalLightingPipeline();
 	InitialiseTransparentRenderingPipelines();
 	InitialiseDebugRenderingPipelines();
+
+	InitialisePostProcessingComponents();
 }
 
 // Perform any initialisation that cannot be completed on construction, e.g. because it requires
@@ -396,6 +398,7 @@ void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 
 	// Screen-space pixel neighbourhood motion blur
 	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
+	
 }
 
 // Primary rendering method; executes all deferred rendering operations

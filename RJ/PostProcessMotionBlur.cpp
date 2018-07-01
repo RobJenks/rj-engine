@@ -73,13 +73,13 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [vs]\n";
 
 	m_ps_tilegen = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurTileGen);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_t]\n";
+	if (m_ps_tilegen == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_t]\n";
 
-	m_ps_tilegen = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurNeighbourhood);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_n]\n";
+	m_ps_neighbourhood = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurNeighbourhood);
+	if (m_ps_neighbourhood == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_n]\n";
 
-	m_ps_tilegen = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurGather);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_g]\n";
+	m_ps_gather = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurGather);
+	if (m_ps_gather == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_g]\n";
 
 
 	// Ensure we have valid indices into the shader parameter sets
@@ -90,7 +90,7 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 }
 
 // Initialise render targets based upon the current configuration.  Can be called multiple times based on 
-// configuration changes, so will also handle release/refresh of existing resourcs if required
+// configuration changes, so will also handle release/refresh of existing resources if required
 void PostProcessMotionBlur::InitialiseRenderTargets(void)
 {
 	// Downsampled texture format for intermediate render stages (R8G8_UNORM)
