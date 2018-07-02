@@ -699,12 +699,13 @@ bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::s
 {
 	auto type = StrLower(target);
 
-	if (type == "diffuse")				m_debug_render_mode = DebugRenderMode::Diffuse;
-	else if (type == "specular")		m_debug_render_mode = DebugRenderMode::Specular;
-	else if (type == "normal")			m_debug_render_mode = DebugRenderMode::Normal;
-	else if (type == "velocity")		m_debug_render_mode = DebugRenderMode::Velocity;
-	else if (type == "depth")			m_debug_render_mode = DebugRenderMode::Depth;
-	else if (type == "motion_tilegen")	m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
+	if (type == "diffuse")						m_debug_render_mode = DebugRenderMode::Diffuse;
+	else if (type == "specular")				m_debug_render_mode = DebugRenderMode::Specular;
+	else if (type == "normal")					m_debug_render_mode = DebugRenderMode::Normal;
+	else if (type == "velocity")				m_debug_render_mode = DebugRenderMode::Velocity;
+	else if (type == "depth")					m_debug_render_mode = DebugRenderMode::Depth;
+	else if (type == "motion_tilegen")			m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
+	else if (type == "motion_neighbourhood")	m_debug_render_mode = DebugRenderMode::MotionBlurNeighbourhood;
 	else
 	{
 		// Unrecognised mode
@@ -727,9 +728,9 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::Velocity:		return GBuffer.VelocityTexture;
 		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
 
-		case DebugRenderMode::MotionBlurTileGen:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
-
 		// Other textures
+		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
+		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
 
 
 		// Unknown texture

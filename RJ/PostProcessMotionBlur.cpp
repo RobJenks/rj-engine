@@ -2,6 +2,7 @@
 #include <vector>
 #include "PostProcessMotionBlur.h"
 #include "DeferredRenderProcess.h"
+#include "DeferredGBuffer.h"
 #include "Logging.h"
 #include "CoreEngine.h"
 #include "RenderDeviceDX11.h"
@@ -53,7 +54,13 @@ PostProcessMotionBlur::PostProcessMotionBlur(DeferredRenderProcess * render_proc
 	m_param_ps_tilegen_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_tilgen_velocitybuffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_neighbour_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_gather_deferred(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_ps_neighbour_tilebuffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_gather_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_gather_colour(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_gather_depth(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_gather_velocity(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_gather_vel_neighbourhood(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_gather_noise(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	assert(render_process != NULL);
 
@@ -104,7 +111,13 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 	m_param_ps_tilegen_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, DeferredRenderingParamBufferName);
 	m_param_ps_tilgen_velocitybuffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, MotionBlurVelocityBufferInputName);
 	m_param_ps_neighbour_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_neighbourhood, DeferredRenderingParamBufferName);
+	m_param_ps_neighbour_tilebuffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_neighbourhood, MotionBlurVelocityTileBufferInputName);
 	m_param_ps_gather_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, DeferredRenderingParamBufferName);
+	m_param_ps_gather_colour = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, MotionBlurColourBufferInputName);
+	m_param_ps_gather_depth = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, MotionBlurDepthBufferInputName);
+	m_param_ps_gather_velocity = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, MotionBlurVelocityBufferInputName);
+	m_param_ps_gather_vel_neighbourhood = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, MotionBlurVelocityNeighbourhoodInputName);
+	m_param_ps_gather_noise = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_gather, MotionBlurNoiseBufferInputName);
 }
 
 // Initialise render targets based upon the current configuration.  Can be called multiple times based on 
@@ -190,7 +203,7 @@ void PostProcessMotionBlur::InitialiseTileGenerationPipeline(void)
 	}
 	else
 	{
-		Game::Log << LOG_INFO << "Initialising motion blur render pipeline [t]\n";
+		Game::Log << LOG_INFO << "Initialising motion blur render pipeline [t]\n";		// Log on startup initialisation only
 	}
 
 	m_pipeline_tilegen = Game::Engine->GetAssets().CreatePipelineState(RP_NAME_TILEGEN);
@@ -221,12 +234,76 @@ void PostProcessMotionBlur::InitialiseTileGenerationPipeline(void)
 
 void PostProcessMotionBlur::InitialiseNeighbourhoodCalculationPipeline(void)
 {
+	// Recreate existing pipeline state if it exists
+	if (Game::Engine->GetAssets().AssetExists<PipelineStateDX11>(RP_NAME_NEIGHBOUR))
+	{
+		Game::Engine->GetAssets().DeleteAsset<PipelineStateDX11>(RP_NAME_NEIGHBOUR);
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "Initialising motion blur render pipeline [n]\n";		// Log on startup initialisation only
+	}
 
+	m_pipeline_neighbour = Game::Engine->GetAssets().CreatePipelineState(RP_NAME_NEIGHBOUR);
+	if (!m_pipeline_neighbour)
+	{
+		Game::Log << LOG_ERROR << "Failed to initialise motion blur neighbour determination render pipeline\n";
+		return;
+	}
+
+	// Pipeline configuration
+	m_pipeline_neighbour->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_neighbour->SetShader(Shader::Type::PixelShader, m_ps_neighbourhood);
+	m_pipeline_neighbour->SetRenderTarget(m_rt_neighbour);
+
+	// Disable all depth/stencil operations
+	DepthStencilState::DepthMode depthMode(false, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Never);
+	m_pipeline_neighbour->GetDepthStencilState().SetDepthMode(depthMode);
+
+	// Disable all culling and update raster state for downsampled rendering
+	m_pipeline_neighbour->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+	m_pipeline_neighbour->GetRasterizerState().SetViewport(m_downsampled_viewport);
+	m_pipeline_neighbour->GetRasterizerState().SetMultisampleEnabled(true);
+
+	// Disable all blending operations in the target buffer
+	m_pipeline_neighbour->GetBlendState().SetBlendMode(BlendState::BlendModes::NoBlend);
 }
 
 void PostProcessMotionBlur::InitialiseGatherPhasePipeline(void)
 {
+	// Recreate existing pipeline state if it exists
+	if (Game::Engine->GetAssets().AssetExists<PipelineStateDX11>(RP_NAME_GATHER))
+	{
+		Game::Engine->GetAssets().DeleteAsset<PipelineStateDX11>(RP_NAME_GATHER);
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "Initialising motion blur render pipeline [g]\n";		// Log on startup initialisation only
+	}
 
+	m_pipeline_gather = Game::Engine->GetAssets().CreatePipelineState(RP_NAME_GATHER);
+	if (!m_pipeline_gather)
+	{
+		Game::Log << LOG_ERROR << "Failed to initialise motion blur gather phase render pipeline\n";
+		return;
+	}
+
+	// Pipeline configuration
+	m_pipeline_gather->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_gather->SetShader(Shader::Type::PixelShader, m_ps_gather);
+	m_pipeline_gather->SetRenderTarget(m_rt_gather);
+
+	// Disable all depth/stencil operations
+	DepthStencilState::DepthMode depthMode(false, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Never);
+	m_pipeline_gather->GetDepthStencilState().SetDepthMode(depthMode);
+
+	// Upsample back to backbuffer resolution for the final gather phase
+	m_pipeline_gather->GetRasterizerState().SetViewport(Game::Engine->GetRenderDevice()->GetPrimaryViewport());
+	m_pipeline_gather->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+	m_pipeline_gather->GetRasterizerState().SetMultisampleEnabled(true);
+
+	// Disable all blending operations in the target buffer
+	m_pipeline_gather->GetBlendState().SetBlendMode(BlendState::BlendModes::NoBlend);
 }
 
 
@@ -262,8 +339,8 @@ TextureDX11 * PostProcessMotionBlur::Execute(TextureDX11 *source_colour, Texture
 		3. Colour sampling and gather to final output
 	*/
 	ExecuteTileGenerationPass(source_vel);
-	ExecuteNeighbourhoodDeterminationPass();
-	ExecuteGatherPass();
+	ExecuteNeighbourhoodDeterminationPass(m_tx_tilegen);
+	ExecuteGatherPass(m_renderprocess->GBuffer, m_tx_neighbour);
 
 	// Return the final result of the post-processing
 	return NULL;
@@ -272,6 +349,8 @@ TextureDX11 * PostProcessMotionBlur::Execute(TextureDX11 *source_colour, Texture
 // 1. Velocity-space tile generation
 void PostProcessMotionBlur::ExecuteTileGenerationPass(TextureDX11 *source_vel)
 {
+	assert(source_vel);
+
 	// Populate shader parameters
 	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilgen_velocitybuffer).Set(source_vel);
 	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilegen_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
@@ -283,14 +362,28 @@ void PostProcessMotionBlur::ExecuteTileGenerationPass(TextureDX11 *source_vel)
 }
 
 // 2. Velocity-space neighbourhood determination
-void PostProcessMotionBlur::ExecuteNeighbourhoodDeterminationPass(void)
+void PostProcessMotionBlur::ExecuteNeighbourhoodDeterminationPass(TextureDX11 *velocity_tile_data)
 {
+	assert(velocity_tile_data);
 
+	// Populate shader parameters
+	m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_neighbour_tilebuffer).Set(velocity_tile_data);
+
+	// TODO: disabled for now, but a CB will be required when we are correctly passing downsampled texture dimensions rather than testing in the PS
+	//m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_neighbour_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
+
+	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
+	m_pipeline_neighbour->Bind();
+	m_renderprocess->RenderFullScreenQuad(*m_pipeline_neighbour);
+	m_pipeline_neighbour->Unbind();
 }
 
 // 3. Colour sampling and gather to final output
-void PostProcessMotionBlur::ExecuteGatherPass(void)
+void PostProcessMotionBlur::ExecuteGatherPass(DeferredGBuffer & gbuffer, TextureDX11 *velocity_neighbourhood_buffer)
 {
+	assert(velocity_neighbourhood_buffer);
+
+
 
 }
 

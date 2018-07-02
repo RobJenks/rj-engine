@@ -5,6 +5,7 @@
 #include "ShaderDX11.h"
 #include "Viewport.h"
 class DeferredRenderProcess;
+class DeferredGBuffer;
 class RenderTargetDX11;
 class TextureDX11;
 class ConstantBufferDX11;
@@ -54,8 +55,8 @@ private:
 	void InitialiseGatherPhasePipeline(void);
 
 	void ExecuteTileGenerationPass(TextureDX11 *source_vel);
-	void ExecuteNeighbourhoodDeterminationPass(void);
-	void ExecuteGatherPass(void);
+	void ExecuteNeighbourhoodDeterminationPass(TextureDX11 *velocity_tile_data);
+	void ExecuteGatherPass(DeferredGBuffer & gbuffer, TextureDX11 *velocity_neighbourhood_buffer);
 
 private:
 
@@ -96,7 +97,14 @@ private:
 	ShaderDX11::ShaderParameterIndex		m_param_ps_tilegen_deferred;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_tilgen_velocitybuffer;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_neighbour_deferred;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_neighbour_tilebuffer;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_deferred;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_colour;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_depth;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_velocity;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_vel_neighbourhood;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_noise;
+
 
 	unsigned int							m_tilesize_k;
 	IntegralVector2<unsigned int>			m_tiled_dimensions;
