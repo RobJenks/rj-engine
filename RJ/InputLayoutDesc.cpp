@@ -61,5 +61,12 @@ void InputLayoutDesc::InitialiseStaticData(void)
 		// Standard instancing input layout
 		ADD_INSTANCING_LAYOUT
 	);
+
+
+	/* Minimal input layout for fullscreen quad rendering, in support of minimal-ovehead screen-space rendering effects */
+	InputLayoutDesc::AddStandardLayout("Fullscreen_Quad_Minimal_Layout", InputLayoutDesc()
+		.Add("POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0)
+	);
+
 }
 

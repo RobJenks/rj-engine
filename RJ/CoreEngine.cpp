@@ -120,7 +120,8 @@ CoreEngine::CoreEngine(void)
 	m_vsync( false ), 
 	m_render_device_failure_count(0U), 
 	m_screen_space_adjustment(NULL_VECTOR), 
-	m_screen_space_adjustment_f(NULL_FLOAT2)
+	m_screen_space_adjustment_f(NULL_FLOAT2), 
+	m_screenspace_quad_vb(NULL)
 {
 	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
@@ -221,6 +222,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Text rendering initialised\n";
 
+	// Initialise the specialised screen-space rendering components
+	res = InitialiseScreenSpaceRenderingComponents();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Screen-space rendering components initialised\n";
+
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -315,6 +321,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownLightingManager();
 	ShutdownDecalRendering();
 	ShutdownTextRendering();
+	ShutdownScreenSpaceRenderingComponents();
 	ShutdownEffectManager();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
@@ -449,6 +456,23 @@ Result CoreEngine::InitialiseShaderSupport(void)
 	InputLayoutDesc::InitialiseStaticData();
 
 	// Returns success
+	return ErrorCodes::NoError;
+}
+
+Result CoreEngine::InitialiseScreenSpaceRenderingComponents(void)
+{
+	// Directly-populated vertex buffer which matches the minimal VS input layout
+	XMFLOAT2 verts[6] = { { -1.0f, -1.0f }, { -1.0f, +1.0f }, { +1.0f, +1.0f }, { -1.0f, -1.0f }, { +1.0f, +1.0f }, { +1.0f, -1.0f } };
+	D3D11_BUFFER_DESC desc = { 6U * sizeof(XMFLOAT2), D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0, 0 };
+	D3D11_SUBRESOURCE_DATA data = { (void *)verts, sizeof(XMFLOAT2), 6U * sizeof(XMFLOAT2) };
+	HRESULT hr = GetDevice()->CreateBuffer(&desc, &data, &m_screenspace_quad_vb);
+
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Failed to initialised screen-space rendering support components\n";
+		return ErrorCodes::CannotInitialiseScreenSpaceRenderingSupport;
+	}
+
 	return ErrorCodes::NoError;
 }
 
@@ -676,6 +700,12 @@ void CoreEngine::ShutdownCamera(void)
 void CoreEngine::ShutdownShaderSupport(void)
 {
 	// Nothing required
+}
+
+void CoreEngine::ShutdownScreenSpaceRenderingComponents(void)
+{
+	// Release any specific resources held for screen-space rendering
+	ReleaseIfExists(m_screenspace_quad_vb);
 }
 
 void CoreEngine::ShutdownFrustrum(void)
@@ -1134,6 +1164,20 @@ void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model
 	// Update the total count of draw calls & instances that have been processed
 	++m_renderinfo.DrawCalls; 
 	m_renderinfo.InstanceCount += instance_count;
+}
+
+// Specialised method for full-screen quad rendering, to support cheaper post-processing and screen-space rendering
+// Is not processed through the render queue; these render actions are performed immediately
+void CoreEngine::RenderFullScreenQuad(void)
+{
+	const UINT stride = sizeof(XMFLOAT2);
+	const UINT offset = 0U;
+
+	// Bind the precompiled fullscreen rendering VB
+	r_devicecontext->IASetVertexBuffers(0, 1, (ID3D11Buffer * const *)(&m_screenspace_quad_vb), &stride, &offset);
+
+	// Submit a basic draw call for the quad geometry
+	r_devicecontext->Draw(6U, 0U);
 }
 
 // Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render

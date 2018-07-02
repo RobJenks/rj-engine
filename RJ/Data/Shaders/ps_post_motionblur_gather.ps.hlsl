@@ -24,7 +24,7 @@ static const float WEIGHT_CORRECTION_FACTOR = 60.0f;
 
 
 // Motion blur gather phase: entry point
-float4 PS_MotionBlur_Gather(VertexShaderStandardOutput IN) : SV_Target0
+float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
 	// TODO: Replace with CB data
 	float2 texsize = DetermineTextureDimensions(MotionBlurColourBufferInput);

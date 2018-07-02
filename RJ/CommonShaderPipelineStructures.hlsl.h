@@ -28,6 +28,13 @@ struct BasicTextureSamplingVertexShaderOutput
 	float opacity				RJ_SEMANTIC(OPACITY);		// Opacity in the range [0.0 1.0]
 };
 
+// Output of the specialised fullscreen-quad rendering VS stage, for screen-space rendering
+struct ScreenSpaceQuadVertexShaderOutput
+{
+	float4 position				RJ_SEMANTIC(SV_POSITION);
+	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);
+};
+
 
 // Output of the deferred geometry PS; mapping into the textures comprising the GBuffer
 struct DeferredPixelShaderGeometryOutput

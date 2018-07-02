@@ -10,6 +10,8 @@ public:
 	static const std::string StandardVertexShader;
 	static const std::string StandardPixelShader;
 
+	static const std::string FullScreenQuadVertexShader;
+
 	static const std::string DeferredGeometryPixelShader;
 	static const std::string DeferredLightingPixelShader;
 	static const std::string DeferredLightingDebug;

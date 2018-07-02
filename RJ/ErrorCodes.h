@@ -329,6 +329,7 @@ namespace ErrorCodes {
 	const Result		CannotReloadMaterialWithoutSourceFilename		= 1518;
 	const Result		FailedToInitialiseNoiseGenerator				= 1519;
 	const Result		InvalidNoiseGenerationMethod					= 1520;
+	const Result		CannotInitialiseScreenSpaceRenderingSupport		= 1521;
 
 
 	// External data read/write errors									(2000-2199)

@@ -7,7 +7,7 @@
 
 
 // Motion blur neighbourhood determination: entry point
-float4 PS_MotionBlur_Neighbourhood(VertexShaderStandardOutput IN) : SV_Target0
+float4 PS_MotionBlur_Neighbourhood(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
 	// Default return value; zero motion unless we have specific data in the velocity buffer
 	float2 result = float2(0.0f, 0.0f);

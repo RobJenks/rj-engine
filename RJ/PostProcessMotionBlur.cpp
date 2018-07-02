@@ -33,7 +33,7 @@ PostProcessMotionBlur::PostProcessMotionBlur(DeferredRenderProcess * render_proc
 	:
 	m_renderprocess(render_process), 
 
-	m_vs(NULL), 
+	m_vs_quad(NULL), 
 	m_ps_tilegen(NULL), 
 	m_ps_neighbourhood(NULL), 
 	m_ps_gather(NULL), 
@@ -52,7 +52,6 @@ PostProcessMotionBlur::PostProcessMotionBlur(DeferredRenderProcess * render_proc
 
 	m_downsampled_fullscreen_transform(ID_MATRIX), 
 
-	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_tilegen_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_tilgen_velocitybuffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_neighbour_deferred(ShaderDX11::INVALID_SHADER_PARAMETER), 
@@ -96,8 +95,8 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising post-process motion blur shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [vs]\n";
+	m_vs_quad = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::FullScreenQuadVertexShader);
+	if (m_vs_quad == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [vs_q]\n";
 
 	m_ps_tilegen = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::MotionBlurTileGen);
 	if (m_ps_tilegen == NULL) Game::Log << LOG_ERROR << "Cannot load post-process motion blur shader resources [ps_t]\n";
@@ -110,7 +109,6 @@ void PostProcessMotionBlur::InitialiseShaders(void)
 
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
 	m_param_ps_tilegen_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, DeferredRenderingParamBufferName);
 	m_param_ps_tilgen_velocitybuffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_tilegen, MotionBlurVelocityBufferInputName);
 	m_param_ps_neighbour_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_neighbourhood, DeferredRenderingParamBufferName);
@@ -218,7 +216,7 @@ void PostProcessMotionBlur::InitialiseTileGenerationPipeline(void)
 	}
 
 	// Pipeline configuration
-	m_pipeline_tilegen->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_tilegen->SetShader(Shader::Type::VertexShader, m_vs_quad);
 	m_pipeline_tilegen->SetShader(Shader::Type::PixelShader, m_ps_tilegen);
 	m_pipeline_tilegen->SetRenderTarget(m_rt_tilegen);
 
@@ -256,7 +254,7 @@ void PostProcessMotionBlur::InitialiseNeighbourhoodCalculationPipeline(void)
 	}
 
 	// Pipeline configuration
-	m_pipeline_neighbour->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_neighbour->SetShader(Shader::Type::VertexShader, m_vs_quad);
 	m_pipeline_neighbour->SetShader(Shader::Type::PixelShader, m_ps_neighbourhood);
 	m_pipeline_neighbour->SetRenderTarget(m_rt_neighbour);
 
@@ -293,7 +291,7 @@ void PostProcessMotionBlur::InitialiseGatherPhasePipeline(void)
 	}
 
 	// Pipeline configuration
-	m_pipeline_gather->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_gather->SetShader(Shader::Type::VertexShader, m_vs_quad);
 	m_pipeline_gather->SetShader(Shader::Type::PixelShader, m_ps_gather);
 	m_pipeline_gather->SetRenderTarget(m_rt_gather);
 
@@ -334,8 +332,6 @@ TextureDX11 * PostProcessMotionBlur::Execute(TextureDX11 *source_colour, Texture
 	// All rendering will be against a full-screen quad in orthographic projection space
 	m_renderprocess->PopulateFrameBuffer(DeferredRenderProcess::FrameBufferState::Fullscreen);
 
-	// Populate shader parameters common to multiple phases before entering the pipeline
-	m_vs->GetParameter(m_param_vs_framedata).Set(m_renderprocess->GetCommonFrameDataBuffer());
 	/* 
 		1. Velocity-space tile generation
 		2. Velocity-space neighbourhood determination

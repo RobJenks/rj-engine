@@ -167,6 +167,7 @@ private:
 
 	ShaderDX11 *							m_standard_vs;
 	ShaderDX11 *							m_standard_ps;
+	ShaderDX11 *							m_quad_vs;
 	ShaderDX11 *							m_deferred_geometry_ps;
 	ShaderDX11 *							m_deferred_lighting_ps;
 	ShaderDX11 *							m_deferred_debug_ps;
@@ -181,6 +182,7 @@ private:
 	ShaderDX11 *							m_post_motionblur_gather_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
+	InputLayoutDesc							m_fullscreen_quad_input_layout;
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;

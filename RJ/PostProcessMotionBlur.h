@@ -74,7 +74,7 @@ private:
 	
 	DeferredRenderProcess *					m_renderprocess;
 
-	ShaderDX11 *							m_vs;				// TODO: Switch this and other deferred render phases to use simpler full-screen-quad VS / basic texture vs?
+	ShaderDX11 *							m_vs_quad;
 	ShaderDX11 *							m_ps_tilegen;
 	ShaderDX11 *							m_ps_neighbourhood;
 	ShaderDX11 *							m_ps_gather;
@@ -94,7 +94,6 @@ private:
 	Viewport								m_downsampled_viewport;
 	XMMATRIX								m_downsampled_fullscreen_transform;
 
-	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_tilegen_deferred;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_tilgen_velocitybuffer;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_neighbour_deferred;

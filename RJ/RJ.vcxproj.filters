@@ -2595,6 +2595,8 @@
     <None Include="Data\Shaders\velocity_calculations.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
+    <None Include="Data\Shaders\motion_blur_calculations.hlsl" />
+    <None Include="Data\Shaders\motion_blur_resources.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2633,9 +2635,6 @@
     <FxCompile Include="Data\Shaders\vs_decal_sdf_deferred.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\motion_blur_calculations.hlsl">
-      <Filter>HLSL\Common</Filter>
-    </FxCompile>
     <FxCompile Include="Data\Shaders\ps_post_motionblur_gather.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
@@ -2645,8 +2644,8 @@
     <FxCompile Include="Data\Shaders\ps_post_motionblur_tilegen.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\motion_blur_resources.hlsl">
-      <Filter>HLSL\Common</Filter>
+    <FxCompile Include="Data\Shaders\vs_quad.vs.hlsl">
+      <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

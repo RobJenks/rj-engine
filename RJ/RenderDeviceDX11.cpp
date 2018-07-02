@@ -55,6 +55,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 
 	m_standard_vs(NULL), 
 	m_standard_ps(NULL),
+	m_quad_vs(NULL), 
 	m_deferred_geometry_ps(NULL), 
 	m_deferred_lighting_ps(NULL),
 	m_texture_vs(NULL), 
@@ -571,7 +572,8 @@ Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 	// Input layouts to be loaded
 	std::vector<std::tuple<std::string, InputLayoutDesc &>> layout_definitions
 	{
-		{ "Vertex_Inst_Standard_Layout", m_standard_input_layout }
+		{ "Vertex_Inst_Standard_Layout", m_standard_input_layout }, 
+		{ "Fullscreen_Quad_Minimal_Layout", m_fullscreen_quad_input_layout }
 	};
 
 	// Attempt to load each defintion in turn
@@ -596,6 +598,9 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		// Standard shaders
 		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
 		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL }, 
+
+		// Full-screen quad rendering shader for minimal screen-space rendering overhead
+		{ &m_quad_vs, Shader::Type::VertexShader, Shaders::FullScreenQuadVertexShader, "Shaders\\vs_quad.vs.hlsl", "latest", &m_fullscreen_quad_input_layout }, 
 
 		// Deferred rendering shaders
 		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },

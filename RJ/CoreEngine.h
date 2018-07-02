@@ -190,6 +190,10 @@ public:
 	void					RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count);
 	void					RenderInstanced(const PipelineStateDX11 & pipeline, const Model & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count);
 
+	// Specialised method for full-screen quad rendering, to support cheaper post-processing and screen-space rendering
+	// Is not processed through the render queue; these render actions are performed immediately
+	void					RenderFullScreenQuad(void);
+
 	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
 	// queue items multiple times through e.g. different shader pipelines
 	void					ClearRenderQueue(void);
@@ -499,6 +503,7 @@ private:
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
 	Result					InitialiseShaderSupport(void);
+	Result					InitialiseScreenSpaceRenderingComponents(void);
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseAudioManager(void);
 	Result					InitialiseLightingManager(void);
@@ -518,6 +523,7 @@ private:
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
 	void					ShutdownShaderSupport(void);
+	void					ShutdownScreenSpaceRenderingComponents(void);
 	void					ShutdownFrustrum(void);
 	void					ShutdownAudioManager(void);
 	void					ShutdownLightingManager(void);
@@ -610,6 +616,9 @@ private:
 
 	// Cached reference to unit quad model, used for direct screen-space rendering of materials
 	Model *						m_unit_quad_model;
+
+	// Screen-space rendering components
+	ID3D11Buffer *				m_screenspace_quad_vb;
 
 	// Clear the render queue.  Not required per-frame; invoked on shutdown to clear down resources
 	void								DeallocateRenderingQueue(void);

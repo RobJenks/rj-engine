@@ -7,7 +7,7 @@
 
 
 // Motion blur tile generation: entry point
-float4 PS_MotionBlur_Tilegen(VertexShaderStandardOutput IN) : SV_Target0
+float4 PS_MotionBlur_Tilegen(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
 	// Default return value; zero motion unless we have specific data in the velocity buffer
 	float2 result = float2(0.0f, 0.0f);
