@@ -10,7 +10,7 @@ TEXTURE2D MotionBlurDepthBufferInput REGISTER(t1);
 TEXTURE2D MotionBlurVelocityBufferInput REGISTER(t2);
 TEXTURE2D MotionBlurVelocityTileBufferInput REGISTER(t3);
 TEXTURE2D MotionBlurVelocityNeighbourhoodInput REGISTER(t4);
-TEXTURE2D MotionBlurNoiseBufferInput REGISTER(t5);
+
 
 // Input texture names
 #define MotionBlurColourBufferInputName BUFFER_NAME(MotionBlurColourBufferInput)
@@ -18,7 +18,7 @@ TEXTURE2D MotionBlurNoiseBufferInput REGISTER(t5);
 #define MotionBlurVelocityBufferInputName BUFFER_NAME(MotionBlurVelocityBufferInput)
 #define MotionBlurVelocityTileBufferInputName BUFFER_NAME(MotionBlurVelocityTileBufferInput)
 #define MotionBlurVelocityNeighbourhoodInputName BUFFER_NAME(MotionBlurVelocityNeighbourhoodInput)
-#define MotionBlurNoiseBufferInputName BUFFER_NAME(MotionBlurNoiseBufferInput)
+
 
 
 #endif

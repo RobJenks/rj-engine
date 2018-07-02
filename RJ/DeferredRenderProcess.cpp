@@ -62,7 +62,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	
 	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
 
-	m_velocity_k(2.0f), 
+	m_velocity_k(2U), 
 	m_exposure(1.0f), 
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
@@ -471,14 +471,14 @@ void DeferredRenderProcess::RenderFrame(void)
 	/* 4. Render transparent objects */
 	RenderTransparency();
 
+// TMP
+	m_post_motionblur.RawPtr->Execute(m_colour_buffer, GBuffer.VelocityTexture);
+
+
 	/* 5. If debug rendering from the GBuffer is enabled, run the debug pipeline and overwrite all primary RT data */
 #ifdef _DEBUG
 	GBufferDebugRendering();
 #endif
-
-// TMP
-	m_post_motionblur.RawPtr->Execute(m_colour_buffer, GBuffer.VelocityTexture);
-
 
 	/* N. Copy final prepared colour buffer into the primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
@@ -555,6 +555,7 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 
 	// Velocity calculation data
 	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;
+	m_cb_deferred_data.RawPtr->C_half_exposure = (0.5f * m_exposure);
 	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
 
 	// Debug visualisation data
@@ -706,6 +707,7 @@ bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::s
 	else if (type == "depth")					m_debug_render_mode = DebugRenderMode::Depth;
 	else if (type == "motion_tilegen")			m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
 	else if (type == "motion_neighbourhood")	m_debug_render_mode = DebugRenderMode::MotionBlurNeighbourhood;
+	else if (type == "motion_final")			m_debug_render_mode = DebugRenderMode::MotionBlurFinal;
 	else
 	{
 		// Unrecognised mode
@@ -731,6 +733,7 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		// Other textures
 		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
 		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
+		case DebugRenderMode::MotionBlurFinal:			return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetRenderedOutput() : NULL);
 
 
 		// Unknown texture

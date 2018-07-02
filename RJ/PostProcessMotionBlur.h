@@ -56,7 +56,8 @@ private:
 
 	void ExecuteTileGenerationPass(TextureDX11 *source_vel);
 	void ExecuteNeighbourhoodDeterminationPass(TextureDX11 *velocity_tile_data);
-	void ExecuteGatherPass(DeferredGBuffer & gbuffer, TextureDX11 *velocity_neighbourhood_buffer);
+	void ExecuteGatherPass(	TextureDX11 *source_colour, TextureDX11 *source_depth, TextureDX11 * source_vel, 
+							TextureDX11 *velocity_neighbourhood_buffer);
 
 private:
 
@@ -103,7 +104,8 @@ private:
 	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_depth;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_velocity;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_vel_neighbourhood;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_noise;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_noise_tex;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_gather_noise_data;
 
 
 	unsigned int							m_tilesize_k;

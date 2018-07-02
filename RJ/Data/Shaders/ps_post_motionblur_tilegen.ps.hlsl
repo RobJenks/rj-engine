@@ -21,9 +21,9 @@ float4 PS_MotionBlur_Tilegen(VertexShaderStandardOutput IN) : SV_Target0
 	float max_magnitude_sq = 0.0f;
 
 	// Iterate across the velocity texture and process all pixels within the current tile
-	for (int u = 0; u < C_k; ++u)
+	for (unsigned int u = 0; u < C_k; ++u)
 	{
-		for (int v = 0; v < C_k; ++v)
+		for (unsigned int v = 0; v < C_k; ++v)
 		{
 			// Read the encoded velocity vector at this texel and decode it back to the original velocity
 			float2 texcoord = tcStart + (float2(u, v) * tcInc);

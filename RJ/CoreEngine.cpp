@@ -3037,7 +3037,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			return true;
 		}
 	}
-	else if (command.InputCommand == "backbuffer_attach")
+	else if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
 	{
 		if (GetRenderDevice()->RepointBackbufferRenderTargetAttachment(command.Parameter(0)))
 		{

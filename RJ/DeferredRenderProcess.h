@@ -135,7 +135,7 @@ private:
 	NoiseGenerator::NoiseResourceID			m_render_noise_method;
 
 	// Velocity calculation parameters
-	float									m_velocity_k;
+	unsigned int							m_velocity_k;
 	float									m_exposure;
 
 	// Indices of required shader parameters

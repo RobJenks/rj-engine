@@ -5,7 +5,7 @@
 
 
 // Noise texture data will be bound to this texture array
-TEXTURE2DARRAY NoiseTextureData REGISTER(t5);
+TEXTURE2DARRAY NoiseTextureData REGISTER(t9);
 
 // Noise data all has a consistent size/depth based on the generation process for simplicity
 static const _uint32 NOISE_TEXTURE_SIZE = 64U;
