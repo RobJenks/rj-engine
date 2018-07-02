@@ -26,6 +26,7 @@
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
 	m_vs(NULL),
+	m_vs_quad(NULL), 
 	m_ps_geometry(NULL),
 	m_ps_lighting(NULL),
 	m_ps_debug(NULL),
@@ -112,6 +113,9 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	// Get a reference to all required shaders
 	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
+
+	m_vs_quad = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::FullScreenQuadVertexShader);
+	if (m_vs_quad == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_q]\n";
 
 	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
 	if (m_ps_geometry == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_g]\n";
@@ -391,7 +395,7 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [d]\n";
 
 	m_pipeline_debug_rendering = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Debug");
-	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs_quad);
 	m_pipeline_debug_rendering->SetShader(Shader::Type::PixelShader, m_ps_debug);
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
 	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
@@ -756,14 +760,13 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
 	// Bind shader parameters to the debug pipeline
-	m_pipeline_debug_rendering->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_deferreddata).Set(m_cb_deferred);
 
 	// Bind the debug pipeline
 	m_pipeline_debug_rendering->Bind();
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
-	RenderFullScreenQuad(*m_pipeline_debug_rendering);
+	RenderFullScreenQuad();
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();
@@ -771,17 +774,11 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	return true;
 }
 
-// Execute a full-screen quad rendering through the given pipeline
-void DeferredRenderProcess::RenderFullScreenQuad(PipelineStateDX11 & pipeline)
+// Execute a full-screen quad rendering through the currently-bound pipeline, using the minimal
+// screen-space rendering vertex pipeline
+void DeferredRenderProcess::RenderFullScreenQuad(void)
 {
-	Game::Engine->RenderInstanced(pipeline, *m_model_quad, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
-}
-
-// Execute a full-screen quad rendering through the given pipeline.  Uses the supplied transform instead of the
-// default fullscreen scale; allows support for down/up-samping or other viewport sizes
-void DeferredRenderProcess::RenderFullScreenQuad(PipelineStateDX11 & pipeline, FXMMATRIX quad_transform)
-{
-	Game::Engine->RenderInstanced(pipeline, *m_model_quad, NULL, RM_Instance(quad_transform), 1U);
+	Game::Engine->RenderFullScreenQuad();
 }
 
 // Virtual inherited method to accept a command from the console
@@ -817,3 +814,4 @@ DeferredRenderProcess::~DeferredRenderProcess(void)
 {
 
 }
+

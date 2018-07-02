@@ -46,9 +46,9 @@ public:
 	// End the frame; perform any post-render cleanup for the render process
 	void EndFrame(void);
 
-	// Execute a full-screen quad rendering through the given pipeline
-	void RenderFullScreenQuad(PipelineStateDX11 & pipeline);
-	void RenderFullScreenQuad(PipelineStateDX11 & pipeline, FXMMATRIX quad_transform);
+	// Execute a full-screen quad rendering through the currently-bound pipeline, using the minimal
+	// screen-space rendering vertex pipeline
+	void RenderFullScreenQuad(void);
 
 	// Retrieve standard buffer data
 	CMPINLINE ConstantBufferDX11 * GetCommonFrameDataBuffer(void) const { return m_cb_frame; }
@@ -96,6 +96,7 @@ private:
 
 	// Deferred rendering shaders
 	ShaderDX11 *		m_vs;
+	ShaderDX11 *		m_vs_quad;
 	ShaderDX11 *		m_ps_geometry;
 	ShaderDX11 *		m_ps_lighting;
 	ShaderDX11 *		m_ps_debug;

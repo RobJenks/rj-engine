@@ -356,7 +356,7 @@ void PostProcessMotionBlur::ExecuteTileGenerationPass(TextureDX11 *source_vel)
 	
 	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
 	m_pipeline_tilegen->Bind();
-	m_renderprocess->RenderFullScreenQuad(*m_pipeline_tilegen, m_downsampled_fullscreen_transform);
+	m_renderprocess->RenderFullScreenQuad();
 	m_pipeline_tilegen->Unbind();
 }
 
@@ -373,7 +373,7 @@ void PostProcessMotionBlur::ExecuteNeighbourhoodDeterminationPass(TextureDX11 *v
 
 	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
 	m_pipeline_neighbour->Bind();
-	m_renderprocess->RenderFullScreenQuad(*m_pipeline_neighbour);
+	m_renderprocess->RenderFullScreenQuad();
 	m_pipeline_neighbour->Unbind();
 }
 
@@ -399,7 +399,7 @@ void PostProcessMotionBlur::ExecuteGatherPass(	TextureDX11 *source_colour, Textu
 
 	// Bind the pipeline and upsample motion blur intermediate data back up to combine via gather with the colour buffer
 	m_pipeline_gather->Bind();
-	m_renderprocess->RenderFullScreenQuad(*m_pipeline_gather);
+	m_renderprocess->RenderFullScreenQuad();
 	m_pipeline_gather->Unbind();
 }
 
