@@ -10,7 +10,7 @@ Texture2D DebugSourceTextureVS : register(t0);
 
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
-float4 PS_Deferred_Debug(VertexShaderStandardOutput IN) : SV_Target0
+float4 PS_Deferred_Debug(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
 	static const float DEPTH_EXP_FACTOR = 6.0f;
 
