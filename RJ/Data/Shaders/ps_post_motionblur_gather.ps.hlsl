@@ -6,7 +6,8 @@
 #include "noise_calculations.hlsl"
 
 // Debug define to show significance/insignificance
-#define DEBUG_RENDER_VELOCITY_SIGNIFICANCE;
+//#define DEBUG_RENDER_VELOCITY_SIGNIFICANT_MASK
+//#define DEBUG_RENDER_VELOCITY_INSIGNIFICANT_MASK
 static const float4 DEBUG_RENDER_INSIGNIFICANT = float4(1, 0, 0, 1);
 static const float4 DEBUG_RENDER_SIGNIFICANT = float4(0, 1, 0, 1);
 
@@ -15,17 +16,22 @@ static const float4 DEBUG_RENDER_SIGNIFICANT = float4(0, 1, 0, 1);
 static const float EPS001 = 0.01f;
 
 // TODO: Move into motion blur CB
-static const unsigned int C_samples = 15U;
-static const unsigned int C_max_sample_tap_distance = 6U;
+static const unsigned int C_samples = 16U;
+static const unsigned int C_max_sample_tap_distance = 16U;
 static const float HALF_VELOCITY_CUTOFF = 0.25f;
 static const float VARIANCE_THRESHOLD = 1.5f;
 static const float WEIGHT_CORRECTION_FACTOR = 60.0f;
 
+static const unsigned int TMP__C_k = 2U;
+static const float TMP__C_half_exposure = 0.5f;
 
 
 // Motion blur gather phase: entry point
 float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
+	// TMP
+	if (C_k == 2345U) return float4(1,1,1,1);
+
 	// TODO: Replace with CB data
 	float2 texsize = DetermineTextureDimensions(MotionBlurColourBufferInput);
 
@@ -38,13 +44,13 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float nh_vel_mag = length(nh_vel);
 
 	// Weight vectors based upon exposure.  Early-exit if velocity is insignificant
-	float weighted_nhv = (nh_vel_mag * C_half_exposure);
+	float weighted_nhv = (nh_vel_mag * TMP__C_half_exposure);
 	bool nhv_pos = (weighted_nhv > EPS001);
-	weighted_nhv = clamp(weighted_nhv, 0.1f, C_k);
+	weighted_nhv = clamp(weighted_nhv, 0.1f, TMP__C_k);
 
 	if (weighted_nhv < HALF_VELOCITY_CUTOFF)
 	{
-#		ifdef DEBUG_RENDER_VELOCITY_SIGNIFICANCE
+#		ifdef DEBUG_RENDER_VELOCITY_INSIGNIFICANT_MASK
 			return DEBUG_RENDER_INSIGNIFICANT;
 #		endif
 
@@ -63,9 +69,9 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float vel_mag = length(vel);
 
 	// Weight and clamp primary velocity data
-	float weighted_v = (vel_mag * C_half_exposure);
+	float weighted_v = (vel_mag * TMP__C_half_exposure);
 	bool v_pos = (weighted_v > EPS001);
-	weighted_v = clamp(weighted_v, 0.1f, C_k);
+	weighted_v = clamp(weighted_v, 0.1f, TMP__C_k);
 
 	if (v_pos)
 	{
@@ -80,7 +86,7 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float depth = InvPointDepth(texcoord);
 
 	// Random noise seed for tap sampling (bias to [-0.5 +0.5])
-	float rnd = RandomNoise(texcoord) - 0.5f;
+	float rnd = RandomNoise(texcoord) - 0.5f; // TODO
 
 	// Update sample tap distance based on source texture
 	float max_tap_dist = (C_max_sample_tap_distance / texsize.x);
@@ -107,14 +113,14 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 		float2 selected_vel = (((i & 1) == 1) ? corrected_vel : nh_vel);
 
 		// Determine the texel location of this sample tap and sample from primary half-vel buffer
-		float2 tapcoord = float2(texcoord + float2(selected_vel * tapdist * half_texel));
+		float2 tapcoord = float2(texcoord + float2(selected_vel * tapdist + half_texel));
 		float2 tap = RevertNormalisationScaleBias(MotionBlurVelocityBufferInput.SampleLevel(PointClampSampler, tapcoord, 0).xy);
 		float tap_mag = length(tap);
 
 		// Weight and clamp current tap velocity
-		float weighted_tap = (tap_mag * C_half_exposure);
+		float weighted_tap = (tap_mag * TMP__C_half_exposure);
 		float tap_pos = (weighted_tap > EPS001);
-		weighted_tap = clamp(weighted_tap, 0.1f, C_k);
+		weighted_tap = clamp(weighted_tap, 0.1f, TMP__C_k);
 		
 		if (tap_pos)
 		{
@@ -129,14 +135,14 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 		float tap_alpha = SoftDepthComparison(depth, tap_depth) * Cone(tapdist, weighted_tap)
 						+ SoftDepthComparison(tap_depth, depth) * Cone(tapdist, weighted_v)
 						+ Cylinder(tapdist, weighted_tap) * Cylinder(tapdist, weighted_v) * 2.0f;
-
+		
 		// Accumulate calculated tap value
 		weight += tap_alpha;
 		aggregate += (tap_alpha * MotionBlurColourBufferInput.SampleLevel(LinearClampSampler, tapcoord, 0).xyz);
 	}
 
 	// Debug signficance rendering
-#	ifdef DEBUG_RENDER_VELOCITY_SIGNIFICANCE
+#	ifdef DEBUG_RENDER_VELOCITY_SIGNIFICANT_MASK
 		return DEBUG_RENDER_SIGNIFICANT + (float4(aggregate/weight, 0.0f) * 0.0001f);
 #	endif
 
