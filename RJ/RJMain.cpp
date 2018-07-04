@@ -760,7 +760,21 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_EQUALS])
 	{
-		cs()->SetTargetSpeedPercentage(b[DIK_LCONTROL] ? 0.0f : 1.0f);
+		//((LightSource*)Game::GetObjectByInstanceCode("clight"))->SetPosition(XMVectorAdd(a1()->GetPosition(), XMVectorSetY(NULL_VECTOR, 5.0f)));
+
+		if (b[DIK_LSHIFT])
+		{
+			s2()->SetName("B");
+		}
+		else
+		{
+			s2()->SetCollisionMode(Game::CollisionMode::NoCollision);
+			s2()->SetSize(2.0f);
+			s2()->SetPosition(XMVectorSet(145, 219, 1.08, 0.0f));
+			s2()->SetOrientation(XMQuaternionRotationRollPitchYaw(0.0f, PI, PI / 5.0f));
+			s2()->SetMass(8.0f);
+			s2()->SetName("A");
+		}
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
@@ -2382,7 +2396,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShip *s2_ship = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
 		s2_ship->SetName("Test ship s2");
-		s2_ship->OverrideInstanceCode("Test ship s2");
+		s2_ship->OverrideInstanceCode("s2");
 		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 		s2_ship->SetPosition(XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
@@ -2708,28 +2722,11 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
-		static float accum = 0.0f;
-		static std::string msg = "";
-		if ((accum += Game::TimeFactor) > 1.0f)
+		if (s2()->GetName() == "B")
 		{
-			iObject *obj = ss();
-			
-			XMFLOAT4X4 wm, last, diff;
-			XMStoreFloat4x4(&wm, obj->GetWorldMatrix());
-			XMStoreFloat4x4(&last, obj->GetLastWorldMatrix());
-			for (int i = 0; i < 4; ++i)
-				for (int j = 0; j < 4; ++j)
-					diff.m[i][j] = (wm.m[i][j] - last.m[i][j]);
-
-			msg = concat("Transform diff: ")(MatrixToString(diff)).str();
+			s2()->ChangePosition(XMVectorSetZ(NULL_VECTOR, -Game::TimeFactor * s2()->GetMass()));
 		}
-		Game::Engine->GetTextRenderer()->RenderString(msg, 0U, DecalRenderingMode::ScreenSpace, XMVectorSet(10.0f, 20.0f, 0.0f, 0.0f), 12.0f, ONE_FLOAT4, ONE_FLOAT4);
 
-		/*Game::Engine->GetTextRenderer()->RenderString("*", 0U, DecalRenderingMode::WorldSpace, Game::GetObjectByInstanceCode("clight")->GetPosition(),
-			14.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), TextAnchorPoint::Centre);*/
-		
-		/*Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
-			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));*/
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 /*		auto renderinfo = Game::Engine->GetRenderInfo();
