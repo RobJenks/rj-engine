@@ -2650,5 +2650,8 @@
     <FxCompile Include="Data\Shaders\vs_quad.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl">
+      <Filter>HLSL\Common\Deferred</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

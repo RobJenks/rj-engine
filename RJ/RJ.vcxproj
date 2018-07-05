@@ -1324,6 +1324,9 @@
     <None Include="Data\Shaders\DeferredRenderingGBuffer.hlsl.h">
       <FileType>CppHeader</FileType>
     </None>
+    <None Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Data\Shaders\deferred_ps_debug.ps.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_Deferred_Debug</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

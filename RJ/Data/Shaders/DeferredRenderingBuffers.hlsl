@@ -14,7 +14,7 @@ CBUFFER LightIndexBuffer REGISTER(b4)
 	float3 _padding;
 };
 
-// Constant buffer used for debug pixel shader rendering of GBuffer data
+// Constant buffer used for pixel shader rendering of GBuffer data
 CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 {
 	// General data
@@ -28,11 +28,8 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 	unsigned int C_motion_samples;					// Number of samples taken along the velocity vector when calculating motion blur
 	unsigned int C_motion_max_sample_tap_distance;	// Max distance for reconstruction tap samples along the velocity vector when calculating motion blur
 
-	// Debug data
-	_bool C_debug_view_is_depth_texture;		// Indicates whether the debug view is a depth texture, otherwise will treat as three-component & alpha colour
-	
 	// Padding
-	float3 _padding_def;						// CB size must be a multiple of 16 bytes
+	//float# _padding_def;						// CB size must be a multiple of 16 bytes
 };
 
 
