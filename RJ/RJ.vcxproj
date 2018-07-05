@@ -998,6 +998,7 @@
     <ClInclude Include="PipelineStateDX11.h" />
     <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
+    <ClInclude Include="PostProcessComponent.h" />
     <ClInclude Include="PostProcessMotionBlur.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />

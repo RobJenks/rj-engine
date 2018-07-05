@@ -31,6 +31,8 @@ PostProcessMotionBlur::PostProcessMotionBlur(void)
 
 PostProcessMotionBlur::PostProcessMotionBlur(DeferredRenderProcess * render_process)
 	:
+	PostProcessComponent("motion", "screen-space motion blur"), 
+
 	m_renderprocess(render_process), 
 
 	m_vs_quad(NULL), 
@@ -342,7 +344,7 @@ TextureDX11 * PostProcessMotionBlur::Execute(TextureDX11 *source_colour, Texture
 	ExecuteGatherPass(source_colour, m_renderprocess->GBuffer.DepthStencilTexture, source_vel, m_tx_neighbour);
 
 	// Return the final result of the post-processing
-	return NULL;
+	return m_tx_gather;
 }
 
 // 1. Velocity-space tile generation

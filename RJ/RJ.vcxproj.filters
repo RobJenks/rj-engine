@@ -2196,6 +2196,9 @@
     <ClInclude Include="SamplerStates.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessComponent.h">
+      <Filter>Engine\Rendering\DirectX11\Postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

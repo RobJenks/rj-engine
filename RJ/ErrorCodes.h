@@ -330,7 +330,9 @@ namespace ErrorCodes {
 	const Result		FailedToInitialiseNoiseGenerator				= 1519;
 	const Result		InvalidNoiseGenerationMethod					= 1520;
 	const Result		CannotInitialiseScreenSpaceRenderingSupport		= 1521;
-
+	const Result		PostProcessAlreadyInDesiredState				= 1522;
+	const Result		PostProcessCommandNotSupported					= 1523;
+	const Result		PostProcessComponentDoesNotExist				= 1524;
 
 	// External data read/write errors									(2000-2199)
 	const Result		FileDoesNotExist								= 2000;
@@ -670,6 +672,7 @@ namespace ErrorCodes {
 	const Result		ObjectCommandDoesNotSpecifyFunction				= 5609;
 	const Result		ObjectTypeCannotAcceptDebugCommands				= 5610;
 	const Result		CommandParameterIsNotValid						= 5611;
+	const Result		ConsoleCommandHasInvalidSyntax					= 5612;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

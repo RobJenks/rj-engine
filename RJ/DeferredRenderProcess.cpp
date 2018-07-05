@@ -66,6 +66,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_velocity_k(2U), 
 	m_exposure(1.0f), 
 
+	m_post_processing_components({ 0 }), 
+
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
 	SetName( RenderProcess::Name<DeferredRenderProcess>() );
@@ -409,6 +411,9 @@ void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 	// Screen-space pixel neighbourhood motion blur
 	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
 	
+
+	// Also maintain a collection of base post processing components
+	m_post_processing_components = { m_post_motionblur.RawPtr };
 }
 
 // Primary rendering method; executes all deferred rendering operations
@@ -453,7 +458,8 @@ void DeferredRenderProcess::RenderFrame(void)
 		3b. Lighting pass 2: render lit pixels (non-directional lights)
 		3c: Lighting: render directional lights
 		4. Render transparent objects
-		5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+		5. Perform all post-processing
+		6. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
 		...
 		N. Copy final prepared render buffer into the primary render target
 	*/
@@ -475,18 +481,19 @@ void DeferredRenderProcess::RenderFrame(void)
 	/* 4. Render transparent objects */
 	RenderTransparency();
 
-// TMP
-	m_post_motionblur.RawPtr->Execute(m_colour_buffer, GBuffer.VelocityTexture);
+	/* 5. Perform all active post-process rendering and assign the 'final' colour buffer reference */
+	PerformPostProcessing();
+	
 
-
-	/* 5. If debug rendering from the GBuffer is enabled, run the debug pipeline and overwrite all primary RT data */
+	/* 6. If debug rendering from the GBuffer is enabled, run the debug pipeline and overwrite all primary RT data */
 #ifdef _DEBUG
 	GBufferDebugRendering();
 #endif
 
 	/* N. Copy final prepared colour buffer into the primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
-		GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(m_colour_buffer);
+		GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(
+			GetFinalColourBuffer());
 }
 
 // End the frame; perform any post-render cleanup for the render process
@@ -692,6 +699,30 @@ void DeferredRenderProcess::RenderTransparency(void)
 
 }
 
+// Execute all active post-process rendering phases and populate the final deferred rendering output
+void DeferredRenderProcess::PerformPostProcessing(void)
+{
+	// Points to the current latest colour buffer during the post-processing pipeline
+	TextureDX11 * buffer = m_colour_buffer;
+
+	/* Post-processing pipeline */
+	buffer = ExecutePostProcessMotionBlur(buffer);
+	
+
+	// Store a pointer to the final, fully-processed buffer
+	m_final_colour_buffer = buffer;
+}
+
+// Screen-space per-pixel subsampled motion blur
+TextureDX11 * DeferredRenderProcess::ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer)
+{
+	// Leave buffer unmodified if this post-process is not active
+	if (!m_post_motionblur.RawPtr->IsActive()) return colour_buffer;
+
+	// Post-process and return the modified colour buffer
+	return m_post_motionblur.RawPtr->Execute(colour_buffer, GBuffer.VelocityTexture);
+}
+
 // Set the class of render noise generation used during the render process
 void DeferredRenderProcess::SetRenderNoiseGeneration(const std::string & code)
 {
@@ -774,6 +805,19 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	return true;
 }
 
+// Return a pointer to the final colour buffer for this render process.  This may be the immediately-rendered colour
+// buffer, the post-processed colour buffer or the debug rendering output, depending on our current state
+TextureDX11 * DeferredRenderProcess::GetFinalColourBuffer(void)
+{
+	// If debug rendering is enabled we redirect to the base colour buffer, which has been overwritten with debug data
+#	ifdef _DEBUG
+		if (m_debug_render_mode != DebugRenderMode::None) return m_colour_buffer;
+#	endif
+
+	// Otherwise, we always return the final fully-processed colour buffer
+	return m_final_colour_buffer;
+}
+
 // Execute a full-screen quad rendering through the currently-bound pipeline, using the minimal
 // screen-space rendering vertex pipeline
 void DeferredRenderProcess::RenderFullScreenQuad(void)
@@ -804,11 +848,72 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 		command.SetSuccessOutput(concat("Deferred rendering noise generation method = \"")(method.empty() ? "<null>" : method)("\" (")(m_render_noise_method)(")").str());
 		return true;
 	}
+	else if (command.InputCommand == "post")
+	{
+		return ProcessPostProcessConsoleCommand(command);
+	}
 
 	// We did not recognise the command
 	return false;
 }
 
+bool DeferredRenderProcess::ProcessPostProcessConsoleCommand(GameConsoleCommand & command)
+{
+	// Commands are of the form "post <component> <command> [params...]"
+	// Param[0] = component
+	// Param[1] = command
+	// Param[2..N-1] = params
+	if (command.ParameterCount() < 2)
+	{
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ConsoleCommandHasInvalidSyntax,
+			"Cannot execute post-process render command; syntax is \"post <component> <command> [params...]\"");
+		return true;
+	}
+
+	// Attempt to locate a matching component before proceeding
+	for (const auto component : m_post_processing_components)
+	{
+		if (component->GetCode() == command.Parameter(0))
+		{
+			// Process allowed commands
+			if (command.Parameter(1) == "status")
+			{
+				command.SetSuccessOutput(concat("Post-processing component \"")(component->GetDescription())("\" (\"")(component->GetCode())("\") is ")
+					(component->IsActive() ? "enabled" : "disabled").str());
+				return true;
+			}
+			else if (command.Parameter(1) == "enable" || command.Parameter(1) == "disable")
+			{
+				bool enable = (command.Parameter(1) == "enable");
+				if (component->IsActive() == enable)
+				{
+					command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessAlreadyInDesiredState, 
+						concat("Post-processing component \"")(component->GetDescription())("\" (\"")
+						(component->GetCode())("\") is already ")(enable ? "enabled" : "disabled").str());
+					return true;
+				}
+				else
+				{
+					component->SetActive(enable);
+					command.SetSuccessOutput(concat("Post-processing component \"")(component->GetDescription())("\" (\"")(component->GetCode())("\") is now ")
+						(component->IsActive() ? "enabled" : "disabled").str());
+					return true;
+				}
+			}
+			else
+			{
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessCommandNotSupported,
+					concat("Command \"")(command.Parameter(0))("\" is not supported by post-processing render components").str());
+				return true;
+			}
+		}
+	}
+
+	// We could not locate a matching component
+	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessComponentDoesNotExist,
+		concat("Cannot execute post-process render command; no component exists with code \"")(command.Parameter(0))("\"").str());
+	return true;
+}
 
 DeferredRenderProcess::~DeferredRenderProcess(void)
 {

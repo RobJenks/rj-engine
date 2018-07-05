@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
 #include "DeferredGBuffer.h"
@@ -12,6 +13,7 @@
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
+class PostProcessComponent;
 class PostProcessMotionBlur;
 
 class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCommands
@@ -75,6 +77,9 @@ protected:
 	CMPINLINE FrameBufferState				GetFrameBufferState(void) const { return m_frame_buffer_state; }
 	CMPINLINE void							SetFrameBufferState(FrameBufferState state) { m_frame_buffer_state = state; }
 
+	// Return a pointer to the final colour buffer for this render process.  This may be the immediately-rendered colour
+	// buffer, the post-processed colour buffer or the debug rendering output, depending on our current state
+	TextureDX11 *							GetFinalColourBuffer(void);
 
 protected:
 
@@ -85,12 +90,19 @@ protected:
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
 	void RenderTransparency(void);
+	void PerformPostProcessing(void);
+
+	// Post-processing phases
+	TextureDX11 *		ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer);
+
 
 	// Retrieve standard buffer data
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
 
 	// Virtual inherited method to accept a command from the console
 	bool ProcessConsoleCommand(GameConsoleCommand & command);
+	
+	bool ProcessPostProcessConsoleCommand(GameConsoleCommand & command);
 
 private:
 
@@ -112,7 +124,13 @@ private:
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
 	RenderTargetDX11 *	m_depth_only_rt;
 	RenderTargetDX11 *	m_colour_rt;
-	TextureDX11 *		m_colour_buffer;
+	TextureDX11 *		m_colour_buffer;		// Colour buffer after all render process rendering, but before any post-processing.  Owned by this render process.
+
+	// Pointer to the final colour buffer following all rendering and post-processing.  This buffer may be 
+	// owned by the render process or it may be owned by the final post-processing component that worked 
+	// upon it.  We maintain only a pointer since it will be direct-copied to the backbuffer immediately 
+	// before presentation 
+	TextureDX11 *		m_final_colour_buffer;
 
 	// Standard constant buffers; keep single instance for binding efficiency
 	ManagedPtr<FrameDataBuffer>					m_cb_frame_data;			// Raw CB data & responsible for deallocation
@@ -124,6 +142,8 @@ private:
 
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
+	/* ... */
+	std::array<PostProcessComponent*, 1U>		m_post_processing_components;
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;

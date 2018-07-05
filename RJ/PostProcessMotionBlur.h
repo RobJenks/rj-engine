@@ -4,6 +4,7 @@
 #include "IntVector.h"
 #include "ShaderDX11.h"
 #include "Viewport.h"
+#include "PostProcessComponent.h"
 class DeferredRenderProcess;
 class DeferredGBuffer;
 class RenderTargetDX11;
@@ -12,7 +13,7 @@ class ConstantBufferDX11;
 class PipelineStateDX11;
 
 
-class PostProcessMotionBlur
+class PostProcessMotionBlur : public PostProcessComponent
 {
 public:
 
