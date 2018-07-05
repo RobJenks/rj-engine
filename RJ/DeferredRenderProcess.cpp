@@ -10,6 +10,7 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "PostProcessMotionBlur.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
@@ -25,13 +26,16 @@
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
 	m_vs(NULL),
+	m_vs_quad(NULL), 
 	m_ps_geometry(NULL),
 	m_ps_lighting(NULL),
 	m_ps_debug(NULL),
 	m_depth_only_rt(NULL),
+	m_colour_buffer(NULL), 
+	m_colour_rt(NULL), 
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
-	m_cb_debug(NULL),
+	m_cb_deferred(NULL),
 
 	m_pipeline_geometry(NULL),
 	m_pipeline_lighting_pass1(NULL),
@@ -41,12 +45,14 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_debug_rendering(NULL),
 
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_debug_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
 	m_model_cone(NULL),
@@ -54,7 +60,13 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_transform_fullscreen_quad(ID_MATRIX),
 	m_transform_fullscreen_quad_farplane(ID_MATRIX),
 	m_frame_buffer_state(FrameBufferState::Unknown),
+	
 	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
+
+	m_velocity_k(2U), 
+	m_exposure(1.0f), 
+
+	m_post_processing_components({ 0 }), 
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
@@ -62,6 +74,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	InitialiseShaders();
 	InitialiseRenderTargets();
+	InitialiseGBuffer();
 	InitialiseStandardBuffers();
 	InitialiseGBufferResourceMappings();
 
@@ -70,6 +83,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseDeferredDirectionalLightingPipeline();
 	InitialiseTransparentRenderingPipelines();
 	InitialiseDebugRenderingPipelines();
+
+	InitialisePostProcessingComponents();
 }
 
 // Perform any initialisation that cannot be completed on construction, e.g. because it requires
@@ -101,6 +116,9 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
 
+	m_vs_quad = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::FullScreenQuadVertexShader);
+	if (m_vs_quad == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_q]\n";
+
 	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
 	if (m_ps_geometry == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_g]\n";
 
@@ -110,11 +128,13 @@ void DeferredRenderProcess::InitialiseShaders(void)
 #ifdef _DEBUG
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
 	if (m_ps_debug == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering debug shader resources [ps_d]\n";
-	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredDebugBufferName);
+	m_param_ps_debug_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
 #endif
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
+	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName);
+	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
@@ -126,10 +146,48 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering render targets\n";
 
+	UINTVECTOR2 displaysize = Game::Engine->GetRenderDevice()->GetDisplaySize().Convert<UINT>();
+
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", Game::Engine->GetRenderDevice()->GetDisplaySize());
+	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", displaysize.Convert<int>());
 	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
+
+	// Colour render target will contain all colour buffer data; this is generally the primary render output before post-processing
+	Texture::TextureFormat primary_colour_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetColourBufferFormat();
+	m_colour_buffer = Game::Engine->GetRenderDevice()->Assets.CreateTexture2D("Deferred_Colour", displaysize.x, displaysize.y, 1, primary_colour_buffer_format);
+	m_colour_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Colour", displaysize.Convert<int>());
+	m_colour_rt->AttachTexture(RenderTarget::AttachmentPoint::Color0, m_colour_buffer);
+
+
+	// Assert that all objects were created as expected
+	std::vector<std::tuple<std::string, void**>> components = { 
+		{ "depth-only render target", (void**)&m_depth_only_rt }, 
+		{ "primary colour buffer", (void**)&m_colour_buffer }, 
+		{ "primary colour render target", (void**)&m_colour_rt }
+	};
+
+	// Verify each component in turn and report issues
+	for (const auto & entry : components)
+	{
+		if (*(std::get<1>(entry)) == NULL)
+		{
+			Game::Log << LOG_ERROR << "Deferred renderer failed to initialise deferred " << std::get<0>(entry) << "\n";
+		}
+		else
+		{
+			Game::Log << LOG_INFO << "Initialised deferred " << std::get<0>(entry) << "\n";
+		}
+	}
+}
+
+void DeferredRenderProcess::InitialiseGBuffer(void)
+{
+	Game::Log << LOG_INFO << "Initialising deferred rendering GBuffer\n";
+
+	// Calling render process (us) must bind the GBuffer target light accumulation buffer on initialisation
+	GBuffer.BindToTargetLightAccumulationBuffer(m_colour_buffer);
+	Game::Log << LOG_INFO << "Initialised GBuffer light accumulation target buffer bindings\n";
 }
 
 void DeferredRenderProcess::InitialiseStandardBuffers(void)
@@ -138,10 +196,8 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
 	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
+	m_cb_deferred = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
 
-#ifdef _DEBUG
-	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredDebugBuffer>(DeferredDebugBufferName, m_cb_debug_data.RawPtr);
-#endif
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
@@ -154,6 +210,7 @@ void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 		{ GBufferDiffuseTextureName, GBuffer.DiffuseTexture },
 		{ GBufferSpecularTextureName, GBuffer.SpecularTexture },
 		{ GBufferNormalTextureName, GBuffer.NormalTexture },
+		{ GBufferVelocityTextureName, GBuffer.VelocityTexture }, 
 		{ GBufferDepthTextureName, GBuffer.DepthStencilTexture }
 	};
 
@@ -195,8 +252,14 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 
 	// Also precalculate a fullscreen quad transform for rendering directional lights via the quad model
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
-	m_transform_fullscreen_quad = XMMatrixMultiply(
-		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
+	m_transform_fullscreen_quad = CalculateFullScreenQuadRenderingTransform(Game::Engine->GetRenderDevice()->GetDisplaySizeF());
+}
+
+// Calculate the transform for full-screen quad rendering with the specified dimensions
+XMMATRIX DeferredRenderProcess::CalculateFullScreenQuadRenderingTransform(const XMFLOAT2 & dimensions)
+{
+	return XMMatrixMultiply(
+		XMMatrixScaling(dimensions.x, dimensions.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
 	);
 }
@@ -262,7 +325,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass2");
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_pass2->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_lighting_pass2->SetRenderTarget(m_colour_rt);
 
 	// Perform culling of front faces since we want to render only back faces of the light volume
 	m_pipeline_lighting_pass2->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
@@ -294,7 +357,7 @@ void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Directional");
 	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_directional->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_lighting_directional->SetRenderTarget(m_colour_rt);
 	m_pipeline_lighting_directional->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
 	m_pipeline_lighting_directional->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
@@ -334,11 +397,23 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [d]\n";
 
 	m_pipeline_debug_rendering = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Debug");
-	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs_quad);
 	m_pipeline_debug_rendering->SetShader(Shader::Type::PixelShader, m_ps_debug);
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
 	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
-	m_pipeline_debug_rendering->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_debug_rendering->SetRenderTarget(m_colour_rt);
+}
+
+void DeferredRenderProcess::InitialisePostProcessingComponents(void)
+{
+	Game::Log << LOG_INFO << "Initialising deferred rendering post-process components\n";
+
+	// Screen-space pixel neighbourhood motion blur
+	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
+	
+
+	// Also maintain a collection of base post processing components
+	m_post_processing_components = { m_post_motionblur.RawPtr };
 }
 
 // Primary rendering method; executes all deferred rendering operations
@@ -356,8 +431,8 @@ void DeferredRenderProcess::Render(void)
 void DeferredRenderProcess::BeginFrame(void)
 {
 	/*
-	1. Initialise per-frame data
-	2. Clear GBuffer render target
+		1. Initialise per-frame data
+		2. Clear GBuffer render target
 	*/
 
 	/* 1. Initialise per-frame data */
@@ -367,20 +442,30 @@ void DeferredRenderProcess::BeginFrame(void)
 
 	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
+
+	/* 3. Clear all deferred render targets */
+	m_colour_rt->Clear(ClearFlags::Colour, NULL_FLOAT4);
 }
 
 // Perform all rendering of the frame
 void DeferredRenderProcess::RenderFrame(void)
 {
 	/*
-	1. Render all opaque geometry
-	2. Copy GBuffer depth/stencil to primary render target
-	3a. Lighting pass 1: determine lit pixels (non-directional lights)
-	3b. Lighting pass 2: render lit pixels (non-directional lights)
-	3c: Lighting: render directional lights
-	4. Render transparent objects
-	5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+		0. Populate deferred rendering parameter buffer
+		1. Render all opaque geometry
+		2. Copy GBuffer depth/stencil to primary render target
+		3a. Lighting pass 1: determine lit pixels (non-directional lights)
+		3b. Lighting pass 2: render lit pixels (non-directional lights)
+		3c: Lighting: render directional lights
+		4. Render transparent objects
+		5. Perform all post-processing
+		6. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+		...
+		N. Copy final prepared render buffer into the primary render target
 	*/
+
+	/* 0. Populate deferred rendering parameter buffer */
+	PopulateDeferredRenderingParamBuffer();
 
 	/* 1. Render opaque geometry */
 	RenderGeometry();
@@ -396,10 +481,19 @@ void DeferredRenderProcess::RenderFrame(void)
 	/* 4. Render transparent objects */
 	RenderTransparency();
 
-	/* 5. If debug rendering from the GBuffer is enabled, run the debug pipeline and overwrite all primary RT data */
+	/* 5. Perform all active post-process rendering and assign the 'final' colour buffer reference */
+	PerformPostProcessing();
+	
+
+	/* 6. If debug rendering from the GBuffer is enabled, run the debug pipeline and overwrite all primary RT data */
 #ifdef _DEBUG
 	GBufferDebugRendering();
 #endif
+
+	/* N. Copy final prepared colour buffer into the primary render target */
+	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
+		GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(
+			GetFinalColourBuffer());
 }
 
 // End the frame; perform any post-render cleanup for the render process
@@ -440,7 +534,9 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	// Frame data buffer
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
+	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
+	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
@@ -451,11 +547,33 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	SetFrameBufferState(FrameBufferState::Fullscreen);
 
 	// Frame data buffer
-	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;														// View matrix == identity
-	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();				// Proj matrix == orthographic
-	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();	// Inv proj == inv orthographic
+	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;															// View matrix == identity
+	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();					// Proj matrix == orthographic
+	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();				// ViewProj matrix == (orthographic * ID) == orthographic
+	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();		// Inv proj == inv orthographic
+	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
+}
+
+void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
+{
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+
+	// General data
+	m_cb_deferred_data.RawPtr->C_frametime = Game::TimeFactor;
+	m_cb_deferred_data.RawPtr->C_buffersize = XMUINT2(displaysize.x, displaysize.y);
+
+	// Velocity calculation data
+	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;
+	m_cb_deferred_data.RawPtr->C_half_exposure = (0.5f * m_exposure);
+	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
+
+	// Debug visualisation data
+	m_cb_deferred_data.RawPtr->C_debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
+
+	// Commit all changes to the CB
+	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);
 }
 
 void DeferredRenderProcess::RenderGeometry(void)
@@ -465,6 +583,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 	// Bind required buffer resources to shader parameters
 	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_geometry_deferreddata).Set(m_cb_deferred);
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	m_pipeline_geometry->Bind();
@@ -580,6 +699,30 @@ void DeferredRenderProcess::RenderTransparency(void)
 
 }
 
+// Execute all active post-process rendering phases and populate the final deferred rendering output
+void DeferredRenderProcess::PerformPostProcessing(void)
+{
+	// Points to the current latest colour buffer during the post-processing pipeline
+	TextureDX11 * buffer = m_colour_buffer;
+
+	/* Post-processing pipeline */
+	buffer = ExecutePostProcessMotionBlur(buffer);
+	
+
+	// Store a pointer to the final, fully-processed buffer
+	m_final_colour_buffer = buffer;
+}
+
+// Screen-space per-pixel subsampled motion blur
+TextureDX11 * DeferredRenderProcess::ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer)
+{
+	// Leave buffer unmodified if this post-process is not active
+	if (!m_post_motionblur.RawPtr->IsActive()) return colour_buffer;
+
+	// Post-process and return the modified colour buffer
+	return m_post_motionblur.RawPtr->Execute(colour_buffer, GBuffer.VelocityTexture);
+}
+
 // Set the class of render noise generation used during the render process
 void DeferredRenderProcess::SetRenderNoiseGeneration(const std::string & code)
 {
@@ -592,10 +735,14 @@ bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::s
 {
 	auto type = StrLower(target);
 
-	if (type == "diffuse")				m_debug_render_mode = DebugRenderMode::Diffuse;
-	else if (type == "specular")		m_debug_render_mode = DebugRenderMode::Specular;
-	else if (type == "normal")			m_debug_render_mode = DebugRenderMode::Normal;
-	else if (type == "depth")			m_debug_render_mode = DebugRenderMode::Depth;
+	if (type == "diffuse")						m_debug_render_mode = DebugRenderMode::Diffuse;
+	else if (type == "specular")				m_debug_render_mode = DebugRenderMode::Specular;
+	else if (type == "normal")					m_debug_render_mode = DebugRenderMode::Normal;
+	else if (type == "velocity")				m_debug_render_mode = DebugRenderMode::Velocity;
+	else if (type == "depth")					m_debug_render_mode = DebugRenderMode::Depth;
+	else if (type == "motion_tilegen")			m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
+	else if (type == "motion_neighbourhood")	m_debug_render_mode = DebugRenderMode::MotionBlurNeighbourhood;
+	else if (type == "motion_final")			m_debug_render_mode = DebugRenderMode::MotionBlurFinal;
 	else
 	{
 		// Unrecognised mode
@@ -612,16 +759,20 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 	switch (debug_mode)
 	{
 		// GBuffer textures
-	case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
-	case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
-	case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
-	case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
+		case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
+		case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
+		case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
+		case DebugRenderMode::Velocity:		return GBuffer.VelocityTexture;
+		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
 
 		// Other textures
+		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
+		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
+		case DebugRenderMode::MotionBlurFinal:			return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetRenderedOutput() : NULL);
 
 
 		// Unknown texture
-	default:							return NULL;
+		default:							return NULL;
 	}
 }
 
@@ -639,24 +790,39 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	// Debug views are generated via full-screen rendering
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
-	// Populate debug rendering constant buffer
-	m_cb_debug_data.RawPtr->is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
-	m_cb_debug->Set(m_cb_debug_data.RawPtr);
-
 	// Bind shader parameters to the debug pipeline
-	m_pipeline_debug_rendering->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_debugdata).Set(m_cb_debug);
+	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_deferreddata).Set(m_cb_deferred);
 
 	// Bind the debug pipeline
 	m_pipeline_debug_rendering->Bind();
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
-	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, *m_model_quad, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
+	RenderFullScreenQuad();
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();
 
 	return true;
+}
+
+// Return a pointer to the final colour buffer for this render process.  This may be the immediately-rendered colour
+// buffer, the post-processed colour buffer or the debug rendering output, depending on our current state
+TextureDX11 * DeferredRenderProcess::GetFinalColourBuffer(void)
+{
+	// If debug rendering is enabled we redirect to the base colour buffer, which has been overwritten with debug data
+#	ifdef _DEBUG
+		if (m_debug_render_mode != DebugRenderMode::None) return m_colour_buffer;
+#	endif
+
+	// Otherwise, we always return the final fully-processed colour buffer
+	return m_final_colour_buffer;
+}
+
+// Execute a full-screen quad rendering through the currently-bound pipeline, using the minimal
+// screen-space rendering vertex pipeline
+void DeferredRenderProcess::RenderFullScreenQuad(void)
+{
+	Game::Engine->RenderFullScreenQuad();
 }
 
 // Virtual inherited method to accept a command from the console
@@ -682,13 +848,75 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 		command.SetSuccessOutput(concat("Deferred rendering noise generation method = \"")(method.empty() ? "<null>" : method)("\" (")(m_render_noise_method)(")").str());
 		return true;
 	}
+	else if (command.InputCommand == "post")
+	{
+		return ProcessPostProcessConsoleCommand(command);
+	}
 
 	// We did not recognise the command
 	return false;
 }
 
+bool DeferredRenderProcess::ProcessPostProcessConsoleCommand(GameConsoleCommand & command)
+{
+	// Commands are of the form "post <component> <command> [params...]"
+	// Param[0] = component
+	// Param[1] = command
+	// Param[2..N-1] = params
+	if (command.ParameterCount() < 2)
+	{
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ConsoleCommandHasInvalidSyntax,
+			"Cannot execute post-process render command; syntax is \"post <component> <command> [params...]\"");
+		return true;
+	}
+
+	// Attempt to locate a matching component before proceeding
+	for (const auto component : m_post_processing_components)
+	{
+		if (component->GetCode() == command.Parameter(0))
+		{
+			// Process allowed commands
+			if (command.Parameter(1) == "status")
+			{
+				command.SetSuccessOutput(concat("Post-processing component \"")(component->GetDescription())("\" (\"")(component->GetCode())("\") is ")
+					(component->IsActive() ? "enabled" : "disabled").str());
+				return true;
+			}
+			else if (command.Parameter(1) == "enable" || command.Parameter(1) == "disable")
+			{
+				bool enable = (command.Parameter(1) == "enable");
+				if (component->IsActive() == enable)
+				{
+					command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessAlreadyInDesiredState, 
+						concat("Post-processing component \"")(component->GetDescription())("\" (\"")
+						(component->GetCode())("\") is already ")(enable ? "enabled" : "disabled").str());
+					return true;
+				}
+				else
+				{
+					component->SetActive(enable);
+					command.SetSuccessOutput(concat("Post-processing component \"")(component->GetDescription())("\" (\"")(component->GetCode())("\") is now ")
+						(component->IsActive() ? "enabled" : "disabled").str());
+					return true;
+				}
+			}
+			else
+			{
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessCommandNotSupported,
+					concat("Command \"")(command.Parameter(0))("\" is not supported by post-processing render components").str());
+				return true;
+			}
+		}
+	}
+
+	// We could not locate a matching component
+	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::PostProcessComponentDoesNotExist,
+		concat("Cannot execute post-process render command; no component exists with code \"")(command.Parameter(0))("\"").str());
+	return true;
+}
 
 DeferredRenderProcess::~DeferredRenderProcess(void)
 {
 
 }
+

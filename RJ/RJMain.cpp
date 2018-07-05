@@ -609,22 +609,27 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_F5])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("velocity");
 		Game::Keyboard.LockKey(DIK_F5);
+	}
+	if (b[DIK_F6])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Keyboard.LockKey(DIK_F6);
 	}
 
 	// Debug resource loading
-	if (b[DIK_F6])
+	if (b[DIK_F7])
 	{
 		Game::Engine->GetRenderDevice()->ReloadAllShaders();
 		Game::Keyboard.LockKey(DIK_F6);
 	}
-	if (b[DIK_F7])
+	if (b[DIK_F8])
 	{
 		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
 		Game::Keyboard.LockKey(DIK_F7);
 	}
-	if (b[DIK_F8])
+	if (b[DIK_F9])
 	{
 		Model::ReloadAllModels();
 		Game::Keyboard.LockKey(DIK_F8);
@@ -755,7 +760,21 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_EQUALS])
 	{
-		cs()->SetTargetSpeedPercentage(b[DIK_LCONTROL] ? 0.0f : 1.0f);
+		//((LightSource*)Game::GetObjectByInstanceCode("clight"))->SetPosition(XMVectorAdd(a1()->GetPosition(), XMVectorSetY(NULL_VECTOR, 5.0f)));
+
+		if (b[DIK_LSHIFT])
+		{
+			s2()->SetName("B");
+		}
+		else
+		{
+			s2()->SetCollisionMode(Game::CollisionMode::NoCollision);
+			s2()->SetSize(2.0f);
+			s2()->SetPosition(XMVectorSet(145, 219, 1.08, 0.0f));
+			s2()->SetOrientation(XMQuaternionRotationRollPitchYaw(0.0f, PI, PI / 5.0f));
+			s2()->SetMass(8.0f);
+			s2()->SetName("A");
+		}
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
@@ -2313,7 +2332,7 @@ void RJMain::__CreateDebugScenario(void)
 		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
-		bool is_armed[2] = { true, false };
+		bool is_armed[2] = { false, false };
 		bool has_engine_control[2] = { false, false };
 		int create_count = 1; // 2
 
@@ -2377,7 +2396,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShip *s2_ship = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
 		s2_ship->SetName("Test ship s2");
-		s2_ship->OverrideInstanceCode("Test ship s2");
+		s2_ship->OverrideInstanceCode("s2");
 		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 		s2_ship->SetPosition(XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
@@ -2703,14 +2722,10 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
-		Game::Engine->GetTextRenderer()->RenderString("*", 0U, DecalRenderingMode::WorldSpace, Game::GetObjectByInstanceCode("clight")->GetPosition(),
-			14.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f), TextAnchorPoint::Centre);
-
-
-		/*Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
-			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));*/
-		
-		
+		if (s2()->GetName() == "B")
+		{
+			s2()->ChangePosition(XMVectorSetZ(NULL_VECTOR, -Game::TimeFactor * s2()->GetMass()));
+		}
 
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
@@ -2737,4 +2752,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
-

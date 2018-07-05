@@ -25,6 +25,15 @@ struct RM_Instance
 		:
 		Flags(0U), 
 		Transform(world), 
+		LastTransform(world), 
+		SortKey(SORT_KEY_RENDER_FIRST)
+	{}
+
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld) noexcept
+		:
+		Flags(0U),
+		Transform(world),
+		LastTransform(lastworld), 
 		SortKey(SORT_KEY_RENDER_FIRST)
 	{}
 
@@ -32,6 +41,15 @@ struct RM_Instance
 		:
 		Flags(0U),
 		Transform(world), 
+		LastTransform(world), 
+		SortKey(sort_key)
+	{}
+
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key) noexcept
+		:
+		Flags(0U),
+		Transform(world),
+		LastTransform(lastworld),
 		SortKey(sort_key)
 	{}
 
@@ -39,7 +57,17 @@ struct RM_Instance
 		:
 		Flags(0U),
 		Transform(world),
+		LastTransform(world), 
 		SortKey(sort_key), 
+		Highlight(highlight)
+	{}
+
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+		:
+	Flags(0U),
+		Transform(world),
+		LastTransform(lastworld),
+		SortKey(sort_key),
 		Highlight(highlight)
 	{}
 
@@ -49,6 +77,15 @@ struct RM_Instance
 		Flags(0U)
 	{
 		XMStoreFloat4x4(&Transform, world);
+		LastTransform = Transform;
+	}
+
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld) noexcept
+		:
+	Flags(0U)
+	{
+		XMStoreFloat4x4(&Transform, world);
+		XMStoreFloat4x4(&LastTransform, lastworld);
 	}
 
 	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key) noexcept
@@ -57,6 +94,16 @@ struct RM_Instance
 		SortKey(sort_key)
 	{
 		XMStoreFloat4x4(&Transform, world);
+		LastTransform = Transform;
+	}
+
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key) noexcept
+		:
+		Flags(0U),
+		SortKey(sort_key)
+	{
+		XMStoreFloat4x4(&Transform, world);
+		XMStoreFloat4x4(&LastTransform, lastworld);
 	}
 
 	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
@@ -66,8 +113,18 @@ struct RM_Instance
 		Highlight(highlight)
 	{
 		XMStoreFloat4x4(&Transform, world);
+		LastTransform = Transform;
 	}
 
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+		:
+		Flags(0U),
+		SortKey(sort_key),
+		Highlight(highlight)
+	{
+		XMStoreFloat4x4(&Transform, world);
+		XMStoreFloat4x4(&LastTransform, lastworld);
+	}
 
 	// Comparison operator for sorting; instances are sorted in ascending 'SortKey' order
 	CMPINLINE bool operator<(const RM_Instance & val) const { return (SortKey < val.SortKey); }
@@ -76,6 +133,7 @@ struct RM_Instance
 	CMPINLINE RM_Instance(const RM_Instance & other)
 		:
 		Transform(other.Transform),
+		LastTransform(other.LastTransform), 
 		Flags(other.Flags),
 		SortKey(other.SortKey),
 		Highlight(other.Highlight)
@@ -89,6 +147,7 @@ struct RM_Instance
 	CMPINLINE RM_Instance(RM_Instance && other) noexcept
 		:
 		Transform(std::move(other.Transform)), 
+		LastTransform(std::move(other.LastTransform)), 
 		Flags(other.Flags), 
 		SortKey(other.SortKey), 
 		Highlight(std::move(other.Highlight))
@@ -101,6 +160,7 @@ struct RM_Instance
 	CMPINLINE RM_Instance & RM_Instance::operator=(RM_Instance && other) noexcept
 	{
 		Transform = std::move(other.Transform);
+		LastTransform = std::move(other.LastTransform);
 		Flags = other.Flags;
 		SortKey = other.SortKey;
 		Highlight = std::move(other.Highlight);

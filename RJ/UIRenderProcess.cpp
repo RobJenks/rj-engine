@@ -117,6 +117,6 @@ void UIRenderProcess::Render(void)
 void UIRenderProcess::PopulateFrameBuffer(void)
 {
 	// Frame data buffer
-	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();		// (View = ID, Proj = Ortho)
+	m_cb_frame_data.RawPtr->ViewProjectionMatrix = Game::Engine->GetRenderOrthographicMatrixF();		// (View = ID, Proj = Ortho)
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }

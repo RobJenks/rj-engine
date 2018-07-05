@@ -120,7 +120,8 @@ CoreEngine::CoreEngine(void)
 	m_vsync( false ), 
 	m_render_device_failure_count(0U), 
 	m_screen_space_adjustment(NULL_VECTOR), 
-	m_screen_space_adjustment_f(NULL_FLOAT2)
+	m_screen_space_adjustment_f(NULL_FLOAT2), 
+	m_screenspace_quad_vb(NULL)
 {
 	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
@@ -143,7 +144,8 @@ CoreEngine::CoreEngine(void)
 	// Initialise all key matrices to the identity
 	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
 		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
-	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f 
+		= r_invviewproj_f = r_priorframe_viewproj_f = ID_MATRIX_F;
 	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -219,6 +221,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Text rendering initialised\n";
+
+	// Initialise the specialised screen-space rendering components
+	res = InitialiseScreenSpaceRenderingComponents();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Screen-space rendering components initialised\n";
 
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
@@ -314,6 +321,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownLightingManager();
 	ShutdownDecalRendering();
 	ShutdownTextRendering();
+	ShutdownScreenSpaceRenderingComponents();
 	ShutdownEffectManager();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
@@ -448,6 +456,23 @@ Result CoreEngine::InitialiseShaderSupport(void)
 	InputLayoutDesc::InitialiseStaticData();
 
 	// Returns success
+	return ErrorCodes::NoError;
+}
+
+Result CoreEngine::InitialiseScreenSpaceRenderingComponents(void)
+{
+	// Directly-populated vertex buffer which matches the minimal VS input layout
+	XMFLOAT2 verts[6] = { { -1.0f, -1.0f }, { -1.0f, +1.0f }, { +1.0f, +1.0f }, { -1.0f, -1.0f }, { +1.0f, +1.0f }, { +1.0f, -1.0f } };
+	D3D11_BUFFER_DESC desc = { 6U * sizeof(XMFLOAT2), D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0, 0 };
+	D3D11_SUBRESOURCE_DATA data = { (void *)verts, sizeof(XMFLOAT2), 6U * sizeof(XMFLOAT2) };
+	HRESULT hr = GetDevice()->CreateBuffer(&desc, &data, &m_screenspace_quad_vb);
+
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Failed to initialised screen-space rendering support components\n";
+		return ErrorCodes::CannotInitialiseScreenSpaceRenderingSupport;
+	}
+
 	return ErrorCodes::NoError;
 }
 
@@ -677,6 +702,12 @@ void CoreEngine::ShutdownShaderSupport(void)
 	// Nothing required
 }
 
+void CoreEngine::ShutdownScreenSpaceRenderingComponents(void)
+{
+	// Release any specific resources held for screen-space rendering
+	ReleaseIfExists(m_screenspace_quad_vb);
+}
+
 void CoreEngine::ShutdownFrustrum(void)
 {
 	// Release the view frustrum object.
@@ -869,6 +900,11 @@ void CoreEngine::Render(void)
 // Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
 void CoreEngine::RetrieveRenderCycleData(void)
 {
+	// Store prior-frame data before recalculating
+	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
+	r_priorframe_viewproj_f = r_viewproj_f;
+	
+	// Store new render matrices
 	r_devicecontext = m_renderdevice->GetDeviceContext();
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
@@ -1128,6 +1164,20 @@ void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model
 	// Update the total count of draw calls & instances that have been processed
 	++m_renderinfo.DrawCalls; 
 	m_renderinfo.InstanceCount += instance_count;
+}
+
+// Specialised method for full-screen quad rendering, to support cheaper post-processing and screen-space rendering
+// Is not processed through the render queue; these render actions are performed immediately
+void CoreEngine::RenderFullScreenQuad(void)
+{
+	const UINT stride = sizeof(XMFLOAT2);
+	const UINT offset = 0U;
+
+	// Bind the precompiled fullscreen rendering VB
+	r_devicecontext->IASetVertexBuffers(0, 1, (ID3D11Buffer * const *)(&m_screenspace_quad_vb), &stride, &offset);
+
+	// Submit a basic draw call for the quad geometry
+	r_devicecontext->Draw(6U, 0U);
 }
 
 // Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
@@ -1427,19 +1477,19 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		if (alpha < Game::C_EPSILON) return;			
 
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), 
-			std::move(RM_Instance(object->GetWorldMatrix())), object->GetPosition());
+			std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix())), object->GetPosition());
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
 }
@@ -1469,8 +1519,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 		ArticulatedModelComponent **component = model->GetComponents();
 		for (int i = 0; i < n; ++i, ++component)
 		{
+			const auto comp = (*component);
 			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
-				RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
+				RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), comp->GetPosition());
 		}
 	}
 	else
@@ -1483,8 +1534,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
-					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
+				const auto comp = (*component);
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
+					RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
 			}
 		}
 		else
@@ -1493,8 +1545,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+				const auto comp = (*component);
+				SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+					RM_Instance(comp->GetWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 			}
 		}
 	}
@@ -1766,8 +1819,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+					auto comp = (*component);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2073,8 +2127,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+					auto comp = (*component);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2246,8 +2301,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 				component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
-						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
+					auto comp = (*component);
+					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, comp->Model.GetModel(), std::move(
+						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), comp->GetPosition());
 				}
 			}
 		});
@@ -2279,8 +2335,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
-							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
+						auto comp = (*component);
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
+							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
 					}
 				}
 			}
@@ -2305,8 +2362,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
-							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
+						auto comp = (*component);
+						SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
+							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
 					}
 				}
 			}
@@ -3023,7 +3081,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			return true;
 		}
 	}
-	else if (command.InputCommand == "backbuffer_attach")
+	else if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
 	{
 		if (GetRenderDevice()->RepointBackbufferRenderTargetAttachment(command.Parameter(0)))
 		{

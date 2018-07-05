@@ -4,6 +4,7 @@
 
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
+#include "FrameFlag.h"
 #include "ModelInstance.h"
 class Model;
 
@@ -37,6 +38,12 @@ public:
 	// Retrieve or set the component world matrix
 	CMPINLINE XMMATRIX					GetWorldMatrix(void) const						{ return m_worldmatrix; }
 	CMPINLINE void RJ_XM_CALLCONV		SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
+
+	// Return the previous-frame world transform, where applicable.  If it was not calculated last frame, returns the current transform
+	CMPINLINE XMMATRIX					GetLastWorldMatrix(void) const
+	{
+		return (m_worldcurrent.IsSet() ? m_lastworld : m_worldmatrix);
+	}
 
 	// Set all spatial components at once, to reduce method calls when all information is known
 	CMPINLINE void						SetAllSpatialData(	const FXMVECTOR position, const FXMVECTOR orientation,
@@ -80,6 +87,12 @@ protected:
 
 	// World matrix for the component
 	AXMMATRIX							m_worldmatrix;
+
+	// Flag which indicates whether the world transform was calculated this frame
+	FrameFlag							m_worldcurrent;
+
+	// Prior frame world transform, valid if m_worldcurrent is set
+	AXMMATRIX							m_lastworld;
 
 	// Flags indicating whether this object has a parent, or any child attachments
 	bool								m_hasparent;

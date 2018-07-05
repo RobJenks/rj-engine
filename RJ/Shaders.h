@@ -10,6 +10,8 @@ public:
 	static const std::string StandardVertexShader;
 	static const std::string StandardPixelShader;
 
+	static const std::string FullScreenQuadVertexShader;
+
 	static const std::string DeferredGeometryPixelShader;
 	static const std::string DeferredLightingPixelShader;
 	static const std::string DeferredLightingDebug;
@@ -21,4 +23,8 @@ public:
 	static const std::string SDFDecalDeferredVertexShader;
 	static const std::string SDFDecalDirectPixelShader;
 	static const std::string SDFDecalDeferredPixelShader;
+
+	static const std::string MotionBlurTileGen;
+	static const std::string MotionBlurNeighbourhood;
+	static const std::string MotionBlurGather;
 };

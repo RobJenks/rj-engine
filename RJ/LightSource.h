@@ -7,7 +7,7 @@
 #include "iSpaceObject.h"
 #include "Light.h"
 
-class LightSource : public ALIGN16<LightSource>, public iSpaceObject
+class LightSource : public iSpaceObject
 {
 public:
 

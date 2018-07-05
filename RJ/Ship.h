@@ -33,7 +33,7 @@ public:
 // Main ship class
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Ship : public ALIGN16<Ship>, public iSpaceObject, public EntityAI, public iContainsHardpoints
+class Ship : public iSpaceObject, public EntityAI, public iContainsHardpoints
 {
 public:
 

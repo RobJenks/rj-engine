@@ -19,7 +19,7 @@ class iSpaceObjectEnvironment;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Actor : public ALIGN16<Actor>, public iEnvironmentObject, public EntityAI
+class Actor : public iEnvironmentObject, public EntityAI
 {
 public:
 

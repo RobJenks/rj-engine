@@ -75,6 +75,7 @@ public:
 	CMPINLINE float									GetNearClipDistance(void) const { return m_screen_near; }
 	CMPINLINE float									GetFarClipDistance(void) const { return m_screen_far; }
 	CMPINLINE INTVECTOR2							GetDisplaySize(void) const { return m_displaysize; }
+	CMPINLINE UINTVECTOR2							GetDisplaySizeU(void) const { return m_displaysize_u; }
 	CMPINLINE XMFLOAT2								GetDisplaySizeF(void) const { return m_displaysize_f; }
 
 	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
@@ -87,6 +88,10 @@ public:
 	// Direct access to common or core engine assets
 	const MaterialDX11 *							NullMaterial(void) const { return m_material_null; }
 	const MaterialDX11 *							DefaultMaterial(void) const { return m_material_null; }
+
+	// Return configuration for the primary render target buffers
+	Texture::TextureFormat							PrimaryRenderTargetColourBufferFormat(void) const;
+	Texture::TextureFormat							PrimaryRenderTargetDepthStencilBufferFormat(void) const;
 
 	// Viewport configuration
 	void											SetDisplaySize(INTVECTOR2 display_size);
@@ -146,6 +151,7 @@ private:
 	float									m_fov;
 	float									m_halffovtan;
 	INTVECTOR2								m_displaysize;
+	UINTVECTOR2								m_displaysize_u;
 	XMFLOAT2								m_displaysize_f;
 	Viewport								m_viewport;			// Primary, full-screen viewport
 	float									m_aspectratio;
@@ -161,6 +167,7 @@ private:
 
 	ShaderDX11 *							m_standard_vs;
 	ShaderDX11 *							m_standard_ps;
+	ShaderDX11 *							m_quad_vs;
 	ShaderDX11 *							m_deferred_geometry_ps;
 	ShaderDX11 *							m_deferred_lighting_ps;
 	ShaderDX11 *							m_deferred_debug_ps;
@@ -170,11 +177,17 @@ private:
 	ShaderDX11 *							m_sdf_decal_deferred_vs;
 	ShaderDX11 *							m_sdf_decal_direct_ps;
 	ShaderDX11 *							m_sdf_decal_deferred_ps;
+	ShaderDX11 *							m_post_motionblur_tilegen_ps;
+	ShaderDX11 *							m_post_motionblur_neighbour_ps;
+	ShaderDX11 *							m_post_motionblur_gather_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
+	InputLayoutDesc							m_fullscreen_quad_input_layout;
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
+	SamplerStateDX11 *						m_sampler_pointclamp;
+	SamplerStateDX11 *						m_sampler_pointrepeat;
 
 	const MaterialDX11 *					m_material_null;
 	const MaterialDX11 *					m_material_default;

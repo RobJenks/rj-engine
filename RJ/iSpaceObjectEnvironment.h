@@ -32,7 +32,7 @@ class Frustum;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iSpaceObjectEnvironment : public ALIGN16<iSpaceObjectEnvironment>, public Ship, public iContainsComplexShipTiles, public iDataObjectEnvironment
+class iSpaceObjectEnvironment : public Ship, public iContainsComplexShipTiles, public iDataObjectEnvironment
 {
 
 

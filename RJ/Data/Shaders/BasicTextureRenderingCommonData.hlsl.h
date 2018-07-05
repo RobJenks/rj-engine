@@ -6,7 +6,7 @@
 // Basic constant buffer holding minimum per-frame data required
 CBUFFER BasicTextureRenderingFrameBuffer REGISTER(b4)
 {
-	RJ_ROW_MAJOR_MATRIX ViewProjection;		// (View * Proj) matrix
+	RJ_ROW_MAJOR_MATRIX ViewProjectionMatrix;		// (View * Proj) matrix
 };
 
 

@@ -10,7 +10,7 @@ class DeferredGBuffer
 {
 public:
 
-	enum class GBufferTexture { Diffuse = 0, Specular = 1, Normal = 2, Depth = 3 };
+	enum class GBufferTexture { Diffuse = 0, Specular = 1, Normal = 2, Depth = 3, Velocity = 4 };
 
 	DeferredGBuffer(void);
 
@@ -20,11 +20,19 @@ public:
 	TextureDX11 *					SpecularTexture;
 	TextureDX11 *					NormalTexture;
 	TextureDX11 *					DepthStencilTexture;
+	TextureDX11 *					VelocityTexture;
 
 	TextureDX11 *					LookupTexture(GBufferTexture texture);
 	
 	void							Bind(Shader::Type shader_type);
 	void							Unbind(Shader::Type shader_type);
+
+	// Bind an existing colour buffer as the light accumulation target for this GBuffer
+	void							BindToTargetLightAccumulationBuffer(TextureDX11 *targetbuffer);
+	
+	// Unbind the light accumulation target for this render buffer.  Target should never be
+	// unbound when executing a render cycle
+	void							UnbindTargetLightAccumulationBuffer(void);
 
 	~DeferredGBuffer(void);
 

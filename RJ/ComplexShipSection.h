@@ -21,7 +21,7 @@ class TextureDX11;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class ComplexShipSection : public ALIGN16<ComplexShipSection>, public iSpaceObject
+class ComplexShipSection : public iSpaceObject
 {
 public:
 

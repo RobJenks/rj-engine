@@ -117,8 +117,6 @@ float DataObjectContinuousSwitch::DeterminePlayerInputDelta(const XMFLOAT2 & mou
 
 	// Now weight the delta based upon the dot product, i.e. the degree to which we align with the constraint axis
 	float result = ((dot_abs * input_delta.x) + ((1.0f - dot_abs) * input_delta.y));
-	OutputDebugString(concat("View: ")(Vector3ToString(Game::Engine->GetCamera()->GetCameraHeadingF()).c_str())(", Axis: ")(Vector3ToString(axis).c_str())(", Dot: ")(dot)
-		(", InputDelta: ")(Vector2ToString(input_delta).c_str())(", Result: ")(result)(", PcResult: ")(clamp(result / PLAYER_INPUT_RANGE_SCREEN_COORDS, -1.0f, 1.0f))("\n").str().c_str());
 	return result;
 }
 

@@ -159,6 +159,7 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseOrthographicMatrixF(void) const		{ return r_invorthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const				{ return r_viewproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
+	CMPINLINE const XMFLOAT4X4 & GetPriorFrameViewProjectionMatrixF(void) const			{ return r_priorframe_viewproj_f; }
 
 	// Pass-through accessor methods for key engine components
 	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
@@ -188,6 +189,10 @@ public:
 	// the material specified in the model buffer; a null material will fall back to the default model buffer material
 	void					RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count);
 	void					RenderInstanced(const PipelineStateDX11 & pipeline, const Model & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count);
+
+	// Specialised method for full-screen quad rendering, to support cheaper post-processing and screen-space rendering
+	// Is not processed through the render queue; these render actions are performed immediately
+	void					RenderFullScreenQuad(void);
 
 	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
 	// queue items multiple times through e.g. different shader pipelines
@@ -498,6 +503,7 @@ private:
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
 	Result					InitialiseShaderSupport(void);
+	Result					InitialiseScreenSpaceRenderingComponents(void);
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseAudioManager(void);
 	Result					InitialiseLightingManager(void);
@@ -517,6 +523,7 @@ private:
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
 	void					ShutdownShaderSupport(void);
+	void					ShutdownScreenSpaceRenderingComponents(void);
 	void					ShutdownFrustrum(void);
 	void					ShutdownAudioManager(void);
 	void					ShutdownLightingManager(void);
@@ -593,6 +600,9 @@ private:
 	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 
+	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
+	XMFLOAT4X4				r_priorframe_viewproj_f;	// Prior frame; local float representation of view projection matrix
+
 
 	VertexBufferDX11 *			m_instancebuffer;
 	RenderQueue					m_renderqueue;
@@ -606,6 +616,9 @@ private:
 
 	// Cached reference to unit quad model, used for direct screen-space rendering of materials
 	Model *						m_unit_quad_model;
+
+	// Screen-space rendering components
+	ID3D11Buffer *				m_screenspace_quad_vb;
 
 	// Clear the render queue.  Not required per-frame; invoked on shutdown to clear down resources
 	void								DeallocateRenderingQueue(void);

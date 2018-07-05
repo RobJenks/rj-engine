@@ -11,7 +11,7 @@ BasicTextureSamplingVertexShaderOutput VS_Basic_Texture(Vertex_Inst_Standard inp
 
 	// Position is only required in clip space
 	output.position = mul(float4(input.position, 1.0f), input.Transform);	// Model -> World space
-	output.position = mul(output.position, ViewProjection);					// -> View -> Projection space
+	output.position = mul(output.position, ViewProjectionMatrix);			// -> View -> Projection space
 
 	// Other required data is simply passed through
 	output.texCoord = input.tex;

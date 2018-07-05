@@ -581,6 +581,7 @@
     <ClCompile Include="DynamicTerrainInteractionType.cpp" />
     <ClCompile Include="PipelineStateDX11.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
+    <ClCompile Include="PostProcessMotionBlur.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />
@@ -602,6 +603,7 @@
     <ClCompile Include="RM_ModelData.cpp" />
     <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SamplerStateDX11.cpp" />
+    <ClCompile Include="SamplerStates.cpp" />
     <ClCompile Include="SDFDecalRenderProcess.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -996,6 +998,8 @@
     <ClInclude Include="PipelineStateDX11.h" />
     <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
+    <ClInclude Include="PostProcessComponent.h" />
+    <ClInclude Include="PostProcessMotionBlur.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="Random.h" />
@@ -1100,6 +1104,7 @@
     <ClInclude Include="RM_ZSortedInstance.h" />
     <ClInclude Include="SamplerState.h" />
     <ClInclude Include="SamplerStateDX11.h" />
+    <ClInclude Include="SamplerStates.h" />
     <ClInclude Include="SDFDecalRenderProcess.h" />
     <ClInclude Include="SentenceType.h" />
     <ClInclude Include="SequenceGenerationTests.h" />
@@ -1367,7 +1372,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Deferred_Lighting</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <None Include="Data\Shaders\hlsl_projection_common.hlsl">
+    <None Include="Data\Shaders\hlsl_common.hlsl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
@@ -1394,6 +1399,12 @@
       <FileType>Document</FileType>
     </None>
     <None Include="Data\Shaders\noise_buffers.hlsl.h">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Shaders\motion_blur_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Shaders\motion_blur_resources.hlsl">
       <FileType>Document</FileType>
     </None>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -1446,6 +1457,48 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PS_SDFDecal_Direct</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_gather.ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_MotionBlur_Gather</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">PS_MotionBlur_Gather</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PS_MotionBlur_Gather</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_MotionBlur_Gather</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">PS_MotionBlur_Gather</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_MotionBlur_Gather</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_neighbour.ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_MotionBlur_Neighbourhood</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">PS_MotionBlur_Neighbourhood</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PS_MotionBlur_Neighbourhood</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_MotionBlur_Neighbourhood</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">PS_MotionBlur_Neighbourhood</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_MotionBlur_Neighbourhood</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_motionblur_tilegen.ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_MotionBlur_Tilegen</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">PS_MotionBlur_Tilegen</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PS_MotionBlur_Tilegen</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_MotionBlur_Tilegen</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">PS_MotionBlur_Tilegen</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_MotionBlur_Tilegen</EntryPointName>
+    </FxCompile>
     <FxCompile Include="Data\Shaders\ps_standard.ps.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_Standard</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -1460,6 +1513,9 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Standard</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <None Include="Data\Shaders\velocity_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Data\Shaders\vs_basic_texture.vs.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS_Basic_Texture</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
@@ -1501,6 +1557,21 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Vertex</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VS_SDFDecal_Direct</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vs_quad.vs.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS_Quad</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS_Standard</EntryPointName>

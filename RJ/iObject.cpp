@@ -53,7 +53,8 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_positionf = NULL_FLOAT3;
 	m_orientation = ID_QUATERNION;
 	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
-	m_worldmatrix = m_inverseworld = ID_MATRIX;
+	m_worldmatrix = m_inverseworld = m_lastworld = ID_MATRIX;
+	m_worldcurrent.Clear();
 	m_overrides_world_derivation = false;
 	m_treenode = NULL;
 	m_centreoffset = NULL_VECTOR;

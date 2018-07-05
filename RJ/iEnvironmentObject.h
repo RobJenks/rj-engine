@@ -13,7 +13,7 @@ class EnvironmentTree;
 // Extends the iSpaceObject interface for objects that exist within and relative to some environment
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iEnvironmentObject : public ALIGN16<iEnvironmentObject>, public iActiveObject, public UsableObject
+class iEnvironmentObject : public iActiveObject, public UsableObject
 {
 public:
 	

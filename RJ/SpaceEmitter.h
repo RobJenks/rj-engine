@@ -12,7 +12,7 @@
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class SpaceEmitter : public ALIGN16<SpaceEmitter>, public iSpaceObject
+class SpaceEmitter : public iSpaceObject
 {
 public:
 
