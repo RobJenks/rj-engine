@@ -12,8 +12,10 @@ float4 PS_MotionBlur_Neighbourhood(ScreenSpaceQuadVertexShaderOutput IN) : SV_Ta
 	// Default return value; zero motion unless we have specific data in the velocity buffer
 	float2 result = float2(0.0f, 0.0f);
 
-	// Determine sample increment across the velocity texture
+	// TODO: Pass in dedicated motion blur CB, rather than calculating per-pixel
 	float2 texsize = DetermineTextureDimensions(MotionBlurVelocityTileBufferInput);
+
+	// Determine sample increment across the velocity texture
 	float2 tcStart = IN.texCoord;
 	float2 tcInc = float2(1.0f, 1.0f) / texsize;
 

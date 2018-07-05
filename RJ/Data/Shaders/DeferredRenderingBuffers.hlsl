@@ -22,15 +22,17 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 	uint2 C_buffersize;							// Size of the primary render buffers (px)
 
 	// Velocity calculation data
-	unsigned int C_k;							// Constant K in the velocity calculation, determining the screen-space radius considered
-	float C_half_exposure;						// 0.5 * camera exposure
-	float C_half_frame_exposure;				// 0.5 * the camera exposure weighted by frame time (0.5 * (exposure / frametime_secs))
+	unsigned int C_k;								// Constant K in the velocity calculation, determining the screen-space radius considered
+	float C_half_exposure;							// 0.5 * camera exposure
+	float C_half_frame_exposure;					// 0.5 * the camera exposure weighted by frame time (0.5 * (exposure / frametime_secs))
+	unsigned int C_motion_samples;					// Number of samples taken along the velocity vector when calculating motion blur
+	unsigned int C_motion_max_sample_tap_distance;	// Max distance for reconstruction tap samples along the velocity vector when calculating motion blur
 
 	// Debug data
 	_bool C_debug_view_is_depth_texture;		// Indicates whether the debug view is a depth texture, otherwise will treat as three-component & alpha colour
 	
 	// Padding
-	float _padding_def;							// CB size must be a multiple of 16 bytes
+	float3 _padding_def;						// CB size must be a multiple of 16 bytes
 };
 
 

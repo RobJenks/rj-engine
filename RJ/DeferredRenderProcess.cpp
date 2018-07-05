@@ -65,6 +65,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	m_velocity_k(2U), 
 	m_exposure(1.0f), 
+	m_motion_samples(16U), 
+	m_motion_max_sample_tap_distance(16U), 
 
 	m_post_processing_components({ 0 }), 
 
@@ -568,6 +570,8 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;
 	m_cb_deferred_data.RawPtr->C_half_exposure = (0.5f * m_exposure);
 	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
+	m_cb_deferred_data.RawPtr->C_motion_samples = m_motion_samples;
+	m_cb_deferred_data.RawPtr->C_motion_max_sample_tap_distance = m_motion_max_sample_tap_distance;
 
 	// Debug visualisation data
 	m_cb_deferred_data.RawPtr->C_debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);

@@ -158,6 +158,8 @@ private:
 	// Velocity calculation parameters
 	unsigned int							m_velocity_k;
 	float									m_exposure;
+	unsigned int							m_motion_samples;
+	unsigned int							m_motion_max_sample_tap_distance;
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;

@@ -14,28 +14,17 @@ static const float4 DEBUG_RENDER_SIGNIFICANT = float4(0, 1, 0, 1);
 
 // Constants
 static const float EPS001 = 0.01f;
-
-// TODO: Move into motion blur CB
-static const unsigned int C_samples = 16U;
-static const unsigned int C_max_sample_tap_distance = 16U;
 static const float HALF_VELOCITY_CUTOFF = 0.25f;
 static const float VARIANCE_THRESHOLD = 1.5f;
 static const float WEIGHT_CORRECTION_FACTOR = 60.0f;
 
-static const unsigned int TMP__C_k = 2U;
-static const float TMP__C_half_exposure = 0.5f;
 
 
 // Motion blur gather phase: entry point
 float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 {
-	// TMP
-	if (C_k == 2345U) return float4(1,1,1,1);
-
-	// TODO: Replace with CB data
-	float2 texsize = DetermineTextureDimensions(MotionBlurColourBufferInput);
-
 	// Sample from source (unprocessed colour buffer)
+	float2 texsize = C_buffersize;
 	float2 texcoord = IN.texCoord;
 	float4 colour = MotionBlurColourBufferInput.SampleLevel(LinearClampSampler, texcoord, 0);
 
@@ -44,9 +33,9 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float nh_vel_mag = length(nh_vel);
 
 	// Weight vectors based upon exposure.  Early-exit if velocity is insignificant
-	float weighted_nhv = (nh_vel_mag * TMP__C_half_exposure);
+	float weighted_nhv = (nh_vel_mag * C_half_exposure);
 	bool nhv_pos = (weighted_nhv > EPS001);
-	weighted_nhv = clamp(weighted_nhv, 0.1f, TMP__C_k);
+	weighted_nhv = clamp(weighted_nhv, 0.1f, C_k);
 
 	if (weighted_nhv < HALF_VELOCITY_CUTOFF)
 	{
@@ -69,9 +58,9 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float vel_mag = length(vel);
 
 	// Weight and clamp primary velocity data
-	float weighted_v = (vel_mag * TMP__C_half_exposure);
+	float weighted_v = (vel_mag * C_half_exposure);
 	bool v_pos = (weighted_v > EPS001);
-	weighted_v = clamp(weighted_v, 0.1f, TMP__C_k);
+	weighted_v = clamp(weighted_v, 0.1f, C_k);
 
 	if (v_pos)
 	{
@@ -89,24 +78,24 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	float rnd = RandomNoise(texcoord) - 0.5f; // TODO
 
 	// Update sample tap distance based on source texture
-	float max_tap_dist = (C_max_sample_tap_distance / texsize.x);
+	float max_tap_dist = (C_motion_max_sample_tap_distance / texsize.x);
 	float2 half_texel = (HALF_VECTOR2 / texsize.x);
 
 	// Weighting value with experimentally-derived constant (from pp)
-	float weight = (C_samples / WEIGHT_CORRECTION_FACTOR / weighted_v);
+	float weight = (C_motion_samples / WEIGHT_CORRECTION_FACTOR / weighted_v);
 
 	// Initialise to state of first texel, and determine current index so we can skip it during reconstruction sampling
 	float3 aggregate = (colour.xyz * weight);
-	unsigned int index = (C_samples - 1) / 2;
+	unsigned int index = (C_motion_samples - 1) / 2;
 
 	// Aggregate for each reconstruction sample tap
-	for (unsigned int i = 0; i < C_samples; ++i)
+	for (unsigned int i = 0; i < C_motion_samples; ++i)
 	{
 		// Avoid double-sampling the current fragment
 		if (i == index) continue;
 
 		// Determine the distance between the current pixel and the next sample tap
-		float lerp_amt = (float(i) + rnd + 1.0f) / (C_samples + 1.0f);
+		float lerp_amt = (float(i) + rnd + 1.0f) / (C_motion_samples + 1.0f);
 		float tapdist = lerp(-max_tap_dist, +max_tap_dist, lerp_amt);
 
 		// Alternate between corrected and neighbourhood maximal velocity for better visual result
@@ -118,9 +107,9 @@ float4 PS_MotionBlur_Gather(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 		float tap_mag = length(tap);
 
 		// Weight and clamp current tap velocity
-		float weighted_tap = (tap_mag * TMP__C_half_exposure);
+		float weighted_tap = (tap_mag * C_half_exposure);
 		float tap_pos = (weighted_tap > EPS001);
-		weighted_tap = clamp(weighted_tap, 0.1f, TMP__C_k);
+		weighted_tap = clamp(weighted_tap, 0.1f, C_k);
 		
 		if (tap_pos)
 		{
