@@ -589,32 +589,32 @@ void RJMain::ProcessKeyboardInput(void)
 	// Debug rendering of GBuffer data
 	if (b[DIK_F1])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("none");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta none"));
 		Game::Keyboard.LockKey(DIK_F1);
 	}
 	if (b[DIK_F2])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("diffuse");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta diffuse"));
 		Game::Keyboard.LockKey(DIK_F2);
 	}
 	if (b[DIK_F3])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("specular");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta specular"));
 		Game::Keyboard.LockKey(DIK_F3);
 	}
 	if (b[DIK_F4])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("normal");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta normal"));
 		Game::Keyboard.LockKey(DIK_F4);
 	}
 	if (b[DIK_F5])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("velocity");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta velocity"));
 		Game::Keyboard.LockKey(DIK_F5);
 	}
 	if (b[DIK_F6])
 	{
-		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Console.ProcessRawCommand(GameConsoleCommand("rta depth"));
 		Game::Keyboard.LockKey(DIK_F6);
 	}
 

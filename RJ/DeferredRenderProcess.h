@@ -7,6 +7,7 @@
 #include "NoiseGenerator.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
+#include "Data/Shaders/DeferredRendererDebugRenderingData.hlsl"
 #include "LightData.hlsl.h"
 #include "ModelInstance.h"
 #include "iAcceptsConsoleCommands.h"
@@ -21,7 +22,10 @@ class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCo
 public:
 
 	// Possible debug rendering modes
-	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Velocity = 8, Depth = 16, MotionBlurTileGen = 32, MotionBlurNeighbourhood = 64, MotionBlurFinal = 128 };
+	enum class DebugRenderMode { None = 0, Diffuse, Specular, Normal, Velocity, Depth, 
+								 MotionBlurTileGen, MotionBlurNeighbourhood, MotionBlurFinal, 
+								 /* ... */						 
+								 Final};
 
 	// Default constructor
 	DeferredRenderProcess(void);
@@ -63,8 +67,8 @@ public:
 	// Calculate the transform for full-screen quad rendering with the specified dimensions
 	XMMATRIX CalculateFullScreenQuadRenderingTransform(const XMFLOAT2 & dimensions);
 
-	// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
-	bool RepointBackbufferRenderTargetAttachment(const std::string & target);
+	// Translate the name of a debug rendering mode to its internal value
+	static DebugRenderMode TranslateDebugRenderMode(const std::string & mode);
 
 	// Destructor
 	~DeferredRenderProcess(void);
@@ -170,7 +174,7 @@ private:
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_deferreddata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
@@ -199,8 +203,18 @@ private:
 	void SetRenderNoiseGeneration(const std::string & code);
 
 	// Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
-	bool GBufferDebugRendering(void);
-	TextureDX11 * GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
-	DebugRenderMode m_debug_render_mode;
+	bool											GBufferDebugRendering(void);
+	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
+	bool											IsDepthDebugMode(DebugRenderMode render_mode) const;
+	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes);
+	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
+	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes);
+
+	unsigned int									m_debug_render_active_view_count;
+	std::vector<DebugRenderMode>					m_debug_render_modes;
+	std::vector<ID3D11ShaderResourceView*>			m_debug_srvs;
+	std::vector<ID3D11ShaderResourceView*>			m_debug_srv_unbind;
+	ManagedPtr<DeferredRendererDebugRenderingData>	m_cb_debug_data;
+	ConstantBufferDX11 *							m_cb_debug;
 	
 };

@@ -52,7 +52,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_debug_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
 	m_model_cone(NULL),
@@ -70,7 +70,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	m_post_processing_components({ 0 }), 
 
-	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
+	m_debug_render_active_view_count(0U),
+	m_cb_debug(NULL)
 {
 	SetName( RenderProcess::Name<DeferredRenderProcess>() );
 
@@ -130,13 +131,13 @@ void DeferredRenderProcess::InitialiseShaders(void)
 #ifdef _DEBUG
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
 	if (m_ps_debug == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering debug shader resources [ps_d]\n";
-	m_param_ps_debug_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
+	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRendererDebugRenderingDataName);
 #endif
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
 	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName);
-	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRenderingParamBufferName);
+	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_lighting, DeferredRenderingParamBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
@@ -199,7 +200,7 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
 	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
 	m_cb_deferred = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
-
+	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
@@ -404,6 +405,12 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
 	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
 	m_pipeline_debug_rendering->SetRenderTarget(m_colour_rt);
+
+	// Also initialise the debug rendering to a default starting state
+	SetDebugRenderingState(std::vector<DebugRenderMode>());
+
+	// Initialise the SRV unbinding resources to avoid repeated allocations at render-time
+	m_debug_srv_unbind = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };	
 }
 
 void DeferredRenderProcess::InitialisePostProcessingComponents(void)
@@ -573,9 +580,6 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	m_cb_deferred_data.RawPtr->C_motion_samples = m_motion_samples;
 	m_cb_deferred_data.RawPtr->C_motion_max_sample_tap_distance = m_motion_max_sample_tap_distance;
 
-	// Debug visualisation data
-	m_cb_deferred_data.RawPtr->C_debug_view_is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
-
 	// Commit all changes to the CB
 	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);
 }
@@ -734,28 +738,28 @@ void DeferredRenderProcess::SetRenderNoiseGeneration(const std::string & code)
 }
 
 
-// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
-bool DeferredRenderProcess::RepointBackbufferRenderTargetAttachment(const std::string & target)
+// Translate the name of a debug rendering mode to its internal value
+DeferredRenderProcess::DebugRenderMode DeferredRenderProcess::TranslateDebugRenderMode(const std::string & mode)
 {
-	auto type = StrLower(target);
+	auto type = StrLower(mode);
 
-	if (type == "diffuse")						m_debug_render_mode = DebugRenderMode::Diffuse;
-	else if (type == "specular")				m_debug_render_mode = DebugRenderMode::Specular;
-	else if (type == "normal")					m_debug_render_mode = DebugRenderMode::Normal;
-	else if (type == "velocity")				m_debug_render_mode = DebugRenderMode::Velocity;
-	else if (type == "depth")					m_debug_render_mode = DebugRenderMode::Depth;
-	else if (type == "motion_tilegen")			m_debug_render_mode = DebugRenderMode::MotionBlurTileGen;
-	else if (type == "motion_neighbourhood")	m_debug_render_mode = DebugRenderMode::MotionBlurNeighbourhood;
-	else if (type == "motion_final")			m_debug_render_mode = DebugRenderMode::MotionBlurFinal;
-	else
-	{
-		// Unrecognised mode
-		m_debug_render_mode = DebugRenderMode::None;
-		return false;
-	}
+	if (type == "diffuse")						return DebugRenderMode::Diffuse;
+	else if (type == "specular")				return DebugRenderMode::Specular;
+	else if (type == "normal")					return DebugRenderMode::Normal;
+	else if (type == "velocity")				return DebugRenderMode::Velocity;
+	else if (type == "depth")					return DebugRenderMode::Depth;
+	else if (type == "motion_tilegen")			return DebugRenderMode::MotionBlurTileGen;
+	else if (type == "motion_neighbourhood")	return DebugRenderMode::MotionBlurNeighbourhood;
+	else if (type == "motion_final")			return DebugRenderMode::MotionBlurFinal;
+	else if (type == "final")					return DebugRenderMode::Final;
+	
+	// Unrecognised mode
+	return DebugRenderMode::None;
+}
 
-	// If we reach this point a debug mode WAS set, so return success
-	return true;
+bool DeferredRenderProcess::IsDepthDebugMode(DebugRenderMode render_mode) const
+{
+	return (render_mode == DebugRenderMode::Depth);
 }
 
 TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode)
@@ -763,39 +767,94 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 	switch (debug_mode)
 	{
 		// GBuffer textures
-		case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
-		case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
-		case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
-		case DebugRenderMode::Velocity:		return GBuffer.VelocityTexture;
-		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
+		case DebugRenderMode::Diffuse:					return GBuffer.DiffuseTexture;
+		case DebugRenderMode::Specular:					return GBuffer.SpecularTexture;
+		case DebugRenderMode::Normal:					return GBuffer.NormalTexture;
+		case DebugRenderMode::Velocity:					return GBuffer.VelocityTexture;
+		case DebugRenderMode::Depth:					return GBuffer.DepthStencilTexture;
 
 		// Other textures
 		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
 		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
 		case DebugRenderMode::MotionBlurFinal:			return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetRenderedOutput() : NULL);
 
+		// Final backbuffer output 
+		case DebugRenderMode::Final:					return m_final_colour_buffer;
 
 		// Unknown texture
 		default:							return NULL;
 	}
 }
 
+void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes)
+{
+	// Set general buffer data
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+	unsigned int viewcount = (std::min)(static_cast<unsigned int>(render_modes.size()), 16U);
+	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
+	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
+
+	// Store a copy of this data for per-frame updates
+	m_debug_render_modes.clear();
+	m_debug_render_modes.insert(m_debug_render_modes.begin(), render_modes.begin(), (render_modes.begin() + viewcount));
+
+	// Vector will hold pointers to the relevant texture resources.  Allocate here but reassign resources
+	// per-frame in the debug rendering method, since resource locations may change
+	m_debug_srvs.clear();
+	m_debug_srvs.insert(m_debug_srvs.begin(), viewcount, NULL);
+
+	// Set each CB parameter in turn, or null it out if not specified
+	int last_valid_view = -1;
+	for (unsigned int i = 0U; i < 16U; ++i)
+	{
+		if (i >= viewcount || render_modes[i] == DebugRenderMode::None)
+		{
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = DEF_DEBUG_STATE_DISABLED;
+		}
+		else
+		{
+			last_valid_view = static_cast<int>(i);
+			bool isdepth = IsDepthDebugMode(render_modes[i]);
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = (isdepth ? DEF_DEBUG_STATE_ENABLED_DEPTH : DEF_DEBUG_STATE_ENABLED_NORMAL);
+		}
+	}
+
+	// Store the count of active render views; if > 0, this will indicate that debug rendering is active
+	// Adjust the render view count downwards to the earliest subset of valid modes
+	m_debug_render_active_view_count = static_cast<unsigned int>(last_valid_view + 1);
+
+	// Compile changes into the debug rendering buffer
+	m_cb_debug->Set(m_cb_debug_data.RawPtr);
+}
+
+std::vector<DeferredRenderProcess::DebugRenderMode> DeferredRenderProcess::ProcessDebugRenderModeString(const std::vector<std::string> & render_modes)
+{
+	std::vector<DebugRenderMode> modes;
+	std::for_each(render_modes.begin(), render_modes.end(), [&modes](const std::string & mode) { modes.push_back(TranslateDebugRenderMode(mode)); });
+
+	return modes;
+}
+
 // Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
 bool DeferredRenderProcess::GBufferDebugRendering(void)
 {
 	// Normal case: exit immediately since debug rendering is not enabled
-	if (m_debug_render_mode == DebugRenderMode::None) return false;
+	if (!DebugRenderingIsEnabled()) return false;
 
-	// Bind the texture to be debug-rendered at register t0
-	TextureDX11 * texture = GetDebugTexture(m_debug_render_mode);
-	if (!texture) return false;
-	texture->Bind(Shader::Type::PixelShader, 0U, ShaderParameter::Type::Texture);
+	// Bind the texture(s) to be debug-rendered 
+	for (unsigned int i = 0U; i < m_debug_render_active_view_count; ++i)
+	{
+		TextureDX11 *texture = GetDebugTexture(m_debug_render_modes[i]);
+		m_debug_srvs[i] = (texture ? texture->GetBindingSRV() : NULL);
+	}
+	TextureDX11::BindSRVMultiple(Shader::Type::PixelShader, 0U, m_debug_srvs);
 
 	// Debug views are generated via full-screen rendering
+	// TODO: No longer required?
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
 	// Bind shader parameters to the debug pipeline
-	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_deferreddata).Set(m_cb_deferred);
+	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_debugdata).Set(m_cb_debug);
 
 	// Bind the debug pipeline
 	m_pipeline_debug_rendering->Bind();
@@ -806,6 +865,9 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();
 
+	// Unbind the SRV resources that were directly bound to the PS
+	TextureDX11::BindSRVMultiple(Shader::Type::PixelShader, 0U, m_debug_srv_unbind);
+
 	return true;
 }
 
@@ -815,7 +877,7 @@ TextureDX11 * DeferredRenderProcess::GetFinalColourBuffer(void)
 {
 	// If debug rendering is enabled we redirect to the base colour buffer, which has been overwritten with debug data
 #	ifdef _DEBUG
-		if (m_debug_render_mode != DebugRenderMode::None) return m_colour_buffer;
+		if (DebugRenderingIsEnabled()) return m_colour_buffer;
 #	endif
 
 	// Otherwise, we always return the final fully-processed colour buffer
@@ -832,7 +894,23 @@ void DeferredRenderProcess::RenderFullScreenQuad(void)
 // Virtual inherited method to accept a command from the console
 bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 {
-	if (command.InputCommand == "defrend_setnoise")
+	if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
+	{
+		std::vector<DebugRenderMode> render_modes = ProcessDebugRenderModeString(command.InputParameters);
+		SetDebugRenderingState(render_modes);
+
+		if (!DebugRenderingIsEnabled())
+		{
+			command.SetSuccessOutput("Disabled debug rendering mode");
+		}
+		else
+		{
+			command.SetSuccessOutput(concat("Enabled debug rendering with ")(m_debug_render_active_view_count)(" redirected render target buffers").str());
+		}
+
+		return true;
+	}
+	else if (command.InputCommand == "defrend_setnoise")
 	{
 		SetRenderNoiseGeneration(command.Parameter(0));
 		if (m_render_noise_method == NoiseGenerator::INVALID_NOISE_RESOURCE)

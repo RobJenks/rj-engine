@@ -1,0 +1,16 @@
+Bind extra full size RT for velocity output
+Pass old projection/world etc. to shader for calculation of per-pixel velocity -> velocity RT
+
+Motion blur passes: 
+ - Render to Velocity-TileMax downsampled (size / K) RT
+ - Render to Velocity-NeighbourMax downsampled (size / K) RT
+ - Execute "Gather" PS process to combine into final post-processed RT
+
+
+ 
+ C:\Program Files\NVIDIA Computing\Samples\d3d-graphics-compute-samples-1.2\samples\MotionBlurAdvanced
+ http://casual-effects.com/research/McGuire2012Blur/McGuire12Blur.pdf
+ https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch27.html
+ https://docs.nvidia.com/gameworks/index.html#gameworkslibrary/graphicssamples/d3d_samples/motionblurd3dadvancedsample.htm%3FTocPath%3DGameWorks%2520Library%7CGraphics%2520and%2520Compute%2520Samples%7CGraphics%2520and%2520Compute%2520Samples%25202.1%7CDirect3D%2520Samples%7CGraphics%2520and%2520Compute%2520Samples%7C_____5
+ 
+ 

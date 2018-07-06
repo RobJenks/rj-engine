@@ -3081,19 +3081,6 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			return true;
 		}
 	}
-	else if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
-	{
-		if (GetRenderDevice()->RepointBackbufferRenderTargetAttachment(command.Parameter(0)))
-		{
-			command.SetSuccessOutput(concat("Redirected primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
-		}
-		else
-		{
-			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters,
-				concat("Failed to redirect primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
-		}
-		return true;
-	}
 	else if (command.InputCommand == "hull_render")
 	{
 		bool b = !(command.ParameterAsBool(0));

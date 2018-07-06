@@ -49,7 +49,7 @@ public:
 	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype) const;
 
 	// Return the SRV that would be bound to a shader slot during Bind(), so that it can be group-bound during an external call for efficiency
-	CMPINLINE const ID3D11ShaderResourceView * GetBindingSRV(void) const { return m_srv; }
+	CMPINLINE ID3D11ShaderResourceView * GetBindingSRV(void) { return m_srv; }
 
 	// Load a texture based on the supplied dimension type
 	bool LoadTexture(const std::wstring & fileName, Texture::Dimension dimension);
@@ -164,6 +164,9 @@ public:
 	*/
 	template< typename T >
 	T FetchPixel(UINTVECTOR2 coord);
+
+	// Static method to bind a set of textures in one operation, starting from the given slot
+	static void BindSRVMultiple(Shader::Type shadertype, Shader::SlotID slot_id, std::vector<ID3D11ShaderResourceView*> & textures);
 
 	// Releases all COM resources associated with this texture
 	void ReleaseResources(void);

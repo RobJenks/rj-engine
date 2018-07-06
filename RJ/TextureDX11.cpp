@@ -1391,6 +1391,41 @@ void TextureDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id, Shader
 	}
 }
 
+// Static method to bind a set of textures in one operation, starting from the given slot
+void TextureDX11::BindSRVMultiple(Shader::Type shadertype, Shader::SlotID slot_id, std::vector<ID3D11ShaderResourceView*> & textures)
+{
+	UINT count = static_cast<UINT>(textures.size());
+	assert(count < 64U);		// Sanity check
+
+	if (count == 0U) return;
+
+	auto devicecontext = Game::Engine->GetDeviceContext();
+	ID3D11ShaderResourceView * const * srv = &(textures[0]);
+
+	switch (shadertype)
+	{
+		case Shader::Type::VertexShader:
+			devicecontext->VSSetShaderResources(slot_id, count, srv);
+			break;
+		case Shader::Type::HullShader:
+			devicecontext->HSSetShaderResources(slot_id, count, srv);
+			break;
+		case Shader::Type::DomainShader:
+			devicecontext->DSSetShaderResources(slot_id, count, srv);
+			break;
+		case Shader::Type::GeometryShader:
+			devicecontext->GSSetShaderResources(slot_id, count, srv);
+			break;
+		case Shader::Type::PixelShader:
+			devicecontext->PSSetShaderResources(slot_id, count, srv);
+			break;
+		case Shader::Type::ComputeShader:
+			devicecontext->CSSetShaderResources(slot_id, count, srv);
+			break;
+	}
+
+}
+
 ID3D11Resource* TextureDX11::GetTextureResource() const
 {
 	ID3D11Resource* resource = nullptr;

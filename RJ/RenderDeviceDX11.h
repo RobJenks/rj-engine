@@ -103,8 +103,6 @@ public:
 	void											RecalculateProjectionMatrix(void);
 	void											RecalculateOrthographicMatrix(void);
 
-	// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
-	bool											RepointBackbufferRenderTargetAttachment(const std::string & target);
 
 	// Return a reference to the primary viewport
 	CMPINLINE const Viewport &						GetPrimaryViewport(void) const { return m_viewport; }
