@@ -396,7 +396,8 @@ void PostProcessMotionBlur::ExecuteGatherPass(	TextureDX11 *source_colour, Textu
 	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_vel_neighbourhood).Set(velocity_neighbourhood_buffer);
 
 	// We will inherit the noise generator configuration of the parent render process, no need for it to differ here
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_noise_tex).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource());
+	auto noise_resource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
+	if (noise_resource) m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_noise_tex).Set(noise_resource);
 	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_noise_data).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Bind the pipeline and upsample motion blur intermediate data back up to combine via gather with the colour buffer
