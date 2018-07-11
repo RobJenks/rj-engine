@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "DeferredRenderProcess.h"
 #include "CoreEngine.h"
 #include "LightingManagerObject.h"
@@ -737,29 +738,39 @@ void DeferredRenderProcess::SetRenderNoiseGeneration(const std::string & code)
 	m_render_noise_method = Game::Engine->GetNoiseGenerator()->GetResourceID(code);
 }
 
+// Returns the list of supported debug render modes, mapped (StringCode -> Mode)
+const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>> DeferredRenderProcess::SupportedDebugRenderModes = 
+{
+	{ "diffuse", DebugRenderMode::Diffuse }, 
+	{ "specular", DebugRenderMode::Specular }, 
+	{ "normal", DebugRenderMode::Normal }, 
+	{ "velocity", DebugRenderMode::Velocity }, 
+	{ "depth", DebugRenderMode::Depth }, 
+	{ "motion_tilegen", DebugRenderMode::MotionBlurTileGen }, 
+	{ "motion_neighbourhood", DebugRenderMode::MotionBlurNeighbourhood }, 
+	{ "motion_final", DebugRenderMode::MotionBlurFinal }, 
+	{ "final", DebugRenderMode::Final }
+};
 
 // Translate the name of a debug rendering mode to its internal value
 DeferredRenderProcess::DebugRenderMode DeferredRenderProcess::TranslateDebugRenderMode(const std::string & mode)
 {
+	// Collection of supported debug render modes
+	const auto & modes = SupportedDebugRenderModes;
 	auto type = StrLower(mode);
 
-	if (type == "diffuse")						return DebugRenderMode::Diffuse;
-	else if (type == "specular")				return DebugRenderMode::Specular;
-	else if (type == "normal")					return DebugRenderMode::Normal;
-	else if (type == "velocity")				return DebugRenderMode::Velocity;
-	else if (type == "depth")					return DebugRenderMode::Depth;
-	else if (type == "motion_tilegen")			return DebugRenderMode::MotionBlurTileGen;
-	else if (type == "motion_neighbourhood")	return DebugRenderMode::MotionBlurNeighbourhood;
-	else if (type == "motion_final")			return DebugRenderMode::MotionBlurFinal;
-	else if (type == "final")					return DebugRenderMode::Final;
-	
-	// Unrecognised mode
-	return DebugRenderMode::None;
+	// Attempt to match a supported render mode, or disable rendering if not recognised
+	auto it = std::find_if(modes.begin(), modes.end(), [&type](const std::pair<std::string, DeferredRenderProcess::DebugRenderMode> & entry)
+	{
+		return (entry.first == type);
+	});
+
+	return (it != modes.end() ? it->second : DebugRenderMode::None);
 }
 
 bool DeferredRenderProcess::IsDepthDebugMode(DebugRenderMode render_mode) const
 {
-	return (render_mode == DebugRenderMode::Depth);
+	return (render_mode == DebugRenderMode::Depth /* || ... || ... */);
 }
 
 TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode)
@@ -915,6 +926,15 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 {
 	if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
 	{
+		if (command.Parameter(0) == "-h" || command.Parameter(0) == "-help" || command.Parameter(0) == "-modes")
+		{
+			std::string modes;
+			for (const auto & mode : DeferredRenderProcess::SupportedDebugRenderModes) modes += ((modes.empty() ? "" : ", ") + mode.first);
+
+			command.SetSuccessOutput("Supported debug rendering modes: " + modes);
+			return true;
+		}
+
 		unsigned int output_mode = DEF_DEBUG_RENDER_VIEWS;
 		std::vector<DebugRenderMode> render_modes = ProcessDebugRenderModeString(command.InputParameters, output_mode);
 		SetDebugRenderingState(render_modes, output_mode);

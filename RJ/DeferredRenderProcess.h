@@ -209,6 +209,11 @@ private:
 	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
 	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
 	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);
+	
+	
+	// Returns the list of supported debug render modes, mapped (StringCode -> Mode)
+	static const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>> SupportedDebugRenderModes;
+	
 
 	unsigned int									m_debug_render_active_view_count;
 	std::vector<DebugRenderMode>					m_debug_render_modes;
