@@ -407,7 +407,7 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->SetRenderTarget(m_colour_rt);
 
 	// Also initialise the debug rendering to a default starting state
-	SetDebugRenderingState(std::vector<DebugRenderMode>());
+	SetDebugRenderingState(std::vector<DebugRenderMode>(), DEF_DEBUG_RENDER_VIEWS);
 
 	// Initialise the SRV unbinding resources to avoid repeated allocations at render-time
 	m_debug_srv_unbind = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };	
@@ -786,13 +786,15 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 	}
 }
 
-void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes)
+void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode)
 {
 	// Set general buffer data
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
 	unsigned int viewcount = (std::min)(static_cast<unsigned int>(render_modes.size()), 16U);
 	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
 	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
+	m_cb_debug_data.RawPtr->C_debug_render_mode = output_mode;
+
 
 	// Store a copy of this data for per-frame updates
 	m_debug_render_modes.clear();
@@ -827,10 +829,27 @@ void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRender
 	m_cb_debug->Set(m_cb_debug_data.RawPtr);
 }
 
-std::vector<DeferredRenderProcess::DebugRenderMode> DeferredRenderProcess::ProcessDebugRenderModeString(const std::vector<std::string> & render_modes)
+std::vector<DeferredRenderProcess::DebugRenderMode> DeferredRenderProcess::ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, 
+																										unsigned int & outDebugRenderType)
 {
 	std::vector<DebugRenderMode> modes;
-	std::for_each(render_modes.begin(), render_modes.end(), [&modes](const std::string & mode) { modes.push_back(TranslateDebugRenderMode(mode)); });
+
+	// Default values
+	outDebugRenderType = DEF_DEBUG_RENDER_VIEWS;
+
+	// Process each component
+	std::for_each(render_modes.begin(), render_modes.end(), [&modes, &outDebugRenderType](const std::string & mode)
+	{ 
+		if (!mode.empty()) 
+		{
+			if (mode == "-views") outDebugRenderType = DEF_DEBUG_RENDER_VIEWS;
+			else if (mode == "-composite") outDebugRenderType = DEF_DEBUG_RENDER_COMPOSITE;
+			else
+			{
+				modes.push_back(TranslateDebugRenderMode(mode));
+			}
+		}
+	});
 
 	return modes;
 }
@@ -896,8 +915,9 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 {
 	if (command.InputCommand == "backbuffer_attach" || command.InputCommand == "rt_attach" || command.InputCommand == "rta")
 	{
-		std::vector<DebugRenderMode> render_modes = ProcessDebugRenderModeString(command.InputParameters);
-		SetDebugRenderingState(render_modes);
+		unsigned int output_mode = DEF_DEBUG_RENDER_VIEWS;
+		std::vector<DebugRenderMode> render_modes = ProcessDebugRenderModeString(command.InputParameters, output_mode);
+		SetDebugRenderingState(render_modes, output_mode);
 
 		if (!DebugRenderingIsEnabled())
 		{

@@ -59,9 +59,17 @@ float4 PS_Deferred_Debug(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
 	if (view_id >= viewcount) return EMPTY;
 
 	// Determine texcoord within the (potentially downsampled) source texture
-	float2 tc_viewpos = ((float2)view * view_pc);
-	float view_scale_factor = (float)views_dim;
-	float2 view_texcoord = ((IN.texCoord - tc_viewpos) * view_scale_factor);
+	float2 view_texcoord;
+	if (C_debug_render_mode == DEF_DEBUG_RENDER_COMPOSITE)	// Render one image with subregions sampled from each debug texture
+	{
+		view_texcoord = IN.texCoord;
+	}
+	else													// Default: render each segment of the window as a separate debug view
+	{
+		float2 tc_viewpos = ((float2)view * view_pc);
+		float view_scale_factor = (float)views_dim;
+		view_texcoord = ((IN.texCoord - tc_viewpos) * view_scale_factor);
+	}
 
 	// Render differently based upon the source texture type and active views
 	return DebugViewSample(view_id, view_texcoord);

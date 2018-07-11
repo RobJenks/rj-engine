@@ -206,9 +206,9 @@ private:
 	bool											GBufferDebugRendering(void);
 	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
 	bool											IsDepthDebugMode(DebugRenderMode render_mode) const;
-	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes);
+	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
 	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
-	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes);
+	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);
 
 	unsigned int									m_debug_render_active_view_count;
 	std::vector<DebugRenderMode>					m_debug_render_modes;
