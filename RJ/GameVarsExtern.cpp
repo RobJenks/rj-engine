@@ -64,6 +64,7 @@ namespace Game {
 	// FPS and performance data
 	float FPS = 0.0f;
 	bool FPSDisplay = true;
+	long FrameIndex = 0L;
 
 	// Display settings; default values that will be overwritten by game config on load
 	int ScreenWidth = 1024;

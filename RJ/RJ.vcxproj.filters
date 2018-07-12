@@ -940,6 +940,12 @@
     <ClCompile Include="SamplerStates.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="FrustumJitterProcess.cpp">
+      <Filter>Engine\Jitter</Filter>
+    </ClCompile>
+    <ClCompile Include="JitterSampleDistribution.cpp">
+      <Filter>Engine\Jitter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2199,6 +2205,12 @@
     <ClInclude Include="PostProcessComponent.h">
       <Filter>Engine\Rendering\DirectX11\Postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="FrustumJitterProcess.h">
+      <Filter>Engine\Jitter</Filter>
+    </ClInclude>
+    <ClInclude Include="JitterSampleDistribution.h">
+      <Filter>Engine\Jitter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2573,6 +2585,9 @@
     <Filter Include="Engine\Rendering\DirectX11\Postprocess\Motion Blur">
       <UniqueIdentifier>{5a1de5e6-1c63-4ae1-aba5-0227176b43bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Jitter">
+      <UniqueIdentifier>{bc48790c-bc7c-4e83-a9ab-1ace0cccc73d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2600,6 +2615,7 @@
     </None>
     <None Include="Data\Shaders\motion_blur_calculations.hlsl" />
     <None Include="Data\Shaders\motion_blur_resources.hlsl" />
+    <None Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2649,9 +2665,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_quad.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl">
-      <Filter>HLSL\Common\Deferred</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

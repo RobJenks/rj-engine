@@ -27,8 +27,8 @@ public:
 	// Initialisation function for this camera component
 	Result								Initialise(void);
 
-	// Calculates a view matrix, dependent on parameters and the current player state
-	void								CalculateViewMatrix(void);
+	// Calculates camera matrices, dependent on parameters and the current player state
+	void								CalculateCameraMatrices(void);
 	
 	// Calculates the camera view matrix and other camera configuration from supplied positonal data
 	void								ConstructCameraFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix);

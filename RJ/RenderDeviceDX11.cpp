@@ -75,7 +75,9 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_sampler_pointrepeat(NULL), 
 
 	m_material_null(NULL), 
-	m_material_default(NULL)
+	m_material_default(NULL), 
+
+	m_frustum_jitter(NULL) 
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -115,7 +117,10 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
 	// Initialise any shader parameters that can be set pre-render time
-	PERFORM_INIT(InitialisePreAssignableShaderParameters(), "pre-assignable shader parameters")
+	PERFORM_INIT( InitialisePreAssignableShaderParameters(), "pre-assignable shader parameters" )
+
+	// Initialise the frustum jitter process, which is a supporting component for other processes
+	PERFORM_INIT( InitialiseFrustumJitterProcess(), "frustum jitter process" )
 
 
 	/* Now perform validation of the initialised engine */
@@ -706,6 +711,12 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 }
 
 
+// Initialise the frustum jitter process, which is a supporting component for other processes
+Result RenderDeviceDX11::InitialiseFrustumJitterProcess(void)
+{
+	m_frustum_jitter
+}
+
 // Validate all shaders and their associated resources, reporting any errors that are encountered
 Result RenderDeviceDX11::ValidateShaders(void)
 {
@@ -831,7 +842,17 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 {
 	// TODO: Flip near/far plane distances as part of inverted depth buffer for greater FP precision
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
+
+	// Base projection matrix
 	m_projection = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+
+	// Apply frustum jitter if enabled
+	if (FrustumJitterEnabled())
+	{
+		m_projection = ApplyFrustumJitter(m_projection);
+	}
+
+
 	m_invproj = XMMatrixInverse(NULL, m_projection);
 }
 
@@ -857,6 +878,18 @@ bool RenderDeviceDX11::VerifyState(void)
 
 	return true;
 }
+
+// Prepare render device for the start of a new frame
+void RenderDeviceDX11::BeginFrame(void)
+{
+	// Calculate frustum jitter for the frame, if enabled
+	CalculateFrustumJitter();
+
+	// Some rendering effects (e.g. frustum jitter) require us to recalculate the projection matrix each frame
+	RecalculateProjectionMatrix();
+}
+
+
 
 // Present backbuffer to the primary display by cycling the swap chain
 HRESULT RenderDeviceDX11::PresentFrame(void)

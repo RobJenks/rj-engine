@@ -31,7 +31,8 @@ Result CameraClass::Initialise()
 	return ErrorCodes::NoError;
 }
 
-void CameraClass::CalculateViewMatrix(void)
+// Calculates camera matrices, dependent on parameters and the current player state
+void CameraClass::CalculateCameraMatrices(void)
 {
 	// Test camera mode - in "normal" state the camera is under the control of the player
 	if (m_camerastate == CameraClass::CameraState::NormalCamera)

@@ -410,8 +410,8 @@ bool RJMain::Display(void)
 
 		/* *** Begin rendering process ****/
 
-		// Calculate the current camera view matrix
-		Game::Engine->GetCamera()->CalculateViewMatrix();
+		// Update the camera based upon player state and recalculate derived data
+		Game::Engine->GetCamera()->CalculateCameraMatrices();
 
 		// Clear the register of all visible objects.  This is generated during rendering so should immediately 
 		// precede the call to CoreEngine::Render()
@@ -511,6 +511,9 @@ void RJMain::InitialiseInternalClock(void)
 // Calculates FPS data; executed once per frame
 void RJMain::PerformFPSCalculations(void)
 {
+	// Global counter of current frame index, from start of rendering
+	Game::FrameIndex += 1;
+
 	// Calculate the FPS rate
 	static float m_framecount = 0.0f; static float m_elapsedtime = 0.0f;
 	++m_framecount;

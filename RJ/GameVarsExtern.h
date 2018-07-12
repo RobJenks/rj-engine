@@ -75,6 +75,7 @@ namespace Game {
 	// Overall speed & performance variables
 	extern float FPS;
 	extern bool FPSDisplay;
+	extern long FrameIndex;
 
 	// Display settings
 	extern int ScreenWidth;

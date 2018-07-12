@@ -824,6 +824,7 @@ void CoreEngine::SetSystemCursorVisibility(bool cursor_visible)
 void CoreEngine::BeginFrame(void)
 {
 	// Delegate to engine components as required
+	GetRenderDevice()->BeginFrame();
 	GetDecalRenderer()->BeginFrame();
 	GetNoiseGenerator()->BeginFrame();
 }
