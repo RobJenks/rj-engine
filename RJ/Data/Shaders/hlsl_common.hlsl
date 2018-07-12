@@ -55,3 +55,31 @@ float2 RevertNormalisationScaleBias(float2 input)
 {
 	return ((input * TWO_VECTOR2) - ONE_VECTOR2);
 }
+
+// Convert RGB to YCoCg colour space
+// https://software.intel.com/en-us/node/503873
+float3 RGB_YCoCg(float3 c)
+{
+	// Y = R/4 + G/2 + B/4
+	// Co = R/2 - B/2
+	// Cg = -R/4 + G/2 - B/4
+	return float3(
+		c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
+		c.x / 2.0 - c.z / 2.0,
+		-c.x / 4.0 + c.y / 2.0 - c.z / 4.0
+		);
+}
+
+// Convert YCoCg to RGB colour space
+// https://software.intel.com/en-us/node/503873
+float3 YCoCg_RGB(float3 c)
+{
+	// R = Y + Co - Cg
+	// G = Y + Cg
+	// B = Y - Co - Cg
+	return saturate(float3(
+		c.x + c.y - c.z,
+		c.x + c.z,
+		c.x - c.y - c.z
+		));
+}
