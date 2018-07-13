@@ -420,7 +420,7 @@ void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 
 	// Screen-space pixel neighbourhood motion blur
 	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
-	
+
 
 	// Also maintain a collection of base post processing components
 	m_post_processing_components = { m_post_motionblur.RawPtr };

@@ -103,6 +103,7 @@ protected:
 	// Retrieve standard buffer data
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
 
+
 	// Virtual inherited method to accept a command from the console
 	bool ProcessConsoleCommand(GameConsoleCommand & command);
 	
@@ -143,6 +144,7 @@ private:
 	ConstantBufferDX11 *						m_cb_lightindex;			// Compiled CB
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
+
 
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;

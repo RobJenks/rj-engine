@@ -16,6 +16,7 @@
 #include "InputLayoutDesc.h"
 #include "Texture.h"
 #include "CPUGraphicsResourceAccess.h"
+#include "iAcceptsConsoleCommands.h"
 class FrustumJitterProcess;
 class RenderTargetDX11;
 
@@ -37,7 +38,7 @@ if (result != ErrorCodes::NoError) \
 
 
 
-class RenderDeviceDX11 : public RenderDevice
+class RenderDeviceDX11 : public RenderDevice, public iAcceptsConsoleCommands
 {
 public:
 
@@ -121,8 +122,8 @@ public:
 	HRESULT											PresentFrame(void);
 
 	// Per-frame frustum projection jitter
-	CMPINLINE bool									FrustumJitterEnabled(void) const;
-	void											CalculateFrustumJitter(void);
+	bool											FrustumJitterEnabled(void) const;
+	void											CalculateFrameFrustumJitter(void);
 	
 
 	// Attempt to hot-load all shaders and recompile them in-place
@@ -138,6 +139,12 @@ public:
 	// The number of samples to be taken for multi-sample textures
 	static const uint8_t							TEXTURE_MULTISAMPLE_COUNT = 1U;
 	
+
+	// Virtual inherited method to accept a command from the console
+	bool											ProcessConsoleCommand(GameConsoleCommand & command);
+
+
+	// Destructor
 	~RenderDeviceDX11(void);
 
 
@@ -200,7 +207,7 @@ private:
 	const MaterialDX11 *					m_material_null;
 	const MaterialDX11 *					m_material_default;
 
-	FrustumJitterProcess * 					m_frustum_jitter;
+	ManagedPtr<FrustumJitterProcess> 		m_frustum_jitter;
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device
 	static const D3D_FEATURE_LEVEL			SUPPORTED_FEATURE_LEVELS[];

@@ -584,6 +584,7 @@
     <ClCompile Include="PipelineStateDX11.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="PostProcessMotionBlur.cpp" />
+    <ClCompile Include="PostProcessTemporalAA.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />
@@ -1004,6 +1005,7 @@
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="PostProcessComponent.h" />
     <ClInclude Include="PostProcessMotionBlur.h" />
+    <ClInclude Include="PostProcessTemporalAA.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="Random.h" />

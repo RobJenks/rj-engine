@@ -17,6 +17,7 @@
 #include "ConstantBufferDX11.h"
 #include "BlendState.h"
 #include "SamplerStates.h"
+#include "FrustumJitterProcess.h"
 #include "DeferredRenderProcess.h"
 #include "DeferredGBuffer.h"
 
@@ -75,9 +76,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_sampler_pointrepeat(NULL), 
 
 	m_material_null(NULL), 
-	m_material_default(NULL), 
-
-	m_frustum_jitter(NULL) 
+	m_material_default(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -714,7 +713,14 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 // Initialise the frustum jitter process, which is a supporting component for other processes
 Result RenderDeviceDX11::InitialiseFrustumJitterProcess(void)
 {
-	m_frustum_jitter
+	m_frustum_jitter = ManagedPtr<FrustumJitterProcess>(new FrustumJitterProcess());
+
+	return ErrorCodes::NoError;
+}
+
+bool RenderDeviceDX11::FrustumJitterEnabled(void) const 
+{
+	return (m_frustum_jitter.RawPtr && m_frustum_jitter.RawPtr->IsEnabled());
 }
 
 // Validate all shaders and their associated resources, reporting any errors that are encountered
@@ -838,6 +844,14 @@ Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthStencilBufferFo
 	);
 }
 
+void RenderDeviceDX11::CalculateFrameFrustumJitter(void)
+{
+	if (FrustumJitterEnabled())
+	{
+		m_frustum_jitter.RawPtr->Update(m_displaysize_f);
+	}
+}
+
 void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 {
 	// TODO: Flip near/far plane distances as part of inverted depth buffer for greater FP precision
@@ -849,10 +863,10 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 	// Apply frustum jitter if enabled
 	if (FrustumJitterEnabled())
 	{
-		m_projection = ApplyFrustumJitter(m_projection);
+		m_projection = m_frustum_jitter.RawPtr->Apply(m_projection);
 	}
 
-
+	// Calculate inverse once and cache
 	m_invproj = XMMatrixInverse(NULL, m_projection);
 }
 
@@ -883,7 +897,7 @@ bool RenderDeviceDX11::VerifyState(void)
 void RenderDeviceDX11::BeginFrame(void)
 {
 	// Calculate frustum jitter for the frame, if enabled
-	CalculateFrustumJitter();
+	CalculateFrameFrustumJitter();
 
 	// Some rendering effects (e.g. frustum jitter) require us to recalculate the projection matrix each frame
 	RecalculateProjectionMatrix();
@@ -1019,6 +1033,40 @@ void RenderDeviceDX11::ReloadAllMaterials(void)
 	{
 		Game::Log << LOG_WARN << "Failed to reload " << failcount << " of " << total << " material definitions\n";
 	}
+}
+
+// Virtual inherited method to accept a command from the console
+bool RenderDeviceDX11::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "frustum_jitter" && m_frustum_jitter.RawPtr)
+	{
+		if (command.Parameter(0) == "enabled")
+		{
+			if (command.ParameterCount() > 1) {
+				m_frustum_jitter.RawPtr->SetEnabled(command.ParameterAsBool(1));
+				command.SetSuccessOutput(concat("Frustum jitter process is now ")(m_frustum_jitter.RawPtr->IsEnabled() ? "enabled" : "disabled").str());		
+			}
+			else {
+				command.SetSuccessOutput(concat("Frustum jitter process is ")(m_frustum_jitter.RawPtr->IsEnabled() ? "enabled" : "disabled").str());
+			}
+			return true;
+		}
+		else if (command.Parameter(0) == "scale")
+		{
+			float scale = command.ParameterAsFloat(1);
+			if (scale > 0.0f) {
+				m_frustum_jitter.RawPtr->SetJitterScale(scale);
+				command.SetSuccessOutput(concat("Frustum jitter scale factor updated to ")(scale).str());
+			}
+			else {
+				command.SetSuccessOutput(concat("Frustum jitter scale == ")(m_frustum_jitter.RawPtr->GetJitterScale()).str());
+			}
+			return true;
+		}
+	}
+
+	// Unrecognised command
+	return false;
 }
 
 

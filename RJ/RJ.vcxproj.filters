@@ -946,6 +946,9 @@
     <ClCompile Include="JitterSampleDistribution.cpp">
       <Filter>Engine\Jitter</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessTemporalAA.cpp">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2211,6 +2214,9 @@
     <ClInclude Include="JitterSampleDistribution.h">
       <Filter>Engine\Jitter</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessTemporalAA.h">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2587,6 +2593,9 @@
     </Filter>
     <Filter Include="Engine\Jitter">
       <UniqueIdentifier>{bc48790c-bc7c-4e83-a9ab-1ace0cccc73d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Postprocess\Temporal AA">
+      <UniqueIdentifier>{3e344964-8dc6-430f-b092-28c66df71ce6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

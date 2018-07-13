@@ -16,7 +16,7 @@ public:
 	CMPINLINE bool										IsEnabled(void) const { return m_enabled; }
 
 	// Calculate frustum jitter for the frame, if enabled
-	void												Update(void);
+	void												Update(XMFLOAT2 displaysize);
 
 	// Apply frustum jittering to the given [projection] matrix and return the result
 	XMMATRIX											Apply(FXMMATRIX matrix);
@@ -25,6 +25,9 @@ public:
 	CMPINLINE void										SetEnabled(bool enabled)	{ m_enabled = enabled; }
 	CMPINLINE void										Enable(void)				{ SetEnabled(true); }
 	CMPINLINE void										Disable(void)				{ SetEnabled(false); }
+
+	// Reset the component state ready to begin from the first frame
+	void												Reset(void);
 
 	// Scaling factor applied to the jitter process
 	CMPINLINE float										GetJitterScale(void) const	{ return m_jitter_scale; }
@@ -37,6 +40,9 @@ public:
 	// Return the jitter translation matrix for the current frame
 	CMPINLINE XMMATRIX									GetJitterMatrix(void) const { return m_frame_jitter_matrix; }
 
+	// Return the two-frame jitter values.  Current frame jitter in xy, previous frame in zw
+	CMPINLINE XMFLOAT4									GetTwoFrameJitterVectorF(void) const { return m_two_frame_jitter; }
+
 	// Destructor
 	~FrustumJitterProcess(void);
 
@@ -48,6 +54,9 @@ private:
 	XMVECTOR											m_frame_jitter;
 	XMFLOAT2											m_frame_jitter_f;
 	XMMATRIX											m_frame_jitter_matrix;
+
+	// Current frame jitter in xy, previous frame in zw
+	XMFLOAT4											m_two_frame_jitter;
 
 	// Using Halton-2-3 (16) distribution for jitter process
 	static const unsigned int 							JITTER_DISTRIBUTION_SIZE = 16U;

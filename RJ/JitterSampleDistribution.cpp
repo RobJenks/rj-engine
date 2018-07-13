@@ -16,7 +16,7 @@ void JitterSampleDistribution::GenerateHalton23Distribution(std::vector<XMFLOAT2
 
 // Generate an element of the Halton sequence based on the given prime seed and index.  Index
 // cannot be zero-based, i.e must be >= 1, per the definition of the sequence
-float JitterSampleDistribution::HaltonSequence(int prime, int index = 1 /* Cannot be zero-based */)
+float JitterSampleDistribution::HaltonSequence(int prime, int index /* Cannot be zero-based */)
 {
 	float r = 0.0f, f = 1.0f;
 
