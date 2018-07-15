@@ -573,6 +573,7 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	// General data
 	m_cb_deferred_data.RawPtr->C_frametime = Game::TimeFactor;
 	m_cb_deferred_data.RawPtr->C_buffersize = XMUINT2(displaysize.x, displaysize.y);
+	m_cb_deferred_data.RawPtr->C_texelsize = XMFLOAT2(1.0f / static_cast<float>(displaysize.x), 1.0f / static_cast<float>(displaysize.y));
 
 	// Velocity calculation data
 	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;

@@ -18,8 +18,9 @@ CBUFFER LightIndexBuffer REGISTER(b4)
 CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 {
 	// General data
-	float C_frametime;							// Elapsed time for the frame (secs)
 	uint2 C_buffersize;							// Size of the primary render buffers (px)
+	float2 C_texelsize;							// Texel size of the primary render buffers, 1.0/buffersize (i.e. pos*texelsize = [0.0 1.0])
+	float C_frametime;							// Elapsed time for the frame (secs)
 
 	// Velocity calculation data
 	unsigned int C_k;								// Constant K in the velocity calculation, determining the screen-space radius considered
@@ -29,7 +30,7 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 	unsigned int C_motion_max_sample_tap_distance;	// Max distance for reconstruction tap samples along the velocity vector when calculating motion blur
 
 	// Padding
-	//float# _padding_def;						// CB size must be a multiple of 16 bytes
+	float2 _padding_def;						// CB size must be a multiple of 16 bytes
 };
 
 
