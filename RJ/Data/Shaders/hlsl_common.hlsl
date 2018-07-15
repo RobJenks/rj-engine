@@ -83,3 +83,21 @@ float3 YCoCg_RGB(float3 c)
 		c.x - c.y - c.z
 		));
 }
+
+// Return luminance for the given RGB
+float Luminance(float3 rgb)
+{
+	return (0.2126*rgb.r + 0.7152*rgb.g + 0.0722*rgb.b)
+}
+
+// Return perceived luminance for the given RGB
+float LuminancePerceived(float3 rgb)
+{
+	return (0.299*rgb.r + 0.587*rgb.g + 0.114*rgb.b)
+}
+
+// Return more a precise luminance for the given RGB, but at greater cost (incl 1x sqrt) 
+float3 LuminancePrecise(float3 rgb)
+{
+	return sqrt((0.299 * rgb.r * rgb.r) + (0.587 * rgb.g * rgb.g) + (0.114 rgb.b * rgb.b));
+}
