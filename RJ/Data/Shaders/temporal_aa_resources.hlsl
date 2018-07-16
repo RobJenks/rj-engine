@@ -11,6 +11,7 @@ TEXTURE2D TAAMotionBlurFinalInput REGISTER(t4);
 
 // Input texture names
 #define TAAColourBufferInputName BUFFER_NAME(TAAColourBufferInput);
+#define TAAHistoryBufferInputName BUFFER_NAME(TAAHistoryBufferInput);
 #define TAADepthBufferInputName BUFFER_NAME(TAADepthBufferInput);
 #define TAAVelocityBufferInputName BUFFER_NAME(TAAVelocityBufferInput);
 #define TAAMotionBlurFinalInputName BUFFER_NAME(TAAMotionBlurFinalInput);
@@ -26,10 +27,9 @@ CBUFFER TemporalAABuffer REGISTER(b4)
 	float C_FarClip;						// Far plane distance
 	float C_FeedbackMin;					// Minimum feedback contribution from history during reprojection
 	float C_FeedbackMax;					// Maximum feedback contribution from history during reprojection
-	float C_TemporalMotionScale;			// Scale factor applied to sampled motion blur data, during reprojection/motion blend
 
 	// Padding
-	float3 _padding_taa;					// CB size must be a multiple of 16 bytes
+	//float# _padding_taa;					// CB size must be a multiple of 16 bytes
 };
 
 
