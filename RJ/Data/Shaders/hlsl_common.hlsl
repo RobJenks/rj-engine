@@ -67,7 +67,7 @@ float3 RGB_YCoCg(float3 c)
 		c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
 		c.x / 2.0 - c.z / 2.0,
 		-c.x / 4.0 + c.y / 2.0 - c.z / 4.0
-		);
+	);
 }
 
 // Convert YCoCg to RGB colour space
@@ -81,23 +81,25 @@ float3 YCoCg_RGB(float3 c)
 		c.x + c.y - c.z,
 		c.x + c.z,
 		c.x - c.y - c.z
-		));
+	));
 }
 
 // Return luminance for the given RGB
+// TODO: Requires LINEAR rgb input, not gamma-corrected input, in whch case the result 
+// should be exact (https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color)
 float Luminance(float3 rgb)
 {
-	return (0.2126*rgb.r + 0.7152*rgb.g + 0.0722*rgb.b)
+	return (0.2126*rgb.r + 0.7152*rgb.g + 0.0722*rgb.b);
 }
 
 // Return perceived luminance for the given RGB
 float LuminancePerceived(float3 rgb)
 {
-	return (0.299*rgb.r + 0.587*rgb.g + 0.114*rgb.b)
+	return (0.299*rgb.r + 0.587*rgb.g + 0.114*rgb.b);
 }
 
 // Return more a precise luminance for the given RGB, but at greater cost (incl 1x sqrt) 
 float3 LuminancePrecise(float3 rgb)
 {
-	return sqrt((0.299 * rgb.r * rgb.r) + (0.587 * rgb.g * rgb.g) + (0.114 rgb.b * rgb.b));
+	return sqrt((0.299 * rgb.r * rgb.r) + (0.587 * rgb.g * rgb.g) + (0.114 * rgb.b * rgb.b));
 }

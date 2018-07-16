@@ -75,7 +75,7 @@ float4 ResolveColour(float4 c)
 #	else
 		return c;
 #	endif
-
+}
 
 // Clip to the colour-space neighbourhood of the current pixel
 float4 ColourSpaceClipAABB(float3 aabb_min, float3 aabb_max, float4 p, float4 q)

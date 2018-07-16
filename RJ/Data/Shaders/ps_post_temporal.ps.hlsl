@@ -3,6 +3,7 @@
 #define USE_YCOCG							0		// Use YCoCg rather than RGB colour space
 #define PERFORM_COLOUR_SPACE_CLIPPING		1		// Clip colour space values against the colour-space AABB, rather than clamping
 #define FAST_APPROX_COLOUR_SPACE_CLIPPING	1		// Perform colour space clipping via fast method which only clips towards AABB centre (no noticeable quality impact)
+#define MOTION_BLUR_BLEND					1		// Blend reprojection into motion blur at higher screen-space velocities
 
 // Includes
 #include "../../CommonShaderPipelineStructures.hlsl.h"
@@ -10,14 +11,16 @@
 #include "DeferredRenderingBuffers.hlsl"
 #include "hlsl_common.hlsl"
 #include "temporal_aa_resources.hlsl"
+#include "temporal_aa_calculations.hlsl"
 
 
 // Constants
-const float Reproj_SubpixelThreshold = 0.5f;
-const float Reproj_GatherBase = 0.5f;
-const float Reproj_GatherSubpixelMotion = 0.1666f;
-const float MinimumHistoryLumaContribution = 0.2f;		// In the range [0.0 1.0]; min proportion contributed by history, regardless of relative luma
-
+static const float Reproj_SubpixelThreshold = 0.5f;
+static const float Reproj_GatherBase = 0.5f;
+static const float Reproj_GatherSubpixelMotion = 0.1666f;
+static const float MinimumHistoryLumaContribution = 0.2f;		// In the range [0.0 1.0]; min proportion contributed by history, regardless of relative luma
+static const float VelocityThresholdFullTrust = 2.0f;
+static const float VelocityThresholdNoTrust = 15.0f;
 
 
 float4 TemporalReprojection(float2 ss_tc, float2 ss_vel, float vs_dist)
@@ -85,24 +88,45 @@ float4 TemporalReprojection(float2 ss_tc, float2 ss_vel, float vs_dist)
 
 
 // Temporal anti-aliasing; temporal reprojection phase: entry point
-float4 PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN) : SV_Target0
+TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 {
+	TemporalAAPixelShaderOutput OUT;					// MRT output to { reprojection buffer, primary colour buffer }
+
 	// Reverse UV jittering for reprojection
-	float2 uv = IN.texCoord - C_jitter.xy;				// .xy is the current frame jitter (zw is prior frame)
+	float2 uv = IN.texCoord - C_Jitter.xy;				// .xy is the current frame jitter (zw is prior frame)
 
 	// Velocity dilation based on 3x3 neighbourhood
 #	if ENABLE_VELOCITY_DILATION
 		float3 closest = ClosestFragmentIn3x3Neighbourhood(uv);
-		float2 ss_vel = TAAVelocityBufferInput.Sample(closest.xy).xy;
+		float2 ss_vel = TAAVelocityBufferInput.Sample(LinearRepeatSampler, closest.xy).xy;
 		float vs_dist = LinearEyeDepth(closest.z);
 #	else
-		float2 ss_vel = TAAVelocityBufferInput.Sample(uv).xy;
+		float2 ss_vel = TAAVelocityBufferInput.Sample(LinearRepeatSampler, uv).xy;
 		float raw_dist = TAADepthBufferInput.Sample(PointClampSampler, uv);
 		float vs_dist = LinearEyeDepth(raw_dist);
 #	endif
 
 	// Perform temporal re-projection
-	float colour_temporal = TemporalReprojection(IN.texCoord, ss_vel, vs_dist);
+	float4 colour_temporal = TemporalReprojection(IN.texCoord, ss_vel, vs_dist);
+	float4 buffer_output = ResolveColour(colour_temporal);
 
-	/* ... */
+	// Incorporate motion blur data if applicable
+#	if MOTION_BLUR_BLEND
+		const float VelocityThresholdTrustSpan = (VelocityThresholdNoTrust - VelocityThresholdFullTrust);
+		float vel_mag = length(ss_vel * C_buffersize);
+		float trust = 1.0f - (clamp(vel_mag - VelocityThresholdFullTrust, 0.0f, VelocityThresholdTrustSpan) / VelocityThresholdTrustSpan);	// [0.0 1.0]
+
+		float4 colour_motion = TAAMotionBlurFinalInput.Sample(LinearRepeatSampler, uv);
+		float4 screen_output = ResolveColour(lerp(colour_motion, colour_temporal, trust));
+#	else
+		float4 screen_output = ResolveColour(colour_temporal);
+#	endif
+
+	/* TODO: Add blue noise component */
+	float4 noise = float4(0, 0, 0, 0);
+
+	// Return the final calculated outputs
+	OUT.ReprojectionBufferOutput = saturate(buffer_output + noise);
+	OUT.ColourBufferOutput = saturate(screen_output + noise);
+	return OUT;
 }
