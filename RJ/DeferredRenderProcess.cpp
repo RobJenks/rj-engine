@@ -12,6 +12,7 @@
 #include "BlendState.h"
 #include "Model.h"
 #include "PostProcessMotionBlur.h"
+#include "PostProcessTemporalAA.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
@@ -420,10 +421,14 @@ void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 
 	// Screen-space pixel neighbourhood motion blur
 	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
-
+	m_post_temporal_aa = ManagedPtr<PostProcessTemporalAA>(new PostProcessTemporalAA(this));
 
 	// Also maintain a collection of base post processing components
-	m_post_processing_components = { m_post_motionblur.RawPtr };
+	m_post_processing_components = 
+	{ 
+		m_post_motionblur.RawPtr, 
+		m_post_temporal_aa.RawPtr 
+	};
 }
 
 // Primary rendering method; executes all deferred rendering operations
@@ -716,8 +721,9 @@ void DeferredRenderProcess::PerformPostProcessing(void)
 	TextureDX11 * buffer = m_colour_buffer;
 
 	/* Post-processing pipeline */
-	buffer = ExecutePostProcessMotionBlur(buffer);
-	
+	// TODO: TEMP
+	auto motion = ExecutePostProcessMotionBlur(buffer);
+	buffer = ExecutePostProcessTemporalAntiAliasing(buffer, motion);
 
 	// Store a pointer to the final, fully-processed buffer
 	m_final_colour_buffer = buffer;
@@ -731,6 +737,17 @@ TextureDX11 * DeferredRenderProcess::ExecutePostProcessMotionBlur(TextureDX11 *c
 
 	// Post-process and return the modified colour buffer
 	return m_post_motionblur.RawPtr->Execute(colour_buffer, GBuffer.VelocityTexture);
+}
+
+// Temporal anti-aliasing with screen-space motion blur contribution
+TextureDX11 * DeferredRenderProcess::ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer, TextureDX11 *motion_buffer)
+{
+	// Revert to motion blur only if temporal AA is disabled
+	// TODO: TEMP
+	if (!m_post_temporal_aa.RawPtr->IsActive()) return motion_buffer;
+
+	// Post-process and return the modified colour buffer
+	return m_post_temporal_aa.RawPtr->Execute(colour_buffer, GBuffer.DepthStencilTexture, GBuffer.VelocityTexture, motion_buffer);
 }
 
 // Set the class of render noise generation used during the render process

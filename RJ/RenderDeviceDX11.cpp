@@ -68,6 +68,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_post_motionblur_tilegen_ps(NULL), 
 	m_post_motionblur_neighbour_ps(NULL), 
 	m_post_motionblur_gather_ps(NULL), 
+	m_post_temporal_aa(NULL), 
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
@@ -624,6 +625,9 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL },
 		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL },
 		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL },
+
+		// Post-process temporal anti-aliasing shaders
+		{ &m_post_temporal_aa, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL },
 
 		// Debug-only shaders
 #ifdef _DEBUG

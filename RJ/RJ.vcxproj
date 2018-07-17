@@ -780,6 +780,7 @@
     <ClCompile Include="XML\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Definitions\CppHLSLLocalisation.hlsl.h" />
     <ClInclude Include="..\Definitions\LightData.hlsl.h" />
     <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
     <ClInclude Include="..\Definitions\ModelData.h" />

@@ -2217,6 +2217,9 @@
     <ClInclude Include="PostProcessTemporalAA.h">
       <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
     </ClInclude>
+    <ClInclude Include="..\Definitions\CppHLSLLocalisation.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2640,6 +2643,8 @@
     <None Include="Data\Shaders\velocity_calculations.hlsl">
       <Filter>HLSL\Support</Filter>
     </None>
+    <None Include="Data\Shaders\temporal_aa_calculations.hlsl" />
+    <None Include="Data\Shaders\temporal_aa_resources.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2692,12 +2697,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\ps_post_temporal.ps.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\temporal_aa_calculations.hlsl">
-      <Filter>HLSL\Support</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\temporal_aa_resources.hlsl">
-      <Filter>HLSL\Support</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

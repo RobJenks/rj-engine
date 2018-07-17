@@ -124,7 +124,7 @@ public:
 	// Per-frame frustum projection jitter
 	bool											FrustumJitterEnabled(void) const;
 	void											CalculateFrameFrustumJitter(void);
-	
+	CMPINLINE FrustumJitterProcess *				FrustumJitter(void) { return m_frustum_jitter.RawPtr; }
 
 	// Attempt to hot-load all shaders and recompile them in-place
 	void											ReloadAllShaders(void);
@@ -195,6 +195,7 @@ private:
 	ShaderDX11 *							m_post_motionblur_tilegen_ps;
 	ShaderDX11 *							m_post_motionblur_neighbour_ps;
 	ShaderDX11 *							m_post_motionblur_gather_ps;
+	ShaderDX11 *							m_post_temporal_aa;
 
 	InputLayoutDesc							m_standard_input_layout;
 	InputLayoutDesc							m_fullscreen_quad_input_layout;

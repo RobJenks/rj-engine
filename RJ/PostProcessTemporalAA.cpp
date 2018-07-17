@@ -9,13 +9,18 @@
 #include "RenderAssetsDX11.h"
 #include "TextureDX11.h"
 #include "RenderTargetDX11.h"
+#include "PipelineStateDX11.h"
+#include "FrustumJitterProcess.h"
 
 const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION0 = "TemporalAA_Reprojection0_TX";
-const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION1 = "TemporalAA_Reprojection0_TX";
+const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION1 = "TemporalAA_Reprojection1_TX";
 const std::string PostProcessTemporalAA::TX_NAME_FINAL = "TemporalAA_Final_TX";
 const std::string PostProcessTemporalAA::RT_NAME_0 = "TemporalAA_RT0";
 const std::string PostProcessTemporalAA::RT_NAME_1 = "TemporalAA_RT1";
+const std::string PostProcessTemporalAA::RP_TEMPORAL = "TemporalAA_Pipeline";
 
+const float PostProcessTemporalAA::DEFAULT_TEMPORAL_FEEDBACK_MIN = 0.88f;
+const float PostProcessTemporalAA::DEFAULT_TEMPORAL_FEEDBACK_MAX = 0.97f;
 
 PostProcessTemporalAA::PostProcessTemporalAA(void)
 {
@@ -26,14 +31,31 @@ PostProcessTemporalAA::PostProcessTemporalAA(DeferredRenderProcess * render_proc
 	:
 	PostProcessComponent("temporal-aa", "Temporal Anti-Aliasing"), 
 
+	m_renderprocess(render_process), 
+
 	m_vs_quad(NULL), 
 	m_ps_temporal(NULL), 
 
 	m_tx_reprojection(), 
 	m_tx_final(NULL), 
 	m_rt(), 
+	m_pipeline_temporal(NULL), 
 
-	m_param_ps_temporal_deferred(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_cb_temporal(NULL), 
+	m_temporal_feedback_min(DEFAULT_TEMPORAL_FEEDBACK_MIN), 
+	m_temporal_feedback_max(DEFAULT_TEMPORAL_FEEDBACK_MAX), 
+
+	m_reprojection_index(INITIAL_REPROJECTION_INDEX), 
+	m_frame_reprojection_source(INITIAL_REPROJECTION_INDEX), 
+	m_frame_reprojection_target(INITIAL_REPROJECTION_INDEX), 
+
+	m_param_ps_temporal_deferred(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_temporal_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_colour_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_reproj_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_depth_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_velocity_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_motion_buffer(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	m_tx_reprojection[0] = m_tx_reprojection[1] = NULL;
 	m_rt[0] = m_rt[1] = NULL;
@@ -51,6 +73,7 @@ void PostProcessTemporalAA::PerformPostConfigInitialisation(void)
 {
 	InitialiseTextureBuffers();
 	InitialiseRenderTargets();
+	InitialiseTemporalPipeline();
 }
 
 void PostProcessTemporalAA::InitialiseShaders(void)
@@ -67,6 +90,12 @@ void PostProcessTemporalAA::InitialiseShaders(void)
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_ps_temporal_deferred = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, DeferredRenderingParamBufferName);
+	m_param_ps_temporal_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TemporalAABufferName);
+	m_param_ps_temporal_tex_colour_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAColourBufferInputName);
+	m_param_ps_temporal_tex_reproj_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAHistoryBufferInputName);
+	m_param_ps_temporal_tex_depth_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAADepthBufferInputName);
+	m_param_ps_temporal_tex_velocity_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAVelocityBufferInputName);
+	m_param_ps_temporal_tex_motion_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAMotionBlurFinalInputName);
 
 }
 
@@ -156,6 +185,144 @@ void PostProcessTemporalAA::InitialiseStandardBuffers(void)
 {
 	Game::Log << LOG_INFO << "Initialising post-process temporal anti-aliasing standard buffers\n";
 
+	m_cb_temporal = Game::Engine->GetAssets().CreateConstantBuffer(TemporalAABufferName, m_cb_temporal_data.RawPtr);
+}
+
+void PostProcessTemporalAA::InitialiseTemporalPipeline(void)
+{
+	// Recreate existing pipeline state if it already exists
+	if (Game::Engine->GetAssets().AssetExists<PipelineStateDX11>(RP_TEMPORAL))
+	{
+		Game::Engine->GetAssets().DeleteAsset<PipelineStateDX11>(RP_TEMPORAL);
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "Initialising post-process temporal anti-aliasing render pipeline\n";
+	}
+
+	m_pipeline_temporal = Game::Engine->GetAssets().CreatePipelineState(RP_TEMPORAL);
+	if (!m_pipeline_temporal)
+	{
+		Game::Log << LOG_ERROR << "Failed to initialise post-process temporal anti-aliasing render pipeline\n";
+		return;
+	}
+
+	// General pipeline configuration
+	m_pipeline_temporal->SetShader(Shader::Type::VertexShader, m_vs_quad);
+	m_pipeline_temporal->SetShader(Shader::Type::PixelShader, m_ps_temporal);
+	m_pipeline_temporal->SetRenderTarget(NULL);		// Will be set per-frame, alternating between RT[0] and [1]
+
+	// Disable all depth/stencil operations and culling; this is full-screen ortho rendering only
+	DepthStencilState::DepthMode depthMode(false, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Never);
+	m_pipeline_temporal->GetDepthStencilState().SetDepthMode(depthMode);
+	m_pipeline_temporal->GetRasterizerState().SetViewport(Game::Engine->GetRenderDevice()->GetPrimaryViewport());
+	m_pipeline_temporal->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+
+	// Disable all blending operations in the target buffer; target will be empty before the full-screen render anyway
+	m_pipeline_temporal->GetBlendState().SetBlendMode(BlendState::BlendModes::NoBlend);
+}
+
+// Virtual event which can be handled by subclasses; triggered when component is activated or deactivated
+void PostProcessTemporalAA::ActiveStateChanged(bool is_active)
+{
+	// Reset frame-dependent or temporal parameters if the component is being activated
+	if (is_active)
+	{
+		Reset();
+	}
+}
+
+// Reset any frame-dependent or temporal parameters, e.g. if the component is being activated
+void PostProcessTemporalAA::Reset(void)
+{
+	m_reprojection_index = INITIAL_REPROJECTION_INDEX;
+}
+
+
+// Execute the post-process over the source buffer.  Returns a pointer to the final buffer
+// following post-processing
+TextureDX11 * PostProcessTemporalAA::Execute(TextureDX11 *source_colour, TextureDX11 *source_depth, TextureDX11 *source_vel, TextureDX11 *source_motion)
+{
+	assert(source_colour);
+	assert(source_depth);
+	assert(source_vel);
+	assert(source_motion);
+
+	// All rendering will be against a full-screen quad in orthographic projection space
+	m_renderprocess->PopulateFrameBuffer(DeferredRenderProcess::FrameBufferState::Fullscreen);
+
+	/*
+		1. Populate the temporal AA buffer with all per-frame parameters
+		2. Prepare reprojection render targets for the frame
+		3. Temporal reprojection phase
+	*/
+	PopulateTemporalAABuffer();
+	PrepareReprojectionBuffers(source_colour);
+	ExecuteTemporalReprojectionPass(source_colour, source_depth, source_vel, source_motion);
+
+	// Return the final result of the post-processing
+	return m_tx_final;
+}
+
+
+void PostProcessTemporalAA::PopulateTemporalAABuffer(void)
+{
+	m_cb_temporal_data.RawPtr->C_NearClip = Game::Engine->GetRenderDevice()->GetNearClipDistance();
+	m_cb_temporal_data.RawPtr->C_FarClip = Game::Engine->GetRenderDevice()->GetFarClipDistance();
+	m_cb_temporal_data.RawPtr->C_FeedbackMin = m_temporal_feedback_min;
+	m_cb_temporal_data.RawPtr->C_FeedbackMax = m_temporal_feedback_max;
+
+	auto frustum_jitter = Game::Engine->GetRenderDevice()->FrustumJitter();
+	if (frustum_jitter->IsEnabled())
+	{
+		m_cb_temporal_data.RawPtr->C_Jitter = frustum_jitter->GetTwoFrameJitterVectorF();
+	}
+	else
+	{
+		m_cb_temporal_data.RawPtr->C_Jitter = NULL_FLOAT4;
+	}
+
+	m_cb_temporal->Set(m_cb_temporal_data.RawPtr);
+}
+
+void PostProcessTemporalAA::PrepareReprojectionBuffers(TextureDX11 *source_colour)
+{
+	// If this is the first frame since the component was activated, directly copy the source colour buffer
+	// to populate the initial reprojection buffer
+	if (m_reprojection_index == INITIAL_REPROJECTION_INDEX)
+	{
+		m_reprojection_index = 0;
+		m_tx_reprojection[m_reprojection_index]->Copy(source_colour);
+	}
+
+	// Data will be read from reprojection_index this frame, and written to target_reproj
+	m_frame_reprojection_source = m_reprojection_index;
+	m_frame_reprojection_target = ((m_reprojection_index + 1) % 2);
+
+	// Bind the relevant render target to the temporal pipeline
+	m_pipeline_temporal->SetRenderTarget(m_rt[m_frame_reprojection_target]);
+
+	// Cycle the source reprojection buffer to the current target, ready for next frame
+	m_reprojection_index = m_frame_reprojection_target;
+}
+
+void PostProcessTemporalAA::ExecuteTemporalReprojectionPass(TextureDX11 *source_colour, TextureDX11 *source_depth, TextureDX11 *source_vel, TextureDX11 *source_motion)
+{
+	// Populate shader parameters
+	auto ps = m_pipeline_temporal->GetShader(Shader::Type::PixelShader);
+	ps->GetParameter(m_param_ps_temporal_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
+	ps->GetParameter(m_param_ps_temporal_buffer).Set(m_cb_temporal);
+
+	ps->GetParameter(m_param_ps_temporal_tex_colour_buffer).Set(source_colour);
+	ps->GetParameter(m_param_ps_temporal_tex_reproj_buffer).Set(m_tx_reprojection[m_frame_reprojection_source]);
+	ps->GetParameter(m_param_ps_temporal_tex_depth_buffer).Set(source_depth);
+	ps->GetParameter(m_param_ps_temporal_tex_velocity_buffer).Set(source_vel);
+	ps->GetParameter(m_param_ps_temporal_tex_motion_buffer).Set(source_motion);
+
+	// Bind the pipeline and perform full-screen quad rendering
+	m_pipeline_temporal->Bind();
+	m_renderprocess->RenderFullScreenQuad();
+	m_pipeline_temporal->Unbind();
 }
 
 

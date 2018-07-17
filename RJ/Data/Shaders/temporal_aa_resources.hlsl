@@ -1,6 +1,8 @@
 #ifndef __TemporalAAResourcesHLSL__
 #define __TemporalAAResourcesHLSL__
 
+#include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
+
 
 // Texture resources bound to the PS
 TEXTURE2D TAAColourBufferInput REGISTER(t0);
@@ -10,11 +12,11 @@ TEXTURE2D TAAVelocityBufferInput REGISTER(t3);
 TEXTURE2D TAAMotionBlurFinalInput REGISTER(t4);
 
 // Input texture names
-#define TAAColourBufferInputName BUFFER_NAME(TAAColourBufferInput);
-#define TAAHistoryBufferInputName BUFFER_NAME(TAAHistoryBufferInput);
-#define TAADepthBufferInputName BUFFER_NAME(TAADepthBufferInput);
-#define TAAVelocityBufferInputName BUFFER_NAME(TAAVelocityBufferInput);
-#define TAAMotionBlurFinalInputName BUFFER_NAME(TAAMotionBlurFinalInput);
+#define TAAColourBufferInputName BUFFER_NAME(TAAColourBufferInput)
+#define TAAHistoryBufferInputName BUFFER_NAME(TAAHistoryBufferInput)
+#define TAADepthBufferInputName BUFFER_NAME(TAADepthBufferInput)
+#define TAAVelocityBufferInputName BUFFER_NAME(TAAVelocityBufferInput)
+#define TAAMotionBlurFinalInputName BUFFER_NAME(TAAMotionBlurFinalInput)
 
 
 

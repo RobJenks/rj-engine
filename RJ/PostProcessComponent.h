@@ -19,9 +19,18 @@ public:
 	// Returns the string description of this post-processing component
 	CMPINLINE std::string				GetDescription(void) const { return m_description; }
 
+	// Virtual event which can be handled by subclasses; triggered when component is activated or deactivated
+	CMPINLINE virtual void				ActiveStateChanged(bool is_active) { }
+
 	// Determines whether the post-processing effect will be applied during rendering
 	CMPINLINE bool						IsActive(void) const { return m_active; }
-	CMPINLINE void						SetActive(bool active) { m_active = active; }
+	CMPINLINE void						SetActive(bool active) 
+	{ 
+		if (active == m_active) return;
+
+		m_active = active; 
+		ActiveStateChanged(active);
+	}
 	CMPINLINE void						Activate(void) { SetActive(true); }
 	CMPINLINE void						Deactivate(void) { SetActive(false); }
 

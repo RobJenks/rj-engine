@@ -111,6 +111,9 @@ TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 	float4 buffer_output = ResolveColour(colour_temporal);
 
 	// Incorporate motion blur data if applicable
+	// TODO: In future, if MotionBlur+TAA are both enabled, we can avoid performing the full & costly
+	// motion blur gather phase.  Perform everything up to neighbour sampling and then run the gather
+	// logic only for pixels in this shader where trust < max_threshold (if % is small enough to be worth it)
 #	if MOTION_BLUR_BLEND
 		const float VelocityThresholdTrustSpan = (VelocityThresholdNoTrust - VelocityThresholdFullTrust);
 		float vel_mag = length(ss_vel * C_buffersize);

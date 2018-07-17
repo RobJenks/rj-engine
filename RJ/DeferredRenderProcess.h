@@ -16,6 +16,7 @@ class RenderTargetDX11;
 class Model;
 class PostProcessComponent;
 class PostProcessMotionBlur;
+class PostProcessTemporalAA;
 
 class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCommands
 {
@@ -98,6 +99,7 @@ protected:
 
 	// Post-processing phases
 	TextureDX11 *		ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer);
+	TextureDX11 *		ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer, TextureDX11 *motion_buffer);
 
 
 	// Retrieve standard buffer data
@@ -148,8 +150,9 @@ private:
 
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
+	ManagedPtr<PostProcessTemporalAA>			m_post_temporal_aa;
 	/* ... */
-	std::array<PostProcessComponent*, 1U>		m_post_processing_components;
+	std::array<PostProcessComponent*, 2U>		m_post_processing_components;
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
