@@ -83,6 +83,7 @@ public:
 	CMPINLINE XMFLOAT2								GetDisplaySizeF(void) const { return m_displaysize_f; }
 
 	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
+	CMPINLINE XMMATRIX								GetProjectionMatrixUnjittered(void) const { return m_projection_unjittered; }
 	CMPINLINE XMMATRIX								GetOrthoMatrix(void) const { return m_orthographic; }
 	CMPINLINE XMMATRIX								GetInverseProjectionMatrix(void) const { return m_invproj; }
 	
@@ -175,6 +176,7 @@ private:
 	float									m_screen_near;
 	float									m_screen_far;
 	XMMATRIX								m_projection;
+	XMMATRIX								m_projection_unjittered;
 	XMMATRIX								m_invproj;
 	XMMATRIX								m_orthographic;
 	DXGI_SAMPLE_DESC						m_sampledesc;

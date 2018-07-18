@@ -142,10 +142,10 @@ CoreEngine::CoreEngine(void)
 	m_unit_quad_model = NULL;
 
 	// Initialise all key matrices to the identity
-	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
-		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
+	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen
+		= r_viewprojscreen = r_invviewprojscreen = r_projection_unjittered = r_viewproj_unjittered = ID_MATRIX;
 	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f 
-		= r_invviewproj_f = r_priorframe_viewproj_f = ID_MATRIX_F;
+		= r_invviewproj_f = r_projection_unjittered_f = r_viewproj_unjittered_f = r_priorframe_viewproj_f = r_priorframe_viewproj_unjittered_f = ID_MATRIX_F;
 	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -904,16 +904,19 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	// Store prior-frame data before recalculating
 	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
 	r_priorframe_viewproj_f = r_viewproj_f;
-	
+	r_priorframe_viewproj_unjittered_f = r_viewproj_unjittered_f;
+
 	// Store new render matrices
 	r_devicecontext = m_renderdevice->GetDeviceContext();
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
 	r_projection = m_renderdevice->GetProjectionMatrix();
+	r_projection_unjittered = m_renderdevice->GetProjectionMatrixUnjittered();
 	r_invproj = m_renderdevice->GetInverseProjectionMatrix();
 	r_orthographic = m_renderdevice->GetOrthoMatrix();
 	r_invorthographic = XMMatrixInverse(NULL, r_orthographic);
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
+	r_viewproj_unjittered = XMMatrixMultiply(r_view, r_projection_unjittered);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
 	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
 	r_invviewprojscreen = XMMatrixInverse(NULL, r_viewprojscreen);
@@ -922,10 +925,12 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	XMStoreFloat4x4(&r_view_f, r_view);
 	XMStoreFloat4x4(&r_invview_f, r_invview);
 	XMStoreFloat4x4(&r_projection_f, r_projection);
+	XMStoreFloat4x4(&r_projection_unjittered_f, r_projection_unjittered);
 	XMStoreFloat4x4(&r_invproj_f, r_invproj);
 	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
 	XMStoreFloat4x4(&r_invorthographic_f, r_invorthographic);
 	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
+	XMStoreFloat4x4(&r_viewproj_unjittered_f, r_viewproj_unjittered);
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
 }
 

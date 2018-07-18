@@ -51,6 +51,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_screen_near(Game::NearClipPlane),
 	m_screen_far(Game::FarClipPlane), 
 	m_projection(ID_MATRIX), 
+	m_projection_unjittered(ID_MATRIX), 
 	m_invproj(ID_MATRIX), 
 	m_orthographic(ID_MATRIX),
 
@@ -862,12 +863,16 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
 
 	// Base projection matrix
-	m_projection = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+	m_projection_unjittered = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
 
 	// Apply frustum jitter if enabled
 	if (FrustumJitterEnabled())
 	{
-		m_projection = m_frustum_jitter.RawPtr->Apply(m_projection);
+		m_projection = m_frustum_jitter.RawPtr->Apply(m_projection_unjittered);
+	}
+	else
+	{
+		m_projection = m_projection_unjittered;
 	}
 
 	// Calculate inverse once and cache

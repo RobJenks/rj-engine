@@ -11,6 +11,7 @@
 float2 CalculateScreenSpacePixelVelocity(float4 prior_pos, float4 current_pos)
 {
 	float2 vraw = ((current_pos.xy / current_pos.w) - (prior_pos.xy / prior_pos.w)) * C_half_frame_exposure;
+
 	float vmagnitude = length(vraw);
 
 	float weight = max(0.5f, min(vmagnitude, C_k));

@@ -16,8 +16,10 @@ struct VertexShaderStandardOutput
 
 	// Non-perspective-corrected position values, since we cannot otherwise compare a TEXCOORD with the SV_POSITION in the PS
 	// due to perspective correction of the latter only
-	float4 lastframeposition	RJ_SEMANTIC(TEXCOORD2);		// Projection-space position in the prior frame
-	float4 thisframeposition	RJ_SEMANTIC(TEXCOORD3);		// Projection-space position in the current frame
+	// TODO: remove jitter contribution in pixel shader when calculating velocity, in order to
+	// avoid passing an additional two float4s per pixel through the pipeline
+	float4 lastframeposition_unjittered	RJ_SEMANTIC(TEXCOORD2);		// Projection-space unjittered position in the prior frame
+	float4 thisframeposition_unjittered	RJ_SEMANTIC(TEXCOORD3);		// Projection-space unjittered position in the current frame
 };
 
 // Output of basic texture-sampling VS stage; returns only pos/texcoord basic data

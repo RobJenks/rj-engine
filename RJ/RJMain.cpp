@@ -685,31 +685,13 @@ void RJMain::ProcessKeyboardInput(void)
 	{
 		if (b[DIK_LSHIFT])
 		{
-			// System light
-			const auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
-			auto it_end = objects.end();
-			for (auto it = objects.begin(); it != it_end; ++it)
-			{
-				if ((*it)() && (*it)()->GetObjectType() == iObject::ObjectType::LightSourceObject)
-				{
-					LightSource *ls = (LightSource*)(*it)();
-					ls->LightObject().SetIsActive(!ls->GetLight().IsActive());
-				}
-			}
+			Game::Console.ProcessRawCommand(GameConsoleCommand("frustum_jitter enabled false"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
 		}
 		else
 		{
-			// Actor-attached light
-			iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
-			for (iObject::AttachmentSet::iterator it = a1()->GetChildObjects().begin(); it != it_end; ++it)
-			{
-				if ((*it).Child && (*it).Child->GetObjectType() == iObject::ObjectType::LightSourceObject)
-				{
-					Light & light = ((LightSource*)(*it).Child)->LightObject();
-					light.SetIsActive(!light.IsActive());
-					break;
-				}
-			}
+			Game::Console.ProcessRawCommand(GameConsoleCommand("frustum_jitter enabled true"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa enable"));
 		}
 
 		Game::Keyboard.LockKey(DIK_5);

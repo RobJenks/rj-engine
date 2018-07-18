@@ -554,6 +554,10 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+
+	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
+	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
 

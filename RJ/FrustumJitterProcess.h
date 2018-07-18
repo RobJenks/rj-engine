@@ -22,7 +22,7 @@ public:
 	XMMATRIX											Apply(FXMMATRIX matrix);
 
 	// Enable or disable the process
-	CMPINLINE void										SetEnabled(bool enabled)	{ m_enabled = enabled; }
+	void												SetEnabled(bool enabled);
 	CMPINLINE void										Enable(void)				{ SetEnabled(true); }
 	CMPINLINE void										Disable(void)				{ SetEnabled(false); }
 

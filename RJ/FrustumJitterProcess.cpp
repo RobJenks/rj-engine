@@ -22,6 +22,13 @@ FrustumJitterProcess::FrustumJitterProcess(void)
 	Reset();
 }
 
+// Enable or disable the process
+void FrustumJitterProcess::SetEnabled(bool enabled) 
+{ 
+	m_enabled = enabled; 
+	Reset();
+}
+
 // Reset the component state ready to begin from the first frame
 void FrustumJitterProcess::Reset(void)
 {
