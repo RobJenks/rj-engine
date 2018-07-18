@@ -24,7 +24,6 @@ TEXTURE2D TAAMotionBlurFinalInput REGISTER(t4);
 // Constant buffer used for temporal AA rendering
 CBUFFER TemporalAABuffer REGISTER(b4)
 {
-	float4 C_Jitter;						// xy = current frame, zw = prior frame
 	float C_NearClip;						// Near plane distance
 	float C_FarClip;						// Far plane distance
 	float C_FeedbackMin;					// Minimum feedback contribution from history during reprojection

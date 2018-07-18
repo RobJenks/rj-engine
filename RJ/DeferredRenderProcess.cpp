@@ -11,6 +11,7 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "FrustumJitterProcess.h"
 #include "PostProcessMotionBlur.h"
 #include "PostProcessTemporalAA.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
@@ -586,6 +587,17 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
 	m_cb_deferred_data.RawPtr->C_motion_samples = m_motion_samples;
 	m_cb_deferred_data.RawPtr->C_motion_max_sample_tap_distance = m_motion_max_sample_tap_distance;
+
+	// Frustum jitter for current and prior frame (xy = current frame UV jitter, zw = prior frame UV jitter)
+	auto frustum_jitter = Game::Engine->GetRenderDevice()->FrustumJitter();
+	if (frustum_jitter->IsEnabled())
+	{
+		m_cb_deferred_data.RawPtr->C_Jitter = frustum_jitter->GetTwoFrameJitterVectorF();
+	}
+	else
+	{
+		m_cb_deferred_data.RawPtr->C_Jitter = NULL_FLOAT4;
+	}
 
 	// Commit all changes to the CB
 	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);

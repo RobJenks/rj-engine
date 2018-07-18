@@ -10,7 +10,6 @@
 #include "TextureDX11.h"
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
-#include "FrustumJitterProcess.h"
 
 const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION0 = "TemporalAA_Reprojection0_TX";
 const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION1 = "TemporalAA_Reprojection1_TX";
@@ -271,16 +270,6 @@ void PostProcessTemporalAA::PopulateTemporalAABuffer(void)
 	m_cb_temporal_data.RawPtr->C_FarClip = Game::Engine->GetRenderDevice()->GetFarClipDistance();
 	m_cb_temporal_data.RawPtr->C_FeedbackMin = m_temporal_feedback_min;
 	m_cb_temporal_data.RawPtr->C_FeedbackMax = m_temporal_feedback_max;
-
-	auto frustum_jitter = Game::Engine->GetRenderDevice()->FrustumJitter();
-	if (frustum_jitter->IsEnabled())
-	{
-		m_cb_temporal_data.RawPtr->C_Jitter = frustum_jitter->GetTwoFrameJitterVectorF();
-	}
-	else
-	{
-		m_cb_temporal_data.RawPtr->C_Jitter = NULL_FLOAT4;
-	}
 
 	m_cb_temporal->Set(m_cb_temporal_data.RawPtr);
 }

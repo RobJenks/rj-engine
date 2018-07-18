@@ -30,7 +30,10 @@ CBUFFER DeferredRenderingParamBuffer REGISTER(b3)
 	unsigned int C_motion_max_sample_tap_distance;	// Max distance for reconstruction tap samples along the velocity vector when calculating motion blur
 
 	// Padding
-	float2 _padding_def;						// CB size must be a multiple of 16 bytes
+	float2 _padding_def;							// CB size must be a multiple of 16 bytes
+
+	// Frustum jitter for the current and prior frame
+	float4 C_Jitter;								// xy = current frame UV jitter, zw = prior frame UV jitter
 };
 
 
