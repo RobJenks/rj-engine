@@ -147,13 +147,13 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 void SDFDecalRenderProcess::InitialiseShaderResourceBindings(void)
 {
 	// Direct SDF rendering
-	m_vs_direct->GetParameter(m_param_vs_direct_framedata).Set(GetFrameDataBuffer());
-	m_ps_direct->GetParameter(m_param_ps_direct_decaldata).Set(GetDecalRenderingConstantBuffer());
+	m_vs_direct->SetParameterData(m_param_vs_direct_framedata, GetFrameDataBuffer());
+	m_ps_direct->SetParameterData(m_param_ps_direct_decaldata, GetDecalRenderingConstantBuffer());
 
 	// Deferred screenspace SDF rendering
-	m_vs_deferred->GetParameter(m_param_vs_deferred_framedata).Set(GetFrameDataBuffer());
-	m_ps_deferred->GetParameter(m_param_ps_deferred_framedata).Set(GetFrameDataBuffer());
-	m_ps_deferred->GetParameter(m_param_ps_deferred_decaldata).Set(GetDecalRenderingConstantBuffer());
+	m_vs_deferred->SetParameterData(m_param_vs_deferred_framedata, GetFrameDataBuffer());
+	m_ps_deferred->SetParameterData(m_param_ps_deferred_framedata, GetFrameDataBuffer());
+	m_ps_deferred->SetParameterData(m_param_ps_deferred_decaldata, GetDecalRenderingConstantBuffer());
 	
 
 }

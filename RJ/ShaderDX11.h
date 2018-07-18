@@ -10,6 +10,12 @@
 #include "ShaderMacros.h"
 #include "InputLayoutDesc.h"
 
+// Debug flag which, when set, will silently ignore shader data bindings to invalid parameters.  Allows more
+// in-depth shader debugging since it does not matter if parameters are optimised out by the HLSL compiler
+// between hot-loads.  Only allowed during debug builds
+#define DEBUG_SHADER_RELAXED_BINDINGS
+
+
 class ShaderDX11 : public Shader
 {
 public:
@@ -36,6 +42,18 @@ public:
 	bool							HasParameter(const std::string & name) const; 
 	ShaderParameterSet::size_type	GetParameterIndexByName(const std::string& name) const; 
 	CMPINLINE ShaderParameterDX11 & GetParameter(ShaderParameterSet::size_type index) { return m_parameters[index]; }
+
+	// Convenience method for setting the data bound to the given shader parameter index
+	// Also allows relaxed binding restrictions for shader debugging
+	template <typename T>
+	void							SetParameterData(ShaderParameterSet::size_type index, T *data)
+	{
+#if defined(_DEBUG) && defined(DEBUG_SHADER_RELAXED_BINDINGS)
+		if (index == ShaderDX11::INVALID_SHADER_PARAMETER) return;
+#endif
+
+		m_parameters[index].Set(data);
+	}
 
 	// Query for the latest supported shader profile
 	std::string						GetLatestProfile(Shader::Type type) const;

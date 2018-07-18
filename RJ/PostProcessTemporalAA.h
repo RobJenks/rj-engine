@@ -31,6 +31,9 @@ public:
 	// Virtual event which can be handled by subclasses; triggered when component is activated or deactivated
 	void								ActiveStateChanged(bool is_active);
 
+	// Respond to a change in shader configuration or a reload of shader bytecode
+	void								ShadersReloaded(void);
+
 
 	// Destructor
 	~PostProcessTemporalAA(void);

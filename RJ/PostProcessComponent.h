@@ -34,6 +34,8 @@ public:
 	CMPINLINE void						Activate(void) { SetActive(true); }
 	CMPINLINE void						Deactivate(void) { SetActive(false); }
 
+	// Response to a change in shader configuration or a reload of shader bytecode
+	virtual void						ShadersReloaded(void) { }
 
 
 private:

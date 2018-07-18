@@ -299,14 +299,14 @@ void PostProcessTemporalAA::ExecuteTemporalReprojectionPass(TextureDX11 *source_
 {
 	// Populate shader parameters
 	auto ps = m_pipeline_temporal->GetShader(Shader::Type::PixelShader);
-	ps->GetParameter(m_param_ps_temporal_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
-	ps->GetParameter(m_param_ps_temporal_buffer).Set(m_cb_temporal);
+	ps->SetParameterData(m_param_ps_temporal_deferred, m_renderprocess->GetDeferredRenderingParameterBuffer());
+	ps->SetParameterData(m_param_ps_temporal_buffer, m_cb_temporal);
 
-	ps->GetParameter(m_param_ps_temporal_tex_colour_buffer).Set(source_colour);
-	ps->GetParameter(m_param_ps_temporal_tex_reproj_buffer).Set(m_tx_reprojection[m_frame_reprojection_source]);
-	ps->GetParameter(m_param_ps_temporal_tex_depth_buffer).Set(source_depth);
-	ps->GetParameter(m_param_ps_temporal_tex_velocity_buffer).Set(source_vel);
-	ps->GetParameter(m_param_ps_temporal_tex_motion_buffer).Set(source_motion);
+	ps->SetParameterData(m_param_ps_temporal_tex_colour_buffer, source_colour);
+	ps->SetParameterData(m_param_ps_temporal_tex_reproj_buffer, m_tx_reprojection[m_frame_reprojection_source]);
+	ps->SetParameterData(m_param_ps_temporal_tex_depth_buffer, source_depth);
+	ps->SetParameterData(m_param_ps_temporal_tex_velocity_buffer, source_vel);
+	ps->SetParameterData(m_param_ps_temporal_tex_motion_buffer, source_motion);
 
 	// Bind the pipeline and perform full-screen quad rendering
 	m_pipeline_temporal->Bind();
@@ -314,6 +314,11 @@ void PostProcessTemporalAA::ExecuteTemporalReprojectionPass(TextureDX11 *source_
 	m_pipeline_temporal->Unbind();
 }
 
+// Response to a change in shader configuration or a reload of shader bytecode
+void PostProcessTemporalAA::ShadersReloaded(void)
+{
+	InitialiseShaders();
+}
 
 
 // Destructor
