@@ -2,6 +2,7 @@
 #include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../CommonShaderPipelineStructures.hlsl.h"
 #include "DeferredRendererDebugRenderingData.hlsl"
+#include "hlsl_common.hlsl"
 
 
 // GBuffer texture target bindings
@@ -23,6 +24,10 @@ float4 ContextDependentSample(Texture2D tex, float2 texcoord, uint buffer_type)
 	else if (buffer_type == DEF_DEBUG_STATE_ENABLED_DEPTH)
 	{
 		return pow(tex.Sample(LinearClampSampler, texcoord).rrrr, DEPTH_EXP_FACTOR);
+	}
+	else if (buffer_type == DEF_DEBUG_STATE_ENABLED_VELOCITY)
+	{
+		return float4(RevertNormalisationScaleBias(tex.Sample(LinearClampSampler, texcoord).xy) * 9.95f + float2(0.05f, 0.05f), 0.0f, 1.0f);
 	}
 
 	return EMPTY;

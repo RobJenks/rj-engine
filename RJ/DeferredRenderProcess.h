@@ -210,7 +210,7 @@ private:
 	// Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
 	bool											GBufferDebugRendering(void);
 	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
-	bool											IsDepthDebugMode(DebugRenderMode render_mode) const;
+	int												GetHlslDebugMode(DebugRenderMode render_mode) const;
 	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
 	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
 	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);

@@ -10,6 +10,7 @@ static const unsigned int DEF_DEBUG_MAX_RENDER_VIEWS = 16U;
 static const unsigned int DEF_DEBUG_STATE_DISABLED = 0U;
 static const unsigned int DEF_DEBUG_STATE_ENABLED_NORMAL = 1U;
 static const unsigned int DEF_DEBUG_STATE_ENABLED_DEPTH = 2U;
+static const unsigned int DEF_DEBUG_STATE_ENABLED_VELOCITY = 3U;
 
 // Render mode types
 static const unsigned int DEF_DEBUG_RENDER_VIEWS = 0U;

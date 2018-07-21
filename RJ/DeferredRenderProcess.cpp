@@ -812,9 +812,22 @@ DeferredRenderProcess::DebugRenderMode DeferredRenderProcess::TranslateDebugRend
 	return (it != modes.end() ? it->second : DebugRenderMode::None);
 }
 
-bool DeferredRenderProcess::IsDepthDebugMode(DebugRenderMode render_mode) const
+int DeferredRenderProcess::GetHlslDebugMode(DebugRenderMode render_mode) const
 {
-	return (render_mode == DebugRenderMode::Depth /* || ... || ... */);
+	switch (render_mode)
+	{
+		case DebugRenderMode::None:
+			return DEF_DEBUG_STATE_DISABLED;
+
+		case DebugRenderMode::Depth:
+			return DEF_DEBUG_STATE_ENABLED_DEPTH;
+
+		case DebugRenderMode::Velocity:
+			return DEF_DEBUG_STATE_ENABLED_VELOCITY;
+
+		default:
+			return DEF_DEBUG_STATE_ENABLED_NORMAL;
+	}
 }
 
 TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode)
@@ -837,7 +850,7 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::Final:					return m_final_colour_buffer;
 
 		// Unknown texture
-		default:							return NULL;
+		default:										return NULL;
 	}
 }
 
@@ -871,8 +884,7 @@ void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRender
 		else
 		{
 			last_valid_view = static_cast<int>(i);
-			bool isdepth = IsDepthDebugMode(render_modes[i]);
-			m_cb_debug_data.RawPtr->C_debug_view[i].state = (isdepth ? DEF_DEBUG_STATE_ENABLED_DEPTH : DEF_DEBUG_STATE_ENABLED_NORMAL);
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(render_modes[i]);
 		}
 	}
 
