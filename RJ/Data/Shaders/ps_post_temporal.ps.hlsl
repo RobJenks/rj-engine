@@ -4,6 +4,7 @@
 #define PERFORM_COLOUR_SPACE_CLIPPING		1		// Clip colour space values against the colour-space AABB, rather than clamping
 #define FAST_APPROX_COLOUR_SPACE_CLIPPING	1		// Perform colour space clipping via fast method which only clips towards AABB centre (no noticeable quality impact)
 #define MOTION_BLUR_BLEND					1		// Blend reprojection into motion blur at higher screen-space velocities
+#define DEBUG_TEMPORAL_MOTION_BLEND			0		// Will show a debug view of temporal reprojection (green) vs motion (red) components, if set
 
 // Includes
 #include "../../CommonShaderPipelineStructures.hlsl.h"
@@ -120,6 +121,13 @@ TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 		float trust = 1.0f - (clamp(vel_mag - VelocityThresholdFullTrust, 0.0f, VelocityThresholdTrustSpan) / VelocityThresholdTrustSpan);	// [0.0 1.0]
 
 		float4 colour_motion = TAAMotionBlurFinalInput.Sample(LinearRepeatSampler, uv);
+
+#	if DEBUG_TEMPORAL_MOTION_BLEND
+		colour_motion = (colour_motion * 0.000001f) + float4(1, 0, 0, 0);
+		colour_temporal = (colour_temporal * 0.000001f) + float4(0, 1, 0, 0);
+#	endif
+
+
 		float4 screen_output = ResolveColour(lerp(colour_motion, colour_temporal, trust));
 #	else
 		float4 screen_output = ResolveColour(colour_temporal);
