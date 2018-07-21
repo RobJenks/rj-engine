@@ -125,6 +125,7 @@
 #include "DataObjectEngineHeadingController.h"	// DBG
 #include "TextRenderer.h"			// DBG
 #include "DecalRenderingManager.h"	// DBG
+#include "FrustumJitterProcess.h"	// DBG
 #include "Frustum.h"
 
 #include "Equipment.h"
@@ -683,7 +684,12 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_5])
 	{
-		if (b[DIK_LSHIFT])
+		if (b[DIK_LCONTROL])
+		{
+			Game::Engine->GetRenderDevice()->FrustumJitter()->SetEnabled(
+				!Game::Engine->GetRenderDevice()->FrustumJitter()->IsEnabled());
+		}
+		else if (b[DIK_LSHIFT])
 		{
 			Game::Console.ProcessRawCommand(GameConsoleCommand("frustum_jitter enabled false"));
 			Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));

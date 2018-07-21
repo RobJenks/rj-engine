@@ -29,7 +29,7 @@ float4 TemporalReprojection(float2 ss_tc, float2 ss_vel, float vs_dist)
 	float2 uv = ss_tc - C_Jitter.xy;
 	float4 texel0 = SampleColour(TAAColourBufferInput, uv);						// Unjitter and sample
 	float4 texel1 = SampleColour(TAAHistoryBufferInput, ss_tc - ss_vel);		// Sample back along the velocity vector.  Already unjittered
-
+	
 	// Perform 4-tap varying sample to calculate local minima-maxima in colour space
 	float2 texel_vel = ss_vel / C_texelsize;
 	float texel_vel_mag = length(texel_vel) * vs_dist;
@@ -64,7 +64,7 @@ float4 TemporalReprojection(float2 ss_tc, float2 ss_vel, float vs_dist)
 #	if PERFORM_COLOUR_SPACE_CLIPPING
 		texel1 = ColourSpaceClipAABB(cmin.xyz, cmax.xyz, clamp(cavg, cmin, cmax), texel1);
 #	else 
-		texel1 = clamp(cavg, cmin, cmax);
+		texel1 = clamp(texel1, cmin, cmax);
 #	endif
 
 	// Calculate feedback weight (% influence from history) based on difference in unbiased luma
@@ -98,10 +98,10 @@ TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 	// Velocity dilation based on 3x3 neighbourhood
 #	if ENABLE_VELOCITY_DILATION
 		float3 closest = ClosestFragmentIn3x3Neighbourhood(uv);
-		float2 ss_vel = TAAVelocityBufferInput.Sample(LinearRepeatSampler, closest.xy).xy;
+		float2 ss_vel = RevertNormalisationScaleBias(TAAVelocityBufferInput.Sample(LinearRepeatSampler, closest.xy).xy);
 		float vs_dist = LinearEyeDepth(closest.z);
 #	else
-		float2 ss_vel = TAAVelocityBufferInput.Sample(LinearRepeatSampler, uv).xy;
+		float2 ss_vel = RevertNormalisationScaleBias(TAAVelocityBufferInput.Sample(LinearRepeatSampler, uv).xy);
 		float raw_dist = TAADepthBufferInput.Sample(PointClampSampler, uv);
 		float vs_dist = LinearEyeDepth(raw_dist);
 #	endif

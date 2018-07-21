@@ -81,7 +81,7 @@ float4 ResolveColour(float4 c)
 float4 ColourSpaceClipAABB(float3 aabb_min, float3 aabb_max, float4 p, float4 q)
 {
 #if FAST_APPROX_COLOUR_SPACE_CLIPPING		
-
+	
 	// Optimised version clips towards AABB centre only, but no noticeable quality impact & much faster
 	float3 p_clip = 0.5 * (aabb_max + aabb_min);
 	float3 e_clip = 0.5 * (aabb_max - aabb_min) + FLT_EPS;
