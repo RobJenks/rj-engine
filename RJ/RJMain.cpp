@@ -751,23 +751,15 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_EQUALS])
 	{
-		//((LightSource*)Game::GetObjectByInstanceCode("clight"))->SetPosition(XMVectorAdd(a1()->GetPosition(), XMVectorSetY(NULL_VECTOR, 5.0f)));
+		static XMFLOAT3 lastpos = NULL_FLOAT3;
+		auto pos = Game::CurrentPlayer->GetActor()->GetPositionF();
+		double diff[3] = { (double)pos.x - (double)lastpos.x, (double)pos.y - (double)lastpos.y, (double)pos.z - (double)lastpos.z };
 
-		if (b[DIK_LSHIFT])
-		{
-			s2()->SetName("B");
-		}
-		else
-		{
-			s2()->SetCollisionMode(Game::CollisionMode::NoCollision);
-			s2()->SetSize(2.0f);
-			s2()->SetPosition(XMVectorSet(145, 219, 1.08, 0.0f));
-			s2()->SetOrientation(XMQuaternionRotationRollPitchYaw(0.0f, PI, PI / 5.0f));
-			s2()->SetMass(8.0f);
-			s2()->SetName("A");
-		}
+		Game::Log << LOG_DEBUG << "Diff: " << diff[0] << ", " << diff[1] << ", " << diff[2] << 
+			(diff[0] == 0.0 && diff[1] == 0.0 && diff[2] == 0.0f ? ", no diff" :
+			", *** DIFFERENCE ***") << "\n";
 
-		Game::Keyboard.LockKey(DIK_EQUALS);
+		lastpos = pos;
 	}
 
 	if (b[DIK_SEMICOLON]) {
@@ -2588,6 +2580,7 @@ void RJMain::DeactivateDebugPortalRenderingTest(void)
 	m_debug_portalrenderingtest_environment = NULL;
 }
 
+#define tp(vec, mat) Vector4ToString(XMVector3TransformCoord(vec, XMLoadFloat4x4(&mat)))
 
 void RJMain::DEBUGDisplayInfo(void)
 {
@@ -2713,11 +2706,28 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
-		if (s2()->GetName() == "B")
-		{
-			s2()->ChangePosition(XMVectorSetZ(NULL_VECTOR, -Game::TimeFactor * s2()->GetMass()));
-		}
+		/*auto pos = Game::CurrentPlayer->GetActor()->GetPosition();
 
+		auto View = Game::Engine->GetRenderViewMatrixF();
+		auto Projection = Game::Engine->GetRenderProjectionMatrixF();
+		auto ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
+		auto InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
+		auto PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
+		auto ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+
+		auto ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
+		auto PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
+		auto * tile = cs()->FindTileAtLocation(Game::CurrentPlayer->GetActor()->GetElementLocation());
+
+		Game::Log << LOG_DEBUG << "Pos: " << Vector4ToString(pos)
+			<< ", View: " << tp(pos, View)
+			<< ", Proj: " << tp(pos, Projection)
+			<< ", ViewProj: " << tp(pos, ViewProjection)
+			<< ", LastViewProj: " << tp(pos, PriorFrameViewProjection)
+			<< ", UProj: " << tp(pos, ProjectionUnjittered)
+			<< ", LastUViewProj: " << tp(pos, PriorFrameViewProjectionUnjittered)
+			<< "\n";*/
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 /*		auto renderinfo = Game::Engine->GetRenderInfo();
@@ -2743,3 +2753,4 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
