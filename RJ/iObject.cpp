@@ -58,7 +58,6 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_overrides_world_derivation = false;
 	m_treenode = NULL;
 	m_centreoffset = NULL_VECTOR;
-	m_orientchanges = 0;
 	m_nocollision_count = 0;
 	m_hardness = 1.0f;
 	m_ambient_audio = AudioParameters::Null;

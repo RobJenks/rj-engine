@@ -429,18 +429,7 @@ public:
 	// Renormalise any object spatial data, following a change to the object position/orientation
 	CMPINLINE void								RenormaliseSpatialData(void)
 	{
-		// Normalise every frame if the object is visible, or every *_FULLSIM changes when the object is being fully-simulated
-		// but is not currently visible.  Aside from that, we do not bother renormalising to save cycles
-		if (IsCurrentlyVisible())
-		{
-			m_orientation = XMQuaternionNormalizeEst(m_orientation);
-		}
-		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && 
-				 ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
-		{
-			m_orientation = XMQuaternionNormalizeEst(m_orientation);
-			m_orientchanges = 0;
-		}
+		m_orientation = XMQuaternionNormalizeEst(m_orientation);
 	}
 
 	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
@@ -546,9 +535,6 @@ protected:
 	// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
 	//void								DebugOutput(std::ostringstream &ss) const;
 
-	// Threshold (number of changes) for internally renormalising object quaternions, depending on state
-	static const int					ORIENT_NORMALISE_THRESHOLD_FULLSIM = 100;
-	//static const int					ORIENT_NORMALISE_THRESHOLD_DISTANT = 250;
 
 	iObject::ObjectType					m_objecttype;					// The type of object, set by each subclass on creation
 	iObject::ObjectClass				m_objectclass;					// The class of object, set by each subclass on creation
@@ -572,7 +558,6 @@ protected:
 	AXMVECTOR							m_orientation;					// Object orientation
 	AXMMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
 	AXMMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
-	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
 
 	Octree<iObject*> *					m_treenode;						// Stores a pointer to the spatial partitioning node we belong to
 
