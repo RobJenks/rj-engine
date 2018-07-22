@@ -123,8 +123,8 @@ TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 		float4 colour_motion = TAAMotionBlurFinalInput.Sample(LinearRepeatSampler, uv);
 
 #	if DEBUG_TEMPORAL_MOTION_BLEND
-		colour_motion = (colour_motion * 0.000001f) + float4(1, 0, 0, 0);
-		colour_temporal = (colour_temporal * 0.000001f) + float4(0, 1, 0, 0);
+		colour_motion = (colour_motion * 0.5f) + float4(0.5f, 0, 0, 0.5f);
+		colour_temporal = (colour_temporal * 0.5f) + float4(0, 0.5f, 0, 0.5f);
 #	endif
 
 
