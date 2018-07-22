@@ -642,19 +642,23 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			return false;		// One axis must have been selected, else we have an error (and probably no collision)
 		}
 
-		// Special case where the collision is NOT in the vertical direction
-		if (m_collisiontest.SATResult.Object0Axis != 1 && m_collisiontest.SATResult.Object1Axis != 1)
-		{
-			// Get the lower edge of the object OBB, and the upper edge of the terrain OBB
-			float obj_lower = (XMVectorGetY(_obbdata.Centre) - _obbdata.ExtentF.y);
-			float terrain_upper = (XMVectorGetY(terrain_obb.Centre) + terrain_obb.ExtentF.y);
-			float step_delta = (terrain_upper - obj_lower);
+		// Get the lower edge of the object OBB, and the upper edge of the terrain OBB.  Useful only for vertical collisions, but this is most of them...
+		float obj_lower = (XMVectorGetY(_obbdata.Centre) - _obbdata.ExtentF.y);
+		float terrain_upper = (XMVectorGetY(terrain_obb.Centre) + terrain_obb.ExtentF.y);
+		float vertical_delta = (obj_lower - terrain_upper);
 
-			// If the distance between these Y values is less than the step threshold we allow the object to move up without collision
-			if (step_delta < Game::C_GROUND_COLLISION_STEP_THRESHOLD)
+		bool is_vertical_collision = (m_collisiontest.SATResult.Object0Axis == 1 || m_collisiontest.SATResult.Object1Axis == 1);
+
+		// Special case where the collision is NOT in the vertical direction, yet we can 'step up' the gap since it is sufficiently small
+		if (!is_vertical_collision)
+		{
+			// If the terrain top is HIGHER than the object bottom, and the distance between these Y values is less than 
+			// the step threshold, we allow the object to move up without collision
+			float step_height = -vertical_delta;
+			if (step_height < Game::C_GROUND_COLLISION_STEP_THRESHOLD)
 			{
 				// Move the player upwards and exit here without performing any collision response
-				object->AddDeltaPosition(XMVectorSetY(NULL_VECTOR, step_delta + Game::C_EPSILON));
+				object->AddDeltaPosition(XMVectorSetY(NULL_VECTOR, step_height + Game::C_EPSILON));
 				return false;
 			}
 		}
@@ -675,6 +679,21 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 					"; momentum change from W" << object->PhysicsState.WorldMomentum << "/L" << object->PhysicsState.LocalMomentum;
 #			endif
 
+			// Special case for vertical collisions; arrest vertical movement and fix position if low speed, i.e. if standing on a surface
+			if (is_vertical_collision)
+			{
+				// If we are within snap distance, and object has downward vertical momentum that is below the notable-collision threshold
+				if (vertical_delta < Game::C_VERTICAL_COLLISION_SNAP_DISTANCE && XMVector2Less(mom, NULL_VECTOR) &&
+					XMVector2LessOrEqual(mom_n, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
+				{
+					// Snap to the top of the terrain object and arrest object local vertical momentum
+					object->SetEnvironmentPosition(XMVectorSetY(object->GetEnvironmentPosition(), (terrain_upper + _obbdata.ExtentF.y)));
+					object->SetLocalMomentum(XMVectorSetY(object->GetLocalMomentum(), 0.0f));
+					object->RefreshPositionImmediate();
+					return false;
+				}
+			}
+			
 			// Apply a direct force (i.e. no division through by mass) in the object local frame, to nullify current momentum along the response vector
 			object->ApplyLocalLinearForceDirect(XMVectorMultiply(response, mom_n));
 

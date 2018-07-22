@@ -126,6 +126,22 @@ public:
 		RecalculateLocalMomentum();
 	}
 
+	// Apply a dampening effect on very small momentum components, to avoid wasting time and introducing 
+	// rendering artifacts through micro-adjustments
+	CMPINLINE void							DampenWorldMomentum(void)
+	{
+		PhysicsState.WorldMomentum = XMVectorSelect(PhysicsState.WorldMomentum, NULL_VECTOR,
+			XMVectorLess(PhysicsState.WorldMomentum, Game::C_MOMENTUM_DAMPING_THRESHOLD_V));
+	}
+
+	// Apply a dampening effect on very small momentum components, to avoid wasting time and introducing 
+	// rendering artifacts through micro-adjustments
+	CMPINLINE void							DampenLocalMomentum(void)
+	{
+		PhysicsState.LocalMomentum = XMVectorSelect(PhysicsState.LocalMomentum, NULL_VECTOR,
+			XMVectorLess(PhysicsState.LocalMomentum, Game::C_MOMENTUM_DAMPING_THRESHOLD_V));
+	}
+
 	// Recalculates the object local momentum based upon its current world momentum
 	CMPINLINE void							RecalculateLocalMomentum(void)
 	{

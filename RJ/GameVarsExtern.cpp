@@ -155,6 +155,10 @@ namespace Game {
 																					// cycles will be run per frame
 	const float C_MAX_PHYSICS_FRAME_CYCLES = 5.0f;									// The maximum number of phyiscs cycles permitted per render 
 																					// frame, to avoid the 'spiral-of-death'
+	
+	const float C_MOMENTUM_DAMPING_THRESHOLD = 0.001f;								// Momentum in each direction will be damped to zero if it is below this threshold
+	const XMVECTOR C_MOMENTUM_DAMPING_THRESHOLD_V = XMVectorReplicate(C_MOMENTUM_DAMPING_THRESHOLD);
+
 	float C_MOVEMENT_DRAG_FACTOR = 0.025f;
 	float C_ENGINE_SIMULATION_UPDATE_INTERVAL = 0.1f;		// Interval (secs) between updates of the engine simulation
 	bool C_NO_MOMENTUM_LIMIT = false;						// Determines whether the momentum safety limit is enabled
@@ -178,6 +182,7 @@ namespace Game {
 		C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD * C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD;	// we apply an additional collision response
 	const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V = XMVectorReplicate(C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD);
 	const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V = XMVectorReplicate(C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ);
+	const float C_VERTICAL_COLLISION_SNAP_DISTANCE = 0.01f;				// Distance at which a slowly-moving object falling into terrain will snap to it and arrest its local vertical momentum
 	const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;					// The maximum number of collision exclusions that can be applied to an object
 	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
 	const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER = 2.5f;	// Constant multiplier applied to collision range when performing collision avoidance

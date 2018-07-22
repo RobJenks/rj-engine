@@ -173,9 +173,11 @@ namespace Game {
 	extern const XMVECTOR C_EPSILON_NEG_V;
 	extern const double C_EPSILON_DP;
 	extern const float C_LARGE_FLOAT;
-	extern const float C_MAX_PHYSICS_TIME_DELTA;		// The maximum permitted physics time delta, beyond which multiple cycles will be run per frame
-	extern const float C_MIN_PHYSICS_CYCLES_PER_SEC;	// The minimum number of physics cycles that should be run per second (i.e. the physics FPS)
-	extern const float C_MAX_PHYSICS_FRAME_CYCLES;		// The maximum number of phyiscs cycles permitted per render frame, to avoid the 'spiral-of-death'
+	extern const float C_MAX_PHYSICS_TIME_DELTA;			// The maximum permitted physics time delta, beyond which multiple cycles will be run per frame
+	extern const float C_MIN_PHYSICS_CYCLES_PER_SEC;		// The minimum number of physics cycles that should be run per second (i.e. the physics FPS)
+	extern const float C_MAX_PHYSICS_FRAME_CYCLES;			// The maximum number of phyiscs cycles permitted per render frame, to avoid the 'spiral-of-death'
+	extern const float C_MOMENTUM_DAMPING_THRESHOLD;		// Momentum in each direction will be damped to zero (when Dampen{...}Momentum is called) if it is below this threshold
+	extern const XMVECTOR C_MOMENTUM_DAMPING_THRESHOLD_V;	// Momentum in each direction will be damped to zero (when Dampen{...}Momentum is called) if it is below this threshold (vectorised)
 	extern float C_MOVEMENT_DRAG_FACTOR;
 	extern float C_ENGINE_SIMULATION_UPDATE_INTERVAL;
 	extern bool C_NO_MOMENTUM_LIMIT;
@@ -198,6 +200,7 @@ namespace Game {
 	extern const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ;	// Squared threshold momentum value, above which we apply an additional collision response
 	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V;	// Threshold momentum value, above which we apply an additional collision response (vectorised form)
 	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V;	// Squared threshold momentum value, above which we apply an additional collision response (vectorised form)
+	extern const float C_VERTICAL_COLLISION_SNAP_DISTANCE;				// Distance at which a slowly-moving object falling into terrain will snap to it and arrest its local vertical momentum
 	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS;					// The maximum number of collision exclusions that can be applied to an object
 	extern const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER;	// Constant multiplier applied to collision range when performing collision avoidance
 	extern const float C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER;	// Safety multiplier on the minimum required response to avoid a collision
