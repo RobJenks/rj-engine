@@ -24,7 +24,7 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	float4 eyePos = { 0, 0, 0, 1 };
 
 	// Read all non-depth GBuffer information for this fragment
-	int2 texCoord = IN.position.xy;
+	int2 texCoord = IN.position.xy - C_Jitter.xy;
 
 	float4 diffuse = GBuffer_DiffuseTextureVS.Load(int3(texCoord, 0));
 	float4 specular = GBuffer_SpecularTextureVS.Load(int3(texCoord, 0));
