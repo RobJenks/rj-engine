@@ -97,4 +97,7 @@ private:
 	ShaderDX11::ShaderParameterIndex	m_param_ps_temporal_tex_depth_buffer;
 	ShaderDX11::ShaderParameterIndex	m_param_ps_temporal_tex_velocity_buffer;
 	ShaderDX11::ShaderParameterIndex	m_param_ps_temporal_tex_motion_buffer;
+	ShaderDX11::ShaderParameterIndex	m_param_ps_temporal_tex_noise;
+	ShaderDX11::ShaderParameterIndex	m_param_ps_temporal_noise_data;
+	
 };

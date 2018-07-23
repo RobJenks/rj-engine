@@ -13,6 +13,7 @@
 #include "hlsl_common.hlsl"
 #include "temporal_aa_resources.hlsl"
 #include "temporal_aa_calculations.hlsl"
+#include "noise_calculations.hlsl"
 
 
 // Constants
@@ -22,6 +23,7 @@ static const float Reproj_GatherSubpixelMotion = 0.1666f;
 static const float MinimumHistoryLumaContribution = 0.2f;		// In the range [0.0 1.0]; min proportion contributed by history, regardless of relative luma
 static const float VelocityThresholdFullTrust = 2.0f;
 static const float VelocityThresholdNoTrust = 15.0f;
+static const float ReprojectionNoiseStrength = (1.0f / 510.0f);	// Multiplied by random noise in the range [-1 +1)
 
 
 float4 TemporalReprojection(float2 ss_tc, float2 ss_vel, float vs_dist)
@@ -133,9 +135,9 @@ TemporalAAPixelShaderOutput PS_Temporal(ScreenSpaceQuadVertexShaderOutput IN)
 		float4 screen_output = ResolveColour(colour_temporal);
 #	endif
 
-	/* TODO: Add blue noise component */
-	float4 noise = float4(0, 0, 0, 0);
-
+	// Mix a noise component into the reprojection to smooth out any discontinuities
+	float4 noise = float4(RandomNoise(IN.position.xy), RandomNoise(IN.position.yx), RandomNoise(IN.position.xx), RandomNoise(IN.position.yy)) * ReprojectionNoiseStrength;
+	
 	// Return the final calculated outputs
 	OUT.ReprojectionBufferOutput = saturate(buffer_output + noise);
 	OUT.ColourBufferOutput = saturate(screen_output + noise);

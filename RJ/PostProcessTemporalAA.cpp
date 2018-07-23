@@ -10,6 +10,7 @@
 #include "TextureDX11.h"
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
+#include "NoiseGenerator.h"
 
 const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION0 = "TemporalAA_Reprojection0_TX";
 const std::string PostProcessTemporalAA::TX_NAME_REPROJECTION1 = "TemporalAA_Reprojection1_TX";
@@ -54,7 +55,9 @@ PostProcessTemporalAA::PostProcessTemporalAA(DeferredRenderProcess * render_proc
 	m_param_ps_temporal_tex_reproj_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_temporal_tex_depth_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_temporal_tex_velocity_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_temporal_tex_motion_buffer(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_ps_temporal_tex_motion_buffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_temporal_tex_noise(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_temporal_noise_data(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	m_tx_reprojection[0] = m_tx_reprojection[1] = NULL;
 	m_rt[0] = m_rt[1] = NULL;
@@ -95,7 +98,8 @@ void PostProcessTemporalAA::InitialiseShaders(void)
 	m_param_ps_temporal_tex_depth_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAADepthBufferInputName);
 	m_param_ps_temporal_tex_velocity_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAVelocityBufferInputName);
 	m_param_ps_temporal_tex_motion_buffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, TAAMotionBlurFinalInputName);
-
+	m_param_ps_temporal_tex_noise = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, NoiseTextureDataName);
+	m_param_ps_temporal_noise_data = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_ps_temporal, NoiseDataBufferName);
 }
 
 // Initialise texture buffer resources based upon the current configuration.  Can be called multiple times based on 
@@ -307,6 +311,11 @@ void PostProcessTemporalAA::ExecuteTemporalReprojectionPass(TextureDX11 *source_
 	ps->SetParameterData(m_param_ps_temporal_tex_depth_buffer, source_depth);
 	ps->SetParameterData(m_param_ps_temporal_tex_velocity_buffer, source_vel);
 	ps->SetParameterData(m_param_ps_temporal_tex_motion_buffer, source_motion);
+
+	// We will inherit the noise generator configuration of the parent render process, no need for it to differ here
+	auto noise_resource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
+	if (noise_resource) ps->SetParameterData(m_param_ps_temporal_tex_noise, noise_resource);
+	ps->SetParameterData(m_param_ps_temporal_noise_data, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Bind the pipeline and perform full-screen quad rendering
 	m_pipeline_temporal->Bind();
