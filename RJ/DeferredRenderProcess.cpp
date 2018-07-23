@@ -747,7 +747,7 @@ void DeferredRenderProcess::PerformPostProcessing(void)
 	TextureDX11 * buffer = m_colour_buffer;
 
 	/* Post-processing pipeline */
-	
+
 	buffer = ExecutePostProcessMotionBlur(buffer);
 	buffer = ExecutePostProcessTemporalAntiAliasing(buffer);
 

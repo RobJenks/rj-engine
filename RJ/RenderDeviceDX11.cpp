@@ -719,6 +719,7 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 Result RenderDeviceDX11::InitialiseFrustumJitterProcess(void)
 {
 	m_frustum_jitter = ManagedPtr<FrustumJitterProcess>(new FrustumJitterProcess());
+	m_frustum_jitter.RawPtr->Enable();
 
 	return ErrorCodes::NoError;
 }
