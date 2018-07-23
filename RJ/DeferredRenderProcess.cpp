@@ -747,9 +747,9 @@ void DeferredRenderProcess::PerformPostProcessing(void)
 	TextureDX11 * buffer = m_colour_buffer;
 
 	/* Post-processing pipeline */
-	// TODO: TEMP
-	auto motion = ExecutePostProcessMotionBlur(buffer);
-	buffer = ExecutePostProcessTemporalAntiAliasing(buffer, motion);
+	
+	buffer = ExecutePostProcessMotionBlur(buffer);
+	buffer = ExecutePostProcessTemporalAntiAliasing(buffer);
 
 	// Store a pointer to the final, fully-processed buffer
 	m_final_colour_buffer = buffer;
@@ -766,11 +766,14 @@ TextureDX11 * DeferredRenderProcess::ExecutePostProcessMotionBlur(TextureDX11 *c
 }
 
 // Temporal anti-aliasing with screen-space motion blur contribution
-TextureDX11 * DeferredRenderProcess::ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer, TextureDX11 *motion_buffer)
+TextureDX11 * DeferredRenderProcess::ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer)
 {
-	// Revert to motion blur only if temporal AA is disabled
-	// TODO: TEMP
-	if (!m_post_temporal_aa.RawPtr->IsActive()) return motion_buffer;
+	// Leave buffer unmodified if this post-process is not active
+	if (!m_post_temporal_aa.RawPtr->IsActive()) return colour_buffer;
+
+	// Temporal reprojection will transition to motion blur at high pixel velocities if motion blur is 
+	// active, otherwise it will fall back to regular colour buffer data
+	TextureDX11 *motion_buffer = (m_post_motionblur.RawPtr->IsActive() ? m_post_motionblur.RawPtr->GetRenderedOutput() : colour_buffer);
 
 	// Post-process and return the modified colour buffer
 	return m_post_temporal_aa.RawPtr->Execute(colour_buffer, GBuffer.DepthStencilTexture, GBuffer.VelocityTexture, motion_buffer);

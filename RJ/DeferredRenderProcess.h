@@ -99,7 +99,7 @@ protected:
 
 	// Post-processing phases
 	TextureDX11 *		ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer);
-	TextureDX11 *		ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer, TextureDX11 *motion_buffer);
+	TextureDX11 *		ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer);
 
 
 	// Retrieve standard buffer data
