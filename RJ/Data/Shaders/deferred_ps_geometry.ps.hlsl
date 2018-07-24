@@ -135,8 +135,8 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	// from Michiel van der Leeuw, Guerrilla (2007)
 	OUT.Specular = float4(specular.rgb, log2(specularPower) / 10.5f);
 
-	// Calculate per-pixel velocity vector based on current and prior frame object geometry
-	OUT.VelocitySS = CalculateScreenSpacePixelVelocity(IN.lastframeposition, IN.thisframeposition);
+	// Calculate per-pixel velocity vector based on current and prior frame object geometry (with frustum-projected jitter component removed)
+	OUT.VelocitySS = CalculateScreenSpacePixelVelocity(IN.lastframeposition_unjittered, IN.thisframeposition_unjittered);
 
 	return OUT;
 }

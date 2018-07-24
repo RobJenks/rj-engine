@@ -17,6 +17,7 @@
 #include "ConstantBufferDX11.h"
 #include "BlendState.h"
 #include "SamplerStates.h"
+#include "FrustumJitterProcess.h"
 #include "DeferredRenderProcess.h"
 #include "DeferredGBuffer.h"
 
@@ -50,6 +51,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_screen_near(Game::NearClipPlane),
 	m_screen_far(Game::FarClipPlane), 
 	m_projection(ID_MATRIX), 
+	m_projection_unjittered(ID_MATRIX), 
 	m_invproj(ID_MATRIX), 
 	m_orthographic(ID_MATRIX),
 
@@ -67,6 +69,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_post_motionblur_tilegen_ps(NULL), 
 	m_post_motionblur_neighbour_ps(NULL), 
 	m_post_motionblur_gather_ps(NULL), 
+	m_post_temporal_aa(NULL), 
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
@@ -75,9 +78,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_sampler_pointrepeat(NULL), 
 
 	m_material_null(NULL), 
-	m_material_default(NULL), 
-
-	m_frustum_jitter(NULL) 
+	m_material_default(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -626,6 +627,9 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL },
 		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL },
 
+		// Post-process temporal anti-aliasing shaders
+		{ &m_post_temporal_aa, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL },
+
 		// Debug-only shaders
 #ifdef _DEBUG
 		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL },
@@ -714,7 +718,15 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 // Initialise the frustum jitter process, which is a supporting component for other processes
 Result RenderDeviceDX11::InitialiseFrustumJitterProcess(void)
 {
-	m_frustum_jitter
+	m_frustum_jitter = ManagedPtr<FrustumJitterProcess>(new FrustumJitterProcess());
+	m_frustum_jitter.RawPtr->Enable();
+
+	return ErrorCodes::NoError;
+}
+
+bool RenderDeviceDX11::FrustumJitterEnabled(void) const 
+{
+	return (m_frustum_jitter.RawPtr && m_frustum_jitter.RawPtr->IsEnabled());
 }
 
 // Validate all shaders and their associated resources, reporting any errors that are encountered
@@ -838,21 +850,33 @@ Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthStencilBufferFo
 	);
 }
 
+void RenderDeviceDX11::CalculateFrameFrustumJitter(void)
+{
+	if (FrustumJitterEnabled())
+	{
+		m_frustum_jitter.RawPtr->Update(m_displaysize_f);
+	}
+}
+
 void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 {
 	// TODO: Flip near/far plane distances as part of inverted depth buffer for greater FP precision
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
 
 	// Base projection matrix
-	m_projection = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+	m_projection_unjittered = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
 
 	// Apply frustum jitter if enabled
 	if (FrustumJitterEnabled())
 	{
-		m_projection = ApplyFrustumJitter(m_projection);
+		m_projection = m_frustum_jitter.RawPtr->Apply(m_projection_unjittered);
+	}
+	else
+	{
+		m_projection = m_projection_unjittered;
 	}
 
-
+	// Calculate inverse once and cache
 	m_invproj = XMMatrixInverse(NULL, m_projection);
 }
 
@@ -883,7 +907,7 @@ bool RenderDeviceDX11::VerifyState(void)
 void RenderDeviceDX11::BeginFrame(void)
 {
 	// Calculate frustum jitter for the frame, if enabled
-	CalculateFrustumJitter();
+	CalculateFrameFrustumJitter();
 
 	// Some rendering effects (e.g. frustum jitter) require us to recalculate the projection matrix each frame
 	RecalculateProjectionMatrix();
@@ -1019,6 +1043,40 @@ void RenderDeviceDX11::ReloadAllMaterials(void)
 	{
 		Game::Log << LOG_WARN << "Failed to reload " << failcount << " of " << total << " material definitions\n";
 	}
+}
+
+// Virtual inherited method to accept a command from the console
+bool RenderDeviceDX11::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "frustum_jitter" && m_frustum_jitter.RawPtr)
+	{
+		if (command.Parameter(0) == "enabled")
+		{
+			if (command.ParameterCount() > 1) {
+				m_frustum_jitter.RawPtr->SetEnabled(command.ParameterAsBool(1));
+				command.SetSuccessOutput(concat("Frustum jitter process is now ")(m_frustum_jitter.RawPtr->IsEnabled() ? "enabled" : "disabled").str());		
+			}
+			else {
+				command.SetSuccessOutput(concat("Frustum jitter process is ")(m_frustum_jitter.RawPtr->IsEnabled() ? "enabled" : "disabled").str());
+			}
+			return true;
+		}
+		else if (command.Parameter(0) == "scale")
+		{
+			float scale = command.ParameterAsFloat(1);
+			if (scale > 0.0f) {
+				m_frustum_jitter.RawPtr->SetJitterScale(scale);
+				command.SetSuccessOutput(concat("Frustum jitter scale factor updated to ")(scale).str());
+			}
+			else {
+				command.SetSuccessOutput(concat("Frustum jitter scale == ")(m_frustum_jitter.RawPtr->GetJitterScale()).str());
+			}
+			return true;
+		}
+	}
+
+	// Unrecognised command
+	return false;
 }
 
 

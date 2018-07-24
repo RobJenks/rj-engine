@@ -11,7 +11,9 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "FrustumJitterProcess.h"
 #include "PostProcessMotionBlur.h"
+#include "PostProcessTemporalAA.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
@@ -109,6 +111,12 @@ void DeferredRenderProcess::ShadersReloaded(void)
 
 	InitialiseShaders();
 	InitialiseGBufferResourceMappings();
+
+	// Also allow all post-processing components to account for the change
+	for (auto * post : m_post_processing_components)
+	{
+		post->ShadersReloaded();
+	}
 }
 
 
@@ -226,7 +234,7 @@ void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 			if (shader->HasParameter(std::get<0>(mapping)))
 			{
 				size_t index = shader->GetParameterIndexByName(std::get<0>(mapping));
-				shader->GetParameter(index).Set(std::get<1>(mapping));
+				shader->SetParameterData(index, std::get<1>(mapping));
 			}
 		}
 	}
@@ -420,10 +428,14 @@ void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 
 	// Screen-space pixel neighbourhood motion blur
 	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
-	
+	m_post_temporal_aa = ManagedPtr<PostProcessTemporalAA>(new PostProcessTemporalAA(this));
 
 	// Also maintain a collection of base post processing components
-	m_post_processing_components = { m_post_motionblur.RawPtr };
+	m_post_processing_components = 
+	{ 
+		m_post_motionblur.RawPtr, 
+		m_post_temporal_aa.RawPtr 
+	};
 }
 
 // Primary rendering method; executes all deferred rendering operations
@@ -548,6 +560,10 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+
+	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
+	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
 
@@ -563,6 +579,10 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();		// Inv proj == inv orthographic
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+
+	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
+	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
 
@@ -573,6 +593,7 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	// General data
 	m_cb_deferred_data.RawPtr->C_frametime = Game::TimeFactor;
 	m_cb_deferred_data.RawPtr->C_buffersize = XMUINT2(displaysize.x, displaysize.y);
+	m_cb_deferred_data.RawPtr->C_texelsize = XMFLOAT2(1.0f / static_cast<float>(displaysize.x), 1.0f / static_cast<float>(displaysize.y));
 
 	// Velocity calculation data
 	m_cb_deferred_data.RawPtr->C_k = m_velocity_k;
@@ -580,6 +601,17 @@ void DeferredRenderProcess::PopulateDeferredRenderingParamBuffer(void)
 	m_cb_deferred_data.RawPtr->C_half_frame_exposure = (0.5f * (m_exposure / (Game::TimeFactor + Game::C_EPSILON)));
 	m_cb_deferred_data.RawPtr->C_motion_samples = m_motion_samples;
 	m_cb_deferred_data.RawPtr->C_motion_max_sample_tap_distance = m_motion_max_sample_tap_distance;
+
+	// Frustum jitter for current and prior frame (xy = current frame UV jitter, zw = prior frame UV jitter)
+	auto frustum_jitter = Game::Engine->GetRenderDevice()->FrustumJitter();
+	if (frustum_jitter->IsEnabled())
+	{
+		m_cb_deferred_data.RawPtr->C_Jitter = frustum_jitter->GetTwoFrameJitterVectorF();
+	}
+	else
+	{
+		m_cb_deferred_data.RawPtr->C_Jitter = NULL_FLOAT4;
+	}
 
 	// Commit all changes to the CB
 	m_cb_deferred->Set(m_cb_deferred_data.RawPtr);
@@ -591,8 +623,8 @@ void DeferredRenderProcess::RenderGeometry(void)
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
 	// Bind required buffer resources to shader parameters
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_geometry_deferreddata).Set(m_cb_deferred);
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_geometry_deferreddata, m_cb_deferred);
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	m_pipeline_geometry->Bind();
@@ -664,28 +696,28 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	// TODO: Required every frame?  Only setting buffer pointer in shader.  May only be required on shader reload in case param indices change
 
 	// Lighting pass 1 is VS-only and does not output fragments
-	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
 
 	// Lighting pass 2 uses both VS and PS
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisedata).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Directional lighting pass uses both VS and PS
-	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisedata).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Bind the required noise resources to PS lighting shaders
 	Game::Engine->GetNoiseGenerator()->BindNoiseResources(m_render_noise_method);
 	TextureDX11 *noiseresource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
 	if (noiseresource)
 	{
-		m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_noisetexture).Set(noiseresource);
+		m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisetexture, noiseresource);
 	}
 }
 
@@ -715,8 +747,9 @@ void DeferredRenderProcess::PerformPostProcessing(void)
 	TextureDX11 * buffer = m_colour_buffer;
 
 	/* Post-processing pipeline */
+
 	buffer = ExecutePostProcessMotionBlur(buffer);
-	
+	buffer = ExecutePostProcessTemporalAntiAliasing(buffer);
 
 	// Store a pointer to the final, fully-processed buffer
 	m_final_colour_buffer = buffer;
@@ -730,6 +763,20 @@ TextureDX11 * DeferredRenderProcess::ExecutePostProcessMotionBlur(TextureDX11 *c
 
 	// Post-process and return the modified colour buffer
 	return m_post_motionblur.RawPtr->Execute(colour_buffer, GBuffer.VelocityTexture);
+}
+
+// Temporal anti-aliasing with screen-space motion blur contribution
+TextureDX11 * DeferredRenderProcess::ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer)
+{
+	// Leave buffer unmodified if this post-process is not active
+	if (!m_post_temporal_aa.RawPtr->IsActive()) return colour_buffer;
+
+	// Temporal reprojection will transition to motion blur at high pixel velocities if motion blur is 
+	// active, otherwise it will fall back to regular colour buffer data
+	TextureDX11 *motion_buffer = (m_post_motionblur.RawPtr->IsActive() ? m_post_motionblur.RawPtr->GetRenderedOutput() : colour_buffer);
+
+	// Post-process and return the modified colour buffer
+	return m_post_temporal_aa.RawPtr->Execute(colour_buffer, GBuffer.DepthStencilTexture, GBuffer.VelocityTexture, motion_buffer);
 }
 
 // Set the class of render noise generation used during the render process
@@ -768,9 +815,22 @@ DeferredRenderProcess::DebugRenderMode DeferredRenderProcess::TranslateDebugRend
 	return (it != modes.end() ? it->second : DebugRenderMode::None);
 }
 
-bool DeferredRenderProcess::IsDepthDebugMode(DebugRenderMode render_mode) const
+int DeferredRenderProcess::GetHlslDebugMode(DebugRenderMode render_mode) const
 {
-	return (render_mode == DebugRenderMode::Depth /* || ... || ... */);
+	switch (render_mode)
+	{
+		case DebugRenderMode::None:
+			return DEF_DEBUG_STATE_DISABLED;
+
+		case DebugRenderMode::Depth:
+			return DEF_DEBUG_STATE_ENABLED_DEPTH;
+
+		case DebugRenderMode::Velocity:
+			return DEF_DEBUG_STATE_ENABLED_VELOCITY;
+
+		default:
+			return DEF_DEBUG_STATE_ENABLED_NORMAL;
+	}
 }
 
 TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode)
@@ -793,7 +853,7 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::Final:					return m_final_colour_buffer;
 
 		// Unknown texture
-		default:							return NULL;
+		default:										return NULL;
 	}
 }
 
@@ -827,8 +887,7 @@ void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRender
 		else
 		{
 			last_valid_view = static_cast<int>(i);
-			bool isdepth = IsDepthDebugMode(render_modes[i]);
-			m_cb_debug_data.RawPtr->C_debug_view[i].state = (isdepth ? DEF_DEBUG_STATE_ENABLED_DEPTH : DEF_DEBUG_STATE_ENABLED_NORMAL);
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(render_modes[i]);
 		}
 	}
 
@@ -884,7 +943,7 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
 	// Bind shader parameters to the debug pipeline
-	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_debugdata).Set(m_cb_debug);
+	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_debug_debugdata, m_cb_debug);
 
 	// Bind the debug pipeline
 	m_pipeline_debug_rendering->Bind();

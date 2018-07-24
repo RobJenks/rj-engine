@@ -12,6 +12,10 @@ CBUFFER FrameDataBuffer REGISTER(b0)
 	RJ_ROW_MAJOR_MATRIX ViewProjection;
 	RJ_ROW_MAJOR_MATRIX InvProjection;
 	RJ_ROW_MAJOR_MATRIX PriorFrameViewProjection;
+
+	RJ_ROW_MAJOR_MATRIX ProjectionUnjittered;
+	RJ_ROW_MAJOR_MATRIX PriorFrameViewProjectionUnjittered;
+
 	float2 ScreenDimensions;
 	float2 padding;
 };

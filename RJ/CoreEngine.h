@@ -144,22 +144,27 @@ public:
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewMatrix(void) const					{ return r_invview; }
 	CMPINLINE const XMMATRIX & GetRenderProjectionMatrix(void) const					{ return r_projection; }
+	CMPINLINE const XMMATRIX & GetRenderProjectionMatrixUnjittered(void) const			{ return r_projection_unjittered; }
 	CMPINLINE const XMMATRIX & GetRenderInverseProjectionMatrix(void) const				{ return r_invproj; }
 	CMPINLINE const XMMATRIX & GetRenderOrthographicMatrix(void) const					{ return r_orthographic; }
 	CMPINLINE const XMMATRIX & GetRenderInverseOrthographicMatrix(void) const			{ return r_invorthographic; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrix(void) const				{ return r_viewproj; }
+	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrixUnjittered(void) const		{ return r_viewproj_unjittered; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionMatrix(void) const			{ return r_invviewproj; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionScreenMatrix(void) const			{ return r_viewprojscreen; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionScreenMatrix(void) const	{ return r_invviewprojscreen; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewMatrixF(void) const						{ return r_view_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewMatrixF(void) const				{ return r_invview_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void) const					{ return r_projection_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixUnjitteredF(void) const		{ return r_projection_unjittered_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseProjectionMatrixF(void) const			{ return r_invproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void) const				{ return r_orthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseOrthographicMatrixF(void) const		{ return r_invorthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const				{ return r_viewproj_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixUnjitteredF(void) const	{ return r_viewproj_unjittered_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetPriorFrameViewProjectionMatrixF(void) const			{ return r_priorframe_viewproj_f; }
+	CMPINLINE const XMFLOAT4X4 & GetPriorFrameViewProjectionMatrixUnjitteredF(void) const { return r_priorframe_viewproj_unjittered_f; }
 
 	// Pass-through accessor methods for key engine components
 	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
@@ -582,26 +587,31 @@ private:
 							r_devicecontext;		// The device context in use for this render cycle
 	AXMMATRIX				r_view;					// View matrix for the current render cycle
 	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
+	AXMMATRIX				r_projection_unjittered;	// Projection matrix with jitter contribution removed
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
 	AXMMATRIX				r_invview;				// We will also store the inverse view matrix
 	AXMMATRIX				r_invproj;				// We will also store the inverse projection matrix
 	AXMMATRIX				r_invorthographic;		// We will also store the inverse orthographic matrix
 	AXMMATRIX				r_viewproj;				// Store the combined (view * proj) matrix
+	AXMMATRIX				r_viewproj_unjittered;	// View-projection matrix with jitter contribution removed
 	AXMMATRIX				r_invviewproj;			// Also store the inverse viewproj matrix, i.e. (view * proj)^-1
 	AXMMATRIX				m_projscreen;			// Adjustment matrix from projection to screen coordinates (only recalculated when screen parameters change)
 	AXMMATRIX				r_viewprojscreen;		// Combined (view * proj * screen) matrix
 	AXMMATRIX				r_invviewprojscreen;	// Inverse of the view/proj/screen transform matrix
 	XMFLOAT4X4				r_view_f;				// Local float representation of the current frame view matrix
 	XMFLOAT4X4				r_projection_f;			// Local float representation of the current frame projection matrix
+	XMFLOAT4X4				r_projection_unjittered_f;	// Local float representation of the unjittered current frame projection matrix
 	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
 	XMFLOAT4X4				r_invview_f;			// Local float representation of the current frame inverse view matrix
 	XMFLOAT4X4				r_invproj_f;			// Local float representation of the current frame inverse projection matrix
 	XMFLOAT4X4				r_invorthographic_f;	// Local float representation of the current frame inverse orthographic matrix
 	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
+	XMFLOAT4X4				r_viewproj_unjittered_f;	// Local float representation of the current frame unjittered (view * proj) matrix
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 
 	// TODO: Define render matrices within struct, then maintain a "Current" and "PriorFrame" instance
 	XMFLOAT4X4				r_priorframe_viewproj_f;	// Prior frame; local float representation of view projection matrix
+	XMFLOAT4X4				r_priorframe_viewproj_unjittered_f;	// Prior frame; float representation of unjittered view projection matrix
 
 
 	VertexBufferDX11 *			m_instancebuffer;

@@ -27,4 +27,7 @@ public:
 	static const std::string MotionBlurTileGen;
 	static const std::string MotionBlurNeighbourhood;
 	static const std::string MotionBlurGather;
+
+	static const std::string TemporalReprojection;
+
 };

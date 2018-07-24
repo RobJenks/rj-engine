@@ -40,6 +40,8 @@ public:
 	CMPINLINE TextureDX11 *						GetTileGenerationPhaseResult(void) const { return m_tx_tilegen; }
 	CMPINLINE TextureDX11 *						GetNeighbourhoodDeterminationResult(void) const { return m_tx_neighbour; }
 
+	// Respond to a change in shader configuration or a reload of shader bytecode
+	void										ShadersReloaded(void);
 
 	// Destructor
 	~PostProcessMotionBlur(void);

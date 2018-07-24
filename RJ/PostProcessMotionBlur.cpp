@@ -353,8 +353,8 @@ void PostProcessMotionBlur::ExecuteTileGenerationPass(TextureDX11 *source_vel)
 	assert(source_vel);
 
 	// Populate shader parameters
-	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilgen_velocitybuffer).Set(source_vel);
-	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_tilegen_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
+	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_tilgen_velocitybuffer, source_vel);
+	m_pipeline_tilegen->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_tilegen_deferred, m_renderprocess->GetDeferredRenderingParameterBuffer());
 	
 	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
 	m_pipeline_tilegen->Bind();
@@ -368,10 +368,10 @@ void PostProcessMotionBlur::ExecuteNeighbourhoodDeterminationPass(TextureDX11 *v
 	assert(velocity_tile_data);
 
 	// Populate shader parameters
-	m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_neighbour_tilebuffer).Set(velocity_tile_data);
+	m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_neighbour_tilebuffer, velocity_tile_data);
 
 	// TODO: disabled for now, but a CB will be required when we are correctly passing downsampled texture dimensions rather than testing in the PS
-	//m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_neighbour_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
+	//m_pipeline_neighbour->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_neighbour_deferred, m_renderprocess->GetDeferredRenderingParameterBuffer());
 
 	// Bind the pipeline and perform full-screen quad rendering on the downsampled buffer
 	m_pipeline_neighbour->Bind();
@@ -389,16 +389,16 @@ void PostProcessMotionBlur::ExecuteGatherPass(	TextureDX11 *source_colour, Textu
 	assert(velocity_neighbourhood_buffer);
 
 	// Populate shader parameters
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_deferred).Set(m_renderprocess->GetDeferredRenderingParameterBuffer());
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_colour).Set(source_colour);
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_depth).Set(source_depth);
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_velocity).Set(source_vel);
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_vel_neighbourhood).Set(velocity_neighbourhood_buffer);
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_deferred, m_renderprocess->GetDeferredRenderingParameterBuffer());
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_colour, source_colour);
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_depth, source_depth);
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_velocity, source_vel);
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_vel_neighbourhood, velocity_neighbourhood_buffer);
 
 	// We will inherit the noise generator configuration of the parent render process, no need for it to differ here
 	auto noise_resource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
-	if (noise_resource) m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_noise_tex).Set(noise_resource);
-	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_gather_noise_data).Set(Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	if (noise_resource) m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_noise_tex, noise_resource);
+	m_pipeline_gather->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_gather_noise_data, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
 	// Bind the pipeline and upsample motion blur intermediate data back up to combine via gather with the colour buffer
 	m_pipeline_gather->Bind();
@@ -407,6 +407,11 @@ void PostProcessMotionBlur::ExecuteGatherPass(	TextureDX11 *source_colour, Textu
 }
 
 
+// Response to a change in shader configuration or a reload of shader bytecode
+void PostProcessMotionBlur::ShadersReloaded(void)
+{
+	InitialiseShaders();
+}
 
 // Destructor
 PostProcessMotionBlur::~PostProcessMotionBlur(void)

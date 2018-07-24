@@ -101,7 +101,7 @@ void UIRenderProcess::Render(void)
 
 	// Bind required buffer resources to shader parameters
 	// TODO: Likely not required on each render; only on initialisation
-	m_pipeline->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetFrameDataBuffer());
+	m_pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetFrameDataBuffer());
 
 	// Bind the UI rendering pipeline, including all shaders, render targets & states
 	m_pipeline->Bind();

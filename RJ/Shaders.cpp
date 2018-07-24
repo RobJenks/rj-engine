@@ -21,3 +21,6 @@ const std::string Shaders::SDFDecalDeferredPixelShader	= "PS_SDFDecal_Deferred";
 const std::string Shaders::MotionBlurTileGen			= "PS_MotionBlur_Tilegen";
 const std::string Shaders::MotionBlurNeighbourhood		= "PS_MotionBlur_Neighbourhood";
 const std::string Shaders::MotionBlurGather				= "PS_MotionBlur_Gather";
+
+const std::string Shaders::TemporalReprojection			= "PS_Temporal";
+

@@ -946,6 +946,9 @@
     <ClCompile Include="JitterSampleDistribution.cpp">
       <Filter>Engine\Jitter</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessTemporalAA.cpp">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2211,6 +2214,12 @@
     <ClInclude Include="JitterSampleDistribution.h">
       <Filter>Engine\Jitter</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessTemporalAA.h">
+      <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\CppHLSLLocalisation.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2588,6 +2597,12 @@
     <Filter Include="Engine\Jitter">
       <UniqueIdentifier>{bc48790c-bc7c-4e83-a9ab-1ace0cccc73d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Postprocess\Temporal AA">
+      <UniqueIdentifier>{3e344964-8dc6-430f-b092-28c66df71ce6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Support">
+      <UniqueIdentifier>{b4d3ce65-2a40-4704-9bd0-b1bf00017ea6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2604,18 +2619,32 @@
     <None Include="Data\Shaders\DeferredRenderingGBuffer.hlsl.h">
       <Filter>HLSL\Common\Deferred</Filter>
     </None>
-    <None Include="Data\Shaders\hlsl_math.hlsl" />
-    <None Include="Data\Shaders\noise_calculations.hlsl" />
-    <None Include="Data\Shaders\noise_buffers.hlsl.h" />
     <None Include="Data\Shaders\hlsl_common.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
-    <None Include="Data\Shaders\velocity_calculations.hlsl">
+    <None Include="Data\Shaders\hlsl_math.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
-    <None Include="Data\Shaders\motion_blur_calculations.hlsl" />
-    <None Include="Data\Shaders\motion_blur_resources.hlsl" />
-    <None Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl" />
+    <None Include="Data\Shaders\DeferredRendererDebugRenderingData.hlsl">
+      <Filter>HLSL\Common\Deferred</Filter>
+    </None>
+    <None Include="Data\Shaders\motion_blur_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\motion_blur_resources.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\noise_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\noise_buffers.hlsl.h">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\velocity_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\temporal_aa_calculations.hlsl" />
+    <None Include="Data\Shaders\temporal_aa_resources.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2664,6 +2693,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_quad.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_post_temporal.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

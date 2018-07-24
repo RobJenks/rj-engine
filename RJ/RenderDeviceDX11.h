@@ -16,6 +16,7 @@
 #include "InputLayoutDesc.h"
 #include "Texture.h"
 #include "CPUGraphicsResourceAccess.h"
+#include "iAcceptsConsoleCommands.h"
 class FrustumJitterProcess;
 class RenderTargetDX11;
 
@@ -37,7 +38,7 @@ if (result != ErrorCodes::NoError) \
 
 
 
-class RenderDeviceDX11 : public RenderDevice
+class RenderDeviceDX11 : public RenderDevice, public iAcceptsConsoleCommands
 {
 public:
 
@@ -82,6 +83,7 @@ public:
 	CMPINLINE XMFLOAT2								GetDisplaySizeF(void) const { return m_displaysize_f; }
 
 	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
+	CMPINLINE XMMATRIX								GetProjectionMatrixUnjittered(void) const { return m_projection_unjittered; }
 	CMPINLINE XMMATRIX								GetOrthoMatrix(void) const { return m_orthographic; }
 	CMPINLINE XMMATRIX								GetInverseProjectionMatrix(void) const { return m_invproj; }
 	
@@ -121,9 +123,9 @@ public:
 	HRESULT											PresentFrame(void);
 
 	// Per-frame frustum projection jitter
-	CMPINLINE bool									FrustumJitterEnabled(void) const;
-	void											CalculateFrustumJitter(void);
-	
+	bool											FrustumJitterEnabled(void) const;
+	void											CalculateFrameFrustumJitter(void);
+	CMPINLINE FrustumJitterProcess *				FrustumJitter(void) { return m_frustum_jitter.RawPtr; }
 
 	// Attempt to hot-load all shaders and recompile them in-place
 	void											ReloadAllShaders(void);
@@ -138,6 +140,12 @@ public:
 	// The number of samples to be taken for multi-sample textures
 	static const uint8_t							TEXTURE_MULTISAMPLE_COUNT = 1U;
 	
+
+	// Virtual inherited method to accept a command from the console
+	bool											ProcessConsoleCommand(GameConsoleCommand & command);
+
+
+	// Destructor
 	~RenderDeviceDX11(void);
 
 
@@ -168,6 +176,7 @@ private:
 	float									m_screen_near;
 	float									m_screen_far;
 	XMMATRIX								m_projection;
+	XMMATRIX								m_projection_unjittered;
 	XMMATRIX								m_invproj;
 	XMMATRIX								m_orthographic;
 	DXGI_SAMPLE_DESC						m_sampledesc;
@@ -188,6 +197,7 @@ private:
 	ShaderDX11 *							m_post_motionblur_tilegen_ps;
 	ShaderDX11 *							m_post_motionblur_neighbour_ps;
 	ShaderDX11 *							m_post_motionblur_gather_ps;
+	ShaderDX11 *							m_post_temporal_aa;
 
 	InputLayoutDesc							m_standard_input_layout;
 	InputLayoutDesc							m_fullscreen_quad_input_layout;
@@ -200,7 +210,7 @@ private:
 	const MaterialDX11 *					m_material_null;
 	const MaterialDX11 *					m_material_default;
 
-	FrustumJitterProcess * 					m_frustum_jitter;
+	ManagedPtr<FrustumJitterProcess> 		m_frustum_jitter;
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device
 	static const D3D_FEATURE_LEVEL			SUPPORTED_FEATURE_LEVELS[];

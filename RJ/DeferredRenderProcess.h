@@ -16,6 +16,7 @@ class RenderTargetDX11;
 class Model;
 class PostProcessComponent;
 class PostProcessMotionBlur;
+class PostProcessTemporalAA;
 
 class DeferredRenderProcess : public RenderProcessDX11, public iAcceptsConsoleCommands
 {
@@ -98,10 +99,12 @@ protected:
 
 	// Post-processing phases
 	TextureDX11 *		ExecutePostProcessMotionBlur(TextureDX11 *colour_buffer);
+	TextureDX11 *		ExecutePostProcessTemporalAntiAliasing(TextureDX11 *colour_buffer);
 
 
 	// Retrieve standard buffer data
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
+
 
 	// Virtual inherited method to accept a command from the console
 	bool ProcessConsoleCommand(GameConsoleCommand & command);
@@ -144,10 +147,12 @@ private:
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
 
+
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
+	ManagedPtr<PostProcessTemporalAA>			m_post_temporal_aa;
 	/* ... */
-	std::array<PostProcessComponent*, 1U>		m_post_processing_components;
+	std::array<PostProcessComponent*, 2U>		m_post_processing_components;
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
@@ -205,7 +210,7 @@ private:
 	// Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
 	bool											GBufferDebugRendering(void);
 	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
-	bool											IsDepthDebugMode(DebugRenderMode render_mode) const;
+	int												GetHlslDebugMode(DebugRenderMode render_mode) const;
 	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
 	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
 	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);
