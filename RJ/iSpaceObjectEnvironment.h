@@ -286,6 +286,7 @@ public:
 	// Methods to add, find or remove terrain objects in the environment
 	void							AddTerrainObject(Terrain *obj);
 	void							RemoveTerrainObject(Terrain *obj);
+	void							TerrainPositionUpdated(Terrain *obj);
 	void							ClearAllTerrainObjects(void);
 
 	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found

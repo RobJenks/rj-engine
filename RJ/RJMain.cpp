@@ -751,15 +751,54 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_EQUALS])
 	{
-		static XMFLOAT3 lastpos = NULL_FLOAT3;
-		auto pos = Game::CurrentPlayer->GetActor()->GetPositionF();
-		double diff[3] = { (double)pos.x - (double)lastpos.x, (double)pos.y - (double)lastpos.y, (double)pos.z - (double)lastpos.z };
+		static Terrain *t = NULL; static Terrain *t2 = NULL;
+		if (!t)
+		{
+			t = Terrain::Create("tmp_terrain_cone");
+			t2 = Terrain::Create("tmp_terrain_cone");
 
-		Game::Log << LOG_DEBUG << "Diff: " << diff[0] << ", " << diff[1] << ", " << diff[2] << 
-			(diff[0] == 0.0 && diff[1] == 0.0 && diff[2] == 0.0f ? ", no diff" :
-			", *** DIFFERENCE ***") << "\n";
+			auto *actor = Game::CurrentPlayer->GetActor();
+			auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(-3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
+			auto envpos2 = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
 
-		lastpos = pos;
+			t->SetPosition(envpos);
+			t->SetOrientation(ID_QUATERNION);
+			t->SetExtent(XMVectorReplicate(0.5f));
+
+			cs()->AddTerrainObject(t);
+			cs()->AddTerrainObject(t2);
+
+			t2->SetPosition(envpos2);
+			t2->SetOrientation(ID_QUATERNION);
+			t2->SetExtent(XMVectorReplicate(0.5f));
+
+			return;
+		}
+		
+
+		if (t)
+		{
+			if (b[DIK_LSHIFT])
+			{
+				Game::Log << LOG_DEBUG << "Pos: " << Vector4ToString(t->GetPosition()) << "\n";
+			}
+			else if (b[DIK_LCONTROL])
+			{
+				Game::Log << LOG_DEBUG << "Moving to: " << Vector4ToString(t->GetPosition()) << "\n";
+				Game::CurrentPlayer->GetActor()->SetEnvironmentPosition(t->GetEnvironmentPosition());
+			}
+			else
+			{
+				auto *actor = Game::CurrentPlayer->GetActor();
+				auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 1.0f), actor->GetOrientationMatrix()));
+
+				Game::Log << LOG_DEBUG << "Before: " << Vector4ToString(t->GetPosition()) << "\n";
+				t->SetPosition(envpos);
+				Game::Log << LOG_DEBUG << "After: " << Vector4ToString(t->GetPosition()) << "\n";
+			}
+		}
+
+		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
 
 	if (b[DIK_SEMICOLON]) {

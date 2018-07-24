@@ -433,6 +433,24 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(Terrain *obj)
 	SafeDelete(obj);
 }
 
+void iSpaceObjectEnvironment::TerrainPositionUpdated(Terrain *obj)
+{
+	if (!obj) return;
+
+	// Update the environment spatial partitioning tree in case the terrain has moved between nodes
+	if (obj->GetEnvironmentTreeNode())
+	{
+		obj->GetEnvironmentTreeNode()->ItemMoved<Terrain*>(obj);
+	}
+	else
+	{
+		// This shouldn't really happen.  Remove and re-add the terrain object from the root to be safe
+		SpatialPartitioningTree->RemoveItem<Terrain*>(obj);
+		SpatialPartitioningTree->AddItem<Terrain*>(obj);
+	}
+
+}
+
 // Removes all terrain objects from an environment
 void iSpaceObjectEnvironment::ClearAllTerrainObjects(void)
 {
