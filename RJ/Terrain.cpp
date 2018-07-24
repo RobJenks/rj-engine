@@ -194,6 +194,12 @@ void Terrain::RecalculatePositionalData(void)
 
 	// Set the flag that indicates whether we span multiple elements, for render-time efficiency
 	m_multielement = (m_element_min != m_element_max);
+
+	// Notify our parent environment (if applicable) that our position may have changed
+	if (m_parent)
+	{
+		m_parent->TerrainPositionUpdated(this);
+	}
 }
 
 // Returns a value indicating whether this terrain object overlaps the specified element
