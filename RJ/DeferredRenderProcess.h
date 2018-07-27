@@ -129,8 +129,12 @@ private:
 	PipelineStateDX11 * m_pipeline_debug_rendering;
 
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
+	TextureDX11 *		m_def_dsv_tx;			// Depth/stencil texture for view-space deferred rendering
+	RenderTargetDX11 *	m_def_dsv_rt;			// RT for view-space deferred rendering with only depth/stencil bindings
+
 	TextureDX11 *		m_light_dsv_tx;			// Depth/stencil texture for light-space rendering
 	RenderTargetDX11 *	m_light_dsv_rt;			// RT for light-space rendering with only depth/stencil bindings
+
 
 	RenderTargetDX11 *	m_colour_rt;			// Colour buffer RT after all render process rendering, but before any post-processing.  Owned by this render process.
 	TextureDX11 *		m_colour_buffer;		// Colour buffer after all render process rendering, but before any post-processing.  Owned by this render process.

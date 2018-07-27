@@ -33,8 +33,10 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_ps_geometry(NULL),
 	m_ps_lighting(NULL),
 	m_ps_debug(NULL),
+	m_def_dsv_tx(NULL), 
+	m_def_dsv_rt(NULL),
 	m_light_dsv_tx(NULL), 
-	m_light_dsv_rt(NULL),
+	m_light_dsv_rt(NULL), 
 	m_colour_buffer(NULL), 
 	m_colour_rt(NULL), 
 	m_cb_frame(NULL),
@@ -162,9 +164,9 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	UINTVECTOR2 displaysize = Game::Engine->GetRenderDevice()->GetDisplaySize().Convert<UINT>();
 
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_light_dsv_tx = Game::Engine->GetAssets().CreateTexture2D("Deferred_Light_DSV", displaysize.x, displaysize.y);
-	m_light_dsv_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Light_DSV", displaysize.Convert<int>());
-	m_light_dsv_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_light_dsv_tx);
+	m_def_dsv_tx = Game::Engine->GetAssets().CreateTexture2D("Deferred_DSV", displaysize.x, displaysize.y);
+	m_def_dsv_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DSV", displaysize.Convert<int>());
+	m_def_dsv_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_def_dsv_tx);
 
 	// Colour render target will contain all colour buffer data; this is generally the primary render output before post-processing
 	Texture::TextureFormat primary_colour_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetColourBufferFormat();
@@ -172,12 +174,20 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	m_colour_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Colour", displaysize.Convert<int>());
 	m_colour_rt->AttachTexture(RenderTarget::AttachmentPoint::Color0, m_colour_buffer);
 
+	// Light-space DSV for cascaded shadow mapping
+	m_light_dsv_tx = Game::Engine->GetAssets().CreateTexture2D("Deferred_Light_DSV", displaysize.x, displaysize.y);
+	m_light_dsv_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Light_DSV", displaysize.Convert<int>());
+	m_light_dsv_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_light_dsv_tx);
+
 
 	// Assert that all objects were created as expected
 	std::vector<std::tuple<std::string, void**>> components = { 
-		{ "depth-only render target", (void**)&m_light_dsv_rt }, 
+		{ "depth-stencil buffer", (void**)&m_light_dsv_tx }, 
+		{ "depth-stencil render target", (void**)&m_def_dsv_rt }, 
 		{ "primary colour buffer", (void**)&m_colour_buffer }, 
-		{ "primary colour render target", (void**)&m_colour_rt }
+		{ "primary colour render target", (void**)&m_colour_rt }, 
+		{ "light-space DSV buffer", (void**)&m_light_dsv_tx }, 
+		{ "light-space DSV render target", (void**)&m_light_dsv_rt }
 	};
 
 	// Verify each component in turn and report issues
@@ -310,7 +320,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 	// First pass will only render depth information to an off-screen buffer
 	m_pipeline_lighting_pass1 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass1");
 	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_pass1->SetRenderTarget(m_light_dsv_rt);
+	m_pipeline_lighting_pass1->SetRenderTarget(m_def_dsv_rt);
 
 	// Perform culling of back faces
 	m_pipeline_lighting_pass1->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
