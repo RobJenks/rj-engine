@@ -55,6 +55,19 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 #		endif
 	};
 
+	// Lighting flags
+	static const _uint32		LIGHT_FLAG_ENABLED					= (1 << 0);
+	static const _uint32		LIGHT_FLAG_SHADOW_MAP				= (1 << 1);
+
+	// Default lighting state
+	static const _uint32		LIGHT_FLAG_DEFAULTS = 
+	(
+		LIGHT_FLAG_ENABLED    | 
+		LIGHT_FLAG_SHADOW_MAP 
+		/* | ... | ... */
+	);
+
+
 	// Primary structure holding light data
 	struct LightData
 	{
@@ -69,7 +82,7 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 		float4					Colour;								// Light colour.  Incorporates diffuse + specular components; we don't currently differentiate
 		//------------------------------------------ ( 16 bytes )
 		LightType				Type;								// The type of light being rendered
-		_bool					Enabled;							// Disabled light will be skipped entirely during lighting calculations
+		_uint32					Flags;								// As per LIGHT_FLAG_*
 		float					Range;								// Range at which light is fully-attenuated and no longer has any effect
 		float					Intensity;							// Overall intensity of the light
 		//------------------------------------------ ( 16 bytes )
@@ -88,7 +101,7 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 			, DirectionVS(0, 0, 1, 0)
 			, Colour(1, 1, 1, 1)
 			, Type(LightType::Point)
-			, Enabled(TRUE)
+			, Flags(LIGHT_FLAG_DEFAULTS)
 			, Range(100.0f)
 			, Intensity(1.0f)
 			, SpotlightAngle(0.7854) // == PI/4 == 45 degrees

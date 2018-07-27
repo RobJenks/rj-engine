@@ -235,7 +235,7 @@ void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
 	outLight.Type = LightType::Directional;
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 0.82f, 1.0f);
 	outLight.DirectionWS = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	outLight.Enabled = true;
+	outLight.Flags = LIGHT_FLAG_DEFAULTS;
 	outLight.Intensity = 0.75f;
 }
 
@@ -247,7 +247,7 @@ void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
 	outLight.Attenuation.Linear = 1.0f;
-	outLight.Enabled = true;
+	outLight.Flags = LIGHT_FLAG_DEFAULTS;
 }
 
 // Returns data for a basic, default spot light
@@ -258,7 +258,7 @@ void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 20.0f;
 	outLight.Attenuation.Linear = 1.0f;
-	outLight.Enabled = true;
+	outLight.Flags = LIGHT_FLAG_DEFAULTS;
 	outLight.SpotlightAngle = (PIBY180 * 30.0f);
 }
 

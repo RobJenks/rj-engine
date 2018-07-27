@@ -663,7 +663,7 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 	{
 		// Only process active lights
 		const auto & light = lights[i];
-		if (!light.Enabled) continue;
+		if (!CheckBit_Single(light.Flags, LIGHT_FLAG_ENABLED)) continue;
 
 		// Update the light index buffer
 		m_cb_lightindex_data.RawPtr->LightIndex = i;

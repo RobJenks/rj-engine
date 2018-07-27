@@ -7,6 +7,7 @@
 #include "ALIGN16.h"
 #include "DX11_Core.h"
 #include "GameConsoleCommand.h"
+#include "Utility.h"
 
 class Light : public ALIGN16<Light>
 {
@@ -22,10 +23,10 @@ public:
 	CMPINLINE LightID				GetID(void) const			{ return m_id; }
 
 	// Active / inactive status of the light
-	CMPINLINE bool					IsActive(void) const		{ return Data.Enabled; }
-	CMPINLINE void					Activate(void) 				{ Data.Enabled = true; }
-	CMPINLINE void					Deactivate(void)			{ Data.Enabled = false; }
-	CMPINLINE void					SetIsActive(bool active)	{ Data.Enabled = active; }
+	CMPINLINE bool					IsActive(void) const		{ return CheckBit_Single(Data.Flags, LIGHT_FLAG_ENABLED); }
+	CMPINLINE void					Activate(void)				{ SetBit(Data.Flags, LIGHT_FLAG_ENABLED); }
+	CMPINLINE void					Deactivate(void)			{ ClearBit(Data.Flags, LIGHT_FLAG_ENABLED); }
+	CMPINLINE void					SetIsActive(bool active)	{ (active ? Activate() : Deactivate()); }
 	CMPINLINE void					Toggle(void)				{ SetIsActive(!IsActive()); }
 
 	// Default constructor
