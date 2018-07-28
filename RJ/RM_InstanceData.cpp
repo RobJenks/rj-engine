@@ -12,7 +12,16 @@ void RM_InstanceData::NewInstance(RM_Instance && instance)
 {
 	if (CurrentInstanceCount == InstanceCapacity) ExtendCapacity();
 
-	InstanceData[CurrentInstanceCount] = std::move(instance);
+	if (CheckBit_Single(instance.Flags, RM_Instance::INSTANCE_FLAG_SHADOW_CASTER))
+	{
+		InstanceData.insert(InstanceData.begin(), std::move(instance));
+		++ShadowCasterCount;
+	}
+	else
+	{
+		InstanceData[CurrentInstanceCount] = std::move(instance);
+	}
+	
 	++CurrentInstanceCount;
 }
 
@@ -31,4 +40,5 @@ void RM_InstanceData::SortInstances(void)
 void RM_InstanceData::Reset(void)
 {
 	CurrentInstanceCount = 0U;
+	ShadowCasterCount = 0U;
 }

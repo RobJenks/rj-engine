@@ -15,6 +15,10 @@ struct RM_InstanceData
 	std::vector<RM_Instance>::size_type	CurrentInstanceCount;
 	std::vector<RM_Instance>::size_type	InstanceCapacity;
 
+	// The number of instances that are shadow-casting in this collection (will be 0 to N-1 in the collection)
+	std::vector<RM_Instance>::size_type	ShadowCasterCount;
+
+
 	// TODO: Change operation of RQ optimiser and timeouts
 	int									TimeoutCounter;
 
@@ -23,7 +27,8 @@ struct RM_InstanceData
 		: 
 		CurrentInstanceCount(0U), 
 		InstanceCapacity(0U), 
-		TimeoutCounter(0) 
+		TimeoutCounter(0), 
+		ShadowCasterCount(0U)
 	{
 		InitialiseCapacity(RENDER_QUEUE_INITIAL_INSTANCE_SLOT_ALLOCATION);
 	}
@@ -73,7 +78,8 @@ struct RM_InstanceData
 		InstanceData(std::move(other.InstanceData)), 
 		CurrentInstanceCount(other.CurrentInstanceCount), 
 		InstanceCapacity(other.InstanceCapacity), 
-		TimeoutCounter(other.TimeoutCounter)
+		TimeoutCounter(other.TimeoutCounter), 
+		ShadowCasterCount(other.ShadowCasterCount)
 	{
 	}
 
@@ -84,6 +90,7 @@ struct RM_InstanceData
 		CurrentInstanceCount = other.CurrentInstanceCount;
 		InstanceCapacity = other.InstanceCapacity;
 		TimeoutCounter = other.TimeoutCounter;
+		ShadowCasterCount = other.ShadowCasterCount;
 		return *this;
 	}
 
