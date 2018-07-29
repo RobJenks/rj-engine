@@ -24,3 +24,5 @@ const std::string Shaders::MotionBlurGather				= "PS_MotionBlur_Gather";
 
 const std::string Shaders::TemporalReprojection			= "PS_Temporal";
 
+const std::string Shaders::ShadowMappingVertexShader	= "VS_ShadowMap";
+

@@ -850,6 +850,18 @@ Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthStencilBufferFo
 	);
 }
 
+// Return configuration for the primary render target buffers
+Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthOnlyBufferFormat(void) const
+{
+	return Texture::TextureFormat
+	(
+		Texture::Components::Depth,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		0, 0, 0, 0, 24, 0
+	);
+}
+
 void RenderDeviceDX11::CalculateFrameFrustumJitter(void)
 {
 	if (FrustumJitterEnabled())

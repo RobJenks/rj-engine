@@ -97,6 +97,7 @@ public:
 	// Return configuration for the primary render target buffers
 	Texture::TextureFormat							PrimaryRenderTargetColourBufferFormat(void) const;
 	Texture::TextureFormat							PrimaryRenderTargetDepthStencilBufferFormat(void) const;
+	Texture::TextureFormat							PrimaryRenderTargetDepthOnlyBufferFormat(void) const;
 
 	// Viewport configuration
 	void											SetDisplaySize(INTVECTOR2 display_size);
