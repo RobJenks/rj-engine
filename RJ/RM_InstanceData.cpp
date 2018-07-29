@@ -14,7 +14,7 @@ void RM_InstanceData::NewInstance(RM_Instance && instance, RM_InstanceMetadata &
 
 	if (CheckBit_Single(instance.Flags, RM_Instance::INSTANCE_FLAG_SHADOW_CASTER))
 	{
-		++ShadowCasterCount;		// TODO: can probably become a flag, not a count
+		++ShadowCasterCount;
 	}
 
 	InstanceData[CurrentInstanceCount] = std::move(instance);	

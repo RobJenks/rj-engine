@@ -527,6 +527,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="IndexBufferDX11.cpp" />
     <ClCompile Include="InputLayoutDesc.cpp" />
+    <ClCompile Include="IntersectionTests.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
     <ClCompile Include="iEnvironmentObject.cpp" />
@@ -966,6 +967,7 @@
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="IndexBufferDX11.h" />
     <ClInclude Include="InstanceProperties.hlsl.h" />
+    <ClInclude Include="IntersectionTests.h" />
     <ClInclude Include="IntVector.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="iTakesDamageSimple.h" />

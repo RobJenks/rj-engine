@@ -952,6 +952,9 @@
     <ClCompile Include="ShadowManagerComponent.cpp">
       <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
     </ClCompile>
+    <ClCompile Include="IntersectionTests.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2228,6 +2231,9 @@
     </ClInclude>
     <ClInclude Include="RM_InstanceMetadata.h">
       <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="IntersectionTests.h">
+      <Filter>Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

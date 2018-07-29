@@ -363,6 +363,9 @@ public:
 	void RJ_XM_CALLCONV						RenderMaterialToScreen(	MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, 
 																	float rotation = 0.0f, float opacity = 1.0f, float zorder = 0.0f);
 
+	// Return a constant reference to the primary render queue
+	CMPINLINE const RenderQueue &			GetRenderQueue(void) const { return m_renderqueue; }
+
 	// Primitive topology is managed by the render queue in an attempt to minimise state changes
 	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
 	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
