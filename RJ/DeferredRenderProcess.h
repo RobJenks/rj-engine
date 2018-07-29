@@ -14,6 +14,7 @@
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
+class ShadowManagerComponent;
 class PostProcessComponent;
 class PostProcessMotionBlur;
 class PostProcessTemporalAA;
@@ -153,6 +154,8 @@ private:
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
 
+	// Shadow mapping components
+	ManagedPtr<ShadowManagerComponent>			m_shadow_manager;
 
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
@@ -202,6 +205,7 @@ private:
 	void InitialiseDeferredDirectionalLightingPipeline(void);
 	void InitialiseTransparentRenderingPipelines(void);
 	void InitialiseDebugRenderingPipelines(void);
+	void InitialiseShadowManager(void);
 	void InitialisePostProcessingComponents(void);
 
 	// Bind shader resources required for the deferred lighting stage

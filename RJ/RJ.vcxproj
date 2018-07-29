@@ -616,6 +616,7 @@
     <ClCompile Include="ShaderParameter.cpp" />
     <ClCompile Include="ShaderParameterDX11.cpp" />
     <ClCompile Include="Shaders.cpp" />
+    <ClCompile Include="ShadowManagerComponent.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
@@ -1105,6 +1106,7 @@
     <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="RM_Instance.h" />
     <ClInclude Include="RM_InstanceData.h" />
+    <ClInclude Include="RM_InstanceMetadata.h" />
     <ClInclude Include="RM_MaterialInstanceMapping.h" />
     <ClInclude Include="RM_ModelData.h" />
     <ClInclude Include="RM_ModelDataCollection.h" />
@@ -1126,6 +1128,7 @@
     <ClInclude Include="ShaderParameterDX11.h" />
     <ClInclude Include="ShaderRenderPredicate.h" />
     <ClInclude Include="Shaders.h" />
+    <ClInclude Include="ShadowManagerComponent.h" />
     <ClInclude Include="SimulatedEnvironmentCollision.h" />
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />

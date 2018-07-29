@@ -11,6 +11,7 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "ShadowManagerComponent.h"
 #include "FrustumJitterProcess.h"
 #include "PostProcessMotionBlur.h"
 #include "PostProcessTemporalAA.h"
@@ -93,6 +94,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseTransparentRenderingPipelines();
 	InitialiseDebugRenderingPipelines();
 
+	InitialiseShadowManager();
 	InitialisePostProcessingComponents();
 }
 
@@ -433,15 +435,22 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_debug_srv_unbind = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };	
 }
 
+void DeferredRenderProcess::InitialiseShadowManager(void)
+{
+	Game::Log << LOG_INFO << "Initialising shadow manager components\n";
+
+	m_shadow_manager = new ShadowManagerComponent(this);
+}
+
 void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering post-process components\n";
 
 	// Screen-space pixel neighbourhood motion blur
-	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
-	m_post_temporal_aa = ManagedPtr<PostProcessTemporalAA>(new PostProcessTemporalAA(this));
+	m_post_motionblur = new PostProcessMotionBlur(this);
+	m_post_temporal_aa = new PostProcessTemporalAA(this);
 
-	// Also maintain a collection of base post processing components
+	// Also maintain a collection of base post-processing components
 	m_post_processing_components = 
 	{ 
 		m_post_motionblur.RawPtr, 

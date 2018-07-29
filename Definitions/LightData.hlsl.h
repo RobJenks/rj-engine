@@ -62,8 +62,7 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 	// Default lighting state
 	static const _uint32		LIGHT_FLAG_DEFAULTS = 
 	(
-		LIGHT_FLAG_ENABLED    | 
-		LIGHT_FLAG_SHADOW_MAP 
+		LIGHT_FLAG_ENABLED    
 		/* | ... | ... */
 	);
 

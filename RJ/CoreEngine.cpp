@@ -936,7 +936,7 @@ void CoreEngine::RetrieveRenderCycleData(void)
 
 // Submits a model to the render queue manager for rendering this frame.  Will iterate through all model components
 // and dispatch to the render queue individually
-void RJ_XM_CALLCONV	CoreEngine::SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance)
+void RJ_XM_CALLCONV	CoreEngine::SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata)
 {
 	if (!model) return;
 
@@ -944,21 +944,22 @@ void RJ_XM_CALLCONV	CoreEngine::SubmitForRendering(RenderQueueShader shader, Mod
 	size_t n = model->GetComponentCount();
 	if (n == 1U)
 	{
-		SubmitForRendering(shader, (model->Components[0].Data.get()), material, std::move(instance));
+		SubmitForRendering(shader, (model->Components[0].Data.get()), material, std::move(instance), std::move(metadata));
 		return;
 	}
 
 	// Otherwise process each component in turn
+	// TODO: optimisation; loop through 1 to N-1, then std::move() the actual instance data for [0] directly.  Saves copying once
 	for (size_t i = 0U; i < n; ++i)
 	{
-		SubmitForRendering(shader, (model->Components[i].Data.get()), material, std::move(RM_Instance(instance)));
+		SubmitForRendering(shader, (model->Components[i].Data.get()), material, std::move(RM_Instance(instance)), std::move(RM_InstanceMetadata(metadata)));
 	}
 }
 
 // Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
 // overrides any default material specified in the model buffer.  A material of NULL will use the default 
 // material in the model buffer
-void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance)
+void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata)
 {
 	// Exclude any null-geometry objects
 	if (!model) return;
@@ -971,7 +972,7 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, Mod
 		m_renderqueue.RegisterModelBuffer(shader, render_slot, model);
 	}
 
-	m_renderqueue[shader].ModelData[render_slot].GetInstances(material).NewInstance(std::move(instance));
+	m_renderqueue[shader].ModelData[render_slot].GetInstances(material).NewInstance(std::move(instance), std::move(metadata));
 }
 
 // Submit a model for z-sorted rendering.  Will dispatch each model component to the render queue in turn
@@ -1023,7 +1024,9 @@ void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, 
 
 	// Delegate to the primary submission method
 	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, m_unit_quad_model->Components[0].Data.get(), &material,
-		RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f)));;
+		std::move(RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f))), 
+		std::move(RM_InstanceMetadata())
+	);
 }
 
 // Adjust the given screen location to desired screen-space reference frame with (0,0) in the top-left of the screen
@@ -1490,12 +1493,16 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		if (object->Highlight.IsActive())
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())), 
+				std::move(RM_InstanceMetadata(object->GetPosition(), object->GetCollisionSphereRadius()))
+			);
 		}
 		else
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))), 
+				std::move(RM_InstanceMetadata(object->GetPosition(), object->GetCollisionSphereRadius()))
+			);
 		}
 	}
 }
@@ -1532,6 +1539,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 	}
 	else
 	{
+		// Use same parent metadata for all components, since we don't currently have access to e.g. per-component extent
+		RM_InstanceMetadata metadata(object->GetPosition(), object->GetCollisionSphereRadius());
+
 		if (object->Highlight.IsActive())
 		{
 			const XMFLOAT4 & highlight = object->Highlight.GetColour();
@@ -1542,7 +1552,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			{
 				const auto comp = (*component);
 				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
-					RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
+					std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight))), 
+					std::move(RM_InstanceMetadata(metadata))
+				);
 			}
 		}
 		else
@@ -1553,7 +1565,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			{
 				const auto comp = (*component);
 				SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
-					RM_Instance(comp->GetWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
+					std::move(RM_Instance(comp->GetWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition())))),
+					std::move(RM_InstanceMetadata(metadata))
+				);
 			}
 		}
 	}
@@ -1804,10 +1818,11 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, std::move(RM_Instance(
-					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition()))))
-				)));
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
+					std::move(RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+						RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))))), 
+					std::move(RM_InstanceMetadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius()))
+				);
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -1815,6 +1830,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			}
 			else if (terrain->HasArticulatedModel())
 			{
+				// Use same parent metadata for each component, since we don't have e.g. per-component extents right now
+				RM_InstanceMetadata metadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius());
+
 				// Render each component of the articulated model
 				ArticulatedModel *model = terrain->GetArticulatedModel();
 				model->Update(XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix()),
@@ -1826,8 +1844,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				for (int i = 0; i < n; ++i, ++component)
 				{
 					auto comp = (*component);
-					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
-						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, 
+						std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), 
+						std::move(RM_InstanceMetadata(metadata))
+					);
 				}
 
 				// This terrain object has been rendered
@@ -2112,10 +2132,11 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, std::move(RM_Instance(
-					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition()))))
-				)));
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
+					std::move(RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+						RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))))), 
+					std::move(RM_InstanceMetadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius()))
+				);
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -2123,6 +2144,10 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			}
 			else if (terrain->HasArticulatedModel())
 			{
+				// Use same parent metadata for all components, since we don't have e.g. per-component extents right now
+				// TODO: Can take from [3] component of world matrix, as per tile rendering logic?
+				RM_InstanceMetadata metadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius());
+
 				// Render all components of the articulated model
 				ArticulatedModel *model = terrain->GetArticulatedModel();
 				model->Update(XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix()),
@@ -2134,8 +2159,10 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				for (int i = 0; i < n; ++i, ++component)
 				{
 					auto comp = (*component);
-					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
-						RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, 
+						std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), 
+						std::move(RM_InstanceMetadata(metadata))
+					);
 				}
 
 				// This terrain object has been rendered
@@ -2204,13 +2231,17 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (tile->Highlight.IsActive())
 				{
 					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel().GetModel(), NULL, std::move(
-						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel().GetModel(), NULL, 
+						std::move(RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)),	// Position can be taken from trans. components of world matrix (_41 to _43)
+						std::move(RM_InstanceMetadata(world.r[3], tile->GetBoundingSphereRadius()))
+					);			
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel().GetModel(), NULL, std::move(
-						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
+					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel().GetModel(), NULL, 
+						std::move(RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))),				// Position can be taken from trans. components of world matrix (_41 to _43)
+						std::move(RM_InstanceMetadata(world.r[3], tile->GetBoundingSphereRadius()))
+					);						
 				}
 			}
 		}
@@ -2241,8 +2272,10 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, item.Model.GetModel(), NULL, std::move(
-					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))));
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.Model.GetModel(), NULL, 
+					std::move(RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))), 
+					std::move(RM_InstanceMetadata(modelwm.r[3], tile->GetBoundingSphereRadius()))
+				);
 			}
 		}
 	}
@@ -2337,13 +2370,19 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					// Update the position of all model components before rendering
 					model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
 
+					// TODO: use same parent metadata for all components since we don't yet have required metadata at the component level
+					auto extent = model->GetExtent();
+					RM_InstanceMetadata metadata(turret->GetPosition(), max(max(extent.x, extent.y), extent.z));
+
 					// Submit each component for rendering in turn
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
 						auto comp = (*component);
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, std::move(
-							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)));
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, comp->Model.GetModel(), NULL, 
+							std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), highlight)), 
+							std::move(RM_InstanceMetadata(metadata))
+						);
 					}
 				}
 			}
@@ -2364,13 +2403,19 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					// Update the position of all model components before rendering
 					model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
 
+					// TODO: use same parent metadata for all components since we don't yet have required metadata at the component level
+					auto extent = model->GetExtent();
+					RM_InstanceMetadata metadata(turret->GetPosition(), max(max(extent.x, extent.y), extent.z));
+
 					// Submit each component for rendering in turn
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
 						auto comp = (*component);
-						SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, std::move(
-							RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))));
+						SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, 
+							std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()))), 
+							std::move(RM_InstanceMetadata(metadata))
+						);
 					}
 				}
 			}

@@ -270,35 +270,43 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void RJ_XM_CALLCONV			RenderModel(Model *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(Model *model, const FXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(Model *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void			RenderModel(Model *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
@@ -641,8 +649,8 @@ private:
 	// Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
 	// overrides any default material specified in the model buffer.  A material of NULL will use the default 
 	// material in the model buffer
-	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance);
-	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance);
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata);
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata);
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required

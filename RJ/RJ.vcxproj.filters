@@ -949,6 +949,9 @@
     <ClCompile Include="PostProcessTemporalAA.cpp">
       <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowManagerComponent.cpp">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2220,6 +2223,12 @@
     <ClInclude Include="..\Definitions\CppHLSLLocalisation.hlsl.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowManagerComponent.h">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RM_InstanceMetadata.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2602,6 +2611,9 @@
     </Filter>
     <Filter Include="HLSL\Support">
       <UniqueIdentifier>{b4d3ce65-2a40-4704-9bd0-b1bf00017ea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\ShadowManager">
+      <UniqueIdentifier>{7e1016cb-a877-4d6e-b66d-48cf2cc06753}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
