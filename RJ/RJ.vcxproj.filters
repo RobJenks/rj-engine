@@ -955,6 +955,12 @@
     <ClCompile Include="IntersectionTests.cpp">
       <Filter>Physics</Filter>
     </ClCompile>
+    <ClCompile Include="CameraProjection.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraView.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2235,6 +2241,12 @@
     <ClInclude Include="IntersectionTests.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="CameraProjection.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraView.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2667,6 +2679,8 @@
     <None Include="Data\Shaders\temporal_aa_resources.hlsl">
       <Filter>HLSL\Support</Filter>
     </None>
+    <None Include="Data\Shaders\shadowmap_calculations.hlsl" />
+    <None Include="Data\Shaders\shadowmap_resources.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2722,12 +2736,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_shadowmap.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\shadowmap_calculations.hlsl">
-      <Filter>HLSL\Support</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\shadowmap_resources.hlsl">
-      <Filter>HLSL\Support</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

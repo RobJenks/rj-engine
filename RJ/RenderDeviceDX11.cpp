@@ -6,6 +6,7 @@
 #include "GameDataExtern.h"
 #include "DataInput.h"
 #include "CoreEngine.h"
+#include "CameraProjection.h"
 #include "Shaders.h"
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
@@ -876,7 +877,7 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
 
 	// Base projection matrix
-	m_projection_unjittered = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+	m_projection_unjittered = CameraProjection::Perspective(m_fov, m_aspectratio, m_screen_near, m_screen_far);
 
 	// Apply frustum jitter if enabled
 	if (FrustumJitterEnabled())
@@ -894,7 +895,7 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 
 void RenderDeviceDX11::RecalculateOrthographicMatrix(void)
 {
-	m_orthographic = XMMatrixOrthographicLH((float)m_displaysize.x, (float)m_displaysize.y, m_screen_near, m_screen_far);
+	m_orthographic = CameraProjection::Orthographic(m_displaysize_f, m_screen_near, m_screen_far);
 }
 
 // Verify the render device is in a good state and report errors if not

@@ -388,6 +388,8 @@
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CameraPath.cpp" />
+    <ClCompile Include="CameraProjection.cpp" />
+    <ClCompile Include="CameraView.cpp" />
     <ClCompile Include="CapabilityTester.cpp" />
     <ClCompile Include="CapitalShipPerimeterBeacon.cpp" />
     <ClCompile Include="CentralScheduler.cpp" />
@@ -819,6 +821,8 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="CameraPath.h" />
+    <ClInclude Include="CameraProjection.h" />
+    <ClInclude Include="CameraView.h" />
     <ClInclude Include="CapabilityTester.h" />
     <ClInclude Include="CapitalShipPerimeterBeacon.h" />
     <ClInclude Include="CentralScheduler.h" />
