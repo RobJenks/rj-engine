@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vector>
+#include "ManagedPtr.h"
 #include "RM_Instance.h"
 #include "RM_InstanceMetadata.h"
 #include "ShaderDX11.h"
+#include "Data/Shaders/shadowmap_resources.hlsl"
 class DeferredRenderProcess;
 class TextureDX11;
 class RenderTargetDX11;
@@ -33,6 +35,7 @@ private:
 
 	// Initialisation
 	void										InitialiseShaders(void);
+	void										InitialiseStandardBuffers(void);
 	void										InitialiseTextureBuffers(void);
 	void										InitialiseRenderTargets(void);
 	void										InitialiseRenderPipelines(void);
@@ -41,6 +44,11 @@ private:
 
 	// Determines whether a render instance intersects with the given light object
 	bool										InstanceIntersectsLightFrustum(const RM_InstanceMetadata & instance_metadata, const LightData & light);
+
+	// Activate or deactivate the light-space shadow mapping pipeline for a given light object
+	void										ActivateLightSpaceShadowmapPipeline(const LightData & light);
+	void										DeactivateLightSpaceShadowmapPipeline(void);
+
 
 private:
 
@@ -51,7 +59,10 @@ private:
 	RenderTargetDX11 *							m_shadowmap_rt;
 	PipelineStateDX11 *							m_pipeline_lightspace_shadowmap;
 
-	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_framebuffer;
+	ManagedPtr<LightSpaceShadowMapDataBuffer>	m_cb_lightspace_shadowmap_data;
+	ConstantBufferDX11 *						m_cb_lightspace_shadowmap;
+
+	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_smdata;
 
 
 	// Persistent vector used to hold instance data for light-space rendering.  Maintain as persistent storage

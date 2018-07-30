@@ -36,11 +36,14 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	m_shadowmap_rt(NULL), 
 	m_pipeline_lightspace_shadowmap(NULL), 
 
-	m_param_vs_shadowmap_framebuffer(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_cb_lightspace_shadowmap(NULL), 
 
-	m_instance_capacity(0U)
+	m_instance_capacity(0U), 
+
+	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	InitialiseShaders();
+	InitialiseStandardBuffers();
 	InitialiseRenderQueueProcessing();
 
 	PerformPostConfigInitialisation();
@@ -56,7 +59,7 @@ void ShadowManagerComponent::PerformPostConfigInitialisation(void)
 
 void ShadowManagerComponent::InitialiseShaders(void)
 {
-	Game::Log << LOG_INFO << "Intialising shadow manager shaders\n";
+	Game::Log << LOG_INFO << "Intialising shadow mapping shaders\n";
 
 	// Get a reference to all required shaders
 	m_vs_lightspace_shadowmap = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::ShadowMappingVertexShader);
@@ -64,7 +67,14 @@ void ShadowManagerComponent::InitialiseShaders(void)
 
 
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_shadowmap_framebuffer = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_vs_lightspace_shadowmap, FrameDataBufferName);
+	m_param_vs_shadowmap_smdata = RenderProcessDX11::AttemptRetrievalOfShaderParameter(m_vs_lightspace_shadowmap, LightSpaceShadowMapDataBufferName);
+}
+
+void ShadowManagerComponent::InitialiseStandardBuffers(void)
+{
+	Game::Log << LOG_INFO << "Intialising shadow mapping standard buffers\n";
+
+	m_cb_lightspace_shadowmap = Game::Engine->GetAssets().CreateConstantBuffer(LightSpaceShadowMapDataBufferName, m_cb_lightspace_shadowmap_data.RawPtr);
 }
 
 
@@ -188,7 +198,7 @@ void ShadowManagerComponent::InitialiseLightSpaceShadowMappingPipeline(void)
 
 void ShadowManagerComponent::InitialiseRenderQueueProcessing(void)
 {
-	Game::Log << LOG_INFO << "Intialising shadow manager render queue processing\n";
+	Game::Log << LOG_INFO << "Intialising shadow mapping render queue processing\n";
 
 	// Preallocate space in the instance data collection
 	m_instance_capacity = INITIAL_INSTANCE_DATA_CAPACITY; 
@@ -274,11 +284,31 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 				if (rendercount == 0U) continue;
 
 				// Submit the instances for rendering
+				ActivateLightSpaceShadowmapPipeline(light);
 				Game::Engine->RenderInstanced(*m_pipeline_lightspace_shadowmap, *modeldata.ModelBufferInstance, matdata.Material, *instances, static_cast<UINT>(rendercount));
+				DeactivateLightSpaceShadowmapPipeline();
 			}
 		}
 	}
 
+}
+
+// Activate the light-space shadow mapping pipeline for the given light object
+void ShadowManagerComponent::ActivateLightSpaceShadowmapPipeline(const LightData & light)
+{
+	// Determine view/projection for this light object based on its positon in the world
+
+
+	// Populate the light-space SM data buffer based on this light
+
+	// Bind the pipeline ready for rendering
+
+}
+
+// Deactivate the light-space shadow mapping pipeline
+void ShadowManagerComponent::DeactivateLightSpaceShadowmapPipeline(void)
+{
+	m_pipeline_lightspace_shadowmap->Unbind();
 }
 
 
@@ -307,3 +337,6 @@ ShadowManagerComponent::~ShadowManagerComponent(void)
 {
 
 }
+
+
+
