@@ -1160,6 +1160,7 @@ void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model
 	// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
 	// Use override material if available, otherwise fall back to the model buffer material (which may also be null in [error] cases)
 	// Deliberate fallthrough from (!x) to (x) since model.Material may also be NULL
+	// TODO (SM): don't bind materials to all shaders; only when shader e.g. exposes a 'uses_materials' flag
 	if (!material) material = model.Material;
 	if (material)
 	{

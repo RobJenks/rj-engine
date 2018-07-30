@@ -1,0 +1,20 @@
+https://github.com/TheRealMJP/MSAAFilter/issues/1
+https://github.com/TheRealMJP/MSAAFilter/blob/master/MSAAFilter/MSAAFilter.cpp#L238
+D:\Documents\DirectX Resource Projects\Temporal-AA-Inside\Assets\Scripts\FrustumJitter.cs
+
+
+https://github.com/playdeadgames/temporal
+http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
+
+http://advances.realtimerendering.com/s2014/epic/TemporalAA.pptx
+
+
+https://blog.demofox.org/2017/05/29/when-random-numbers-are-too-random-low-discrepancy-sequences/
+
+https://books.google.co.uk/books?id=AQf9AAAAQBAJ&pg=PA85&lpg=PA85&dq=rendering+frustum+jittering&source=bl&ots=0peoongmwV&sig=IJMR1azHLhj_6PhNZIB30VM8oDs&hl=en&sa=X&ved=0ahUKEwjRrrn-9ZfcAhVILsAKHSIBDXoQ6AEINDAC#v=onepage&q=rendering%20frustum%20jittering&f=false
+
+https://bartwronski.com/2014/03/15/temporal-supersampling-and-antialiasing/
+https://interplayoflight.wordpress.com/2017/10/25/how-unreal-renders-a-frame-part-3/
+
+
+Update velocity buffer to R16G16 for required precision
