@@ -49,6 +49,9 @@ private:
 	void										ActivateLightSpaceShadowmapPipeline(const LightData & light);
 	void										DeactivateLightSpaceShadowmapPipeline(void);
 
+	// Calculate transform matrix for the given light
+	XMMATRIX									LightViewMatrix(const LightData & light) const;
+	XMMATRIX									LightProjMatrix(const LightData & light) const;
 
 private:
 

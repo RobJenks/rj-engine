@@ -6,6 +6,8 @@
 #include "RM_ModelDataCollection.h"
 #include "RM_MaterialInstanceMapping.h"
 #include "RM_InstanceData.h"
+#include "CameraView.h"
+#include "CameraProjection.h"
 #include "IntersectionTests.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "ShaderDX11.h"
@@ -296,21 +298,60 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 // Activate the light-space shadow mapping pipeline for the given light object
 void ShadowManagerComponent::ActivateLightSpaceShadowmapPipeline(const LightData & light)
 {
-	// Determine view/projection for this light object based on its positon in the world
-
-
+	// Determine view/projection for this light object based on its position in the world
+	XMMATRIX view = LightViewMatrix(light);
+	XMMATRIX proj = LightProjMatrix(light);
+	
 	// Populate the light-space SM data buffer based on this light
+	XMStoreFloat4x4(&(m_cb_lightspace_shadowmap_data.RawPtr->LightViewProjection), XMMatrixMultiply(view, proj));
+	m_cb_lightspace_shadowmap->Set(m_cb_lightspace_shadowmap_data.RawPtr);
+
+	// Bind resources to the shadow mapping shader
+	m_vs_lightspace_shadowmap->SetParameterData(m_param_vs_shadowmap_smdata, m_cb_lightspace_shadowmap);
 
 	// Bind the pipeline ready for rendering
-
+	m_pipeline_lightspace_shadowmap->Bind();
 }
 
 // Deactivate the light-space shadow mapping pipeline
 void ShadowManagerComponent::DeactivateLightSpaceShadowmapPipeline(void)
 {
+	// Unbind the pipeline and all its shaders & resources
 	m_pipeline_lightspace_shadowmap->Unbind();
 }
 
+// Calculate transform matrix for the given light
+XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
+{
+	// TODO: It may be possible to do this more efficiently, e.g. setting matrix components directly?
+	switch (light.Type)
+	{
+		case LightType::Directional:
+		case LightType::Spotlight:
+			return CameraView::View(XMLoadFloat4(&light.PositionWS), QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)));
+
+		// Case Point, or as default
+		default: 
+			return CameraView::View(XMLoadFloat4(&light.PositionWS), ID_MATRIX);
+	}
+	
+}
+
+// Calculate transform matrix for the given light
+XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
+{
+	// TODO: near/far plane, FOV, and frustum in general will be calculated per light during cascaded shadow mapping
+	const auto *rd = Game::Engine->GetRenderDevice();
+	switch (light.Type)
+	{
+		case LightType::Directional:
+			return CameraProjection::Orthographic(rd->GetDisplaySizeF(), rd->GetNearClipDistance(), rd->GetFarClipDistance());
+
+		// Case Point, Spotlight, or as default
+		default:
+			return CameraProjection::Perspective(rd->GetFOV(), rd->GetAspectRatio(), rd->GetNearClipDistance(), rd->GetFarClipDistance());
+	}
+}
 
 // Determines whether a render instance intersects with the given light object
 bool ShadowManagerComponent::InstanceIntersectsLightFrustum(const RM_InstanceMetadata & instance_metadata, const LightData & light)
