@@ -1808,19 +1808,18 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			if (terrain->IsRendered()) continue;
 			if (terrain->IsDestroyed()) continue; 
 			
-			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_lever_vertical_01")
-			{
-				int a = 1;
-			}
-
 			terrain_def = terrain->GetDefinition();
 			if (terrain_def && terrain_def->HasModel())
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+				// TODO (SM): temporary
+				auto inst = RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))));
+				if (terrain_def->GetCode() == "tmp_terrain_cone") inst.Flags |= RM_Instance::INSTANCE_FLAG_SHADOW_CASTER;
+
 				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
-					std::move(RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-						RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))))), 
+					std::move(inst), 
 					std::move(RM_InstanceMetadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius()))
 				);
 

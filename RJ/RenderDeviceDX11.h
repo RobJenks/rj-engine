@@ -195,6 +195,7 @@ private:
 	ShaderDX11 *							m_sdf_decal_deferred_vs;
 	ShaderDX11 *							m_sdf_decal_direct_ps;
 	ShaderDX11 *							m_sdf_decal_deferred_ps;
+	ShaderDX11 *							m_shadowmapping_lightspace_vs;
 	ShaderDX11 *							m_post_motionblur_tilegen_ps;
 	ShaderDX11 *							m_post_motionblur_neighbour_ps;
 	ShaderDX11 *							m_post_motionblur_gather_ps;

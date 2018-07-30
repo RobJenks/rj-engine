@@ -700,6 +700,8 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 				break;
 
 			case LightType::Directional:
+				// TODO (SM): temporary
+				m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(light);
 				PopulateFrameBuffer(FrameBufferState::Fullscreen);
 				RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
 				break;

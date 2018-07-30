@@ -67,6 +67,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_sdf_decal_deferred_vs(NULL), 
 	m_sdf_decal_direct_ps(NULL), 
 	m_sdf_decal_deferred_ps(NULL),
+	m_shadowmapping_lightspace_vs(NULL), 
 	m_post_motionblur_tilegen_ps(NULL), 
 	m_post_motionblur_neighbour_ps(NULL), 
 	m_post_motionblur_gather_ps(NULL), 
@@ -622,6 +623,9 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		{ &m_sdf_decal_deferred_vs, Shader::Type::VertexShader, Shaders::SDFDecalDeferredVertexShader, "Shaders\\vs_decal_sdf_deferred.vs.hlsl", "latest", &m_standard_input_layout },
 		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL }, 
 		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL },
+
+		// Shadow mapping shaders
+		{ &m_shadowmapping_lightspace_vs, Shader::Type::VertexShader, Shaders::ShadowMappingVertexShader, "Shaders\\vs_shadowmap.vs.hlsl", "latest", &m_standard_input_layout },
 
 		// Post-process motion blur rendering shaders
 		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL },

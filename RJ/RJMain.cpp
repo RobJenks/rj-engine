@@ -2499,8 +2499,9 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->OverrideInstanceCode("syslight");
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
-		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
+	// TODO (SM): temporary; directional light should not have a position, is just at (0, 0, 0)
+	l->SetPositionAndOrientation(XMVectorAdd(cs()->GetPosition(), XMVectorScale(XMVectorSubtract(ss()->GetPosition(), cs()->GetPosition()), 0.25f)), // x% of the way along the vector from (cs -> ss)
+		QuaternionBetweenVectors(FORWARD_VECTOR, XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
 	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
 	l->LightObject().SetIntensity(0.25f);
 
