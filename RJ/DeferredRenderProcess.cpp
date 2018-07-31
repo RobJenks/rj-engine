@@ -474,7 +474,8 @@ void DeferredRenderProcess::BeginFrame(void)
 {
 	/*
 		1. Initialise per-frame data
-		2. Clear GBuffer render target
+		2. Clear deferred and GBuffer render targets
+		3. Delegate to child BeginFrame methods where applicable
 	*/
 
 	/* 1. Initialise per-frame data */
@@ -485,8 +486,11 @@ void DeferredRenderProcess::BeginFrame(void)
 	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 
-	/* 3. Clear all deferred render targets */
+	/* 2. Clear all deferred render targets */
 	m_colour_rt->Clear(ClearFlags::Colour, NULL_FLOAT4);
+
+	/* 3. Perform shadow mapping frame initialisation */
+	m_shadow_manager.RawPtr->BeginFrame();
 }
 
 // Perform all rendering of the frame

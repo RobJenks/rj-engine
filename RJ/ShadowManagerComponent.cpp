@@ -15,6 +15,10 @@
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
 
+// TODO (SM): remove
+#include "OverlayRenderer.h"
+
+
 // Initialise static data
 const std::string ShadowManagerComponent::TX_SHADOWMAP = "ShadowMap_TX";
 const std::string ShadowManagerComponent::RT_SHADOWMAP = "ShadowMap_RT";
@@ -40,10 +44,16 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 
 	m_cb_lightspace_shadowmap(NULL), 
 
+	r_viewfrustum(NULL), 
+	r_frustum_world_min(NULL_VECTOR), 
+	r_frustum_world_max(NULL_VECTOR), 
 	m_instance_capacity(0U), 
 
 	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
+	for (int i = 0; i < 8; ++i) r_frustum_world_corners[i] = NULL_VECTOR;
+
+	// Initialisation
 	InitialiseShaders();
 	InitialiseStandardBuffers();
 	InitialiseRenderQueueProcessing();
@@ -212,6 +222,31 @@ void ShadowManagerComponent::InitialiseRenderQueueProcessing(void)
 }
 
 
+// Perform per-frame initialisation before any shadow map rendering is performed
+void ShadowManagerComponent::BeginFrame(void)
+{
+	// Get a reference to the view frustum and calculate any derived data
+	CalculateViewFrustumData(Game::Engine->GetViewFrustrum());
+}
+
+// Perform per-frame calculations based on the current view frustum
+void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
+{
+	assert(frustum);
+
+	// Get a reference to the view frustum and its world-space coordinates
+	r_viewfrustum = Game::Engine->GetViewFrustrum();
+	r_viewfrustum->DetermineWorldSpaceCorners(r_frustum_world_corners);
+
+	// Determine the minimum and maximum frustum extents in world-space
+	r_frustum_world_min = r_frustum_world_corners[0];
+	r_frustum_world_max = r_frustum_world_corners[0];
+	for (int i = 1; i < 8; ++i)
+	{
+		r_frustum_world_min = XMVectorMin(r_frustum_world_min, r_frustum_world_corners[i]);
+		r_frustum_world_max = XMVectorMax(r_frustum_world_max, r_frustum_world_corners[i]);
+	}
+}
 
 
 // Process the render queue and issue draw calls for all shadow-casting entities in range of the given light

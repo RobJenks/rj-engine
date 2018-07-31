@@ -10,6 +10,7 @@ class DeferredRenderProcess;
 class TextureDX11;
 class RenderTargetDX11;
 class PipelineStateDX11;
+class Frustum;
 struct LightData;
 
 class ShadowManagerComponent
@@ -23,6 +24,8 @@ public:
 	// Initialisation of any components dependent on config load, or which should update on device parameter changes
 	void										PerformPostConfigInitialisation(void);
 
+	// Perform per-frame initialisation before any shadow map rendering is performed
+	void										BeginFrame(void);
 
 	// Process the render queue and issue draw calls for all shadow-casting entities in range of the given light
 	void										ExecuteLightSpaceRenderPass(const LightData & light);
@@ -42,6 +45,9 @@ private:
 	void										InitialiseLightSpaceShadowMappingPipeline(void);
 	void										InitialiseRenderQueueProcessing(void);
 
+	// Perform per-frame calculations based on the current view frustum
+	void										CalculateViewFrustumData(const Frustum *frustum);
+
 	// Determines whether a render instance intersects with the given light object
 	bool										InstanceIntersectsLightFrustum(const RM_InstanceMetadata & instance_metadata, const LightData & light);
 
@@ -56,6 +62,11 @@ private:
 private:
 
 	DeferredRenderProcess *						m_renderprocess;
+
+	const Frustum *								r_viewfrustum;						// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_corners[8];			// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_min;				// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_max;				// Relevant for the current frame only
 
 	ShaderDX11 *								m_vs_lightspace_shadowmap;
 	TextureDX11 *								m_shadowmap_tx;
