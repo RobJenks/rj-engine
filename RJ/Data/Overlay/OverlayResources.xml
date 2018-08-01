@@ -2,20 +2,18 @@
 
   <Model>
     <Code>unit_line_model_green</Code>
-    <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>emissive_green</Material>
+    <Component file="Models\Misc\unit_line.rjm" material="emissive_green" />
   </Model>
 
   <Model>
     <Code>unit_line_model_red</Code>
     <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>emissive_red</Material>
+    <Component file="Models\Misc\unit_line.rjm" material="emissive_red" />
   </Model>
 
   <Model>
     <Code>unit_line_model_lblue</Code>
-    <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>emissive_cyan</Material>
+    <Component file="Models\Misc\unit_line.rjm" material="emissive_cyan" />
   </Model>
 
 </gamedata>
