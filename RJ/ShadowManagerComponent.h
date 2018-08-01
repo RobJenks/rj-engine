@@ -67,6 +67,7 @@ private:
 	XMVECTOR									r_frustum_world_corners[8];			// Relevant for the current frame only
 	XMVECTOR									r_frustum_world_min;				// Relevant for the current frame only
 	XMVECTOR									r_frustum_world_max;				// Relevant for the current frame only
+	XMVECTOR									r_frustum_longest_diagonal_mag_v;	// Relevant for the current frame only
 
 	ShaderDX11 *								m_vs_lightspace_shadowmap;
 	TextureDX11 *								m_shadowmap_tx;

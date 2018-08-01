@@ -239,6 +239,7 @@ void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
 	r_viewfrustum->DetermineWorldSpaceCorners(r_frustum_world_corners);
 
 	// Determine the minimum and maximum frustum extents in world-space
+	// TODO: Is this needed any more, now that we instead use the longest diagonal for light frustum bounding?
 	r_frustum_world_min = r_frustum_world_corners[0];
 	r_frustum_world_max = r_frustum_world_corners[0];
 	for (int i = 1; i < 8; ++i)
@@ -246,6 +247,9 @@ void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
 		r_frustum_world_min = XMVectorMin(r_frustum_world_min, r_frustum_world_corners[i]);
 		r_frustum_world_max = XMVectorMax(r_frustum_world_max, r_frustum_world_corners[i]);
 	}
+
+	// Store the length of the longest view frustum diagonal, for use in sizing the light frustum
+	r_frustum_longest_diagonal_mag_v = XMVector3Length(XMVectorSubtract(r_frustum_world_corners[6], r_frustum_world_corners[0]));
 }
 
 
