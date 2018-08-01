@@ -1091,6 +1091,29 @@ bool RenderDeviceDX11::ProcessConsoleCommand(GameConsoleCommand & command)
 			return true;
 		}
 	}
+	else if (command.InputCommand == "depth_planes")
+	{
+		std::string cmd = command.Parameter(0);
+		float dpnear = command.ParameterAsFloat(1);
+		float dpfar = command.ParameterAsFloat(2);
+
+		if (cmd == "get") {
+			command.SetSuccessOutput(concat("Depth plane configuration: { d_near=")(GetNearClipDistance())(", d_far=")(GetFarClipDistance())(" }").str());
+			return true;
+		}
+		else if (cmd == "set") {
+			if (dpnear <= 0.0f || dpfar <= 0.0f || dpnear > 1e9f || dpfar > 1e9f || dpnear >= dpfar) {
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidDepthPlaneConfiguration,
+					concat("Invalid depth plane configuration (d_near=")(dpnear)(", d_far=")(dpfar)(")").str());
+				return true;
+			}
+			else {
+				SetDepthPlanes(dpnear, dpfar);
+				command.SetSuccessOutput(concat("Depth plane configuration updated to { d_near=")(GetNearClipDistance())(", d_far=")(GetFarClipDistance())(" }").str());
+				return true;
+			}
+		}
+	}
 
 	// Unrecognised command
 	return false;

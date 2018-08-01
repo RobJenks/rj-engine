@@ -79,7 +79,6 @@
 #include "DynamicTerrainDefinition.h"			// DBG
 #include <tchar.h>
 #include <unordered_map>
-
 #include "CoreEngine.h"
 
 // Forward declare allowed instances of render queue processing
@@ -3326,6 +3325,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			command.SetSuccessOutput("Enabling debug render of current view frustum");
 		}
 		else if (command.Parameter(0) == "cached") {
+			DebugUpdateFrustumRenderCache();
 			SetRenderFlag(CoreEngine::RenderFlag::RenderCachedFrustum, true);
 			command.SetSuccessOutput("Enabling debug render of view frustum, cached for the current frame");
 		}
