@@ -107,6 +107,8 @@ public:
 		RenderTerrainBoxes,
 		RenderNavNetwork,
 		RenderObjectIdentifiers,
+		RenderFrustum, 
+		RenderCachedFrustum, 
 		_RFLAG_COUNT
 	};
 
@@ -389,6 +391,8 @@ public:
 	void DebugRenderEnvironmentNavNetwork(void);
 	void DebugRenderObjectIdentifiers(void);
 	void DebugRenderPortalTraversal(void);
+	void DebugRenderFrustum(bool update_cache);
+	void DebugUpdateFrustumRenderCache(void);
 
 	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
@@ -769,6 +773,7 @@ private:
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
 								m_debug_renderobjid_text;						// Vector of text objects for debug render object identifiers
+	AXMVECTOR					m_debug_frustum_render[8];
 
 	// Counter for allowable render device failures before application will consider it unrecoverable and terminate
 	unsigned int				m_render_device_failure_count;

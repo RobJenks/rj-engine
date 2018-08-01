@@ -2682,6 +2682,9 @@ void CoreEngine::RenderDebugData(void)
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTerrainBoxes]) DebugRenderEnvironmentCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderNavNetwork]) DebugRenderEnvironmentNavNetwork();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderObjectIdentifiers]) DebugRenderObjectIdentifiers();
+	
+	if (m_renderflags[CoreEngine::RenderFlag::RenderCachedFrustum]) DebugRenderFrustum(false);
+	else if (m_renderflags[CoreEngine::RenderFlag::RenderFrustum])  DebugRenderFrustum(true);
 }
 
 // Performs debug rendering of the active spatial partitioning tree
@@ -2989,6 +2992,35 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	}*/
 }
 
+void CoreEngine::DebugRenderFrustum(bool update_cache)
+{
+	if (update_cache)
+	{
+		DebugUpdateFrustumRenderCache();
+	}
+
+	/* Frustum points should be connected as follows: 
+		0-1, 1-2, 2-3, 3-0, 
+		4-5, 5-6, 6-7, 7-4,
+		0-4, 1-5, 2-6, 3-7
+	*/
+
+	static const int edges[12][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 }, 
+							  		  { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 }, 
+									  { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
+
+	for (int i = 0; i < 12; ++i)
+	{
+		Game::Engine->GetOverlayRenderer()->RenderLine(m_debug_frustum_render[edges[i][0]], m_debug_frustum_render[edges[i][1]],
+			OverlayRenderer::RenderColour::RC_Green, 10.0f, -1.0f);
+	}
+}
+
+void CoreEngine::DebugUpdateFrustumRenderCache(void)
+{
+	Game::Engine->GetViewFrustrum()->DetermineWorldSpaceCorners(m_debug_frustum_render);
+}
+
 
 // Activate or deactivate a particular stage of the rendering cycle.  Changing the 'All' stage will overwrite all stage values
 void CoreEngine::SetRenderStageState(CoreEngine::RenderStage stage, bool active)
@@ -3285,6 +3317,23 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		SetDebugPortalRenderingConfiguration(debug_render, debug_log);
 		command.SetSuccessOutput(concat("Debug portal rendering enabled for \"")(obj->GetInstanceCode())("\" (")(obj->GetID())("); rendering ")
 			(debug_render ? "enabled" : "disabled")(", logging ")(debug_log ? "enabled" : "disabled").str());
+		return true;
+	}
+	else if (command.InputCommand == "render_frustum")
+	{
+		if (command.Parameter(0) == "current") {
+			SetRenderFlag(CoreEngine::RenderFlag::RenderFrustum, true);
+			command.SetSuccessOutput("Enabling debug render of current view frustum");
+		}
+		else if (command.Parameter(0) == "cached") {
+			SetRenderFlag(CoreEngine::RenderFlag::RenderCachedFrustum, true);
+			command.SetSuccessOutput("Enabling debug render of view frustum, cached for the current frame");
+		}
+		else {
+			SetRenderFlag(CoreEngine::RenderFlag::RenderFrustum, false);
+			SetRenderFlag(CoreEngine::RenderFlag::RenderCachedFrustum, false);
+			command.SetSuccessOutput("Disabling debug render of view frustum");
+		}
 		return true;
 	}
 
