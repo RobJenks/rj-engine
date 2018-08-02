@@ -24,6 +24,7 @@ const std::string ShadowManagerComponent::TX_SHADOWMAP = "ShadowMap_TX";
 const std::string ShadowManagerComponent::RT_SHADOWMAP = "ShadowMap_RT";
 const std::string ShadowManagerComponent::RP_SHADOWMAP = "ShadowMap_Pipeline";
 
+const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST = 1.0f;
 
 
 // Constructor
@@ -35,18 +36,24 @@ ShadowManagerComponent::ShadowManagerComponent(void)
 // Constructor
 ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderprocess)
 	:
-	m_renderprocess(renderprocess), 
+	m_renderprocess(renderprocess),
 
-	m_vs_lightspace_shadowmap(NULL), 
-	m_shadowmap_tx(NULL), 
-	m_shadowmap_rt(NULL), 
-	m_pipeline_lightspace_shadowmap(NULL), 
+	m_vs_lightspace_shadowmap(NULL),
+	m_shadowmap_tx(NULL),
+	m_shadowmap_rt(NULL),
+	m_pipeline_lightspace_shadowmap(NULL),
 
-	m_cb_lightspace_shadowmap(NULL), 
+	m_cb_lightspace_shadowmap(NULL),
 
-	r_viewfrustum(NULL), 
-	r_frustum_world_min(NULL_VECTOR), 
-	r_frustum_world_max(NULL_VECTOR), 
+	r_viewfrustum(NULL),
+	r_frustum_world_min(NULL_VECTOR),
+	r_frustum_world_max(NULL_VECTOR),
+	m_lightspace_view_neardist(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST),
+	m_lightspace_view_neardist_v(XMVectorReplicate(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST)),
+	r_lightspace_view_fardist(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST + 1.0f), 
+	r_frustum_longest_diagonal_mag(0.0f), 
+	r_frustum_longest_diagonal_mag_v(NULL_VECTOR), 
+
 	m_instance_capacity(0U), 
 
 	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER)
@@ -239,17 +246,22 @@ void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
 	r_viewfrustum->DetermineWorldSpaceCorners(r_frustum_world_corners);
 
 	// Determine the minimum and maximum frustum extents in world-space
-	// TODO: Is this needed any more, now that we instead use the longest diagonal for light frustum bounding?
+	XMVECTOR vsum = NULL_VECTOR;
 	r_frustum_world_min = r_frustum_world_corners[0];
 	r_frustum_world_max = r_frustum_world_corners[0];
 	for (int i = 1; i < 8; ++i)
 	{
 		r_frustum_world_min = XMVectorMin(r_frustum_world_min, r_frustum_world_corners[i]);
 		r_frustum_world_max = XMVectorMax(r_frustum_world_max, r_frustum_world_corners[i]);
+		vsum = XMVectorAdd(vsum, r_frustum_world_corners[i]);
 	}
 
 	// Store the length of the longest view frustum diagonal, for use in sizing the light frustum
 	r_frustum_longest_diagonal_mag_v = XMVector3Length(XMVectorSubtract(r_frustum_world_corners[6], r_frustum_world_corners[0]));
+	r_frustum_longest_diagonal_mag = XMVectorGetX(r_frustum_longest_diagonal_mag_v);
+
+	r_frustum_centre_point = XMVectorDivide(vsum, XMVectorReplicate(8.0f));
+	r_lightspace_view_fardist = (m_lightspace_view_neardist + r_frustum_longest_diagonal_mag);
 }
 
 
@@ -259,6 +271,9 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 	bool directional_light = (light.Type == LightType::Directional);
 	const auto & renderqueue = Game::Engine->GetRenderQueue();
 	
+	// Activate the pipeline for the active light
+	ActivateLightSpaceShadowmapPipeline(light);
+
 	// For each shader
 	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
@@ -325,13 +340,13 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 				if (rendercount == 0U) continue;
 
 				// Submit the instances for rendering
-				ActivateLightSpaceShadowmapPipeline(light);
 				Game::Engine->RenderInstanced(*m_pipeline_lightspace_shadowmap, *modeldata.ModelBufferInstance, matdata.Material, *instances, static_cast<UINT>(rendercount));
-				DeactivateLightSpaceShadowmapPipeline();
 			}
 		}
 	}
 
+	// Deactivate the pipeline and unbind all resources
+	DeactivateLightSpaceShadowmapPipeline();
 }
 
 // Activate the light-space shadow mapping pipeline for the given light object
@@ -365,10 +380,33 @@ void ShadowManagerComponent::DeactivateLightSpaceShadowmapPipeline(void)
 // Calculate transform matrix for the given light
 XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 {
+	// TODO (SM): temp
+	if (Game::Keyboard.GetKey(DIK_F) && Game::Keyboard.CtrlDown())
+	{
+		XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
+		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorMultiplyAdd(
+			XMVectorMultiplyAdd(r_frustum_longest_diagonal_mag_v, HALF_VECTOR, m_lightspace_view_neardist_v),	// (frustum_size/2 + NEAR)
+			XMVectorNegate(dir),																				// * -lightdir
+			r_frustum_centre_point));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(QuaternionBetweenVectors(FORWARD_VECTOR, dir));
+		Game::Log << LOG_DEBUG << "DBG pos = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraPosition()) <<
+			", Orient = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraOrientation()) << "\n";
+		Game::Keyboard.LockKey(DIK_F);
+	}
+
 	// TODO: It may be possible to do this more efficiently, e.g. setting matrix components directly?
 	switch (light.Type)
 	{
 		case LightType::Directional:
+			
+			// Step back from view frustum centre by (lightdir * (frustum_size + NEAR))
+			XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
+			return CameraView::View(XMVectorMultiplyAdd(
+				XMVectorMultiplyAdd(r_frustum_longest_diagonal_mag_v, HALF_VECTOR, m_lightspace_view_neardist_v),	// (frustum_size/2 + NEAR)
+				XMVectorNegate(dir),																				// * -lightdir
+				r_frustum_centre_point),																			// + centre_point
+				QuaternionBetweenVectors(FORWARD_VECTOR, dir));												 
+
 		case LightType::Spotlight:
 			return CameraView::View(XMLoadFloat4(&light.PositionWS), QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)));
 
@@ -387,7 +425,8 @@ XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 	switch (light.Type)
 	{
 		case LightType::Directional:
-			return CameraProjection::Orthographic(rd->GetDisplaySizeF(), rd->GetNearClipDistance(), rd->GetFarClipDistance());
+			return CameraProjection::Orthographic(XMFLOAT2(r_frustum_longest_diagonal_mag, r_frustum_longest_diagonal_mag), 
+				m_lightspace_view_neardist, r_lightspace_view_fardist);
 
 		// Case Point, Spotlight, or as default
 		default:

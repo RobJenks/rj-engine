@@ -1499,8 +1499,12 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		}
 		else
 		{
+			// TODO (SM): temporary
+			auto inst = RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()));
+			inst.Flags |= RM_Instance::INSTANCE_FLAG_SHADOW_CASTER;
+
 			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))), 
+				std::move(inst), 
 				std::move(RM_InstanceMetadata(object->GetPosition(), object->GetCollisionSphereRadius()))
 			);
 		}
@@ -1816,7 +1820,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				// TODO (SM): temporary
 				auto inst = RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))));
-				if (terrain_def->GetCode() == "tmp_terrain_cone") inst.Flags |= RM_Instance::INSTANCE_FLAG_SHADOW_CASTER;
+				if (terrain_def->HasModel()) inst.Flags |= RM_Instance::INSTANCE_FLAG_SHADOW_CASTER;
 
 				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
 					std::move(inst), 

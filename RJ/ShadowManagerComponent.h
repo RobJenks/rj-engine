@@ -67,7 +67,14 @@ private:
 	XMVECTOR									r_frustum_world_corners[8];			// Relevant for the current frame only
 	XMVECTOR									r_frustum_world_min;				// Relevant for the current frame only
 	XMVECTOR									r_frustum_world_max;				// Relevant for the current frame only
+	float										r_frustum_longest_diagonal_mag;		// Relevant for the current frame only
 	XMVECTOR									r_frustum_longest_diagonal_mag_v;	// Relevant for the current frame only
+	XMVECTOR									r_frustum_centre_point;				// Relevant for the current frame only
+	float										r_lightspace_view_fardist;			// Relevant for the current frame only
+
+	static const float							DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST;
+	float										m_lightspace_view_neardist;
+	XMVECTOR									m_lightspace_view_neardist_v;
 
 	ShaderDX11 *								m_vs_lightspace_shadowmap;
 	TextureDX11 *								m_shadowmap_tx;
