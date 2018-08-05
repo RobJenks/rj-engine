@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "ManagedPtr.h"
+#include "iAcceptsConsoleCommands.h"
 #include "RM_Instance.h"
 #include "RM_InstanceMetadata.h"
 #include "ShaderDX11.h"
@@ -12,8 +13,9 @@ class RenderTargetDX11;
 class PipelineStateDX11;
 class Frustum;
 struct LightData;
+class GameConsoleCommand;
 
-class ShadowManagerComponent
+class ShadowManagerComponent : public iAcceptsConsoleCommands
 {
 public:
 
@@ -30,9 +32,19 @@ public:
 	// Process the render queue and issue draw calls for all shadow-casting entities in range of the given light
 	void										ExecuteLightSpaceRenderPass(const LightData & light);
 
+	// Size of all shadow maps (TODO: in future, allow customised size per SM, based on e.g. light?  Probably
+	// not necessary if cascaded shadow mapping is adopted)
+	CMPINLINE UINTVECTOR2						GetShadowMapSize(void) const { return m_shadow_map_size; }
+	bool										SetShadowMapSize(UINTVECTOR2 size);
+
+	// Return the number of currently-active shadow maps (as of the last rendered frame)
+	CMPINLINE unsigned int						GetActiveShadowMapCount(void) const { return m_active_shadow_maps; }
+
 	// Destructor
 	~ShadowManagerComponent(void);
 
+	// Virtual inherited method to accept a command from the console
+	bool										ProcessConsoleCommand(GameConsoleCommand & command);
 
 private:
 
@@ -72,6 +84,10 @@ private:
 	XMVECTOR									r_frustum_centre_point;				// Relevant for the current frame only
 	float										r_lightspace_view_fardist;			// Relevant for the current frame only
 
+	static const UINTVECTOR2					DEFAULT_SHADOW_MAP_SIZE;
+	static const unsigned int					MAX_SHADOW_MAP_SIZE = 8192U;
+	UINTVECTOR2									m_shadow_map_size;
+
 	static const float							DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST;
 	float										m_lightspace_view_neardist;
 	XMVECTOR									m_lightspace_view_neardist_v;
@@ -86,6 +102,7 @@ private:
 
 	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_smdata;
 
+	unsigned int								m_active_shadow_maps;
 
 	// Persistent vector used to hold instance data for light-space rendering.  Maintain as persistent storage
 	// to avoid repeated reallocations between frames

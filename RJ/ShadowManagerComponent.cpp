@@ -14,6 +14,7 @@
 #include "TextureDX11.h"
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
+#include "GameConsoleCommand.h"
 
 // TODO (SM): remove
 #include "OverlayRenderer.h"
@@ -24,6 +25,7 @@ const std::string ShadowManagerComponent::TX_SHADOWMAP = "ShadowMap_TX";
 const std::string ShadowManagerComponent::RT_SHADOWMAP = "ShadowMap_RT";
 const std::string ShadowManagerComponent::RP_SHADOWMAP = "ShadowMap_Pipeline";
 
+const UINTVECTOR2 ShadowManagerComponent::DEFAULT_SHADOW_MAP_SIZE = UINTVECTOR2(2048U, 2048U);
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST = 1.0f;
 
 
@@ -54,6 +56,7 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	r_frustum_longest_diagonal_mag(0.0f), 
 	r_frustum_longest_diagonal_mag_v(NULL_VECTOR), 
 
+	m_shadow_map_size(DEFAULT_SHADOW_MAP_SIZE), 
 	m_instance_capacity(0U), 
 
 	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER)
@@ -228,10 +231,28 @@ void ShadowManagerComponent::InitialiseRenderQueueProcessing(void)
 	}	
 }
 
+// Size of all shadow maps.  Returns a flag indicating whether the change was made
+bool ShadowManagerComponent::SetShadowMapSize(UINTVECTOR2 size)
+{
+	if (max(size.x, size.y) > MAX_SHADOW_MAP_SIZE)
+	{
+		Game::Log << LOG_ERROR << "Cannot set shadow map size to " << size.ToString() << "; exceeds maximum dimension of " << MAX_SHADOW_MAP_SIZE << "\n";
+		return false;
+	}
+
+	// Need to reinitialise render targets and buffers to reflect the change in SM resource size
+	Game::Log << LOG_INFO << "Shadow map buffer size set to " << size.ToString() << "\n";
+	m_shadow_map_size = size;
+	PerformPostConfigInitialisation();
+	return true;
+}
 
 // Perform per-frame initialisation before any shadow map rendering is performed
 void ShadowManagerComponent::BeginFrame(void)
 {
+	// Initialise any per-frame fields
+	m_active_shadow_maps = 0U;
+
 	// Get a reference to the view frustum and calculate any derived data
 	CalculateViewFrustumData(Game::Engine->GetViewFrustrum());
 }
@@ -273,6 +294,7 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 	
 	// Activate the pipeline for the active light
 	ActivateLightSpaceShadowmapPipeline(light);
+	++m_active_shadow_maps;
 
 	// For each shader
 	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
@@ -460,5 +482,45 @@ ShadowManagerComponent::~ShadowManagerComponent(void)
 
 }
 
+
+// Virtual inherited method to accept a command from the console
+bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "shadow")
+	{
+		if (command.Parameter(0) == "map")
+		{
+			if (command.Parameter(1) == "status")
+			{
+				command.SetSuccessOutput(concat("Frame ")(Game::FrameIndex)(": ")(GetActiveShadowMapCount())(" shadow maps (")
+					(m_shadow_map_size.x)("x")(m_shadow_map_size.y)(") currently active").str());
+				return true;
+			}
+			else if (command.Parameter(1) == "size")
+			{
+				if (command.ParameterCount() >= 4)
+				{
+					INTVECTOR2 size = INTVECTOR2(command.ParameterAsInt(2), command.ParameterAsInt(3));
+					bool success = (size.x >= 0 && size.y >= 0) &&
+						SetShadowMapSize(size.Convert<unsigned int>());
+
+					if (success) command.SetSuccessOutput(concat("Shadow map size set to ")(size.ToString()).str());
+					else command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidShadowMapBufferSize,
+						concat("Cannot update shadow map buffer size; ")(size.ToString())(" is an invalid size").str());
+					return true;
+				}
+				else if (command.ParameterCount() == 2)
+				{
+					auto size = GetShadowMapSize();
+					command.SetSuccessOutput(concat("Shadow map buffers are ")(size.x)("x")(size.y).str());
+					return true;
+				}
+			}
+		}
+	}
+
+	// Unrecognised command
+	return false;
+}
 
 
