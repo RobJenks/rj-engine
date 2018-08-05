@@ -22,6 +22,7 @@
 
 // Initialise static data
 const std::string ShadowManagerComponent::TX_SHADOWMAP = "ShadowMap_TX";
+const std::string ShadowManagerComponent::TX_SHADOWMAP_DEBUG_CAPTURE = "ShadowMap_Debug_Capture_TX";
 const std::string ShadowManagerComponent::RT_SHADOWMAP = "ShadowMap_RT";
 const std::string ShadowManagerComponent::RP_SHADOWMAP = "ShadowMap_Pipeline";
 
@@ -59,7 +60,10 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	m_shadow_map_size(DEFAULT_SHADOW_MAP_SIZE), 
 	m_instance_capacity(0U), 
 
-	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+
+	m_debug_shadowmap_capture(NULL), 
+	m_debug_shadowmap_capture_id(DEBUG_SHADOW_MAP_CAPTURE_DISABLED)
 {
 	for (int i = 0; i < 8; ++i) r_frustum_world_corners[i] = NULL_VECTOR;
 
@@ -104,11 +108,13 @@ void ShadowManagerComponent::InitialiseTextureBuffers(void)
 {
 	Texture::TextureFormat & primary_colour_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetColourBufferFormat();
 	Texture::TextureFormat & primary_dsv_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetDepthStencilBufferFormat();
-	IntegralVector2<unsigned int> display_size = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
 
 	// Texture resource details
 	std::vector<std::tuple<const std::string, const std::string, TextureDX11**, Texture::TextureFormat&, IntegralVector2<unsigned int>>> textures = {
-		{ "light-space DSV", TX_SHADOWMAP, &m_shadowmap_tx, primary_dsv_buffer_format, display_size },	// TODO: can probably reduce from DSV to depth-only in future
+		{ "light-space DSV", TX_SHADOWMAP, &m_shadowmap_tx, primary_dsv_buffer_format, m_shadow_map_size },	// TODO: can probably reduce from DSV to depth-only in future
+#ifdef _DEBUG
+		{ "debug shadowmap capture", TX_SHADOWMAP_DEBUG_CAPTURE, &m_debug_shadowmap_capture, primary_dsv_buffer_format, m_shadow_map_size }	// TODO: can probably reduce from DSV to depth-only in future
+#endif
 	};
 
 	// Create each texture resource in turn
@@ -138,11 +144,9 @@ void ShadowManagerComponent::InitialiseTextureBuffers(void)
 
 void ShadowManagerComponent::InitialiseRenderTargets(void)
 {
-	IntegralVector2<unsigned int> display_size = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
-
 	// Render target data (desc, name, pRT, size, colour-buffer, dsv-buffer)
 	std::vector<std::tuple<std::string, std::string, RenderTargetDX11**, IntegralVector2<int>, TextureDX11*, TextureDX11*>> rts = {
-		{ "light-space render target", RT_SHADOWMAP, &m_shadowmap_rt, display_size.Convert<int>(), NULL, m_shadowmap_tx }
+		{ "light-space render target", RT_SHADOWMAP, &m_shadowmap_rt, m_shadow_map_size.Convert<int>(), NULL, m_shadowmap_tx }
 	};
 
 	// Initialise each RT in turn
@@ -287,7 +291,7 @@ void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
 
 
 // Process the render queue and issue draw calls for all shadow-casting entities in range of the given light
-void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light)
+void ShadowManagerComponent::ExecuteLightSpaceRenderPass(unsigned int light_index, const LightData & light)
 {
 	bool directional_light = (light.Type == LightType::Directional);
 	const auto & renderqueue = Game::Engine->GetRenderQueue();
@@ -363,6 +367,11 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(const LightData & light
 
 				// Submit the instances for rendering
 				Game::Engine->RenderInstanced(*m_pipeline_lightspace_shadowmap, *modeldata.ModelBufferInstance, matdata.Material, *instances, static_cast<UINT>(rendercount));
+
+				// Perform a resource copy of this shadow map data if we have the debug capture enabled
+#			ifdef _DEBUG
+				if (i == m_debug_shadowmap_capture_id) DebugCaptureActiveShadowMap();
+#			endif
 			}
 		}
 	}
@@ -476,6 +485,35 @@ bool ShadowManagerComponent::InstanceIntersectsLightFrustum(const RM_InstanceMet
 	}
 }
 
+
+// Debug capture of shadow map bufers for the given light
+void ShadowManagerComponent::EnableShadowMapCapture(int light_index)
+{
+#ifdef _DEBUG
+	m_debug_shadowmap_capture_id = light_index;
+#else
+	DisableShadowMapCapture();
+#endif
+}
+
+// Debug capture of shadow map bufers for the given light
+void ShadowManagerComponent::DisableShadowMapCapture(void)
+{
+	m_debug_shadowmap_capture_id = DEBUG_SHADOW_MAP_CAPTURE_DISABLED;
+}
+
+// Copy the active shadow map resource (debug mode only)
+void ShadowManagerComponent::DebugCaptureActiveShadowMap(void)
+{
+	m_debug_shadowmap_capture->Copy(m_shadowmap_tx);
+}
+
+// Return the debug capture of the active shadow map buffer
+TextureDX11 * ShadowManagerComponent::GetDebugShadowMapBufferCapture(void)
+{
+	return m_debug_shadowmap_capture;
+}
+
 // Destructor
 ShadowManagerComponent::~ShadowManagerComponent(void)
 {
@@ -515,6 +553,20 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 					command.SetSuccessOutput(concat("Shadow map buffers are ")(size.x)("x")(size.y).str());
 					return true;
 				}
+			}
+			else if (command.Parameter(1) == "capture")
+			{
+				if (command.ParameterCount() >= 3 && command.ParameterAsInt(2) >= 0)
+				{
+					EnableShadowMapCapture(command.ParameterAsInt(2));
+					command.SetSuccessOutput(concat("Enabling shadow map buffer capture for light index ")(command.ParameterAsInt(2)).str());
+				}
+				else
+				{
+					DisableShadowMapCapture();
+					command.SetSuccessOutput("Disabling shadow map buffer capture");
+				}
+				return true;
 			}
 		}
 	}

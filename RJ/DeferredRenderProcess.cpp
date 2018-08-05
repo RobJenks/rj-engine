@@ -30,16 +30,16 @@
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
 	m_vs(NULL),
-	m_vs_quad(NULL), 
+	m_vs_quad(NULL),
 	m_ps_geometry(NULL),
 	m_ps_lighting(NULL),
 	m_ps_debug(NULL),
-	m_def_dsv_tx(NULL), 
+	m_def_dsv_tx(NULL),
 	m_def_dsv_rt(NULL),
-	m_light_dsv_tx(NULL), 
-	m_light_dsv_rt(NULL), 
-	m_colour_buffer(NULL), 
-	m_colour_rt(NULL), 
+	m_light_dsv_tx(NULL),
+	m_light_dsv_rt(NULL),
+	m_colour_buffer(NULL),
+	m_colour_rt(NULL),
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
 	m_cb_deferred(NULL),
@@ -52,13 +52,13 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_debug_rendering(NULL),
 
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
@@ -67,15 +67,15 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_transform_fullscreen_quad(ID_MATRIX),
 	m_transform_fullscreen_quad_farplane(ID_MATRIX),
 	m_frame_buffer_state(FrameBufferState::Unknown),
-	
-	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
 
-	m_velocity_k(2U), 
-	m_exposure(1.0f), 
-	m_motion_samples(16U), 
-	m_motion_max_sample_tap_distance(16U), 
+	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE),
 
-	m_post_processing_components({ 0 }), 
+	m_velocity_k(2U),
+	m_exposure(1.0f),
+	m_motion_samples(16U),
+	m_motion_max_sample_tap_distance(16U),
+
+	m_post_processing_components({ 0 }),
 
 	m_debug_render_active_view_count(0U),
 	m_cb_debug(NULL)
@@ -705,7 +705,7 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 
 			case LightType::Directional:
 				// TODO (SM): temporary
-				m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(light);
+				m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(i, light);
 				PopulateFrameBuffer(FrameBufferState::Fullscreen);
 				RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
 				break;
@@ -822,6 +822,7 @@ const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>
 	{ "motion_tilegen", DebugRenderMode::MotionBlurTileGen }, 
 	{ "motion_neighbourhood", DebugRenderMode::MotionBlurNeighbourhood }, 
 	{ "motion_final", DebugRenderMode::MotionBlurFinal }, 
+	{ "shadowmap", DebugRenderMode::ShadowMap }, 
 	{ "final", DebugRenderMode::Final }
 };
 
@@ -849,6 +850,7 @@ int DeferredRenderProcess::GetHlslDebugMode(DebugRenderMode render_mode) const
 			return DEF_DEBUG_STATE_DISABLED;
 
 		case DebugRenderMode::Depth:
+		case DebugRenderMode::ShadowMap:
 			return DEF_DEBUG_STATE_ENABLED_DEPTH;
 
 		case DebugRenderMode::Velocity:
@@ -874,6 +876,7 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
 		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
 		case DebugRenderMode::MotionBlurFinal:			return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetRenderedOutput() : NULL);
+		case DebugRenderMode::ShadowMap:				return (m_shadow_manager.RawPtr->GetDebugShadowMapBufferCapture());
 
 		// Final backbuffer output 
 		case DebugRenderMode::Final:					return m_final_colour_buffer;

@@ -26,6 +26,7 @@ public:
 	// Possible debug rendering modes
 	enum class DebugRenderMode { None = 0, Diffuse, Specular, Normal, Velocity, Depth, 
 								 MotionBlurTileGen, MotionBlurNeighbourhood, MotionBlurFinal, 
+								 ShadowMap, 
 								 /* ... */						 
 								 Final};
 

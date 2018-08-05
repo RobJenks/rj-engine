@@ -13,7 +13,7 @@ class RenderTargetDX11;
 class PipelineStateDX11;
 class Frustum;
 struct LightData;
-class GameConsoleCommand;
+struct GameConsoleCommand;
 
 class ShadowManagerComponent : public iAcceptsConsoleCommands
 {
@@ -30,7 +30,7 @@ public:
 	void										BeginFrame(void);
 
 	// Process the render queue and issue draw calls for all shadow-casting entities in range of the given light
-	void										ExecuteLightSpaceRenderPass(const LightData & light);
+	void										ExecuteLightSpaceRenderPass(unsigned int light_index, const LightData & light);
 
 	// Size of all shadow maps (TODO: in future, allow customised size per SM, based on e.g. light?  Probably
 	// not necessary if cascaded shadow mapping is adopted)
@@ -42,6 +42,12 @@ public:
 
 	// Destructor
 	~ShadowManagerComponent(void);
+
+	// Debug capture of shadow map bufers for the given light
+	void										EnableShadowMapCapture(int light_index);
+	void										DisableShadowMapCapture(void);
+	TextureDX11 *								GetDebugShadowMapBufferCapture(void);
+
 
 	// Virtual inherited method to accept a command from the console
 	bool										ProcessConsoleCommand(GameConsoleCommand & command);
@@ -70,6 +76,10 @@ private:
 	// Calculate transform matrix for the given light
 	XMMATRIX									LightViewMatrix(const LightData & light) const;
 	XMMATRIX									LightProjMatrix(const LightData & light) const;
+
+	// Copy the active shadow map resource (debug mode only)
+	void										DebugCaptureActiveShadowMap(void);
+
 
 private:
 
@@ -102,7 +112,14 @@ private:
 
 	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_smdata;
 
+#ifdef _DEBUG
+	TextureDX11 *								m_debug_shadowmap_capture;
+#endif
+
 	unsigned int								m_active_shadow_maps;
+
+	static const unsigned int					DEBUG_SHADOW_MAP_CAPTURE_DISABLED = (std::numeric_limits<unsigned int>::max)();
+	unsigned int								m_debug_shadowmap_capture_id;
 
 	// Persistent vector used to hold instance data for light-space rendering.  Maintain as persistent storage
 	// to avoid repeated reallocations between frames
@@ -113,6 +130,7 @@ private:
 private:
 
 	static const std::string					TX_SHADOWMAP;
+	static const std::string					TX_SHADOWMAP_DEBUG_CAPTURE;
 	static const std::string					RT_SHADOWMAP;
 	static const std::string					RP_SHADOWMAP;
 
