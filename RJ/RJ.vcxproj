@@ -1204,6 +1204,7 @@
     <ClInclude Include="MeshGeometry.h" />
     <ClInclude Include="MissileLauncher.h" />
     <ClInclude Include="VariableSizeValue.h" />
+    <ClInclude Include="VectorisedFloat.h" />
     <ClInclude Include="__OLD_Model.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>

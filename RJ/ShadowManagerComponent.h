@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "VectorisedFloat.h"
 #include "ManagedPtr.h"
 #include "iAcceptsConsoleCommands.h"
 #include "RM_Instance.h"
@@ -77,6 +78,11 @@ private:
 	XMMATRIX									LightViewMatrix(const LightData & light) const;
 	XMMATRIX									LightProjMatrix(const LightData & light) const;
 
+	// Shadow map near-side frustum scaling factor (1.0 = near plane at outer extent of camera view frustum, 
+	// 0.0 would have the near plane all the way forward at the camera view frustum centre point)
+	CMPINLINE float								GetShadowMapNearSideFrustumScaling(void) const { return m_lightspace_view_nearside_scaling.F(); }
+	CMPINLINE void								SetShadowMapNearSideFrustumScaling(float scale) { m_lightspace_view_nearside_scaling = scale; }
+
 	// Copy the active shadow map resource (debug mode only)
 	void										DebugCaptureActiveShadowMap(void);
 
@@ -85,22 +91,25 @@ private:
 
 	DeferredRenderProcess *						m_renderprocess;
 
-	const Frustum *								r_viewfrustum;						// Relevant for the current frame only
-	XMVECTOR									r_frustum_world_corners[8];			// Relevant for the current frame only
-	XMVECTOR									r_frustum_world_min;				// Relevant for the current frame only
-	XMVECTOR									r_frustum_world_max;				// Relevant for the current frame only
-	float										r_frustum_longest_diagonal_mag;		// Relevant for the current frame only
-	XMVECTOR									r_frustum_longest_diagonal_mag_v;	// Relevant for the current frame only
-	XMVECTOR									r_frustum_centre_point;				// Relevant for the current frame only
-	float										r_lightspace_view_fardist;			// Relevant for the current frame only
+	const Frustum *								r_viewfrustum;							// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_corners[8];				// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_min;					// Relevant for the current frame only
+	XMVECTOR									r_frustum_world_max;					// Relevant for the current frame only
+	VectorisedFloat								r_frustum_longest_diagonal_mag;			// Relevant for the current frame only
+	XMVECTOR									r_frustum_centre_point;					// Relevant for the current frame only
+	VectorisedFloat								r_lightspace_view_fardist;				// Relevant for the current frame only
+	VectorisedFloat								r_camera_distance_from_frustum_centre;	// Relevant for the current frame only
+	
 
 	static const UINTVECTOR2					DEFAULT_SHADOW_MAP_SIZE;
 	static const unsigned int					MAX_SHADOW_MAP_SIZE = 8192U;
 	UINTVECTOR2									m_shadow_map_size;
 
 	static const float							DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST;
-	float										m_lightspace_view_neardist;
-	XMVECTOR									m_lightspace_view_neardist_v;
+	VectorisedFloat								m_lightspace_view_neardist;
+
+	static const float							DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING;
+	VectorisedFloat								m_lightspace_view_nearside_scaling;
 
 	ShaderDX11 *								m_vs_lightspace_shadowmap;
 	TextureDX11 *								m_shadowmap_tx;

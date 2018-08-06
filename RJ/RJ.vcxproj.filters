@@ -2247,6 +2247,9 @@
     <ClInclude Include="CameraView.h">
       <Filter>Engine\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="VectorisedFloat.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

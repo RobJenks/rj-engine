@@ -108,6 +108,7 @@ public:
 
 	void											RecalculateProjectionMatrix(void);
 	void											RecalculateOrthographicMatrix(void);
+	void											RecalculatePrimaryViewFrustum(void);
 
 
 	// Return a reference to the primary viewport

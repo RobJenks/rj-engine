@@ -335,7 +335,7 @@ namespace ErrorCodes {
 	const Result		PostProcessComponentDoesNotExist				= 1524;
 	const Result		InvalidDepthPlaneConfiguration					= 1525;
 	const Result		InvalidShadowMapBufferSize						= 1526;
-
+	const Result		InvalidShadowMapNearScaleFactor					= 1527;
 
 
 	// External data read/write errors									(2000-2199)

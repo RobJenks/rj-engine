@@ -28,6 +28,7 @@ const std::string ShadowManagerComponent::RP_SHADOWMAP = "ShadowMap_Pipeline";
 
 const UINTVECTOR2 ShadowManagerComponent::DEFAULT_SHADOW_MAP_SIZE = UINTVECTOR2(2048U, 2048U);
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST = 1.0f;
+const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING = 1.0f;
 
 
 // Constructor
@@ -52,10 +53,9 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	r_frustum_world_min(NULL_VECTOR),
 	r_frustum_world_max(NULL_VECTOR),
 	m_lightspace_view_neardist(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST),
-	m_lightspace_view_neardist_v(XMVectorReplicate(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST)),
 	r_lightspace_view_fardist(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST + 1.0f), 
 	r_frustum_longest_diagonal_mag(0.0f), 
-	r_frustum_longest_diagonal_mag_v(NULL_VECTOR), 
+	m_lightspace_view_nearside_scaling(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING), 
 
 	m_shadow_map_size(DEFAULT_SHADOW_MAP_SIZE), 
 	m_instance_capacity(0U), 
@@ -282,11 +282,14 @@ void ShadowManagerComponent::CalculateViewFrustumData(const Frustum *frustum)
 	}
 
 	// Store the length of the longest view frustum diagonal, for use in sizing the light frustum
-	r_frustum_longest_diagonal_mag_v = XMVector3Length(XMVectorSubtract(r_frustum_world_corners[6], r_frustum_world_corners[0]));
-	r_frustum_longest_diagonal_mag = XMVectorGetX(r_frustum_longest_diagonal_mag_v);
-
+	r_frustum_longest_diagonal_mag = XMVector3Length(XMVectorSubtract(r_frustum_world_corners[6], r_frustum_world_corners[0]));
 	r_frustum_centre_point = XMVectorDivide(vsum, XMVectorReplicate(8.0f));
-	r_lightspace_view_fardist = (m_lightspace_view_neardist + r_frustum_longest_diagonal_mag);
+
+	// Calculate camera, near and far plane distances
+	XMVECTOR half_diag = XMVectorMultiply(r_frustum_longest_diagonal_mag.V(), HALF_VECTOR);
+	XMVECTOR near_side_dist = XMVectorMultiply(half_diag, m_lightspace_view_nearside_scaling.V());
+	r_camera_distance_from_frustum_centre = XMVectorAdd(m_lightspace_view_neardist.V(), near_side_dist);
+	r_lightspace_view_fardist = XMVectorAdd(r_camera_distance_from_frustum_centre.V(), half_diag);
 }
 
 
@@ -416,8 +419,8 @@ XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 	{
 		XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
 		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorMultiplyAdd(
-			XMVectorMultiplyAdd(r_frustum_longest_diagonal_mag_v, HALF_VECTOR, m_lightspace_view_neardist_v),	// (frustum_size/2 + NEAR)
-			XMVectorNegate(dir),																				// * -lightdir
+			r_camera_distance_from_frustum_centre.V(),								// (Vectorised distance from camera to frustum centre)
+			XMVectorNegate(dir),													// * -lightdir
 			r_frustum_centre_point));
 		Game::Engine->GetCamera()->SetDebugCameraOrientation(QuaternionBetweenVectors(FORWARD_VECTOR, dir));
 		Game::Log << LOG_DEBUG << "DBG pos = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraPosition()) <<
@@ -433,9 +436,9 @@ XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 			// Step back from view frustum centre by (lightdir * (frustum_size + NEAR))
 			XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
 			return CameraView::View(XMVectorMultiplyAdd(
-				XMVectorMultiplyAdd(r_frustum_longest_diagonal_mag_v, HALF_VECTOR, m_lightspace_view_neardist_v),	// (frustum_size/2 + NEAR)
-				XMVectorNegate(dir),																				// * -lightdir
-				r_frustum_centre_point),																			// + centre_point
+				r_camera_distance_from_frustum_centre.V(),				// (Vectorised distance from camera to frustum centre)
+				XMVectorNegate(dir),									// * -lightdir
+				r_frustum_centre_point),								// + centre_point
 				QuaternionBetweenVectors(FORWARD_VECTOR, dir));												 
 
 		case LightType::Spotlight:
@@ -456,8 +459,8 @@ XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 	switch (light.Type)
 	{
 		case LightType::Directional:
-			return CameraProjection::Orthographic(XMFLOAT2(r_frustum_longest_diagonal_mag, r_frustum_longest_diagonal_mag), 
-				m_lightspace_view_neardist, r_lightspace_view_fardist);
+			return CameraProjection::Orthographic(XMFLOAT2(r_frustum_longest_diagonal_mag.F(), r_frustum_longest_diagonal_mag.F()), 
+				m_lightspace_view_neardist.F(), r_lightspace_view_fardist.F());
 
 		// Case Point, Spotlight, or as default
 		default:
@@ -568,11 +571,35 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 				}
 				return true;
 			}
+			else if (command.Parameter(1) == "nearscale")
+			{
+				if (command.ParameterCount() >= 3)
+				{
+					float scale = command.ParameterAsFloat(2);
+					if (scale >= 0.0f && scale < 1000.0f) 
+					{
+						SetShadowMapNearSideFrustumScaling(scale);
+						command.SetSuccessOutput(concat("Updated shadow map near-side frustum scaling factor to ")(scale).str());
+					}
+					else 
+					{
+						command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidShadowMapNearScaleFactor, 
+							concat("Invalid shadow map near-side frustum scaling value: ")(scale).str());
+					}
+				}
+				else
+				{
+					command.SetSuccessOutput(concat("Shadow map near-side frustum scaling factor = ")(GetShadowMapNearSideFrustumScaling()).str());
+				}
+				return true;
+			}
 		}
 	}
 
 	// Unrecognised command
 	return false;
 }
+
+
 
 

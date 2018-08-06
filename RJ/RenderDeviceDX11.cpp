@@ -771,6 +771,9 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 	// created and associated with the default viewport
 	UpdatePrimaryViewportSize(m_displaysize_f);
 
+	// Also update the the primary view frustum
+	RecalculatePrimaryViewFrustum();
+
 }
 
 // Update the primary viewport; this will propogate to all resources which have already been 
@@ -812,6 +815,7 @@ void RenderDeviceDX11::SetFOV(float fov)
 	m_halffovtan = tanf(fov * 0.5f);
 
 	RecalculateProjectionMatrix();
+	RecalculatePrimaryViewFrustum();
 }
 
 void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
@@ -823,6 +827,7 @@ void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
 
 	RecalculateProjectionMatrix();
 	RecalculateOrthographicMatrix();
+	RecalculatePrimaryViewFrustum();
 }
 
 void RenderDeviceDX11::SetSampleDesc(UINT count, UINT quality)
@@ -900,6 +905,12 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 void RenderDeviceDX11::RecalculateOrthographicMatrix(void)
 {
 	m_orthographic = CameraProjection::Orthographic(m_displaysize_f, m_screen_near, m_screen_far);
+}
+
+void RenderDeviceDX11::RecalculatePrimaryViewFrustum(void)
+{
+	auto *frustum = Game::Engine->GetViewFrustrum();
+	if (frustum) frustum->InitialiseAsViewFrustum(GetProjectionMatrixUnjittered(), m_screen_far, m_fov, m_aspectratio);
 }
 
 // Verify the render device is in a good state and report errors if not
