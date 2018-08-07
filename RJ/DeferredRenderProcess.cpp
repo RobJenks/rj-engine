@@ -157,6 +157,7 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
 	m_param_ps_light_noisetexture = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseTextureDataName);
 	m_param_ps_light_noisedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseDataBufferName);
+	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting, ShadowMapInputTextureName);	/*** ADD THIS ***/
 }
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
@@ -663,8 +664,6 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 void DeferredRenderProcess::PerformDeferredLighting(void)
 {
-	XMMATRIX transform;
-
 	// Bind required buffer resources to each pipeline
 	BindDeferredLightingShaderResources();
 
@@ -690,28 +689,87 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		switch (light.Type)
 		{
 			case LightType::Point:
-				PopulateFrameBuffer(FrameBufferState::Normal);
-				transform = LightSource::CalculatePointLightTransform(light);
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
+				RenderPointLight(i, light);
 				break;
 
 			case LightType::Spotlight:
-				PopulateFrameBuffer(FrameBufferState::Normal);
-				transform = LightSource::CalculateSpotlightTransform(light);
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
+				RenderSpotLight(i, light);
 				break;
 
 			case LightType::Directional:
-				// TODO (SM): temporary
-				m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(i, light);
-				PopulateFrameBuffer(FrameBufferState::Fullscreen);
-				RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
+				RenderDirectionalLight(i, light);
 				break;
 		}
 	}
+}
 
+
+void DeferredRenderProcess::RenderPointLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Normal);
+
+	// Perform shadow mapping and bind to the PS, if applicable
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+
+	// Two-pass render pipeline
+	XMMATRIX transform = LightSource::CalculatePointLightTransform(light);
+	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
+}
+
+void DeferredRenderProcess::RenderSpotLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Normal);
+
+	// Perform shadow mapping and bind to the PS, if applicable
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+
+	// Two-pass render pipeline
+	XMMATRIX transform = LightSource::CalculateSpotlightTransform(light);
+	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
+}
+
+void DeferredRenderProcess::RenderDirectionalLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Fullscreen);
+
+	// Perform shadow mapping and bind to the PS, if applicable
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+
+	// Single-pass render pipeline
+	RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
+}
+
+void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader, 
+												 ShaderDX11::ShaderParameterIndex consuming_shader_parameter)
+{
+	if (CheckBit_Single(light.Flags, LIGHT_FLAG_SHADOW_MAP))
+	{
+		RenderShadowMap(light_index, light);
+		BindShadowMap(consuming_shader, consuming_shader_parameter);
+	}
+	else
+	{
+		UnbindShadowMap(consuming_shader, consuming_shader_parameter);
+	}
+}
+
+void DeferredRenderProcess::RenderShadowMap(unsigned int light_index, const LightData & light)
+{
+	m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(light_index, light);
+}
+
+void DeferredRenderProcess::BindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter)
+{
+	assert(shader);
+	shader->SetParameterData(parameter, m_shadow_manager.RawPtr->GetActiveShadowMap());
+}
+
+void DeferredRenderProcess::UnbindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter)
+{
+	assert(shader);
+	shader->SetParameterData(parameter, static_cast<TextureDX11*>(NULL));
 }
 
 
@@ -730,6 +788,7 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));		// Set per shadow-casting light
 
 	// Directional lighting pass uses both VS and PS
 	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
@@ -737,6 +796,7 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));	// Set per shadow-casting light
 
 	// Bind the required noise resources to PS lighting shaders
 	Game::Engine->GetNoiseGenerator()->BindNoiseResources(m_render_noise_method);

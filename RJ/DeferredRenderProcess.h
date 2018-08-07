@@ -96,6 +96,17 @@ protected:
 	void PopulateDeferredRenderingParamBuffer(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
+
+	void RenderPointLight(unsigned int light_index, const LightData & light);
+	void RenderSpotLight(unsigned int light_index, const LightData & light);
+	void RenderDirectionalLight(unsigned int light_index, const LightData & light);
+
+	void PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader,
+							  ShaderDX11::ShaderParameterIndex consuming_shader_parameter);
+	void RenderShadowMap(unsigned int light_index, const LightData & light);
+	void BindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
+	void UnbindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
+
 	void RenderTransparency(void);
 	void PerformPostProcessing(void);
 
@@ -189,6 +200,7 @@ private:
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
 	
 	// Initialise components of the deferred rendering process

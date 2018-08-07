@@ -33,6 +33,9 @@ public:
 	// Process the render queue and issue draw calls for all shadow-casting entities in range of the given light
 	void										ExecuteLightSpaceRenderPass(unsigned int light_index, const LightData & light);
 
+	// Returns a pointer to the active shadow map buffer resource
+	CMPINLINE TextureDX11 *						GetActiveShadowMap(void) { return m_shadowmap_tx; }
+
 	// Size of all shadow maps (TODO: in future, allow customised size per SM, based on e.g. light?  Probably
 	// not necessary if cascaded shadow mapping is adopted)
 	CMPINLINE UINTVECTOR2						GetShadowMapSize(void) const { return m_shadow_map_size; }
