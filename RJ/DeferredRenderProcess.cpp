@@ -19,6 +19,7 @@
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
+#include "Data/Shaders/shadowmap_resources.hlsl"
 
 /* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
    those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
@@ -157,8 +158,9 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
 	m_param_ps_light_noisetexture = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseTextureDataName);
 	m_param_ps_light_noisedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseDataBufferName);
-	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting, ShadowMapInputTextureName);	/*** ADD THIS ***/
+	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting, ShadowMapTextureName);
 }
+
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
 {

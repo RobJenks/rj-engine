@@ -20,10 +20,13 @@ CBUFFER LightSpaceShadowMapDataBuffer REGISTER(b4)
 	//float# _padding_sm;			// CB size must be a multiple of 16 bytes
 };
 
+// Shadow map depth texture resource; either bound as SM render target, or as lighting PS input
+TEXTURE2D ShadowMapTexture REGISTER(t8);
+
 
 // String references to each buffer for application parameter binding
 #define LightSpaceShadowMapDataBufferName BUFFER_NAME(LightSpaceShadowMapDataBuffer)
-
+#define ShadowMapTextureName BUFFER_NAME(ShadowMapTexture)
 
 
 #endif

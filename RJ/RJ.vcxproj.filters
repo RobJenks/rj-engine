@@ -2682,8 +2682,12 @@
     <None Include="Data\Shaders\temporal_aa_resources.hlsl">
       <Filter>HLSL\Support</Filter>
     </None>
-    <None Include="Data\Shaders\shadowmap_calculations.hlsl" />
-    <None Include="Data\Shaders\shadowmap_resources.hlsl" />
+    <None Include="Data\Shaders\shadowmap_resources.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\shadowmap_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
