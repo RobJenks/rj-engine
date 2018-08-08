@@ -3,6 +3,9 @@
 #include "DX11_Core.h"
 
 
+const ShaderMacros::MacroData ShaderMacros::NONE = { };
+
+
 ShaderMacros::ShaderMacros(void)
 	:
 	m_isdirty(false)
@@ -33,6 +36,29 @@ const ShaderMacros::MacroData & ShaderMacros::GetMacros(void) const
 	return m_macros;
 }
 
+// Returns data on any currently-defined macros
+ShaderMacros::MacroData::size_type ShaderMacros::GetDefinedMacroCount(void) const
+{
+	return m_macros.size();
+}
+
+// Returns data on any currently-defined macros
+bool ShaderMacros::HasDefinedMacros(void) const
+{
+	return !m_macros.empty();
+}
+
+// Replace the entire set of shader macros with the given collection
+void ShaderMacros::ReplaceMacros(const MacroData & macros)
+{
+	// Shortcut to catch the usual case
+	if (macros.empty() && m_macros.empty()) return;
+
+	// Store the new macros and flag as dirty, regardless of contents
+	m_macros = macros;
+	m_isdirty = true;
+}
+
 // Remove the macro with the given name, if one exists
 void ShaderMacros::RemoveMacro(const std::string & name)
 {
@@ -44,8 +70,19 @@ void ShaderMacros::RemoveMacro(const std::string & name)
 	}
 }
 
+// Clears all macro data
+void ShaderMacros::ClearMacros(void)
+{
+	if (HasDefinedMacros())
+	{
+		m_macros.clear();
+		m_isdirty = true;
+	}
+}
+
+
 // Return a reference to the compiled macro set.  Will recompile if any changes have been made since the last compilation
-const ShaderMacros::CompiledMacroData & ShaderMacros::GetCompiledData(void)
+const D3D_SHADER_MACRO * ShaderMacros::GetCompiledData(void)
 {
 	if (m_isdirty)
 	{
@@ -65,8 +102,13 @@ const ShaderMacros::CompiledMacroData & ShaderMacros::GetCompiledData(void)
 			m_macros_compiled.push_back( { c_name, c_definition } );
 		}
 
+		// Array of shader tuples must be terminated with a NULL ENTRY at the end, per the API, otherwise DX will 
+		// not know where to stop and will throw access violations during shader compilation.  We only need to do
+		// this if the collection contains >0 item, since an empty collection .data() will just return null anyway
+		if (!m_macros_compiled.empty()) m_macros_compiled.push_back( { NULL, NULL } );
+
 		m_isdirty = false;
 	}
 
-	return m_macros_compiled;
+	return m_macros_compiled.data();
 }

@@ -10,7 +10,8 @@ class ShaderMacros
 public:
 
 	typedef std::map<std::string, std::string>		MacroData;
-	typedef std::vector<D3D_SHADER_MACRO>			CompiledMacroData;
+
+	static const MacroData NONE;
 
 	ShaderMacros(void);
 	~ShaderMacros(void);
@@ -24,17 +25,27 @@ public:
 	// Return the set of all macro definitions
 	const MacroData & 								GetMacros(void) const;
 
+	// Returns data on any currently-defined macros
+	MacroData::size_type							GetDefinedMacroCount(void) const;
+	bool											HasDefinedMacros(void) const;
+
+	// Replace the entire set of shader macros with the given collection
+	void											ReplaceMacros(const MacroData & macros);
+
 	// Remove the macro with the given name, if one exists
 	void											RemoveMacro(const std::string & name);
 
+	// Clears all macro data
+	void											ClearMacros(void);
+
 	// Return a reference to the compiled macro set.  Will recompile if any changes have been made since the last compilation
-	const CompiledMacroData &						GetCompiledData(void);
+	const D3D_SHADER_MACRO *						GetCompiledData(void);
 
 
 private:
 
 	MacroData										m_macros;
-	CompiledMacroData								m_macros_compiled;
+	std::vector<D3D_SHADER_MACRO>					m_macros_compiled;
 
 	bool											m_isdirty;
 };

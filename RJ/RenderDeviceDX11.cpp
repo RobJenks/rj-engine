@@ -601,43 +601,47 @@ Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 Result RenderDeviceDX11::InitialiseShaderResources(void)
 {
 	// Shader definitions
-	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
+	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*, const ShaderMacros::MacroData>> shader_resources
 	{
 		// Standard shaders
-		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL }, 
+		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Full-screen quad rendering shader for minimal screen-space rendering overhead
-		{ &m_quad_vs, Shader::Type::VertexShader, Shaders::FullScreenQuadVertexShader, "Shaders\\vs_quad.vs.hlsl", "latest", &m_fullscreen_quad_input_layout }, 
+		{ &m_quad_vs, Shader::Type::VertexShader, Shaders::FullScreenQuadVertexShader, "Shaders\\vs_quad.vs.hlsl", "latest", &m_fullscreen_quad_input_layout, ShaderMacros::NONE },
 
 		// Deferred rendering shaders
-		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },
-		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL },
+		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Basic texture/UI rendering shaders
-		{ &m_texture_vs, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout },
-		{ &m_texture_ps, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL },
+		{ &m_texture_vs, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ &m_texture_ps, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Signed-distance-field decal rendering shaders
-		{ &m_sdf_decal_direct_vs, Shader::Type::VertexShader, Shaders::SDFDecalDirectVertexShader, "Shaders\\vs_decal_sdf_direct.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_sdf_decal_deferred_vs, Shader::Type::VertexShader, Shaders::SDFDecalDeferredVertexShader, "Shaders\\vs_decal_sdf_deferred.vs.hlsl", "latest", &m_standard_input_layout },
-		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL }, 
-		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL },
+		{ &m_sdf_decal_direct_vs, Shader::Type::VertexShader, Shaders::SDFDecalDirectVertexShader, "Shaders\\vs_decal_sdf_direct.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ &m_sdf_decal_deferred_vs, Shader::Type::VertexShader, Shaders::SDFDecalDeferredVertexShader, "Shaders\\vs_decal_sdf_deferred.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Shadow mapping shaders
-		{ &m_shadowmapping_lightspace_vs, Shader::Type::VertexShader, Shaders::ShadowMappingVertexShader, "Shaders\\vs_shadowmap.vs.hlsl", "latest", &m_standard_input_layout },
+		{ &m_shadowmapping_lightspace_vs, Shader::Type::VertexShader, Shaders::ShadowMappingVertexShader, "Shaders\\vs_shadowmap.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+
+		// Deferred lighting shaders (deferred-light-pass-2) for shadow-mapped lights
+	//{ &m_shadowmapping_lightspace_vs, Shader::Type::VertexShader, Shaders::ShadowMappingVertexShader, "Shaders\\vs_shadowmap.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+	
 
 		// Post-process motion blur rendering shaders
-		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL },
-		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL },
-		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL },
+		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Post-process temporal anti-aliasing shaders
-		{ &m_post_temporal_aa, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL },
+		{ &m_post_temporal_aa, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Debug-only shaders
 #ifdef _DEBUG
-		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL },
+		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 #endif
 
 	};
@@ -646,7 +650,9 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	Game::Log << LOG_INFO << "Loading all shader resources (" << shader_resources.size() << ")\n";
 	for (auto & shader : shader_resources)
 	{
-		Result result = Assets.InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), std::get<4>(shader), std::get<5>(shader));
+		// Perform shader initialisation
+		Result result = Assets.InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), 
+																std::get<4>(shader), std::get<5>(shader), std::get<6>(shader));
 		if (result != ErrorCodes::NoError)
 		{
 			Game::Log << LOG_ERROR << "Fatal error: shader initialisation failed, cannot recover from errors (res:" << result << ")\n";

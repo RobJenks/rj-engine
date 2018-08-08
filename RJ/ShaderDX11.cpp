@@ -57,7 +57,8 @@ Shader::Type ShaderDX11::GetType() const
 
 
 bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, 
-										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout)
+										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout, 
+										const ShaderMacros::MacroData & macros)
 {
 	auto device = Game::Engine->GetDevice();
 	HRESULT hr;
@@ -78,8 +79,9 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			}
 		}
 
-		// Get global compiled macro set
-		ShaderMacros::CompiledMacroData macros = ShaderManager::GetGlobalShaderMacros().GetCompiledData();
+		// Set any shader macros before compilation.  We can directly\\ overwrite any existing data.  Then compile & retrieve the data
+		ShaderManager::GetGlobalShaderMacros().ReplaceMacros(macros);
+		const D3D_SHADER_MACRO * compiled_macros = ShaderManager::GetGlobalShaderMacros().GetCompiledData();
 
 		// Compilation flags
 		UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -94,7 +96,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		// Enclosed in preprocessor defines to force the use of HLSL definitions during inline C++ compilation, rather than
 		// the C++ defines which woul otherwise be used since __cplusplus is defined here
 #		define RJ_COMPILING_HLSL
-		hr = D3DCompile((LPCVOID)shaderSource.c_str(), shaderSource.size(), sourceFilePath.c_str(), macros.data(), 
+		hr = D3DCompile((LPCVOID)shaderSource.c_str(), shaderSource.size(), sourceFilePath.c_str(), compiled_macros, 
 			D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint.c_str(), _profile.c_str(), flags, 0, &shaderBlob, &errorBlob);
 #		undef RJ_COMPILING_HLSL
 
@@ -235,7 +237,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 }
 
 bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, 
-									const std::string& profile, const InputLayoutDesc *input_layout)
+									const std::string& profile, const InputLayoutDesc *input_layout, const ShaderMacros::MacroData & macros)
 {
 	bool result = false;
 
@@ -246,12 +248,13 @@ bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring&
 		m_filename = fileName;
 		m_entrypoint = entryPoint;
 		m_profile = profile;
+		m_macros = macros;
 
 		// Load from disk
 		std::ifstream inputFile(fileName);
 		std::string source((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
 
-		result = LoadShaderFromString(shadertype, source, fileName, entryPoint, profile, input_layout);
+		result = LoadShaderFromString(shadertype, source, fileName, entryPoint, profile, input_layout, macros);
 	}
 	else
 	{
@@ -310,7 +313,7 @@ Result ShaderDX11::Reload(void)
 	ReleaseAllResources();
 
 	// Attempt to reload the shader from disk
-	bool success = LoadShaderFromFile(m_type, m_filename, m_entrypoint, m_profile, m_inputlayout_desc);
+	bool success = LoadShaderFromFile(m_type, m_filename, m_entrypoint, m_profile, m_inputlayout_desc, m_macros);
 	if (success)
 	{
 		Game::Log << LOG_INFO << "Reloaded and recompiled shader \"" << m_entrypoint << "\"\n";

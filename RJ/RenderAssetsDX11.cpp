@@ -96,7 +96,7 @@ TextureDX11 * RenderAssetsDX11::RegisterNewTexture(const std::string & name, std
 
 
 Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
-															const std::string & profile, const InputLayoutDesc *input_layout)
+															const std::string & profile, const InputLayoutDesc *input_layout, const ShaderMacros::MacroData & macros)
 {
 	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
 
@@ -116,7 +116,7 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 
 	// Attempt to initialise from file
 	ShaderDX11 *shader = CreateAsset<ShaderDX11>(entryPoint);
-	bool success = shader->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
+	bool success = shader->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout, macros);
 
 	// Deallocate the shader object if initialisation failed
 	if (!success)

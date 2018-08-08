@@ -32,8 +32,10 @@ public:
 
 	// Load shader data
 	bool LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, const std::string& entryPoint, 
-								const std::string& profile, const InputLayoutDesc *input_layout = NULL);
-	bool LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout = NULL);
+								const std::string& profile, const InputLayoutDesc *input_layout = NULL, 
+								const ShaderMacros::MacroData & macros = ShaderMacros::NONE);
+	bool LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, const std::string& profile, 
+							const InputLayoutDesc *input_layout = NULL, const ShaderMacros::MacroData & macros = ShaderMacros::NONE);
 
 	// Initialise any shader parameters that can be assigned prior to rendering
 	Result							InitialisePreAssignableParameters(void);
@@ -108,6 +110,7 @@ private:
 	std::wstring						m_filename; 
 	std::string							m_entrypoint;
 	std::string							m_profile;
+	ShaderMacros::MacroData				m_macros;
 	
 	// Slot indices for key data types
 	SlotID								m_slot_material;		// Slot for the material constant buffer data

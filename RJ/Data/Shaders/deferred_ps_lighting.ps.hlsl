@@ -6,7 +6,7 @@
 #include "hlsl_common.hlsl"
 #include "lighting_calculations.hlsl"
 #include "noise_calculations.hlsl"
-#include "shadow_map_calculations.hlsl"
+#include "shadowmap_calculations.hlsl"
 #include "LightDataBuffers.hlsl"
 #include "DeferredRenderingBuffers.hlsl"
 #include "DeferredRenderingGBuffer.hlsl.h"
