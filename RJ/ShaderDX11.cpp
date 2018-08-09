@@ -18,6 +18,7 @@ ShaderDX11::ShaderParameterIndex ShaderDX11::INVALID_SHADER_PARAMETER = (std::nu
 
 ShaderDX11::ShaderDX11(void)
 	: 
+	m_name(NullString), 
 	m_type(Shader::Type::SHADER_TYPE_COUNT), 
 	m_vs(NULL), m_ps(NULL), m_gs(NULL), m_hs(NULL), m_ds(NULL), m_cs(NULL), 
 	m_inputlayout_desc(NULL), 
@@ -56,7 +57,7 @@ Shader::Type ShaderDX11::GetType() const
 }
 
 
-bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, 
+bool ShaderDX11::LoadShaderFromString(  const std::string & name, Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName,
 										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout, 
 										const ShaderMacros::MacroData & macros)
 {
@@ -73,7 +74,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			_profile = GetLatestProfile(shadertype);
 			if (_profile.empty())
 			{
-				Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for \"" << entryPoint << 
+				Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for \"" << name << 
 					"\", could not determine supported feature level (" << ConvertWStringToString(sourceFileName) << ")\n";
 				return false;
 			}
@@ -103,7 +104,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		// Check compilation results and report any errors
 		if (FAILED(hr))
 		{
-			Game::Log << LOG_ERROR << "Compilation of shader \"" << entryPoint << "\" failed (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
+			Game::Log << LOG_ERROR << "Compilation of shader \"" << name << "\" failed (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
 			if (errorBlob)
 			{
 				Game::Log << LOG_ERROR << "Error buffer: " << (static_cast<char*>(errorBlob->GetBufferPointer())) << "\n";
@@ -116,7 +117,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		}
 		else
 		{
-			Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" compiled successfully\n";
+			Game::Log << LOG_INFO << "Shader \"" << name << "\" compiled successfully\n";
 		}
 
 		m_shaderblob = shaderBlob;
@@ -148,13 +149,13 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			hr = device->CreateComputeShader(m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), nullptr, &m_cs);
 			break;
 		default:
-			Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for " << entryPoint << "; cannnot create compiled shader object (" << ConvertWStringToString(sourceFileName )<< ")\n";
+			Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for " << name << "; cannnot create compiled shader object (" << ConvertWStringToString(sourceFileName )<< ")\n";
 			return false;
 	}
 
 	if (FAILED(hr))
 	{
-		Game::Log << LOG_ERROR << "Failed to create shader \"" << entryPoint << "\" from compiled source (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
+		Game::Log << LOG_ERROR << "Failed to create shader \"" << name << "\" from compiled source (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
 		return false;
 	}
 
@@ -163,7 +164,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 	hr = D3DReflect(m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&reflect);
 	if (FAILED(hr))
 	{
-		Game::Log << LOG_ERROR << "Failed to reflect shader parameters for \"" << entryPoint << "\" (hr=" << hr << ")\n";
+		Game::Log << LOG_ERROR << "Failed to reflect shader parameters for \"" << name << "\" (hr=" << hr << ")\n";
 		return false;
 	}
 
@@ -171,7 +172,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 	hr = reflect->GetDesc(&shaderdesc);
 	if (FAILED(hr))
 	{
-		Game::Log << LOG_ERROR << "Failed to retrieve shader descriptor for \"" << entryPoint << "\" (hr=" << hr << ")\n";
+		Game::Log << LOG_ERROR << "Failed to retrieve shader descriptor for \"" << name << "\" (hr=" << hr << ")\n";
 		return false;
 	}
 
@@ -181,7 +182,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 	m_parameters.clear();
 
 	// Query resource binding sites using the descriptor
-	Game::Log << LOG_INFO << "Registering " << shaderdesc.BoundResources << " resource binding sites from \"" << entryPoint << "\" shader descriptor\n";
+	Game::Log << LOG_INFO << "Registering " << shaderdesc.BoundResources << " resource binding sites from \"" << name << "\" shader descriptor\n";
 	for (UINT i = 0; i < shaderdesc.BoundResources; ++i)
 	{
 		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
@@ -211,7 +212,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			parameterType = ShaderParameter::Type::RWTexture;
 			break;
 		default:
-			Game::Log << LOG_WARN << "Encountered unknown shader parameter type of " << (int)parameterType << " for \"" << entryPoint << "::" << resourceName << "\" (ix: " << i << ")\n";
+			Game::Log << LOG_WARN << "Encountered unknown shader parameter type of " << (int)parameterType << " for \"" << name << "::" << resourceName << "\" (ix: " << i << ")\n";
 		}
 
 		// Record both the parameter and a mapping from (parameter name -> index in m_parameters)
@@ -227,7 +228,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		hr = device->CreateInputLayout(input_layout->Data(), input_layout->ElementCount(), m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), &m_inputlayout);
 		if (FAILED(hr))
 		{
-			Game::Log << LOG_ERROR << "Failed to create input layout for \"" << entryPoint << "\" (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
+			Game::Log << LOG_ERROR << "Failed to create input layout for \"" << name << "\" (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
 			return false;
 		}
 	}
@@ -236,7 +237,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 	return true;
 }
 
-bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, 
+bool ShaderDX11::LoadShaderFromFile(const std::string & name, Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint,
 									const std::string& profile, const InputLayoutDesc *input_layout, const ShaderMacros::MacroData & macros)
 {
 	bool result = false;
@@ -245,6 +246,7 @@ bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring&
 	if (fs::exists(filePath) && fs::is_regular_file(filePath))
 	{
 		// Store data necessary to reload the shader if it changes on disc.
+		m_name = name;
 		m_filename = fileName;
 		m_entrypoint = entryPoint;
 		m_profile = profile;
@@ -254,11 +256,11 @@ bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring&
 		std::ifstream inputFile(fileName);
 		std::string source((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
 
-		result = LoadShaderFromString(shadertype, source, fileName, entryPoint, profile, input_layout, macros);
+		result = LoadShaderFromString(name, shadertype, source, fileName, entryPoint, profile, input_layout, macros);
 	}
 	else
 	{
-		Game::Log << LOG_ERROR << "Failed to load shader \"" << entryPoint << "\" from external file \"" << ConvertWStringToString(fileName) << "\"; source file may not exist or be otherwise inacessible\n";
+		Game::Log << LOG_ERROR << "Failed to load shader \"" << name << "\" from external file \"" << ConvertWStringToString(fileName) << "\"; source file may not exist or be otherwise inacessible\n";
 	}
 
 	return result;
@@ -278,7 +280,7 @@ Result ShaderDX11::InitialisePreAssignableParameters(void)
 				auto * sampler = Game::Engine->GetAssets().GetSamplerState(param.GetName());
 				if (!sampler)
 				{
-					Game::Log << LOG_ERROR << "Cannot locate sampler \"" << param.GetName() << "\" for pre-render initialisation of shader \"" << m_entrypoint << "\"\n";
+					Game::Log << LOG_ERROR << "Cannot locate sampler \"" << param.GetName() << "\" for pre-render initialisation of shader \"" << m_name << "\"\n";
 					return ErrorCodes::CannotPreInitialiseShaderParameter;
 				}
 				param.Set(sampler);
@@ -307,27 +309,27 @@ Result ShaderDX11::InitialisePreAssignableParameters(void)
 // Attempt to reload the shader from disk
 Result ShaderDX11::Reload(void)
 {
-	Game::Log << LOG_INFO << "Reloading shader \"" << m_entrypoint << "\" from \"" << ConvertWStringToString(m_filename) << "\"\n";
+	Game::Log << LOG_INFO << "Reloading shader \"" << m_name << "\" from \"" << ConvertWStringToString(m_filename) << "\"\n";
 
 	// Release any data that will be reloaded
 	ReleaseAllResources();
 
 	// Attempt to reload the shader from disk
-	bool success = LoadShaderFromFile(m_type, m_filename, m_entrypoint, m_profile, m_inputlayout_desc, m_macros);
+	bool success = LoadShaderFromFile(m_name, m_type, m_filename, m_entrypoint, m_profile, m_inputlayout_desc, m_macros);
 	if (success)
 	{
-		Game::Log << LOG_INFO << "Reloaded and recompiled shader \"" << m_entrypoint << "\"\n";
+		Game::Log << LOG_INFO << "Reloaded and recompiled shader \"" << m_name << "\"\n";
 	}
 	else
 	{
-		Game::Log << LOG_ERROR << "SEVERE: Failed to reload and recompile shader \"" << m_entrypoint << "\"\n";
+		Game::Log << LOG_ERROR << "SEVERE: Failed to reload and recompile shader \"" << m_name << "\"\n";
 		return ErrorCodes::CouldNotReloadAndRecompileShader;
 	}
 
 	// Also attempt to reassign fixed parameter indices, since these may have changed with the signature of the shader
 	UnmapAllParameters();
 	InitialisePreAssignableParameters();
-	Game::Log << LOG_INFO << "Reinitialised shader parameters for shader \"" << m_entrypoint << "\"\n";
+	Game::Log << LOG_INFO << "Reinitialised shader parameters for shader \"" << m_name << "\"\n";
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -348,7 +350,7 @@ ShaderDX11::ShaderParameterSet::size_type ShaderDX11::GetParameterIndexByName(co
 	}
 	else
 	{
-		Game::Log << LOG_WARN << "Attempted to retrieve shader parameter \"" << name << "\" from \"" << m_entrypoint << "\"; does not exist\n";
+		Game::Log << LOG_WARN << "Attempted to retrieve shader parameter \"" << name << "\" from \"" << m_name << "\"; does not exist\n";
 		return INVALID_SHADER_PARAMETER;
 	}
 }
@@ -455,7 +457,7 @@ bool ShaderDX11::ValidateShader(void)
 	bool valid_type = true;
 	if ((int)m_type < 0 || (int)m_type >= (int)Shader::Type::SHADER_TYPE_COUNT)
 	{
-		Game::Log << LOG_ERROR << "Shader \"" << m_entrypoint << "\" has invalid type: " << (int)m_type << "\n";
+		Game::Log << LOG_ERROR << "Shader \"" << m_name << "\" has invalid type: " << (int)m_type << "\n";
 		valid_type = false;
 	}
 
@@ -473,7 +475,7 @@ bool ShaderDX11::ValidateShader(void)
 
 	if (!valid_binary)
 	{
-		Game::Log << LOG_ERROR << "Shader \"" << m_entrypoint << "\" is of type \"" << Shader::ShaderTypeToString(m_type)
+		Game::Log << LOG_ERROR << "Shader \"" << m_name << "\" is of type \"" << Shader::ShaderTypeToString(m_type)
 			<< " shader\" but has no compiled " << Shader::ShaderTypeToString(m_type) << " shader resource\n";
 	}
 
@@ -491,7 +493,7 @@ bool ShaderDX11::ValidateShader(void)
 		bool indexvalid = (mappedindex == i);
 		if (!indexvalid)
 		{
-			Game::Log << LOG_ERROR << "Invalid parameter mapping index for \"" << m_entrypoint << "::" << parameter.GetName() << 
+			Game::Log << LOG_ERROR << "Invalid parameter mapping index for \"" << m_name << "::" << parameter.GetName() << 
 				"\"; parameter has index " << i << " but is mapped to index " << mappedindex << "\n";
 		}
 
@@ -500,7 +502,7 @@ bool ShaderDX11::ValidateShader(void)
 
 	if (invalid_params != 0U)
 	{
-		Game::Log << LOG_ERROR << "Validation of shader \"" << m_entrypoint << "\" failed with " << invalid_params << " invalid parameters\n";
+		Game::Log << LOG_ERROR << "Validation of shader \"" << m_name << "\" failed with " << invalid_params << " invalid parameters\n";
 	}
 
 	return ( valid_type && valid_binary && invalid_params == 0U );

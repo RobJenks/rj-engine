@@ -1,12 +1,23 @@
 #include "../../CommonShaderPipelineStructures.hlsl.h"
 #include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../../Definitions/VertexDefinitions.hlsl.h"
+#include "shadowmap_resources.hlsl"
+
+
+// Conditional compilation for shadow mapping support
+#ifdef SHADER_SHADOWMAPPED
+#	define SHADER_ENTRY		VS_Standard_ShadowMapped
+#	define SHADER_OUTPUT	VertexShaderStandardOutputShadowMapped
+#else
+#	define SHADER_ENTRY		VS_Standard
+#	define SHADER_OUTPUT	VertexShaderStandardOutput
+#endif
 
 
 // VS_Standard: Standard vertex shader
-VertexShaderStandardOutput VS_Standard(Vertex_Inst_Standard input)
+SHADER_OUTPUT SHADER_ENTRY(Vertex_Inst_Standard input)
 {
-	VertexShaderStandardOutput output;
+	SHADER_OUTPUT output;
 
 	// Position transformation into view- and clip-space
 	float4 input_pos = float4(input.position, 1.0f);
@@ -27,8 +38,12 @@ VertexShaderStandardOutput VS_Standard(Vertex_Inst_Standard input)
 	output.tangentVS = mul(input.tangent, (float3x3)WorldView);
 	output.binormalVS = mul(input.binormal, (float3x3)WorldView);
 	output.normalVS = mul(input.normal, (float3x3)WorldView);
-
 	output.texCoord = input.tex;
+
+	// Transform vertex into shadow-mapped light space, if applicable
+#ifdef SHADER_SHADOWMAPPED
+	output.shadow_uv = mul(input_pos, BiasedShadowMapWVP);
+#endif
 
 	return output;
 }

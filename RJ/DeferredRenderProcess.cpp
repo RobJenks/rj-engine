@@ -19,7 +19,6 @@
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
-#include "Data/Shaders/shadowmap_resources.hlsl"
 
 /* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
    those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
@@ -30,10 +29,10 @@
 
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
-	m_vs(NULL),
+	m_vs{ NULL, NULL },
 	m_vs_quad(NULL),
 	m_ps_geometry(NULL),
-	m_ps_lighting(NULL),
+	m_ps_lighting{ NULL, NULL },
 	m_ps_debug(NULL),
 	m_def_dsv_tx(NULL),
 	m_def_dsv_rt(NULL),
@@ -43,23 +42,25 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_colour_rt(NULL),
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
-	m_cb_deferred(NULL),
+	m_cb_deferred(NULL), 
+	m_cb_smlight(NULL), 
 
 	m_pipeline_geometry(NULL),
 	m_pipeline_lighting_pass1(NULL),
-	m_pipeline_lighting_pass2(NULL),
-	m_pipeline_lighting_directional(NULL),
+	m_pipeline_lighting_pass2{ NULL, NULL },
+	m_pipeline_lighting_directional{ NULL, NULL },
 	m_pipeline_transparency(NULL),
 	m_pipeline_debug_rendering(NULL),
 
-	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_vs_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
 	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_deferreddata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER }, 
+	m_param_ps_light_lightdata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_lightindexdata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_noisetexture{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_noisedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_shadowmap(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
@@ -131,8 +132,11 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
+	m_vs[SM_DISABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
+	if (m_vs[SM_DISABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
+
+	m_vs[SM_ENABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShaderShadowMapped);
+	if (m_vs[SM_ENABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_sm]\n";
 
 	m_vs_quad = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::FullScreenQuadVertexShader);
 	if (m_vs_quad == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_q]\n";
@@ -140,8 +144,11 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
 	if (m_ps_geometry == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_g]\n";
 
-	m_ps_lighting = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShader);
-	if (m_ps_lighting == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
+	m_ps_lighting[SM_DISABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShader);
+	if (m_ps_lighting[SM_DISABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
+
+	m_ps_lighting[SM_ENABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShaderShadowMapped);
+	if (m_ps_lighting[SM_ENABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l_sm]\n";
 
 #ifdef _DEBUG
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
@@ -149,16 +156,23 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRendererDebugRenderingDataName);
 #endif
 
+
 	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
-	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName);
-	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_lighting, DeferredRenderingParamBufferName);
-	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
-	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
-	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
-	m_param_ps_light_noisetexture = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseTextureDataName);
-	m_param_ps_light_noisedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseDataBufferName);
-	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting, ShadowMapTextureName);
+	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName); 
+
+	const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		m_param_vs_framedata[SM] = AttemptRetrievalOfShaderParameter(m_vs[SM], FrameDataBufferName);
+		m_param_ps_light_deferreddata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], DeferredRenderingParamBufferName);
+		m_param_ps_light_framedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], FrameDataBufferName);
+		m_param_ps_light_lightdata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], LightBufferName);
+		m_param_ps_light_lightindexdata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], LightIndexBufferName);
+		m_param_ps_light_noisetexture[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], NoiseTextureDataName);
+		m_param_ps_light_noisedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], NoiseDataBufferName);
+	}
+
+	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM_ENABLED], ShadowMapTextureName);
 }
 
 
@@ -222,16 +236,19 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering standard buffer resources\n";
 
-	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
-	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
-	m_cb_deferred = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
-	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
+	auto & assets = Game::Engine->GetRenderDevice()->Assets;
+
+	m_cb_frame = assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
+	m_cb_lightindex = assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
+	m_cb_deferred = assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
+	m_cb_debug = assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
+	m_cb_smlight = assets.CreateConstantBuffer<ShadowMappedLightBuffer>(ShadowMappedLightBufferName, m_cb_smlight_data.RawPtr);
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 {
 	// GBuffer textures will be bound as shader resource view to all lighting (not geometry) pixel shaders
-	std::vector<ShaderDX11*> shaders = { &m_ps_lighting, &m_ps_debug };
+	std::vector<ShaderDX11*> shaders = { m_ps_lighting[SM_DISABLED], m_ps_lighting[SM_ENABLED], m_ps_debug };
 
 	// Mapping from resource names to GBuffer components
 	std::vector<std::tuple<std::string, TextureDX11*>> resource_mapping = {
@@ -304,7 +321,7 @@ void DeferredRenderProcess::InitialiseGeometryPipelines(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [g]\n";
 
 	m_pipeline_geometry = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Geometry");
-	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs[SM_DISABLED]);
 	m_pipeline_geometry->SetShader(Shader::Type::PixelShader, m_ps_geometry);
 	m_pipeline_geometry->SetRenderTarget(GBuffer.RenderTarget);
 
@@ -324,7 +341,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 
 	// First pass will only render depth information to an off-screen buffer
 	m_pipeline_lighting_pass1 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass1");
-	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs[SM_DISABLED]);
 	m_pipeline_lighting_pass1->SetRenderTarget(m_def_dsv_rt);
 
 	// Perform culling of back faces
@@ -347,58 +364,75 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 // Lighting pass 2: render lit pixels
 void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 {
-	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [l2]\n";
+	// We will initialise pipelines for both shadow-mapped and normal rendering
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	static const std::string PIPELINE_ID[2] = { "l2", "l2_sm" };
+	static const std::string PIPELINE_NAME[2] = { "Deferred_Lighting_Pass2", "Deferred_Lighting_Pass2_SM" };
 
-	// Second pass will render lighting information to the primary RT itself
-	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass2");
-	m_pipeline_lighting_pass2->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_pass2->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_pass2->SetRenderTarget(m_colour_rt);
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [" << PIPELINE_ID[SM] << "]\n";
 
-	// Perform culling of front faces since we want to render only back faces of the light volume
-	m_pipeline_lighting_pass2->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
-	m_pipeline_lighting_pass2->GetRasterizerState().SetDepthClipEnabled(false);
+		// Second pass will render lighting information to the primary RT itself
+		m_pipeline_lighting_pass2[SM] = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState(PIPELINE_NAME[SM]);
+		m_pipeline_lighting_pass2[SM]->SetShader(Shader::Type::VertexShader, m_vs[SM]);
+		m_pipeline_lighting_pass2[SM]->SetShader(Shader::Type::PixelShader, m_ps_lighting[SM]);
+		m_pipeline_lighting_pass2[SM]->SetRenderTarget(m_colour_rt);
 
-	// All light rendering will be additive
-	m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
+		// Perform culling of front faces since we want to render only back faces of the light volume
+		m_pipeline_lighting_pass2[SM]->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
+		m_pipeline_lighting_pass2[SM]->GetRasterizerState().SetDepthClipEnabled(false);
 
-	// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
-	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);
-	m_pipeline_lighting_pass2->GetDepthStencilState().SetDepthMode(depthMode);
+		// All light rendering will be additive
+		m_pipeline_lighting_pass2[SM]->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
-	// Enable stencil operations, keep on pass ( == 1, i.e. not decremented/unmarked in pass1)
-	DepthStencilState::StencilMode stencilMode(true);
-	DepthStencilState::FaceOperation faceOperation;
-	faceOperation.StencilFunction = DepthStencilState::CompareFunction::Equal;
-	stencilMode.StencilReference = 1U;
-	stencilMode.BackFace = faceOperation;
-	m_pipeline_lighting_pass2->GetDepthStencilState().SetStencilMode(stencilMode);
+		// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
+		DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);
+		m_pipeline_lighting_pass2[SM]->GetDepthStencilState().SetDepthMode(depthMode);
+
+		// Enable stencil operations, keep on pass ( == 1, i.e. not decremented/unmarked in pass1)
+		DepthStencilState::StencilMode stencilMode(true);
+		DepthStencilState::FaceOperation faceOperation;
+		faceOperation.StencilFunction = DepthStencilState::CompareFunction::Equal;
+		stencilMode.StencilReference = 1U;
+		stencilMode.BackFace = faceOperation;
+		m_pipeline_lighting_pass2[SM]->GetDepthStencilState().SetStencilMode(stencilMode);
+	}
 }
 
 // Directional lights can be rendered in a single pass, rather than the default two-pass deferred lighting calculation
 void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 {
-	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [ld]\n";
+	// We will initialise pipelines for both shadow-mapped and normal rendering
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	static const std::string PIPELINE_ID[2] = { "ld", "ld_sm" };
+	static const std::string PIPELINE_NAME[2] = { "Deferred_Lighting_Directional", "Deferred_Lighting_Directional_SM" };
 
-	// Directional lighting pass will use a single full-screen quad at the far clip plane.  All pixels 
-	// forward of the plane will be lit using the same deferred lighting PS
-	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Directional");
-	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_directional->SetRenderTarget(m_colour_rt);
-	m_pipeline_lighting_directional->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
-	m_pipeline_lighting_directional->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [" << PIPELINE_ID[SM] << "]\n";
 
-	// Enable depth testing (pass all pixels in front of the far plane), disable writes to the depth buffer
-	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Greater);
-	m_pipeline_lighting_directional->GetDepthStencilState().SetDepthMode(depthMode);
+		// Directional lighting pass will use a single full-screen quad at the far clip plane.  All pixels 
+		// forward of the plane will be lit using the same deferred lighting PS
+		m_pipeline_lighting_directional[SM] = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState(PIPELINE_NAME[SM]);
+		m_pipeline_lighting_directional[SM]->SetShader(Shader::Type::VertexShader, m_vs[SM]);
+		m_pipeline_lighting_directional[SM]->SetShader(Shader::Type::PixelShader, m_ps_lighting[SM]);
+		m_pipeline_lighting_directional[SM]->SetRenderTarget(m_colour_rt);
+		m_pipeline_lighting_directional[SM]->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
+		m_pipeline_lighting_directional[SM]->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
+		// Enable depth testing (pass all pixels in front of the far plane), disable writes to the depth buffer
+		DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Greater);
+		m_pipeline_lighting_directional[SM]->GetDepthStencilState().SetDepthMode(depthMode);
+	}
+	
 	// Also initialise the fullscreen quad transform for rendering at the far plane
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_transform_fullscreen_quad_farplane = XMMatrixMultiply(
 		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, Game::Engine->GetRenderDevice()->GetFarClipDistance())
 	);
+
 }
 
 void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
@@ -650,7 +684,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
 	// Bind required buffer resources to shader parameters
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM_DISABLED], GetCommonFrameDataBuffer());
 	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_geometry_deferreddata, m_cb_deferred);
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
@@ -711,12 +745,13 @@ void DeferredRenderProcess::RenderPointLight(unsigned int light_index, const Lig
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
 	// Perform shadow mapping and bind to the PS, if applicable
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
 
 	// Two-pass render pipeline
 	XMMATRIX transform = LightSource::CalculatePointLightTransform(light);
 	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
-	RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2[SM], m_model_sphere, transform);
 }
 
 void DeferredRenderProcess::RenderSpotLight(unsigned int light_index, const LightData & light)
@@ -724,12 +759,13 @@ void DeferredRenderProcess::RenderSpotLight(unsigned int light_index, const Ligh
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
 	// Perform shadow mapping and bind to the PS, if applicable
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
 
 	// Two-pass render pipeline
 	XMMATRIX transform = LightSource::CalculateSpotlightTransform(light);
 	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
-	RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2[SM], m_model_cone, transform);
 }
 
 void DeferredRenderProcess::RenderDirectionalLight(unsigned int light_index, const LightData & light)
@@ -737,17 +773,24 @@ void DeferredRenderProcess::RenderDirectionalLight(unsigned int light_index, con
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
 	// Perform shadow mapping and bind to the PS, if applicable
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
 
 	// Single-pass render pipeline
-	RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
+	RenderLightPipeline(m_pipeline_lighting_directional[SM], m_model_quad, m_transform_fullscreen_quad_farplane);
+}
+
+DeferredRenderProcess::SM_STATE DeferredRenderProcess::GetShadowMappingState(const LightData & light)
+{
+	return (CheckBit_Single(light.Flags, LIGHT_FLAG_SHADOW_MAP) ? SM_ENABLED : SM_DISABLED);
 }
 
 void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader, 
 												 ShaderDX11::ShaderParameterIndex consuming_shader_parameter)
 {
-	if (CheckBit_Single(light.Flags, LIGHT_FLAG_SHADOW_MAP))
+	if (GetShadowMappingState(light) == SM_ENABLED)
 	{
+		PopulatedShadowMappedLightBuffer(light);
 		RenderShadowMap(light_index, light);
 		BindShadowMap(consuming_shader, consuming_shader_parameter);
 	}
@@ -755,6 +798,11 @@ void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const
 	{
 		UnbindShadowMap(consuming_shader, consuming_shader_parameter);
 	}
+}
+
+void DeferredRenderProcess::PopulatedShadowMappedLightBuffer(const LightData & light)
+{
+	// DO THIS
 }
 
 void DeferredRenderProcess::RenderShadowMap(unsigned int light_index, const LightData & light)
@@ -781,31 +829,41 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	// TODO: Required for all pipelines when shader/buffer is the same?  E.g. all pipelines use the same frame data param in the same VS
 	// TODO: Required every frame?  Only setting buffer pointer in shader.  May only be required on shader reload in case param indices change
 
+	// Bind for both regular and shadow-mapped pipeline versions
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+
 	// Lighting pass 1 is VS-only and does not output fragments
-	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM_DISABLED], GetCommonFrameDataBuffer());
 
-	// Lighting pass 2 uses both VS and PS
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));		// Set per shadow-casting light
+	// Lighting pass 2 and Directional light pipelines both support shadow mapping
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		// Lighting pass 2 uses both VS and PS
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata[SM], m_cb_lightindex);
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata[SM], Game::Engine->LightingManager->GetLightDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata[SM], Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
-	// Directional lighting pass uses both VS and PS
-	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));	// Set per shadow-casting light
+		// Directional lighting pass uses both VS and PS
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata[SM], m_cb_lightindex);
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata[SM], Game::Engine->LightingManager->GetLightDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata[SM], Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	}
+	m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));			// Set per shadow-casting light
+	m_pipeline_lighting_directional[SM_ENABLED]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));	// Set per shadow-casting light
 
 	// Bind the required noise resources to PS lighting shaders
 	Game::Engine->GetNoiseGenerator()->BindNoiseResources(m_render_noise_method);
 	TextureDX11 *noiseresource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
 	if (noiseresource)
 	{
-		m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisetexture, noiseresource);
+		for (SM_STATE SM : SM_OPTIONS)
+		{
+			m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisetexture[SM], noiseresource);
+		}
 	}
 }
 

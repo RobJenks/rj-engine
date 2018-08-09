@@ -12,14 +12,23 @@
 #include "DeferredRenderingGBuffer.hlsl.h"
 
 
+// Conditional compilation for shadow mapping support
+#ifdef SHADER_SHADOWMAPPED
+#	define SHADER_ENTRY		PS_Deferred_Lighting_ShadowMapped 
+#	define SHADER_INPUT		VertexShaderStandardOutputShadowMapped 
+#else
+#	define SHADER_ENTRY		PS_Deferred_Lighting
+#	define SHADER_INPUT		VertexShaderStandardOutput
+#endif
+
+
 // Determines the relative strength of generated noise when modulating the calculated lighting values
 static const float LIGHTING_NOISE_STRENGTH = 0.1f;
 
 
-
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
-float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
+float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 {
 	// All calculations are performed in view space
 	float4 eyePos = { 0, 0, 0, 1 };

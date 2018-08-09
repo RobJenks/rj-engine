@@ -370,14 +370,14 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(unsigned int light_inde
 
 				// Submit the instances for rendering
 				Game::Engine->RenderInstanced(*m_pipeline_lightspace_shadowmap, *modeldata.ModelBufferInstance, matdata.Material, *instances, static_cast<UINT>(rendercount));
-
-				// Perform a resource copy of this shadow map data if we have the debug capture enabled
-#			ifdef _DEBUG
-				if (i == m_debug_shadowmap_capture_id) DebugCaptureActiveShadowMap();
-#			endif
 			}
 		}
 	}
+
+	// Perform a resource copy of this shadow map data if we have the debug capture enabled
+#ifdef _DEBUG
+	if (light_index == m_debug_shadowmap_capture_id) DebugCaptureActiveShadowMap();
+#endif
 
 	// Deactivate the pipeline and unbind all resources
 	DeactivateLightSpaceShadowmapPipeline();

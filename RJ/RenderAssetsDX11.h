@@ -114,8 +114,9 @@ public:
 	TextureDX11 *									CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 	TextureDX11 *									CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 
-	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName,
-															const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL, 
+	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, const std::string & name, Shader::Type shadertype, 
+															const std::string & fileName, const std::string & entryPoint, const std::string & profile, 
+															const InputLayoutDesc *input_layout = NULL, 
 															const ShaderMacros::MacroData & macros = ShaderMacros::NONE);
 	
 public:

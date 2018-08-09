@@ -26,3 +26,6 @@ const std::string Shaders::TemporalReprojection			= "PS_Temporal";
 
 const std::string Shaders::ShadowMappingVertexShader	= "VS_ShadowMap";
 
+const std::string Shaders::StandardVertexShaderShadowMapped = "VS_Standard_ShadowMapped";
+const std::string Shaders::DeferredLightingPixelShaderShadowMapped = "PS_Deferred_Lighting_ShadowMapped";
+

@@ -184,24 +184,6 @@ private:
 	DXGI_SAMPLE_DESC						m_sampledesc;
 
 
-	ShaderDX11 *							m_standard_vs;
-	ShaderDX11 *							m_standard_ps;
-	ShaderDX11 *							m_quad_vs;
-	ShaderDX11 *							m_deferred_geometry_ps;
-	ShaderDX11 *							m_deferred_lighting_ps;
-	ShaderDX11 *							m_deferred_debug_ps;
-	ShaderDX11 *							m_texture_vs;
-	ShaderDX11 *							m_texture_ps;
-	ShaderDX11 *							m_sdf_decal_direct_vs;
-	ShaderDX11 *							m_sdf_decal_deferred_vs;
-	ShaderDX11 *							m_sdf_decal_direct_ps;
-	ShaderDX11 *							m_sdf_decal_deferred_ps;
-	ShaderDX11 *							m_shadowmapping_lightspace_vs;
-	ShaderDX11 *							m_post_motionblur_tilegen_ps;
-	ShaderDX11 *							m_post_motionblur_neighbour_ps;
-	ShaderDX11 *							m_post_motionblur_gather_ps;
-	ShaderDX11 *							m_post_temporal_aa;
-
 	InputLayoutDesc							m_standard_input_layout;
 	InputLayoutDesc							m_fullscreen_quad_input_layout;
 

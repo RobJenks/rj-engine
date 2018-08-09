@@ -95,15 +95,16 @@ TextureDX11 * RenderAssetsDX11::RegisterNewTexture(const std::string & name, std
 }
 
 
-Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
-															const std::string & profile, const InputLayoutDesc *input_layout, const ShaderMacros::MacroData & macros)
+Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, const std::string & name, Shader::Type shadertype, const std::string & fileName, 
+															const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout, 
+															const ShaderMacros::MacroData & macros)
 {
-	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
+	Game::Log << LOG_INFO << "Initialising shader \"" << name << "\" from \"" << fileName << "\"\n";
 
 	// No duplicates allowed
-	if (AssetExists<ShaderDX11>(entryPoint))
+	if (AssetExists<ShaderDX11>(name))
 	{
-		Game::Log << LOG_ERROR << "Multiple shader resources detected with entry point \"" << entryPoint << "\"\n";
+		Game::Log << LOG_ERROR << "Multiple shader resources detected with name \"" << name << "\"\n";
 		return ErrorCodes::CannotLoadDuplicateShaderResource;
 	}
 
@@ -115,13 +116,13 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	}
 
 	// Attempt to initialise from file
-	ShaderDX11 *shader = CreateAsset<ShaderDX11>(entryPoint);
-	bool success = shader->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout, macros);
+	ShaderDX11 *shader = CreateAsset<ShaderDX11>(name);
+	bool success = shader->LoadShaderFromFile(name, shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout, macros);
 
 	// Deallocate the shader object if initialisation failed
 	if (!success)
 	{
-		Game::Log << LOG_ERROR << "Initialisation of shader \"" << entryPoint << "\" failed, cannot proceed\n";
+		Game::Log << LOG_ERROR << "Initialisation of shader \"" << name << "\" failed, cannot proceed\n";
 		SafeDelete(shader);
 		return ErrorCodes::CannotLoadShaderFromFile;
 	}
@@ -129,7 +130,7 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	// Return a pointer to the shader if required
 	if (ppOutShader) (*ppOutShader) = shader;
 
-	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
+	Game::Log << LOG_INFO << "Shader \"" << name << "\" loaded successfully\n";
 	return ErrorCodes::NoError;
 }
 

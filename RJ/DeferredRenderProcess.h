@@ -8,6 +8,7 @@
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRendererDebugRenderingData.hlsl"
+#include "Data/Shaders/shadowmap_resources.hlsl"
 #include "LightData.hlsl.h"
 #include "ModelInstance.h"
 #include "iAcceptsConsoleCommands.h"
@@ -101,11 +102,15 @@ protected:
 	void RenderSpotLight(unsigned int light_index, const LightData & light);
 	void RenderDirectionalLight(unsigned int light_index, const LightData & light);
 
+	// Shadow mapping
+	typedef unsigned int SM_STATE;
 	void PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader,
 							  ShaderDX11::ShaderParameterIndex consuming_shader_parameter);
+	void PopulatedShadowMappedLightBuffer(const LightData & light);
 	void RenderShadowMap(unsigned int light_index, const LightData & light);
 	void BindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
 	void UnbindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
+	SM_STATE GetShadowMappingState(const LightData & light);
 
 	void RenderTransparency(void);
 	void PerformPostProcessing(void);
@@ -126,18 +131,22 @@ protected:
 
 private:
 
+	// Define shadow-mapped and regular versions of key deferred rendering shaders
+	static const SM_STATE SM_DISABLED = 0U;
+	static const SM_STATE SM_ENABLED = 1U;
+
 	// Deferred rendering shaders
-	ShaderDX11 *		m_vs;
+	ShaderDX11 *		m_vs[2];			// [2] for optional shadow mapping
 	ShaderDX11 *		m_vs_quad;
 	ShaderDX11 *		m_ps_geometry;
-	ShaderDX11 *		m_ps_lighting;
+	ShaderDX11 *		m_ps_lighting[2];	// [2] for optional shadow mapping
 	ShaderDX11 *		m_ps_debug;
 
 	// Render pipelines
 	PipelineStateDX11 * m_pipeline_geometry;
 	PipelineStateDX11 * m_pipeline_lighting_pass1;
-	PipelineStateDX11 * m_pipeline_lighting_pass2;
-	PipelineStateDX11 *	m_pipeline_lighting_directional;
+	PipelineStateDX11 * m_pipeline_lighting_pass2[2];			// [2] for optional shadow mapping
+	PipelineStateDX11 *	m_pipeline_lighting_directional[2];		// [2] for optional shadow mapping
 	PipelineStateDX11 * m_pipeline_transparency;
 	PipelineStateDX11 * m_pipeline_debug_rendering;
 
@@ -165,6 +174,8 @@ private:
 	ConstantBufferDX11 *						m_cb_lightindex;			// Compiled CB
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
+	ManagedPtr<ShadowMappedLightBuffer>			m_cb_smlight_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *						m_cb_smlight;				// Compiled CB
 
 	// Shadow mapping components
 	ManagedPtr<ShadowManagerComponent>			m_shadow_manager;
@@ -192,16 +203,17 @@ private:
 	unsigned int							m_motion_max_sample_tap_distance;
 
 	// Indices of required shader parameters
-	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata[2];
 	ShaderDX11::ShaderParameterIndex		m_param_ps_geometry_deferreddata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap;			// No [2] since this is only relevant for SM_ENABLED
 	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
+	
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);

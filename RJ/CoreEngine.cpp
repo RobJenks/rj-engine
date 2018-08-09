@@ -93,6 +93,7 @@ CoreEngine::CoreEngine(void)
 	m_renderdevice(NULL),
 	m_rq_optimiser(m_renderqueue), 
 	m_camera(NULL),
+	LightingManager(NULL), 
 	m_lightshader(NULL),
 	m_lightfadeshader(NULL),
 	m_lighthighlightshader(NULL),

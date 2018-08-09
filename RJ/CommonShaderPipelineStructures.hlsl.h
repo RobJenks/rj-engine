@@ -5,21 +5,30 @@
 
 
 // Output of the standard vertex shader
+#define STANDARD_VS_OUTPUT \
+	float3 positionVS			RJ_SEMANTIC(TEXCOORD0);			/* View space position */ \
+	float2 texCoord				RJ_SEMANTIC(TEXCOORD1);			/* Texture coordinate */ \
+	float3 tangentVS			RJ_SEMANTIC(TANGENT);			/* View space tangent */ \
+	float3 binormalVS			RJ_SEMANTIC(BINORMAL);			/* View space binormal */ \
+	float3 normalVS 			RJ_SEMANTIC(NORMAL);			/* View space normal */ \
+	float4 position				RJ_SEMANTIC(SV_POSITION);		/* Clip-space position */ \
+	\
+	 /* Non-perspective-corrected position values, since we cannot otherwise compare a TEXCOORD with the SV_POSITION in the PS
+	    due to perspective correction of the latter only
+	    TODO: remove jitter contribution in pixel shader when calculating velocity, in order to
+	    avoid passing an additional two float4s per pixel through the pipeline */ \
+	float4 lastframeposition_unjittered	RJ_SEMANTIC(TEXCOORD2);		/* Projection-space unjittered position in the prior frame */ \
+	float4 thisframeposition_unjittered	RJ_SEMANTIC(TEXCOORD3);		// Projection-space unjittered position in the current frame
+
 struct VertexShaderStandardOutput
 {
-	float3 positionVS			RJ_SEMANTIC(TEXCOORD0);		// View space position
-	float2 texCoord				RJ_SEMANTIC(TEXCOORD1);		// Texture coordinate
-	float3 tangentVS			RJ_SEMANTIC(TANGENT);		// View space tangent
-	float3 binormalVS			RJ_SEMANTIC(BINORMAL);		// View space binormal
-	float3 normalVS 			RJ_SEMANTIC(NORMAL);		// View space normal
-	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
+	STANDARD_VS_OUTPUT
+};
 
-	// Non-perspective-corrected position values, since we cannot otherwise compare a TEXCOORD with the SV_POSITION in the PS
-	// due to perspective correction of the latter only
-	// TODO: remove jitter contribution in pixel shader when calculating velocity, in order to
-	// avoid passing an additional two float4s per pixel through the pipeline
-	float4 lastframeposition_unjittered	RJ_SEMANTIC(TEXCOORD2);		// Projection-space unjittered position in the prior frame
-	float4 thisframeposition_unjittered	RJ_SEMANTIC(TEXCOORD3);		// Projection-space unjittered position in the current frame
+struct VertexShaderStandardOutputShadowMapped
+{
+	STANDARD_VS_OUTPUT
+	float4 shadow_uv			RJ_SEMANTIC(TEXCOORD4);
 };
 
 // Output of basic texture-sampling VS stage; returns only pos/texcoord basic data
