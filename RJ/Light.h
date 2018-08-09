@@ -55,6 +55,7 @@ public:
 
 	// Accessor functions which operate on the underlying LightData structure
 	CMPINLINE LightType GetType(void) const						{ return Data.Type; }
+	CMPINLINE _uint32 GetFlags(void) const						{ return Data.Flags; }
 	CMPINLINE XMFLOAT4 GetPositionWS(void) const				{ return Data.PositionWS; }
 	CMPINLINE XMFLOAT4 GetDirectionWS(void) const				{ return Data.DirectionWS; }
 	CMPINLINE XMFLOAT4 GetPositionVS(void) const				{ return Data.PositionVS; }
@@ -67,6 +68,7 @@ public:
 
 	// Mutator functions which operate on the underlying LightData structure
 	CMPINLINE void SetType(LightType value) { Data.Type = value; }
+	CMPINLINE void SetFlags(_uint32 value) { Data.Flags = value; }
 	CMPINLINE void SetPositionWS(const XMFLOAT4 & value) { Data.PositionWS = value; }
 	CMPINLINE void SetDirectionWS(const XMFLOAT4 & value) { Data.DirectionWS = value; }
 	CMPINLINE void SetPositionVS(const XMFLOAT4 & value) { Data.PositionVS = value; }
@@ -80,6 +82,13 @@ public:
 	CMPINLINE void SetAttenuationConstant(float atten) { Data.Attenuation.Constant = atten; }
 	CMPINLINE void SetAttenuationLinear(float atten) { Data.Attenuation.Linear = atten; }
 	CMPINLINE void SetAttenuationQuadratic(float atten) { Data.Attenuation.Quadratic = atten; }
+
+	// Shadow mapping state for the light
+	CMPINLINE bool IsShadowMapped(void) const { return CheckBit_Single(Data.Flags, LIGHT_FLAG_SHADOW_MAP); }
+	CMPINLINE void EnableShadowMapping(void) { SetBit(Data.Flags, LIGHT_FLAG_SHADOW_MAP); }
+	CMPINLINE void DisableShadowMapping(void) { ClearBit(Data.Flags, LIGHT_FLAG_SHADOW_MAP); }
+	CMPINLINE void SetShadowMappingState(bool state) { state ? EnableShadowMapping() : DisableShadowMapping(); }
+
 
 	// Default destructor
 	~Light(void);
