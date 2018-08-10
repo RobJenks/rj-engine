@@ -30,6 +30,7 @@ const UINTVECTOR2 ShadowManagerComponent::DEFAULT_SHADOW_MAP_SIZE = UINTVECTOR2(
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST = 1.0f;
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING = 1.0f;
 
+const XMMATRIX ShadowManagerComponent::SM_BIAS_SCREEN_TO_UV = XMMatrixMultiply(XMMatrixScalingFromVector(HALF_VECTOR), XMMatrixTranslationFromVector(HALF_VECTOR));
 
 // Constructor
 ShadowManagerComponent::ShadowManagerComponent(void)
@@ -48,6 +49,7 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	m_pipeline_lightspace_shadowmap(NULL),
 
 	m_cb_lightspace_shadowmap(NULL),
+	m_cb_shadowmapped_light(NULL), 
 
 	r_viewfrustum(NULL),
 	r_frustum_world_min(NULL_VECTOR),
@@ -59,6 +61,10 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 
 	m_shadow_map_size(DEFAULT_SHADOW_MAP_SIZE), 
 	m_instance_capacity(0U), 
+
+	m_active_sm_light_position(NULL_VECTOR), 
+	m_active_sm_light_orientation(ID_QUATERNION), 
+	m_active_sm_viewproj(ID_MATRIX), 
 
 	m_param_vs_shadowmap_smdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 
@@ -381,17 +387,24 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(unsigned int light_inde
 
 	// Deactivate the pipeline and unbind all resources
 	DeactivateLightSpaceShadowmapPipeline();
+
+	// Populate any CB data required for rendering that uses this shadow map and compile the buffer ready for binding
+	CompileShadowMappedLightDataBuffer(light);
 }
 
 // Activate the light-space shadow mapping pipeline for the given light object
 void ShadowManagerComponent::ActivateLightSpaceShadowmapPipeline(const LightData & light)
 {
-	// Determine view/projection for this light object based on its position in the world
+	// Determine view/projection and other light data for this light object based on its position in the world
+	m_active_sm_light_position = XMLoadFloat4(&light.PositionWS);
+	m_active_sm_light_orientation = QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS));
+
 	XMMATRIX view = LightViewMatrix(light);
 	XMMATRIX proj = LightProjMatrix(light);
+	m_active_sm_viewproj = XMMatrixMultiply(view, proj);
 	
 	// Populate the light-space SM data buffer based on this light
-	XMStoreFloat4x4(&(m_cb_lightspace_shadowmap_data.RawPtr->LightViewProjection), XMMatrixMultiply(view, proj));
+	XMStoreFloat4x4(&(m_cb_lightspace_shadowmap_data.RawPtr->LightViewProjection), m_active_sm_viewproj);
 	m_cb_lightspace_shadowmap->Set(m_cb_lightspace_shadowmap_data.RawPtr);
 
 	// Bind resources to the shadow mapping shader
@@ -411,6 +424,25 @@ void ShadowManagerComponent::DeactivateLightSpaceShadowmapPipeline(void)
 	m_pipeline_lightspace_shadowmap->Unbind();
 }
 
+// Store any required data on the active shadow map before returning
+void ShadowManagerComponent::CompileShadowMappedLightDataBuffer(const LightData & light)
+{
+	// Calculate required data
+	XMMATRIX biasedWVP = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixMultiply(													// World
+			XMMatrixRotationQuaternion(m_active_sm_light_orientation),
+			XMMatrixTranslationFromVector(m_active_sm_light_position)),
+		m_active_sm_viewproj),												// * View * Proj
+		SM_BIAS_SCREEN_TO_UV												// * Bias
+	);
+
+	// Populate the buffer data
+	XMStoreFloat4x4(&(m_cb_shadowmapped_light_data.RawPtr->BiasedShadowMapWVP), biasedWVP);
+
+	// Compile the buffer
+	m_cb_shadowmapped_light->Set(m_cb_shadowmapped_light_data.RawPtr);
+}
+
 // Calculate transform matrix for the given light
 XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 {
@@ -422,7 +454,7 @@ XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 			r_camera_distance_from_frustum_centre.V(),								// (Vectorised distance from camera to frustum centre)
 			XMVectorNegate(dir),													// * -lightdir
 			r_frustum_centre_point));
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(QuaternionBetweenVectors(FORWARD_VECTOR, dir));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(m_active_sm_light_orientation);
 		Game::Log << LOG_DEBUG << "DBG pos = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraPosition()) <<
 			", Orient = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraOrientation()) << "\n";
 		Game::Keyboard.LockKey(DIK_F);
@@ -439,14 +471,14 @@ XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 				r_camera_distance_from_frustum_centre.V(),				// (Vectorised distance from camera to frustum centre)
 				XMVectorNegate(dir),									// * -lightdir
 				r_frustum_centre_point),								// + centre_point
-				QuaternionBetweenVectors(FORWARD_VECTOR, dir));												 
+				m_active_sm_light_orientation);
 
 		case LightType::Spotlight:
-			return CameraView::View(XMLoadFloat4(&light.PositionWS), QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)));
+			return CameraView::View(m_active_sm_light_position, m_active_sm_light_orientation);
 
 		// Case Point, or as default
 		default: 
-			return CameraView::View(XMLoadFloat4(&light.PositionWS), ID_MATRIX);
+			return CameraView::View(m_active_sm_light_position, ID_MATRIX);
 	}
 	
 }

@@ -44,6 +44,9 @@ public:
 	// Return the number of currently-active shadow maps (as of the last rendered frame)
 	CMPINLINE unsigned int						GetActiveShadowMapCount(void) const { return m_active_shadow_maps; }
 
+	// Returns a pointer to the compiled data buffer for the active SM, for use in the primary render pipeline
+	CMPINLINE ConstantBufferDX11 *				GetShadowMappedLightDataBuffer(void) const { return m_cb_shadowmapped_light; }
+
 	// Destructor
 	~ShadowManagerComponent(void);
 
@@ -76,6 +79,9 @@ private:
 	// Activate or deactivate the light-space shadow mapping pipeline for a given light object
 	void										ActivateLightSpaceShadowmapPipeline(const LightData & light);
 	void										DeactivateLightSpaceShadowmapPipeline(void);
+
+	// Populate the shadow mapped light CB for use in the primary rendering pipeline
+	void										CompileShadowMappedLightDataBuffer(const LightData & light);
 
 	// Calculate transform matrix for the given light
 	XMMATRIX									LightViewMatrix(const LightData & light) const;
@@ -119,8 +125,21 @@ private:
 	RenderTargetDX11 *							m_shadowmap_rt;
 	PipelineStateDX11 *							m_pipeline_lightspace_shadowmap;
 
+	// CB input to the shadow mapping process
 	ManagedPtr<LightSpaceShadowMapDataBuffer>	m_cb_lightspace_shadowmap_data;
 	ConstantBufferDX11 *						m_cb_lightspace_shadowmap;
+
+	// CB input to the primary rendering process, containing data that was calculated during the shadow mapping process
+	ManagedPtr<ShadowMappedLightBuffer>			m_cb_shadowmapped_light_data;
+	ConstantBufferDX11 *						m_cb_shadowmapped_light;
+
+	// Data on the current shadow mapping render, i.e. the last light to be shadow-mapped
+	XMVECTOR									m_active_sm_light_position;		// Position of the current light in world space
+	XMVECTOR									m_active_sm_light_orientation;	// Orientation of the current light in world space
+	XMMATRIX									m_active_sm_viewproj;			// View-projection for the current light
+
+	// Bias matrix from screen-space [-1 +1] to UV-coords [0, +1]
+	static const XMMATRIX						SM_BIAS_SCREEN_TO_UV;
 
 	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_smdata;
 

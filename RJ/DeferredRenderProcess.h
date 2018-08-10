@@ -104,12 +104,14 @@ protected:
 
 	// Shadow mapping
 	typedef unsigned int SM_STATE;
-	void PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader,
-							  ShaderDX11::ShaderParameterIndex consuming_shader_parameter);
-	void PopulatedShadowMappedLightBuffer(const LightData & light);
+	void PerformShadowMapping(unsigned int light_index, const LightData & light, PipelineStateDX11 *pipeline,
+							  ShaderDX11::ShaderParameterIndex param_vs_data, ShaderDX11::ShaderParameterIndex param_ps_sm,
+							  ShaderDX11::ShaderParameterIndex param_ps_data);
 	void RenderShadowMap(unsigned int light_index, const LightData & light);
-	void BindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
-	void UnbindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter);
+	void BindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+								ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data);
+	void UnbindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+								  ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data);
 	SM_STATE GetShadowMappingState(const LightData & light);
 
 	void RenderTransparency(void);
@@ -204,6 +206,7 @@ private:
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_vs_light_shadowmap_data;	// No [2] since this is only relevant for SM_ENABLED
 	ShaderDX11::ShaderParameterIndex		m_param_ps_geometry_deferreddata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata[2];
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata[2];
@@ -212,11 +215,12 @@ private:
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture[2];
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata[2];
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap;			// No [2] since this is only relevant for SM_ENABLED
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap_data;	// No [2] since this is only relevant for SM_ENABLED
 	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
-	
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
+	void InitialiseShaderParameterBindings(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseGBuffer(void); 
 	void InitialiseStandardBuffers(void);

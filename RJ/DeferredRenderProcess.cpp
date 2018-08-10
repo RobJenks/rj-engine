@@ -53,6 +53,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_debug_rendering(NULL),
 
 	m_param_vs_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_vs_light_shadowmap_data(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_deferreddata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
 	m_param_ps_light_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER }, 
@@ -61,6 +62,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_param_ps_light_noisetexture{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
 	m_param_ps_light_noisedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
 	m_param_ps_light_shadowmap(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_shadowmap_data(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
@@ -150,20 +152,26 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_ps_lighting[SM_ENABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShaderShadowMapped);
 	if (m_ps_lighting[SM_ENABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l_sm]\n";
 
-#ifdef _DEBUG
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
 	if (m_ps_debug == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering debug shader resources [ps_d]\n";
-	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRendererDebugRenderingDataName);
-#endif
 
+	InitialiseShaderParameterBindings();
+}
 
-	// Ensure we have valid indices into the shader parameter sets
+void DeferredRenderProcess::InitialiseShaderParameterBindings(void)
+{
+	/* Determine indices into the shader parameter sets */
+
+	/// Geometry-PS
 	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName); 
 
 	const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
 	for (SM_STATE SM : SM_OPTIONS)
 	{
+		/// VS
 		m_param_vs_framedata[SM] = AttemptRetrievalOfShaderParameter(m_vs[SM], FrameDataBufferName);
+
+		/// Lighting-PS
 		m_param_ps_light_deferreddata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], DeferredRenderingParamBufferName);
 		m_param_ps_light_framedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], FrameDataBufferName);
 		m_param_ps_light_lightdata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], LightBufferName);
@@ -172,7 +180,16 @@ void DeferredRenderProcess::InitialiseShaders(void)
 		m_param_ps_light_noisedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], NoiseDataBufferName);
 	}
 
+	/// SM-specific parameters
+	m_param_vs_light_shadowmap_data = AttemptRetrievalOfShaderParameter(m_vs[SM_ENABLED], ShadowMappedLightBufferName);
 	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM_ENABLED], ShadowMapTextureName);
+	m_param_ps_light_shadowmap_data = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM_ENABLED], ShadowMappedLightBufferName);
+
+#ifdef _DEBUG
+	/// Debug
+	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRendererDebugRenderingDataName);
+#endif
+
 }
 
 
@@ -744,9 +761,10 @@ void DeferredRenderProcess::RenderPointLight(unsigned int light_index, const Lig
 {
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
-	// Perform shadow mapping and bind to the PS, if applicable
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
 	SM_STATE SM = GetShadowMappingState(light);
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
 
 	// Two-pass render pipeline
 	XMMATRIX transform = LightSource::CalculatePointLightTransform(light);
@@ -758,9 +776,10 @@ void DeferredRenderProcess::RenderSpotLight(unsigned int light_index, const Ligh
 {
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
-	// Perform shadow mapping and bind to the PS, if applicable
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
 	SM_STATE SM = GetShadowMappingState(light);
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
 
 	// Two-pass render pipeline
 	XMMATRIX transform = LightSource::CalculateSpotlightTransform(light);
@@ -772,9 +791,10 @@ void DeferredRenderProcess::RenderDirectionalLight(unsigned int light_index, con
 {
 	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
-	// Perform shadow mapping and bind to the PS, if applicable
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
 	SM_STATE SM = GetShadowMappingState(light);
-	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional[SM_ENABLED]->GetShader(Shader::Type::PixelShader), m_param_ps_light_shadowmap);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
 
 	// Single-pass render pipeline
 	RenderLightPipeline(m_pipeline_lighting_directional[SM], m_model_quad, m_transform_fullscreen_quad_farplane);
@@ -785,24 +805,19 @@ DeferredRenderProcess::SM_STATE DeferredRenderProcess::GetShadowMappingState(con
 	return (CheckBit_Single(light.Flags, LIGHT_FLAG_SHADOW_MAP) ? SM_ENABLED : SM_DISABLED);
 }
 
-void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const LightData & light, ShaderDX11 *consuming_shader, 
-												 ShaderDX11::ShaderParameterIndex consuming_shader_parameter)
+void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const LightData & light, PipelineStateDX11 *pipeline, 
+												 ShaderDX11::ShaderParameterIndex param_vs_data, ShaderDX11::ShaderParameterIndex param_ps_sm, 
+												 ShaderDX11::ShaderParameterIndex param_ps_data)
 {
 	if (GetShadowMappingState(light) == SM_ENABLED)
 	{
-		PopulatedShadowMappedLightBuffer(light);
 		RenderShadowMap(light_index, light);
-		BindShadowMap(consuming_shader, consuming_shader_parameter);
+		BindShadowMapResources(pipeline, param_vs_data, param_ps_sm, param_ps_data);
 	}
 	else
 	{
-		UnbindShadowMap(consuming_shader, consuming_shader_parameter);
+		UnbindShadowMapResources(pipeline, param_vs_data, param_ps_sm, param_ps_data);
 	}
-}
-
-void DeferredRenderProcess::PopulatedShadowMappedLightBuffer(const LightData & light)
-{
-	// DO THIS
 }
 
 void DeferredRenderProcess::RenderShadowMap(unsigned int light_index, const LightData & light)
@@ -810,16 +825,24 @@ void DeferredRenderProcess::RenderShadowMap(unsigned int light_index, const Ligh
 	m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(light_index, light);
 }
 
-void DeferredRenderProcess::BindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter)
+void DeferredRenderProcess::BindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data, 
+												   ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data)
 {
-	assert(shader);
-	shader->SetParameterData(parameter, m_shadow_manager.RawPtr->GetActiveShadowMap());
+	assert(pipeline);
+
+	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, m_shadow_manager.RawPtr->GetActiveShadowMap());
 }
 
-void DeferredRenderProcess::UnbindShadowMap(ShaderDX11 *shader, ShaderDX11::ShaderParameterIndex parameter)
+void DeferredRenderProcess::UnbindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+													 ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data)
 {
-	assert(shader);
-	shader->SetParameterData(parameter, static_cast<TextureDX11*>(NULL));
+	assert(pipeline);
+
+	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, static_cast<ConstantBufferDX11*>(NULL));
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, static_cast<ConstantBufferDX11*>(NULL));
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, static_cast<TextureDX11*>(NULL));
 }
 
 
