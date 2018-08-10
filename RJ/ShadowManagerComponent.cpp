@@ -107,6 +107,7 @@ void ShadowManagerComponent::InitialiseStandardBuffers(void)
 	Game::Log << LOG_INFO << "Intialising shadow mapping standard buffers\n";
 
 	m_cb_lightspace_shadowmap = Game::Engine->GetAssets().CreateConstantBuffer(LightSpaceShadowMapDataBufferName, m_cb_lightspace_shadowmap_data.RawPtr);
+	m_cb_shadowmapped_light = Game::Engine->GetAssets().CreateConstantBuffer(ShadowMappedLightBufferName, m_cb_shadowmapped_light_data.RawPtr);
 }
 
 

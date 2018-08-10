@@ -176,9 +176,7 @@ private:
 	ConstantBufferDX11 *						m_cb_lightindex;			// Compiled CB
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
-	ManagedPtr<ShadowMappedLightBuffer>			m_cb_smlight_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *						m_cb_smlight;				// Compiled CB
-
+	
 	// Shadow mapping components
 	ManagedPtr<ShadowManagerComponent>			m_shadow_manager;
 

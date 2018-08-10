@@ -42,8 +42,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_colour_rt(NULL),
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
-	m_cb_deferred(NULL), 
-	m_cb_smlight(NULL), 
+	m_cb_deferred(NULL),
 
 	m_pipeline_geometry(NULL),
 	m_pipeline_lighting_pass1(NULL),
@@ -259,7 +258,6 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 	m_cb_lightindex = assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
 	m_cb_deferred = assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
 	m_cb_debug = assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
-	m_cb_smlight = assets.CreateConstantBuffer<ShadowMappedLightBuffer>(ShadowMappedLightBufferName, m_cb_smlight_data.RawPtr);
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)

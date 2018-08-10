@@ -78,6 +78,17 @@ float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 	// Generate rendering noise to apply to the calculated lighting values
 	float4 noise = float4(RandomNoise(IN.position.xy), RandomNoise(IN.position.yx), RandomNoise(texCoord*255), 0.0f);
 	
+	// Determine the shadow factor, if this is a shadow-casting light
+#ifdef SHADER_SHADOWMAPPED
+	float shadow_factor = ComputeShadowFactor(IN.shadow_uv);
+#else
+	static const float shadow_factor = 1.0f;
+#endif
+
 	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
-	return (diffuse * lit.Diffuse * (1.0f - LIGHTING_NOISE_STRENGTH)) + (specular * lit.Specular) + (noise * lit.Diffuse * LIGHTING_NOISE_STRENGTH);
+	float4 total_diffuse = (diffuse * lit.Diffuse * (1.0f - LIGHTING_NOISE_STRENGTH));
+	float4 total_specular = (specular * lit.Specular);
+	float4 total_noise = (noise * lit.Diffuse * LIGHTING_NOISE_STRENGTH);
+
+	return (total_diffuse + total_specular + total_noise) * shadow_factor;
 }

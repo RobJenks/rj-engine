@@ -642,36 +642,10 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
-		for (auto & obj : objects)
-		{
-			if (obj()->GetObjectType() == iObject::ObjectType::LightSourceObject)
-			{
-				LightSource *ls = (LightSource*)obj();
-				if (ls->GetLight().GetType() == LightType::Directional)
-				{
-					if (b[DIK_LALT])
-					{
-						ls->LightObject().Toggle();
-						Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
-						break;
-					}
-					else if (b[DIK_LSHIFT])
-					{
-						ls->LightObject().ChangeIntensity(+0.1f);
-						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
-						break;
-					}
-					else if (b[DIK_LCONTROL])
-					{
-						ls->LightObject().ChangeIntensity(-0.1f);
-						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
-						break;
-					}
-				}
-			}
-		}
-
+		ss()->SetPosition(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetY(NULL_VECTOR, cs()->GetSizeF().y)), NULL_VECTOR));
+		LightSource *syslight = (LightSource*)Game::GetObjectByInstanceCode("syslight");
+		syslight->SetOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		syslight->LightObject().EnableShadowMapping();
 		Game::Keyboard.LockKey(DIK_U);
 	}
 	if (b[DIK_J])

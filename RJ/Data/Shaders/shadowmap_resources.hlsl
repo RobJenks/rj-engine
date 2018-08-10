@@ -37,7 +37,7 @@ CBUFFER ShadowMappedLightBuffer REGISTER(b5)
 
 // --------------------------------------------------------------------------------
 // Shadow map depth texture resource; either bound as SM render target, or as lighting PS input
-TEXTURE2D ShadowMapTexture REGISTER(t8);
+TEXTURE2D ShadowMapTexture REGISTER(t10);
 
 
 // --------------------------------------------------------------------------------
