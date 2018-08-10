@@ -80,7 +80,7 @@ bool ShaderDX11::LoadShaderFromString(  const std::string & name, Shader::Type s
 			}
 		}
 
-		// Set any shader macros before compilation.  We can directly\\ overwrite any existing data.  Then compile & retrieve the data
+		// Set any shader macros before compilation.  We can directly overwrite any existing data.  Then compile & retrieve the data
 		ShaderManager::GetGlobalShaderMacros().ReplaceMacros(macros);
 		const D3D_SHADER_MACRO * compiled_macros = ShaderManager::GetGlobalShaderMacros().GetCompiledData();
 

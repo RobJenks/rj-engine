@@ -51,8 +51,9 @@ bool ShaderMacros::HasDefinedMacros(void) const
 // Replace the entire set of shader macros with the given collection
 void ShaderMacros::ReplaceMacros(const MacroData & macros)
 {
-	// Shortcut to catch the usual case
-	if (macros.empty() && m_macros.empty()) return;
+	// Shortcut to catch the usual case; replacing an empty set with another empty set, and 
+	// the buffer is not dirty which means the compiled buffer accurately represents this data already
+	if (macros.empty() && m_macros.empty() && !m_isdirty) return;
 
 	// Store the new macros and flag as dirty, regardless of contents
 	m_macros = macros;
@@ -110,5 +111,5 @@ const D3D_SHADER_MACRO * ShaderMacros::GetCompiledData(void)
 		m_isdirty = false;
 	}
 
-	return m_macros_compiled.data();
+	return (m_macros_compiled.empty() ? NULL : m_macros_compiled.data());
 }
