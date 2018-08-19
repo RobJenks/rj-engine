@@ -642,10 +642,14 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		ss()->SetPosition(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetY(NULL_VECTOR, cs()->GetSizeF().y)), NULL_VECTOR));
+		ss()->SetPositionAndOrientation(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetY(NULL_VECTOR, cs()->GetSizeF().y)), NULL_VECTOR), ID_QUATERNION);
 		LightSource *syslight = (LightSource*)Game::GetObjectByInstanceCode("syslight");
 		syslight->SetOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		syslight->LightObject().SetIntensity(0.7f);
 		syslight->LightObject().EnableShadowMapping();
+		Game::Console.ProcessRawCommand(GameConsoleCommand("shadow map size 1280 720"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand("post motion disable"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
 		Game::Keyboard.LockKey(DIK_U);
 	}
 	if (b[DIK_J])

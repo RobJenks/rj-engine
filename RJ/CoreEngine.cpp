@@ -917,7 +917,7 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	r_invorthographic = XMMatrixInverse(NULL, r_orthographic);
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_viewproj_unjittered = XMMatrixMultiply(r_view, r_projection_unjittered);
-	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
+	r_invviewproj = XMMatrixMultiply(r_invproj, r_invview);
 	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
 	r_invviewprojscreen = XMMatrixInverse(NULL, r_viewprojscreen);
 

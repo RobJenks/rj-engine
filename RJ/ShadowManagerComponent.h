@@ -138,9 +138,6 @@ private:
 	XMVECTOR									m_active_sm_light_orientation;	// Orientation of the current light in world space
 	XMMATRIX									m_active_sm_viewproj;			// View-projection for the current light
 
-	// Bias matrix from screen-space [-1 +1] to UV-coords [0, +1]
-	static const XMMATRIX						SM_BIAS_SCREEN_TO_UV;
-
 	ShaderDX11::ShaderParameterIndex			m_param_vs_shadowmap_smdata;
 
 #ifdef _DEBUG

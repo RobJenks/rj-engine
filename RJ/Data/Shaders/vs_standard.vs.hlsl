@@ -7,7 +7,7 @@
 // Conditional compilation for shadow mapping support
 #ifdef SHADER_SHADOWMAPPED
 #	define SHADER_ENTRY		VS_Standard_ShadowMapped
-#	define SHADER_OUTPUT	VertexShaderStandardOutputShadowMapped
+#	define SHADER_OUTPUT	VertexShaderStandardOutput	// No longer different, but keep option open for future & CSMs
 #else
 #	define SHADER_ENTRY		VS_Standard
 #	define SHADER_OUTPUT	VertexShaderStandardOutput
@@ -39,11 +39,6 @@ SHADER_OUTPUT SHADER_ENTRY(Vertex_Inst_Standard input)
 	output.binormalVS = mul(input.binormal, (float3x3)WorldView);
 	output.normalVS = mul(input.normal, (float3x3)WorldView);
 	output.texCoord = input.tex;
-
-	// Transform vertex into shadow-mapped light space, if applicable
-#ifdef SHADER_SHADOWMAPPED
-	output.shadow_uv = mul(input_pos, BiasedShadowMapWVP);
-#endif
 
 	return output;
 }

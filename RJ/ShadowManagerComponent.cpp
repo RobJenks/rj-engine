@@ -30,7 +30,6 @@ const UINTVECTOR2 ShadowManagerComponent::DEFAULT_SHADOW_MAP_SIZE = UINTVECTOR2(
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST = 1.0f;
 const float ShadowManagerComponent::DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING = 1.0f;
 
-const XMMATRIX ShadowManagerComponent::SM_BIAS_SCREEN_TO_UV = XMMatrixMultiply(XMMatrixScalingFromVector(HALF_VECTOR), XMMatrixTranslationFromVector(HALF_VECTOR));
 
 // Constructor
 ShadowManagerComponent::ShadowManagerComponent(void)
@@ -429,16 +428,14 @@ void ShadowManagerComponent::DeactivateLightSpaceShadowmapPipeline(void)
 void ShadowManagerComponent::CompileShadowMappedLightDataBuffer(const LightData & light)
 {
 	// Calculate required data
-	XMMATRIX biasedWVP = XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixMultiply(													// World
-			XMMatrixRotationQuaternion(m_active_sm_light_orientation),
-			XMMatrixTranslationFromVector(m_active_sm_light_position)),
-		m_active_sm_viewproj),												// * View * Proj
-		SM_BIAS_SCREEN_TO_UV												// * Bias
+	XMMATRIX cam_to_light_projection = XMMatrixMultiply(
+		Game::Engine->GetRenderInverseViewProjectionMatrix(),		// InvCamProj * InvCamView
+		m_active_sm_viewproj										// * LightView * LightProj
 	);
 
 	// Populate the buffer data
-	XMStoreFloat4x4(&(m_cb_shadowmapped_light_data.RawPtr->BiasedShadowMapWVP), biasedWVP);
+	XMStoreFloat4x4(&(m_cb_shadowmapped_light_data.RawPtr->CamToLightProjection), cam_to_light_projection);
+
 
 	// Compile the buffer
 	m_cb_shadowmapped_light->Set(m_cb_shadowmapped_light_data.RawPtr);
@@ -485,6 +482,7 @@ XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
 }
 
 // Calculate transform matrix for the given light
+// TODO: This can be cached and only recalculated on display/view plane/aspect/FOV change, if needed
 XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 {
 	// TODO: near/far plane, FOV, and frustum in general will be calculated per light during cascaded shadow mapping

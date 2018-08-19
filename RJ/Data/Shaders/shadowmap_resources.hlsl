@@ -28,8 +28,10 @@ CBUFFER LightSpaceShadowMapDataBuffer REGISTER(b4)
 // previous SM input buffer and bind same buffer to both stages, saving map/unmap time
 CBUFFER ShadowMappedLightBuffer REGISTER(b5)
 {
-	// World*View*Proj matrix for the shadow-mapped light, biased from screen to UV coords
-	RJ_ROW_MAJOR_MATRIX BiasedShadowMapWVP;
+	// Transformation from camera projection space to light projection space
+	// Evaluates to [CamInvProj * CamInvView * LightView * LightProj]
+	RJ_ROW_MAJOR_MATRIX CamToLightProjection;
+
 
 	// Padding
 	//float# _padding_sm;			// CB size must be a multiple of 16 bytes

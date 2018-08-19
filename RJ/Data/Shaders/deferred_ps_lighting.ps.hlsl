@@ -15,7 +15,7 @@
 // Conditional compilation for shadow mapping support
 #ifdef SHADER_SHADOWMAPPED
 #	define SHADER_ENTRY		PS_Deferred_Lighting_ShadowMapped 
-#	define SHADER_INPUT		VertexShaderStandardOutputShadowMapped 
+#	define SHADER_INPUT		VertexShaderStandardOutput	// No longer different, but leave option open for future & CSMs
 #else
 #	define SHADER_ENTRY		PS_Deferred_Lighting
 #	define SHADER_INPUT		VertexShaderStandardOutput
@@ -80,7 +80,9 @@ float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 	
 	// Determine the shadow factor, if this is a shadow-casting light
 #ifdef SHADER_SHADOWMAPPED
-	float shadow_factor = ComputeShadowFactor(IN.shadow_uv);
+	float2 texUV = (texCoord / ScreenDimensions);
+	float3 shadow_uv = CalculateShadowMapUVProjection(texUV, depth);
+	float shadow_factor = ComputeShadowFactor(shadow_uv.xy, shadow_uv.z);
 #else
 	static const float shadow_factor = 1.0f;
 #endif

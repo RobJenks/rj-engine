@@ -44,6 +44,20 @@ float4 ScreenToView(float4 screen)
 	return ClipToView(clip);
 }
 
+// Reconstruct world-space position from the given texcoord [0 1] and depth value
+// TODO: NOT TESTED
+float4 ReconstructWorld(float2 texCoord, float depth)
+{
+	float4 projected = float4(
+		float2(texCoord.x, 1.0f - texCoord.y) * 2.0f - 1.0f, 
+		depth,
+		1.0f
+	);
+	
+	return mul(projected, CameraInverseViewProjection);
+	// TODO: divide through by W first?
+}
+
 // Scale and bias a [-1 +1] input to the range [0 +1]
 float2 ApplyNormalisationScaleBias(float2 input)
 {

@@ -320,7 +320,7 @@ XMMATRIX DeferredRenderProcess::CalculateFullScreenQuadRenderingTransform(const 
 {
 	return XMMatrixMultiply(
 		XMMatrixScaling(dimensions.x, dimensions.y, 1.0f),
-		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
+		XMMatrixTranslation(0.0f, 0.0f, 10.0f)	// TODO (SM): Remove z translation?
 	);
 }
 
@@ -442,6 +442,7 @@ void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 	}
 	
 	// Also initialise the fullscreen quad transform for rendering at the far plane
+	// TODO: will not currently react to changes of the far depth plane distance
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_transform_fullscreen_quad_farplane = XMMatrixMultiply(
 		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
@@ -629,16 +630,21 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	// Store the new state
 	SetFrameBufferState(FrameBufferState::Normal);
 
-	// Frame data buffer
+	/* Frame data buffer */
+
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
+	m_cb_frame_data.RawPtr->InvView = Game::Engine->GetRenderInverseViewMatrixF();
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 
 	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
+	// Camera-specific, independent of normal/fullscreen rendering
+	m_cb_frame_data.RawPtr->CameraInverseViewProjection = Game::Engine->GetRenderInverseViewProjectionMatrixF();
 
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
@@ -652,12 +658,16 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;															// View matrix == identity
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();					// Proj matrix == orthographic
 	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();				// ViewProj matrix == (orthographic * ID) == orthographic
+	m_cb_frame_data.RawPtr->InvView = ID_MATRIX_F;														// Inv view == inv(ID) == ID
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();		// Inv proj == inv orthographic
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 
 	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
+	// Camera-specific, independent of normal/fullscreen rendering
+	m_cb_frame_data.RawPtr->CameraInverseViewProjection = Game::Engine->GetRenderInverseViewProjectionMatrixF();
 
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
