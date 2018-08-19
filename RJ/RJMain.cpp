@@ -647,9 +647,9 @@ void RJMain::ProcessKeyboardInput(void)
 		syslight->SetOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
 		syslight->LightObject().SetIntensity(0.7f);
 		syslight->LightObject().EnableShadowMapping();
-		Game::Console.ProcessRawCommand(GameConsoleCommand("shadow map size 1280 720"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand("post motion disable"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("shadow map size 1280 720"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("post motion disable"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
 		Game::Keyboard.LockKey(DIK_U);
 	}
 	if (b[DIK_J])

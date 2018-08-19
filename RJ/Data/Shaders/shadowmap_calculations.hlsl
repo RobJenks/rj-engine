@@ -27,7 +27,7 @@ float3 CalculateShadowMapUVProjection(float2 camera_uv, float depth)
 
 	float2 shadow_uv = (light_projected.xy * 0.5f) + 0.5f;
 	shadow_uv.y = (1.0f - shadow_uv.y);
-
+	
 	return float3(shadow_uv, light_projected.z);
 }
 

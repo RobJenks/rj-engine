@@ -7,6 +7,7 @@
 #include "RM_Instance.h"
 #include "RM_InstanceMetadata.h"
 #include "ShaderDX11.h"
+#include "ViewPort.h"
 #include "Data/Shaders/shadowmap_resources.hlsl"
 class DeferredRenderProcess;
 class TextureDX11;
@@ -66,6 +67,7 @@ private:
 	void										InitialiseStandardBuffers(void);
 	void										InitialiseTextureBuffers(void);
 	void										InitialiseRenderTargets(void);
+	void										InitialiseViewports(void);
 	void										InitialiseRenderPipelines(void);
 	void										InitialiseLightSpaceShadowMappingPipeline(void);
 	void										InitialiseRenderQueueProcessing(void);
@@ -113,6 +115,8 @@ private:
 	static const UINTVECTOR2					DEFAULT_SHADOW_MAP_SIZE;
 	static const unsigned int					MAX_SHADOW_MAP_SIZE = 8192U;
 	UINTVECTOR2									m_shadow_map_size;
+
+	Viewport									m_shadow_map_viewport;					// Viewport for rendering to shadow map-sized RT
 
 	static const float							DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_DIST;
 	VectorisedFloat								m_lightspace_view_neardist;

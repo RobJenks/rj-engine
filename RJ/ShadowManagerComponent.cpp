@@ -49,7 +49,7 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 
 	m_cb_lightspace_shadowmap(NULL),
 	m_cb_shadowmapped_light(NULL), 
-
+	
 	r_viewfrustum(NULL),
 	r_frustum_world_min(NULL_VECTOR),
 	r_frustum_world_max(NULL_VECTOR),
@@ -85,6 +85,7 @@ void ShadowManagerComponent::PerformPostConfigInitialisation(void)
 {
 	InitialiseTextureBuffers();
 	InitialiseRenderTargets();
+	InitialiseViewports();
 	InitialiseRenderPipelines();
 }
 
@@ -188,6 +189,13 @@ void ShadowManagerComponent::InitialiseRenderTargets(void)
 	}
 }
 
+void ShadowManagerComponent::InitialiseViewports(void)
+{
+	// Shadow map viewport for rendering to light-space SM buffer
+	XMFLOAT2 size = GetShadowMapSize().ToFloat();
+	m_shadow_map_viewport = Viewport(0.0f, 0.0f, size.x, size.y);
+}
+
 void ShadowManagerComponent::InitialiseRenderPipelines(void)
 {
 	InitialiseLightSpaceShadowMappingPipeline();
@@ -215,17 +223,14 @@ void ShadowManagerComponent::InitialiseLightSpaceShadowMappingPipeline(void)
 	// General pipeline configuration
 	m_pipeline_lightspace_shadowmap->SetShader(Shader::Type::VertexShader, m_vs_lightspace_shadowmap);
 	m_pipeline_lightspace_shadowmap->SetRenderTarget(m_shadowmap_rt);
-	m_pipeline_lightspace_shadowmap->GetRasterizerState().SetViewport(Game::Engine->GetRenderDevice()->GetPrimaryViewport());
-
-	// TODO (SM): Re-enable here as available, e.g. set culling to front-face
+	m_pipeline_lightspace_shadowmap->GetRasterizerState().SetViewport(m_shadow_map_viewport);
 
 	// Standard depth buffer operations; we want to render a closest-depth buffer from the light perspective
-	/*DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Enable, DepthStencilState::CompareFunction::Less);
+	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Enable, DepthStencilState::CompareFunction::Less);
 	m_pipeline_lightspace_shadowmap->GetDepthStencilState().SetDepthMode(depthMode);
 
 	// Front-face culling so that backfaces are shadowed; reduces artifacts when compared to back-face culling
 	m_pipeline_lightspace_shadowmap->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
-	*/
 }
 
 void ShadowManagerComponent::InitialiseRenderQueueProcessing(void)
