@@ -66,6 +66,14 @@ struct GameConsoleCommand
 		OutputString = outputString;
 	}
 
+	// Sets the output result for a failed command execution; shortcut to SetOutput for Status==Failure
+	void SetFailureOutput(const std::string & outputString, Result failure_code = ErrorCodes::ConsoleCommandGeneralFailure)
+	{
+		OutputStatus = CommandResult::Failure;
+		OutputResult = failure_code;
+		OutputString = outputString;
+	}
+
 	// Returns a flag indicating whether a parameter with the specified index has been provided
 	CMPINLINE bool HasParameter(std::vector<std::string>::size_type index) const	{ return (InputParameters.size() > index); }
 

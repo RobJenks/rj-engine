@@ -43,6 +43,9 @@ public:
 	void SetViewports(const ViewportList & viewports);
 	const ViewportList & GetViewports();
 
+	void SetCompiledViewportDirect(const Viewport & viewport, const D3D11_VIEWPORT & compiled_viewport);
+	void SetCompiledViewportDirect(const Viewport & viewport, const D3D11_VIEWPORT & compiled_viewport, ViewportList::size_type index);
+
 	void SetScissorEnabled(bool scissorEnable = false);
 	bool GetScissorEnabled() const;
 

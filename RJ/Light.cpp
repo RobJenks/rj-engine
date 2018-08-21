@@ -68,6 +68,13 @@ Light::~Light(void)
 }
 
 
+// Determines whether the given light type is valid
+bool Light::IsValidLightType(LightType type)
+{
+	int index = static_cast<int>(type);
+	return (index >= 0 && index < static_cast<int>(LightType::_LightTypeCount));
+}
+
 // Translate a light type value to its string representation.  Defaults to "Directional" if the value is not recognised
 std::string Light::TranslateLightTypeToString(LightType type)
 {

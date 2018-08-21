@@ -45,6 +45,9 @@ public:
 	void							InitialiseSpotLight(const XMFLOAT4 & positionWS, const XMFLOAT4 & directionWS, const XMFLOAT4 & colour,
 														float range, float intensity, float spotlight_angle);
 
+	// Determines whether the given light type is valid
+	static bool						IsValidLightType(LightType type);
+
 	// Translate a light type value to/from its string representation
 	static std::string				TranslateLightTypeToString(LightType type);
 	static Light::LightType			TranslateLightTypeFromString(std::string type);

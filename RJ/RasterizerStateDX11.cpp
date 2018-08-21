@@ -176,6 +176,20 @@ const RasterizerStateDX11::ViewportList & RasterizerStateDX11::GetViewports()
 	return m_viewports;
 }
 
+void RasterizerStateDX11::SetCompiledViewportDirect(const Viewport & viewport, const D3D11_VIEWPORT & compiled_viewport)
+{
+	// Set standard and compiled viewport directly, so no need to set the dirty flag and recompile on next bind
+	m_viewports[0] = viewport;
+	m_d3d_viewports[0] = compiled_viewport;
+}
+
+void RasterizerStateDX11::SetCompiledViewportDirect(const Viewport & viewport, const D3D11_VIEWPORT & compiled_viewport, ViewportList::size_type index)
+{
+	// Set standard and compiled viewport directly, so no need to set the dirty flag and recompile on next bind
+	m_viewports[index] = viewport;
+	m_d3d_viewports[index] = compiled_viewport;
+}
+
 void RasterizerStateDX11::SetScissorEnabled(bool scissorEnable)
 {
 	m_ScissorEnabled = scissorEnable;

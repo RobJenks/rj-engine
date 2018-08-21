@@ -677,6 +677,7 @@ namespace ErrorCodes {
 	const Result		ObjectTypeCannotAcceptDebugCommands				= 5610;
 	const Result		CommandParameterIsNotValid						= 5611;
 	const Result		ConsoleCommandHasInvalidSyntax					= 5612;
+	const Result		ConsoleCommandGeneralFailure					= 5613;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

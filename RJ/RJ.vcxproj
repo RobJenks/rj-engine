@@ -672,6 +672,7 @@
     <ClCompile Include="MeshGeometry.cpp" />
     <ClCompile Include="MissileLauncher.cpp" />
     <ClCompile Include="VariableSizeValue.cpp" />
+    <ClCompile Include="Viewport.cpp" />
     <ClCompile Include="__OLD_Model.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
