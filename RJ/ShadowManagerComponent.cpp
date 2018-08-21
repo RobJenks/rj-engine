@@ -858,6 +858,37 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 				}
 				return true;
 			}
+			else if (command.Parameter(1) == "getconfig")
+			{
+				if (command.ParameterCount() >= 3)
+				{
+					unsigned int index = static_cast<unsigned int>(command.ParameterAsInt(2));
+					if (index < SMSize::_SMCOUNT)
+					{
+						command.SetSuccessOutput(concat("Shadow map config ")(index)(": buffer size = ")(m_shadow_map_config[index].TexelSize)
+							("x")(m_shadow_map_config[index].TexelSize).str());
+					}
+					else
+					{
+						SMSize fromtexel = GetShadowMapSizeFromTexels(index);
+						if (fromtexel != SMSize::SMUnknown)
+						{
+							int ix = static_cast<int>(fromtexel);
+							command.SetSuccessOutput(concat("Shadow map config ")(ix)(": buffer size = ")(m_shadow_map_config[ix].TexelSize)
+								("x")(m_shadow_map_config[ix].TexelSize).str());
+						}
+						else
+						{
+							command.SetFailureOutput(concat("No shadow map config exists with ID or texel size of ")(index).str());
+						}
+					}
+				}
+				else
+				{
+					command.SetFailureOutput("Usage: getconfig <ConfigID|TexelSize>");
+				}
+				return true;
+			}
 		}
 	}
 

@@ -2,6 +2,9 @@
 #include "FastMath.h"
 #include "Light.h"
 #include "GameConsoleCommand.h"
+#include "CoreEngine.h"
+#include "ShadowManagerComponent.h"
+
 
 // Initialise static variables
 Light::LightID Light::GlobalLightIDCount = 0U;
@@ -97,6 +100,7 @@ LightType Light::TranslateLightTypeFromString(std::string type)
 	else											return LightType::Point;
 }
 
+
 // Process a debug command from the console.  "Light" objects are not part of the object hierarchy, but 
 // members of that hierarchy will invokve this method when asked to perform lighting-related actions
 void Light::ProcessDebugCommand(GameConsoleCommand & command)
@@ -120,6 +124,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightAngle)
 	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuation)
 	REGISTER_DEBUG_ACCESSOR_FN(IsShadowMapped)
+	REGISTER_DEBUG_ACCESSOR_FN(GetShadowMapConfig)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(Activate)
@@ -142,6 +147,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(EnableShadowMapping)
 	REGISTER_DEBUG_FN(DisableShadowMapping)
 	REGISTER_DEBUG_FN(SetShadowMappingState, command.ParameterAsBool(3))
+	REGISTER_DEBUG_FN(SetShadowMapConfig, (static_cast<unsigned int>(command.ParameterAsInt(3)) < ShadowManagerComponent::SMSize::_SMCOUNT ? static_cast<unsigned int>(command.ParameterAsInt(3)) : GetShadowMapConfig()))
 }
 
 

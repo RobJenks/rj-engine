@@ -68,6 +68,7 @@ public:
 	CMPINLINE float GetIntensity(void) const					{ return Data.Intensity; }
 	CMPINLINE float GetSpotlightAngle(void) const				{ return Data.SpotlightAngle; }
 	CMPINLINE AttenuationData GetAttenuation(void) const		{ return Data.Attenuation; }
+	CMPINLINE unsigned int GetShadowMapConfig(void) const		{ return Data.ShadowMapConfig; }
 
 	// Mutator functions which operate on the underlying LightData structure
 	CMPINLINE void SetType(LightType value) { Data.Type = value; }
@@ -85,6 +86,7 @@ public:
 	CMPINLINE void SetAttenuationConstant(float atten) { Data.Attenuation.Constant = atten; }
 	CMPINLINE void SetAttenuationLinear(float atten) { Data.Attenuation.Linear = atten; }
 	CMPINLINE void SetAttenuationQuadratic(float atten) { Data.Attenuation.Quadratic = atten; }
+	CMPINLINE void SetShadowMapConfig(unsigned int config) { Data.ShadowMapConfig = config; }
 
 	// Shadow mapping state for the light
 	CMPINLINE bool IsShadowMapped(void) const { return CheckBit_Single(Data.Flags, LIGHT_FLAG_SHADOW_MAP); }
