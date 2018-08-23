@@ -652,6 +652,11 @@ void RJMain::ProcessKeyboardInput(void)
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
 		Game::Keyboard.LockKey(DIK_U);
 	}
+
+	if (b[DIK_L])
+	{
+	}
+
 	if (b[DIK_J])
 	{
 		if (!b[DIK_LSHIFT])	ActivateDebugPortalRenderingTest(Game::CurrentPlayer->GetActor());
@@ -749,6 +754,8 @@ void RJMain::ProcessKeyboardInput(void)
 			t2->SetPosition(envpos2);
 			t2->SetOrientation(ID_QUATERNION);
 			t2->SetExtent(XMVectorReplicate(0.5f));
+
+			Game::Log << LOG_DEBUG << "Added at " << Vector3ToString(t->GetPosition()) << " and " << Vector3ToString(t2->GetPosition()) << "\n";
 
 			return;
 		}
@@ -1019,6 +1026,8 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 			Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
 			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
+
+			Game::Console.ProcessRawCommand(GameConsoleCommand("obj plight light setshadowmappingstate true"));
 
 			((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(1.0f);
 

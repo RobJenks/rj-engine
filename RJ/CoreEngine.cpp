@@ -1818,14 +1818,16 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				// TODO (SM): temporary
 				auto inst = RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))));
+				auto worldpos = XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix());
+
+				// TODO (SM): temporary
 				if (terrain_def->HasModel()) inst.Flags |= RM_Instance::INSTANCE_FLAG_SHADOW_CASTER;
 
 				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
 					std::move(inst), 
-					std::move(RM_InstanceMetadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius()))
+					std::move(RM_InstanceMetadata(worldpos, terrain->GetCollisionSphereRadius()))
 				);
 
 				// This terrain object has been rendered
@@ -1835,11 +1837,12 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			else if (terrain->HasArticulatedModel())
 			{
 				// Use same parent metadata for each component, since we don't have e.g. per-component extents right now
-				RM_InstanceMetadata metadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius());
+				auto worldpos = XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix());
+				RM_InstanceMetadata metadata(worldpos, terrain->GetCollisionSphereRadius());
 
 				// Render each component of the articulated model
 				ArticulatedModel *model = terrain->GetArticulatedModel();
-				model->Update(XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix()),
+				model->Update(worldpos,
 					XMQuaternionMultiply(terrain->GetOrientation(), environment->GetOrientation()),
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
 
