@@ -8,9 +8,6 @@
 // GBuffer texture target bindings
 Texture2D DebugSourceTexture[DEF_DEBUG_MAX_RENDER_VIEWS] : register(t0);
 
-// Exponent applied to generate enough contrast in depth data for visualisation
-static const float DEPTH_EXP_FACTOR = 6.0f;
-
 // Constants
 static const float4 EMPTY = float4(0, 0, 0, 0);
 
@@ -23,7 +20,7 @@ float4 ContextDependentSample(Texture2D tex, float2 texcoord, uint buffer_type)
 	}
 	else if (buffer_type == DEF_DEBUG_STATE_ENABLED_DEPTH)
 	{
-		return pow(tex.Sample(LinearClampSampler, texcoord).rrrr, DEPTH_EXP_FACTOR);
+		return pow(tex.Sample(LinearClampSampler, texcoord).rrrr, C_debug_depth_scaling_exponent);
 	}
 	else if (buffer_type == DEF_DEBUG_STATE_ENABLED_VELOCITY)
 	{

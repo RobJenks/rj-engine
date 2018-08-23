@@ -249,19 +249,25 @@ private:
 	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
 	int												GetHlslDebugMode(DebugRenderMode render_mode) const;
 	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
-	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
+	void											UpdateDebugRenderingBuffers(void);
+	CMPINLINE bool									DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
 	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);
-	
+	CMPINLINE float									GetDebugDepthRenderingExponent(void) const { return m_debug_depth_scaling_exponent; }
+	void											SetDebugDepthRenderingExponent(float exp);
 	
 	// Returns the list of supported debug render modes, mapped (StringCode -> Mode)
 	static const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>> SupportedDebugRenderModes;
 	
 
 	unsigned int									m_debug_render_active_view_count;
+	unsigned int									m_debug_output_mode;
 	std::vector<DebugRenderMode>					m_debug_render_modes;
 	std::vector<ID3D11ShaderResourceView*>			m_debug_srvs;
 	std::vector<ID3D11ShaderResourceView*>			m_debug_srv_unbind;
 	ManagedPtr<DeferredRendererDebugRenderingData>	m_cb_debug_data;
 	ConstantBufferDX11 *							m_cb_debug;
+
+	static const float								DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT;
+	float											m_debug_depth_scaling_exponent;
 	
 };

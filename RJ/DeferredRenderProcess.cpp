@@ -20,13 +20,18 @@
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
 
-/* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
+/* Info: known problem.  If an object is rendered in the deferred LIGHTING phase with textures assigned in its material, 
    those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
    only be rendered in a small upper-left corner square corresponding to the dimensions of the material texture.  If it 
    becomes necessary to allow textures light volume models in future, need to ensure the slots for material textures and 
    GBuffer textures do not overlap */
 
 
+// Initialise static data
+const float DeferredRenderProcess::DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT = 6.0f;
+
+
+// Constructor
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
 	m_vs{ NULL, NULL },
@@ -81,7 +86,9 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_post_processing_components({ 0 }),
 
 	m_debug_render_active_view_count(0U),
-	m_cb_debug(NULL)
+	m_cb_debug(NULL), 
+	m_debug_depth_scaling_exponent(DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT), 
+	m_debug_output_mode(DEF_DEBUG_RENDER_VIEWS)
 {
 	SetName( RenderProcess::Name<DeferredRenderProcess>() );
 
@@ -1039,17 +1046,31 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 
 void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode)
 {
-	// Set general buffer data
-	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+	// Maximum of 16 views (4x4)
 	unsigned int viewcount = (std::min)(static_cast<unsigned int>(render_modes.size()), 16U);
-	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
-	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
-	m_cb_debug_data.RawPtr->C_debug_render_mode = output_mode;
-
 
 	// Store a copy of this data for per-frame updates
 	m_debug_render_modes.clear();
 	m_debug_render_modes.insert(m_debug_render_modes.begin(), render_modes.begin(), (render_modes.begin() + viewcount));
+
+	m_debug_output_mode = output_mode;
+
+	// Update the debug shader buffer based on this new information
+	UpdateDebugRenderingBuffers();
+}
+
+void DeferredRenderProcess::UpdateDebugRenderingBuffers(void)
+{
+	// Set general buffer data
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+	size_t viewcount = m_debug_render_modes.size();
+	assert(viewcount <= 16U);
+
+	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
+	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
+	m_cb_debug_data.RawPtr->C_debug_render_mode = m_debug_output_mode;
+	m_cb_debug_data.RawPtr->C_debug_depth_scaling_exponent = GetDebugDepthRenderingExponent();
+
 
 	// Vector will hold pointers to the relevant texture resources.  Allocate here but reassign resources
 	// per-frame in the debug rendering method, since resource locations may change
@@ -1060,14 +1081,14 @@ void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRender
 	int last_valid_view = -1;
 	for (unsigned int i = 0U; i < 16U; ++i)
 	{
-		if (i >= viewcount || render_modes[i] == DebugRenderMode::None)
+		if (i >= viewcount || m_debug_render_modes[i] == DebugRenderMode::None)
 		{
 			m_cb_debug_data.RawPtr->C_debug_view[i].state = DEF_DEBUG_STATE_DISABLED;
 		}
 		else
 		{
 			last_valid_view = static_cast<int>(i);
-			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(render_modes[i]);
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(m_debug_render_modes[i]);
 		}
 	}
 
@@ -1140,6 +1161,12 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	return true;
 }
 
+void DeferredRenderProcess::SetDebugDepthRenderingExponent(float exp)
+{
+	m_debug_depth_scaling_exponent = exp;
+	UpdateDebugRenderingBuffers();
+}
+
 // Return a pointer to the final colour buffer for this render process.  This may be the immediately-rendered colour
 // buffer, the post-processed colour buffer or the debug rendering output, depending on our current state
 TextureDX11 * DeferredRenderProcess::GetFinalColourBuffer(void)
@@ -1187,6 +1214,25 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 			command.SetSuccessOutput(concat("Enabled debug rendering with ")(m_debug_render_active_view_count)(" redirected render target buffers").str());
 		}
 
+		return true;
+	}
+	else if (command.InputCommand == "debug_depth_exp")
+	{
+		if (command.ParameterCount() >= 1U)
+		{
+			float exp = command.ParameterAsFloat(0);
+			if (exp <= 0.0f) {
+				command.SetFailureOutput("Debug depth rendering exponent must be positive and non-zero");
+			}
+			else {
+				SetDebugDepthRenderingExponent(exp);
+				command.SetSuccessOutput(concat("Debug depth rendering exponent updated to ")(GetDebugDepthRenderingExponent()).str());
+			}
+		}
+		else
+		{
+			command.SetSuccessOutput(concat("Debug depth rendering exponent is ")(GetDebugDepthRenderingExponent()).str());
+		}
 		return true;
 	}
 	else if (command.InputCommand == "defrend_setnoise")
