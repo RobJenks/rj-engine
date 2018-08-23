@@ -529,7 +529,7 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(unsigned int light_inde
 
 	// Perform a resource copy of this shadow map data if we have the debug capture enabled
 #ifdef _DEBUG
-	if (light_index == m_debug_shadowmap_capture_id) DebugCaptureActiveShadowMap();
+	if ((m_active_shadow_map_count - 1) == m_debug_shadowmap_capture_id) DebugCaptureActiveShadowMap();
 #endif
 
 	// Deactivate the pipeline and unbind all resources
