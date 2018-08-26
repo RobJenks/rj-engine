@@ -49,4 +49,13 @@ TEXTURE2D ShadowMapTexture REGISTER(t10);
 #define ShadowMapTextureName BUFFER_NAME(ShadowMapTexture)
 
 
+// --------------------------------------------------------------------------------
+// Support percentage-closer filtering (PCF) kernels for shadow map calculation
+#define PCF_NONE		0
+#define PCF_SINGLE		1
+#define PCF_BOX_3		2
+
+
+
+
 #endif

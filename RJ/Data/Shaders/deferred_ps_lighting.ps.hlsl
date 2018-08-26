@@ -85,6 +85,9 @@ float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 	float2 texUV = (texCoord / ScreenDimensions);
 	float3 shadow_uv = CalculateShadowMapUVProjection(texUV, depth);
 	float shadow_factor = ComputeShadowFactor(shadow_uv.xy, shadow_uv.z);
+#	if DEBUG_RENDER_PCF
+		float unweighted = (shadow_factor - (1.0f - SHADOW_SHADING_FACTOR)) * (1.0f / SHADOW_SHADING_FACTOR);
+#	endif
 #else
 	static const float shadow_factor = 1.0f;
 #endif
@@ -94,8 +97,9 @@ float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 	float4 total_specular = (specular * lit.Specular);
 	float4 total_noise = (noise * lit.Diffuse * LIGHTING_NOISE_STRENGTH);
 
-#if DEBUG_RENDER_PCF
-	if (shadow_factor != 0.0f && shadow_factor != 1.0f)
+	// Debug rendering of PCF thresholds
+#if DEBUG_RENDER_PCF && defined(SHADER_SHADOWMAPPED)
+	if (unweighted > 0.00001f && unweighted < 0.99999f)
 	{
 		return (total_diffuse * 0.25f) + float4(shadow_factor, 1.0f - shadow_factor, 0.0f, 1.0f);
 	}
