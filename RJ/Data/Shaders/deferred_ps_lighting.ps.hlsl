@@ -21,6 +21,8 @@
 #	define SHADER_INPUT		VertexShaderStandardOutput
 #endif
 
+// Injectable compile-time macros for debug rendering
+#define DEBUG_RENDER_PCF	0
 
 // Determines the relative strength of generated noise when modulating the calculated lighting values
 static const float LIGHTING_NOISE_STRENGTH = 0.1f;
@@ -87,10 +89,18 @@ float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 	static const float shadow_factor = 1.0f;
 #endif
 
-	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
+	// Determine the total lighting contribution from both GBuffer/Material and lighting calculation data
 	float4 total_diffuse = (diffuse * lit.Diffuse * (1.0f - LIGHTING_NOISE_STRENGTH));
 	float4 total_specular = (specular * lit.Specular);
 	float4 total_noise = (noise * lit.Diffuse * LIGHTING_NOISE_STRENGTH);
 
+#if DEBUG_RENDER_PCF
+	if (shadow_factor != 0.0f && shadow_factor != 1.0f)
+	{
+		return (total_diffuse * 0.25f) + float4(shadow_factor, 1.0f - shadow_factor, 0.0f, 1.0f);
+	}
+#endif
+
+	// Return the combined contribution from all lighting components
 	return (total_diffuse + total_specular + total_noise) * shadow_factor;
 }

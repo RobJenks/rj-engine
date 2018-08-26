@@ -18,6 +18,9 @@ public:
 	void						SetWrapMode(WrapMode u = WrapMode::Repeat, WrapMode v = WrapMode::Repeat, WrapMode w = WrapMode::Repeat);
 	void						GetWrapMode(WrapMode& u, WrapMode& v, WrapMode& w) const;
 
+	void						SetCompareMode(CompareMode compareMode);
+	CompareMode					GetCompareMode(void) const;
+
 	void						SetCompareFunction(CompareFunc compareFunc);
 	CompareFunc					GetCompareFunc() const;
 

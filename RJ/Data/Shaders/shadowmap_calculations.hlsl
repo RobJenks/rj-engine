@@ -33,13 +33,26 @@ float3 CalculateShadowMapUVProjection(float2 camera_uv, float depth)
 
 // Compute the shadowing factor based on the currently-bound shadow map and the given UV-biased
 // projected coordinates.  
-float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
+float _ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 {
 	float shadowmap_depth = ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r;
+
+
 	bool shadowed = ((camera_depth - shadowmap_depth) > SHADOWMAP_PROJECTION_EPSILON);
 
 	return (shadowed ? SHADOW_SHADING_FACTOR : 1.0f);
 }
+
+float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
+{
+	float shadow_pc = (camera_depth == 13.0f ?
+		ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r :
+		ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, camera_depth)
+	);
+
+	return shadow_pc;
+}
+
 
 
 

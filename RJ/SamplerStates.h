@@ -13,5 +13,6 @@ public:
 	static const std::string			PointClampSampler;
 	static const std::string			PointRepeatSampler;
 	
+	static const std::string			PCFDepthSampler;
 
 };

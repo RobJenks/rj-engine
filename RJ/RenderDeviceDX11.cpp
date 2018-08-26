@@ -687,6 +687,14 @@ Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 	m_sampler_pointrepeat->SetFilter(SamplerState::MinFilter::MinNearest, SamplerState::MagFilter::MagNearest, SamplerState::MipFilter::MipNearest);
 	m_sampler_pointrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
 
+	m_sampler_pcfdepth = Assets.CreateSamplerState(SamplerStates::PCFDepthSampler);
+	m_sampler_pcfdepth->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
+	m_sampler_pcfdepth->SetWrapMode(SamplerState::WrapMode::Mirror, SamplerState::WrapMode::Mirror);
+	m_sampler_pcfdepth->SetCompareMode(SamplerState::CompareMode::CompareRefToTexture);
+	m_sampler_pcfdepth->SetCompareFunction(SamplerState::CompareFunc::LessEqual);
+	//m_sampler_pcfdepth->EnableAnisotropicFiltering(true);
+
+
 
 	Game::Log << LOG_INFO << "Sample state definitions initialised\n";
 	return ErrorCodes::NoError;

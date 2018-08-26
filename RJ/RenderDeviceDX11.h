@@ -191,6 +191,7 @@ private:
 	SamplerStateDX11 *						m_sampler_linearrepeat;
 	SamplerStateDX11 *						m_sampler_pointclamp;
 	SamplerStateDX11 *						m_sampler_pointrepeat;
+	SamplerStateDX11 *						m_sampler_pcfdepth;
 
 	const MaterialDX11 *					m_material_null;
 	const MaterialDX11 *					m_material_default;

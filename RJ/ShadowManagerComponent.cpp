@@ -663,6 +663,9 @@ XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 			return CameraProjection::Orthographic(XMFLOAT2(r_frustum_longest_diagonal_mag.F(), r_frustum_longest_diagonal_mag.F()), 
 				m_lightspace_view_neardist.F(), r_lightspace_view_fardist.F());
 
+		case LightType::Spotlight:
+				return CameraProjection::Perspective(rd->GetFOV(), rd->GetAspectRatio(), rd->GetNearClipDistance(), light.Range + 1.0f);
+			
 		// Case Point, Spotlight, or as default
 		default:
 			return CameraProjection::Perspective(rd->GetFOV(), rd->GetAspectRatio(), rd->GetNearClipDistance(), rd->GetFarClipDistance());

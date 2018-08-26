@@ -2508,7 +2508,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	player_light->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
 	player_light->LightObject().SetIntensity(16.0f);
-	player_light->LightObject().SetRange(5.0f);
+	player_light->LightObject().SetRange(20.0f);
 	player_light->LightObject().SetAttenuation(AttenuationData(0.0f, 0.6f, 0.4));
 	//player_light->LightObject().Deactivate();
 	lt2 = player_light;
@@ -2721,15 +2721,26 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		// Tmp: Update player spotlight position and orientation to match camera
-		LightSource *lights[2] = { lt(), lt2() };
+		static bool attach = true;
+		if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+		{
+			attach = !attach;
+			Game::Log << LOG_DEBUG << "Setting attachment to " << attach << "\n";
+			Game::Keyboard.LockKey(DIK_CAPSLOCK);
+		}
+
+		LightSource *lights[2] = { lt2() };
 		for (LightSource *active : lights)
 		{
-			active->SetPosition(Game::Engine->GetCamera()->GetPosition());
-			active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
-			if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+			if (attach && active)
 			{
-				active->LightObject().SetRange(active->LightObject().GetRange() < 100.0f ? 200.0f : 20.0f);
-				Game::Keyboard.LockKey(DIK_CAPSLOCK);
+				active->SetPosition(Game::Engine->GetCamera()->GetPosition());
+				active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
+
+				/*XMMATRIX om = XMMatrixLookAtLH(Game::Engine->GetCamera()->GetPosition(),
+					XMVectorAdd(Game::Engine->GetCamera()->GetPosition(), Game::Engine->GetCamera()->GetCameraHeading()),
+					XMVectorSetY(NULL_VECTOR, -1.0f));
+				active->SetOrientation(XMQuaternionRotationMatrix(om));*/
 			}
 		}
 
