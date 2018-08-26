@@ -2,9 +2,10 @@
 #define __ShadowMapCalculationsHLSL__
 
 #include "shadowmap_resources.hlsl"
+#include "DeferredRenderingBuffers.hlsl"
 
 // Macros controlling shadow-map features
-#define SHADER_SHADOWMAP_PCF		PCF_SINGLE
+#define SHADER_SHADOWMAP_PCF		PCF_BOX_3
 
 // Constant epsilon bias allowed between shadow map and projected camera distance calculation
 static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
@@ -45,7 +46,25 @@ float ShadowMapPCFSingle(float2 shadowmap_uv, float camera_depth)
 // PCF: 3x3 box PCF kernel
 float ShadowMapPCFBox3(float2 shadowmap_uv, float camera_depth)
 {
-	return 1.0f;
+	static const int TAPS = 9;
+	static const int2 offsets[TAPS] =
+	{
+		int2(-1, -1), int2(-1, 0), int2(-1, +1),
+		int2(0, -1), int2(0, 0), int2(0, +1),
+		int2(+1, -1), int2(+1, 0), int2(+1, +1)
+	};
+
+	float shadow_pc = 0.0f;
+
+	[unroll]
+	for (int i = 0; i < TAPS; ++i)
+	{
+		shadow_pc += ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv,
+			(camera_depth - SHADOWMAP_PROJECTION_EPSILON), offsets[i]);
+	}
+
+	static const float WEIGHTING = (1.0f / (TAPS * (1.0f / SHADOW_SHADING_FACTOR)));	// E.g. 9 taps, shadingfactor of 0.5 -> WEIGHTING = 1/18
+	return (1.0f - SHADOW_SHADING_FACTOR) + (shadow_pc * WEIGHTING);
 }
 
 
@@ -54,14 +73,17 @@ float ShadowMapPCFBox3(float2 shadowmap_uv, float camera_depth)
 // projected coordinates.  
 float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 {
+	// PCF: Single-tap
 #if SHADER_SHADOWMAP_PCF == PCF_SINGLE
 	return ShadowMapPCFSingle(shadowmap_uv, camera_depth);
 
+	// PCF: 3x3 box filter kernel
 #elif SHADER_SHADOWMAP_PCF == PCF_BOX_3
 	return ShadowMapPCFBox3(shadowmap_uv, camera_depth);
 
 #else
 
+	// Single sample, no PCF
 	float shadowmap_depth = ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r;
 	bool shadowed = ((camera_depth - shadowmap_depth) > SHADOWMAP_PROJECTION_EPSILON);
 	return (shadowed ? (1.0F - SHADOW_SHADING_FACTOR) : 1.0f);
