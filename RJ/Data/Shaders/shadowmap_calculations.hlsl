@@ -105,7 +105,7 @@ float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 		}
 
 		// Early-exit from adaptive kernel if we are in (approx) 0% or 100% shadow
-		if (raw_sum < PCF_ADAPTIVE_KERNEL_EPSILON || raw_sum > (1.0f - PCF_ADAPTIVE_KERNEL_EPSILON))		// i.e. ~= 0 or ~= 1
+		if (raw_sum < PCF_ADAPTIVE_KERNEL_EPSILON || raw_sum >= (KERNEL(STAGETAPS[k]) - PCF_ADAPTIVE_KERNEL_EPSILON))		// i.e. ~= 0 or ~= 1
 		{
 			break;
 		}
