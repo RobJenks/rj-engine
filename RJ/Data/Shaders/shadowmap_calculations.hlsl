@@ -39,8 +39,8 @@ float3 CalculateShadowMapUVProjection(float2 camera_uv, float depth)
 float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 {
 #if SHADER_SHADOWMAP_PCF
-	
-	float shadow_pc = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, camera_depth);
+
+	float shadow_pc = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, (camera_depth - SHADOWMAP_PROJECTION_EPSILON));
 	return (1.0f - SHADOW_SHADING_FACTOR) + (shadow_pc * SHADOW_SHADING_FACTOR);
 
 #else
