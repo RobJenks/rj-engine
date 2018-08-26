@@ -734,54 +734,38 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_EQUALS])
 	{
-		static Terrain *t = NULL; static Terrain *t2 = NULL;
-		if (!t)
+		static const int TN = 4;
+		static Terrain *t[TN] = { 0 };
+		static int tx = 0;
+
+		if (!b[DIK_LSHIFT])
 		{
-			t = Terrain::Create("tmp_terrain_cone");
-			t2 = Terrain::Create("tmp_terrain_cone");
+			bool create = (t[tx] == NULL);
+			
+			if (create) t[tx] = Terrain::Create("tmp_terrain_cone");
 
-			auto *actor = Game::CurrentPlayer->GetActor();
-			auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(-3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
-			auto envpos2 = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
+			static const XMVECTOR offset_scale = XMVectorReplicate(2.5f);
+			auto pos = XMVectorMultiplyAdd(Game::Engine->GetCamera()->GetCameraHeading(), offset_scale, Game::Engine->GetCamera()->GetPosition());
 
-			t->SetPosition(envpos);
-			t->SetOrientation(ID_QUATERNION);
-			t->SetExtent(XMVectorReplicate(0.5f));
+			t[tx]->SetPosition(XMVector3TransformCoord(pos, cs()->GetInverseZeroPointWorldMatrix()));
+			t[tx]->SetOrientation(ID_QUATERNION);
+			t[tx]->SetExtent(XMVectorReplicate(0.5f));
 
-			cs()->AddTerrainObject(t);
-			cs()->AddTerrainObject(t2);
+			if (create) cs()->AddTerrainObject(t[tx]);
 
-			t2->SetPosition(envpos2);
-			t2->SetOrientation(ID_QUATERNION);
-			t2->SetExtent(XMVectorReplicate(0.5f));
-
-			Game::Log << LOG_DEBUG << "Added at " << Vector3ToString(t->GetPosition()) << " and " << Vector3ToString(t2->GetPosition()) << "\n";
-
-			return;
+			Game::Log << LOG_DEBUG << "Obj " << tx << " moved to " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
+				XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 		}
-		
-
-		if (t)
+		else
 		{
-			if (b[DIK_LSHIFT])
-			{
-				Game::Log << LOG_DEBUG << "Pos: " << Vector4ToString(t->GetPosition()) << "\n";
-			}
-			else if (b[DIK_LCONTROL])
-			{
-				Game::Log << LOG_DEBUG << "Moving to: " << Vector4ToString(t->GetPosition()) << "\n";
-				Game::CurrentPlayer->GetActor()->SetEnvironmentPosition(t->GetEnvironmentPosition());
-			}
+			if (t[tx])
+				Game::Log << LOG_DEBUG << "Obj " << tx << " left at " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
+					XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 			else
-			{
-				auto *actor = Game::CurrentPlayer->GetActor();
-				auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 1.0f), actor->GetOrientationMatrix()));
-
-				Game::Log << LOG_DEBUG << "Before: " << Vector4ToString(t->GetPosition()) << "\n";
-				t->SetPosition(envpos);
-				Game::Log << LOG_DEBUG << "After: " << Vector4ToString(t->GetPosition()) << "\n";
-			}
+				Game::Log << LOG_DEBUG << "Obj " << tx << " skipped; does not exist yet\n";
 		}
+
+		tx = ((tx + 1) % TN);
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
