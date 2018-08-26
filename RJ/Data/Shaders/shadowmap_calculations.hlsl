@@ -8,6 +8,7 @@
 // Macros controlling shadow-map features
 #define SHADER_SHADOWMAP_PCF				PCF_BOX_3		/* Determines the PCF kernel that will be used */
 #define SHADER_APPLY_PCF_KERNEL_WEIGHTS		1				/* Determines whether PCF kernel values will be weighted on a per-tap basis*/
+#define SHADER_PCF_KERNEL_SCALE				1.0f			/* Scale factor applied to all PCF kernel offsets (integral recommended)*/
 
 // Constant epsilon bias allowed between shadow map and projected camera distance calculation
 static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
@@ -77,7 +78,7 @@ float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 	for (int i = 0; i < TAPS; ++i)
 	{
 		float pcfsample = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv,
-			(camera_depth - SHADOWMAP_PROJECTION_EPSILON), OFFSETS[i]);
+			(camera_depth - SHADOWMAP_PROJECTION_EPSILON), OFFSETS[i] * SHADER_PCF_KERNEL_SCALE);
 
 #if SHADER_APPLY_PCF_KERNEL_WEIGHTS
 		pcfsample *= WEIGHTS[i];
