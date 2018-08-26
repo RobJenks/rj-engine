@@ -6,7 +6,8 @@
 #include "DeferredRenderingBuffers.hlsl"
 
 // Macros controlling shadow-map features
-#define SHADER_SHADOWMAP_PCF		PCF_BOX_3
+#define SHADER_SHADOWMAP_PCF				PCF_BOX_3		/* Determines the PCF kernel that will be used */
+#define SHADER_APPLY_PCF_KERNEL_WEIGHTS		1				/* Determines whether PCF kernel values will be weighted on a per-tap basis*/
 
 // Constant epsilon bias allowed between shadow map and projected camera distance calculation
 static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
@@ -47,26 +48,46 @@ float ShadowMapPCFSingle(float2 shadowmap_uv, float camera_depth)
 // Percentage-closer filtering (PCF) with compile-time attached offsets, for use as shadow mapping kernel
 float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 {
+	// Select PCF kernel
 #if SHADER_SHADOWMAP_PCF == PCF_BOX_3
 	static const int TAPS = BOX3_TAPS;
-	static const int2 offsets[BOX3_TAPS] = BOX3_OFFSETS;
+	static const int2 OFFSETS[TAPS] = BOX3_OFFSETS;
+	static const float WEIGHTS[TAPS] = BOX3_WEIGHTS;
+	static const float WEIGHT_SUM = BOX3_WEIGHT_SUM;
 
 #else
 	static const int TAPS = 1;
-	static const int2 offsets[1] = int2(0, 0);
-
+	static const int2 OFFSETS[TAPS] = { int2(0, 0) };
+	static const float WEIGHTS[TAPS] = { 1.0f };
+	static const float WEIGHT_SUM = 1.0f;
 #endif
 
+	// If configurable weighting per tap is enabled, shadow contribution must be divided through by weighting sum (instead of simply tap count)
+#if SHADER_APPLY_PCF_KERNEL_WEIGHTS
+	static const float KERNEL_DIVISOR = WEIGHT_SUM;
+#else
+	static const float KERNEL_DIVISOR = TAPS;
+#endif
+ 
+
+	// Sample based on the PCF kernel and accumulate the shadowing contribution
 	float shadow_pc = 0.0f;
 
 	[unroll]
 	for (int i = 0; i < TAPS; ++i)
 	{
-		shadow_pc += ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv,
-			(camera_depth - SHADOWMAP_PROJECTION_EPSILON), offsets[i]);
+		float pcfsample = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv,
+			(camera_depth - SHADOWMAP_PROJECTION_EPSILON), OFFSETS[i]);
+
+#if SHADER_APPLY_PCF_KERNEL_WEIGHTS
+		pcfsample *= WEIGHTS[i];
+#endif
+
+		shadow_pc += pcfsample;
 	}
 
-	static const float WEIGHTING = (1.0f / (TAPS * (1.0f / SHADOW_SHADING_FACTOR)));	// E.g. 9 taps, shadingfactor of 0.5 -> WEIGHTING = 1/18
+	// Return the averaged contribution, accounting for kernel size and relative weights
+	static const float WEIGHTING = (1.0f / (KERNEL_DIVISOR * (1.0f / SHADOW_SHADING_FACTOR)));	// E.g. 9 taps, shadingfactor of 0.5 -> WEIGHTING = 1/18
 	return (1.0f - SHADOW_SHADING_FACTOR) + (shadow_pc * WEIGHTING);
 }
 
