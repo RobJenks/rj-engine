@@ -10,7 +10,7 @@
 static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
 
 // Degree of shadowing applied to occluded pixels
-static const float SHADOW_SHADING_FACTOR = 0.5f;
+static const float SHADOW_SHADING_FACTOR = 0.75f;
 
 
 // Calculate the transformation of the given camera UV space coordinate into the current light shadow map space
@@ -41,13 +41,13 @@ float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 #if SHADER_SHADOWMAP_PCF
 	
 	float shadow_pc = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, camera_depth);
-	return shadow_pc;
+	return (1.0f - SHADOW_SHADING_FACTOR) + (shadow_pc * SHADOW_SHADING_FACTOR);
 
 #else
 
 	float shadowmap_depth = ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r;
 	bool shadowed = ((camera_depth - shadowmap_depth) > SHADOWMAP_PROJECTION_EPSILON);
-	return (shadowed ? SHADOW_SHADING_FACTOR : 1.0f);
+	return (shadowed ? (1.0F - SHADOW_SHADING_FACTOR) : 1.0f);
 
 #endif
 
