@@ -6,7 +6,7 @@
 #include "DeferredRenderingBuffers.hlsl"
 
 // Macros controlling shadow-map features
-#define SHADER_SHADOWMAP_PCF				PCF_BOX_3		/* Determines the PCF kernel that will be used */
+#define SHADER_SHADOWMAP_PCF				PCF_DISC_5		/* Determines the PCF kernel that will be used */
 #define SHADER_APPLY_PCF_KERNEL_WEIGHTS		1				/* Determines whether PCF kernel values will be weighted on a per-tap basis*/
 #define SHADER_PCF_KERNEL_SCALE				2				/* Scale factor applied to all PCF kernel offsets (integral recommended since offset is int2 of texels)*/
 
@@ -53,6 +53,9 @@ float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 #if SHADER_SHADOWMAP_PCF == PCF_BOX_3
 #	define KERNEL(x) PCF_KERNEL_BOX3_##x
 
+#elif SHADER_SHADOWMAP_PCF == PCF_DISC_5
+#	define KERNEL(x) PCF_KERNEL_DISC5_##x
+
 #else
 #	define KERNEL(x) PCF_KERNEL_NULL_##x
 
@@ -98,7 +101,8 @@ float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 	return ShadowMapPCFSingle(shadowmap_uv, camera_depth);
 
 	// PCF: multi-tap offset filter kernel
-#elif SHADER_SHADOWMAP_PCF == PCF_BOX_3
+#elif SHADER_SHADOWMAP_PCF == PCF_BOX_3 ||\
+	  SHADER_SHADOWMAP_PCF == PCF_DISC_5
 	return ShadowMapPCFOffsetKernel(shadowmap_uv, camera_depth);
 
 #else

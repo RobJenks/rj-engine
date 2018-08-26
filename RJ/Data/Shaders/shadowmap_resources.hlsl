@@ -54,7 +54,7 @@ TEXTURE2D ShadowMapTexture REGISTER(t10);
 #define PCF_NONE		0
 #define PCF_SINGLE		1
 #define PCF_BOX_3		2
-
+#define PCF_DISC_5		3
 
 
 
