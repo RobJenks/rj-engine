@@ -3,6 +3,9 @@
 
 #include "shadowmap_resources.hlsl"
 
+// Macros controlling shadow-map features
+#define SHADER_SHADOWMAP_PCF		1
+
 // Constant epsilon bias allowed between shadow map and projected camera distance calculation
 static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
 
@@ -33,24 +36,21 @@ float3 CalculateShadowMapUVProjection(float2 camera_uv, float depth)
 
 // Compute the shadowing factor based on the currently-bound shadow map and the given UV-biased
 // projected coordinates.  
-float _ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
-{
-	float shadowmap_depth = ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r;
-
-
-	bool shadowed = ((camera_depth - shadowmap_depth) > SHADOWMAP_PROJECTION_EPSILON);
-
-	return (shadowed ? SHADOW_SHADING_FACTOR : 1.0f);
-}
-
 float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 {
-	float shadow_pc = (camera_depth == 13.0f ?
-		ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r :
-		ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, camera_depth)
-	);
-
+#if SHADER_SHADOWMAP_PCF
+	
+	float shadow_pc = ShadowMapTexture.SampleCmpLevelZero(PCFDepthSampler, shadowmap_uv, camera_depth);
 	return shadow_pc;
+
+#else
+
+	float shadowmap_depth = ShadowMapTexture.Sample(PointClampSampler, shadowmap_uv).r;
+	bool shadowed = ((camera_depth - shadowmap_depth) > SHADOWMAP_PROJECTION_EPSILON);
+	return (shadowed ? SHADOW_SHADING_FACTOR : 1.0f);
+
+#endif
+
 }
 
 
