@@ -2,6 +2,7 @@
 #define __ShadowMapCalculationsHLSL__
 
 #include "shadowmap_resources.hlsl"
+#include "shadowmap_pcf_kernels.hlsl"
 #include "DeferredRenderingBuffers.hlsl"
 
 // Macros controlling shadow-map features
@@ -43,16 +44,18 @@ float ShadowMapPCFSingle(float2 shadowmap_uv, float camera_depth)
 	return (1.0f - SHADOW_SHADING_FACTOR) + (shadow_pc * SHADOW_SHADING_FACTOR);
 }
 
-// PCF: 3x3 box PCF kernel
-float ShadowMapPCFBox3(float2 shadowmap_uv, float camera_depth)
+// Percentage-closer filtering (PCF) with compile-time attached offsets, for use as shadow mapping kernel
+float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 {
-	static const int TAPS = 9;
-	static const int2 offsets[TAPS] =
-	{
-		int2(-1, -1), int2(-1, 0), int2(-1, +1),
-		int2(0, -1), int2(0, 0), int2(0, +1),
-		int2(+1, -1), int2(+1, 0), int2(+1, +1)
-	};
+#if SHADER_SHADOWMAP_PCF == PCF_BOX_3
+	static const int TAPS = BOX3_TAPS;
+	static const int2 offsets[BOX3_TAPS] = BOX3_OFFSETS;
+
+#else
+	static const int TAPS = 1;
+	static const int2 offsets[1] = int2(0, 0);
+
+#endif
 
 	float shadow_pc = 0.0f;
 
@@ -77,9 +80,9 @@ float ComputeShadowFactor(float2 shadowmap_uv, float camera_depth)
 #if SHADER_SHADOWMAP_PCF == PCF_SINGLE
 	return ShadowMapPCFSingle(shadowmap_uv, camera_depth);
 
-	// PCF: 3x3 box filter kernel
+	// PCF: multi-tap offset filter kernel
 #elif SHADER_SHADOWMAP_PCF == PCF_BOX_3
-	return ShadowMapPCFBox3(shadowmap_uv, camera_depth);
+	return ShadowMapPCFOffsetKernel(shadowmap_uv, camera_depth);
 
 #else
 
