@@ -71,7 +71,7 @@ float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 #if SHADER_APPLY_PCF_KERNEL_WEIGHTS
 	static const float KERNEL_DIVISOR[KERNEL(STAGES)] = KERNEL(WEIGHT_SUM);
 #else
-	static const float KERNEL_DIVISOR[KERNEL(STAGES)] = KERNEL(STAGETAPS);
+	static const int KERNEL_DIVISOR[KERNEL(STAGES)] = KERNEL(STAGETAPS);
 #endif
  
 
@@ -88,7 +88,7 @@ float ShadowMapPCFOffsetKernel(float2 shadowmap_uv, float camera_depth)
 		int tap_limit = (start_tap + stage_taps);
 		float raw_sum = 0.0f;
 
-		total_weight += KERNEL_DIVISOR[k];
+		total_weight += (float)KERNEL_DIVISOR[k];
 
 		[unroll]
 		for (int i = start_tap; i < tap_limit; ++i)
