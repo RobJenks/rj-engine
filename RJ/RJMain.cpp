@@ -732,13 +732,30 @@ void RJMain::ProcessKeyboardInput(void)
 		//Game::Keyboard.LockKey(DIK_MINUS);
 	}
 
+	// DIK_EQUALS
+	static const int TN = 4;
+	static Terrain *t[TN] = { 0 };
+	static bool obj_eq_rotate = false;
+	if (obj_eq_rotate)
+	{
+		static const float ROT_SPEED = PI;
+		float speed = (ROT_SPEED * Game::TimeFactor);
+
+		for (int i = 0; i < TN; ++i)
+		{
+			if (t[i]) t[i]->ChangeOrientation(XMQuaternionRotationRollPitchYaw(
+				((float)(((i + 1) * 17) % 7)) * 0.1f * speed,
+				((float)(((i + 1) * 17) % 4)) * 0.1f * speed,
+				((float)(((i + 1) * 17) % 10)) * 0.1f * speed
+			));
+		}
+
+	}
 	if (b[DIK_EQUALS])
 	{
-		static const int TN = 4;
-		static Terrain *t[TN] = { 0 };
 		static int tx = 0;
 
-		if (!b[DIK_LSHIFT])
+		if (!b[DIK_LSHIFT] && !b[DIK_LCONTROL])
 		{
 			bool create = (t[tx] == NULL);
 			
@@ -756,13 +773,18 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Log << LOG_DEBUG << "Obj " << tx << " moved to " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
 				XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 		}
-		else
+		else if (b[DIK_LSHIFT] && !b[DIK_LCONTROL])
 		{
 			if (t[tx])
 				Game::Log << LOG_DEBUG << "Obj " << tx << " left at " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
 					XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 			else
 				Game::Log << LOG_DEBUG << "Obj " << tx << " skipped; does not exist yet\n";
+		}
+		else if (b[DIK_LCONTROL] && !b[DIK_LSHIFT]) 
+		{
+			obj_eq_rotate = !obj_eq_rotate;
+			Game::Log << LOG_DEBUG << "Obj rotation set to " << obj_eq_rotate << "\n";
 		}
 
 		tx = ((tx + 1) % TN);
