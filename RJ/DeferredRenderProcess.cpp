@@ -1067,7 +1067,7 @@ void DeferredRenderProcess::UpdateDebugRenderingBuffers(void)
 	assert(viewcount <= 16U);
 
 	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
-	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
+	m_cb_debug_data.RawPtr->C_debug_view_count = static_cast<unsigned int>(viewcount);
 	m_cb_debug_data.RawPtr->C_debug_render_mode = m_debug_output_mode;
 	m_cb_debug_data.RawPtr->C_debug_depth_scaling_exponent = GetDebugDepthRenderingExponent();
 

@@ -59,6 +59,12 @@ public:
 	// Returns a pointer to the compiled data buffer for the active SM, for use in the primary render pipeline
 	CMPINLINE ConstantBufferDX11 *				GetShadowMappedLightDataBuffer(void) const { return m_cb_shadowmapped_light; }
 
+	// Determines whether the shadow mapping component performs light-space texel snapping to avoid high-frequency changes in light frustum position
+	CMPINLINE bool								IsLightSpaceTexelMappingActive(void) const { return m_perform_light_space_texel_snapping; }
+	CMPINLINE void								SetLightSpaceTexelMappingState(bool enabled) { m_perform_light_space_texel_snapping = enabled; }
+	CMPINLINE void								EnableLightSpaceTexelMappingState(void) { SetLightSpaceTexelMappingState(true); }
+	CMPINLINE void								DisableLightSpaceTexelMappingState(void) { SetLightSpaceTexelMappingState(false); }
+
 	// Destructor
 	~ShadowManagerComponent(void);
 
@@ -101,10 +107,14 @@ private:
 	void										CompileShadowMappedLightDataBuffer(const LightData & light);
 
 	// Calculate transform matrix for the given light
-	XMMATRIX									LightViewMatrix(const LightData & light) const;
+	XMMATRIX									LightViewMatrix(const LightData & light);
 	XMMATRIX									LightProjMatrix(const LightData & light) const;
 
-	// Retrieve 
+	// Calculate and store the position & orientation of the currently-active light
+	void										CalculateLightPositionAndOrientation(const LightData & light);
+
+	// Returns one bound of the current light frustum if constructed as an orthographic projection (ortho bounds are a cube)
+	float										OrthographicShadowMapProjectionBound(void) const;
 
 	// Shadow map near-side frustum scaling factor (1.0 = near plane at outer extent of camera view frustum, 
 	// 0.0 would have the near plane all the way forward at the camera view frustum centre point)
@@ -141,7 +151,9 @@ private:
 	VectorisedFloat								r_lightspace_view_fardist;				// Relevant for the current frame only
 	VectorisedFloat								r_camera_distance_from_frustum_centre;	// Relevant for the current frame only
 
-	
+	bool										m_perform_light_space_texel_snapping;
+
+
 	// All supported shadow map configurations
 	std::array<ShadowMapConfig, static_cast<int>(SMSize::_SMCOUNT)>		m_shadow_map_config;		
 

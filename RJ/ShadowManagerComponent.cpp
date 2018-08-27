@@ -61,6 +61,8 @@ ShadowManagerComponent::ShadowManagerComponent(DeferredRenderProcess *renderproc
 	r_frustum_longest_diagonal_mag(0.0f), 
 	m_lightspace_view_nearside_scaling(DEFAULT_LIGHT_SPACE_FRUSTUM_NEAR_SIDE_SCALING), 
 
+	m_perform_light_space_texel_snapping(true), 
+
 	m_current_shadow_map_size(SMSize::SMUnknown),
 	m_standard_shadow_map_size{ DEFAULT_SHADOW_MAP_SIZE[0], DEFAULT_SHADOW_MAP_SIZE[1], DEFAULT_SHADOW_MAP_SIZE[2] },
 
@@ -546,9 +548,11 @@ void ShadowManagerComponent::ActivateLightSpaceShadowmapPipeline(const LightData
 	SMSize sm = static_cast<SMSize>(light.ShadowMapConfig);
 	if (sm == SMSize::SMUnknown) sm = m_standard_shadow_map_size[static_cast<unsigned int>(light.Type)];
 
+	// Prepare the pipeline to render a shadow map with this configuration
+	ActivateShadowMapConfiguration(sm);
+
 	// Determine view/projection and other light data for this light object based on its position in the world
-	m_active_sm_light_position = XMLoadFloat4(&light.PositionWS);
-	m_active_sm_light_orientation = QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS));
+	CalculateLightPositionAndOrientation(light);
 
 	XMMATRIX view = LightViewMatrix(light);
 	XMMATRIX proj = LightProjMatrix(light);
@@ -560,9 +564,6 @@ void ShadowManagerComponent::ActivateLightSpaceShadowmapPipeline(const LightData
 
 	// Bind resources to the shadow mapping shader
 	m_vs_lightspace_shadowmap->SetParameterData(m_param_vs_shadowmap_smdata, m_cb_lightspace_shadowmap);
-
-	// Prepare the pipeline to render a shadow map with this configuration
-	ActivateShadowMapConfiguration(sm);
 
 	// Bind the pipeline ready for rendering
 	m_pipeline_lightspace_shadowmap->Bind();
@@ -611,45 +612,66 @@ void ShadowManagerComponent::CompileShadowMappedLightDataBuffer(const LightData 
 	m_cb_shadowmapped_light->Set(m_cb_shadowmapped_light_data.RawPtr);
 }
 
-// Calculate transform matrix for the given light
-XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light) const
+// Calculate and store the position & orientation of the currently-active light
+void ShadowManagerComponent::CalculateLightPositionAndOrientation(const LightData & light)
 {
-	// TODO (SM): temp
-	if (Game::Keyboard.GetKey(DIK_F) && Game::Keyboard.CtrlDown())
-	{
-		XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
-		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorMultiplyAdd(
-			r_camera_distance_from_frustum_centre.V(),								// (Vectorised distance from camera to frustum centre)
-			XMVectorNegate(dir),													// * -lightdir
-			r_frustum_centre_point));
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(m_active_sm_light_orientation);
-		Game::Log << LOG_DEBUG << "DBG pos = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraPosition()) <<
-			", Orient = " << Vector4ToString(Game::Engine->GetCamera()->GetDebugCameraOrientation()) << "\n";
-		Game::Keyboard.LockKey(DIK_F);
-	}
-
-	// TODO: It may be possible to do this more efficiently, e.g. setting matrix components directly?
 	switch (light.Type)
 	{
 		case LightType::Directional:
 			
-			// Step back from view frustum centre by (lightdir * (frustum_size + NEAR))
+			// For directional lights, we need to calculate the light position (whereas it already has a known
+			// position in the game world for other types).  Step back from view frustum centre by (lightdir * (frustum_size + NEAR))
 			XMVECTOR dir = XMLoadFloat4(&light.DirectionWS);
-			return CameraView::View(XMVectorMultiplyAdd(
+			m_active_sm_light_position = XMVectorMultiplyAdd(
 				r_camera_distance_from_frustum_centre.V(),				// (Vectorised distance from camera to frustum centre)
 				XMVectorNegate(dir),									// * -lightdir
-				r_frustum_centre_point),								// + centre_point
-				m_active_sm_light_orientation);
+				r_frustum_centre_point);								// + centre_point
+
+			m_active_sm_light_orientation = QuaternionBetweenVectors(FORWARD_VECTOR, dir);
+			return;
 
 		case LightType::Spotlight:
-			return CameraView::View(m_active_sm_light_position, m_active_sm_light_orientation);
+			m_active_sm_light_position = XMLoadFloat4(&light.PositionWS);
+			m_active_sm_light_orientation = QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS));
+			return;
 
-		// Case Point, or as default
-		default: 
-			return CameraView::View(m_active_sm_light_position, ID_MATRIX);
+		case LightType::Point:
+			m_active_sm_light_position = XMLoadFloat4(&light.PositionWS);
+			m_active_sm_light_orientation = ID_QUATERNION;
+			return;
 	}
-	
 }
+
+// Calculate transform matrix for the given light
+XMMATRIX ShadowManagerComponent::LightViewMatrix(const LightData & light)
+{
+	// Calculate an intial view matrix based on the current light position and orientation
+	XMMATRIX view = CameraView::View(m_active_sm_light_position, m_active_sm_light_orientation);
+
+	// If texel snapping is enabled, and this is an ORTHOGRAPHIC projection, perform additional work to calculate a snap delta and adjusted view matrix
+	// TODO: possible and necessary to do this for perspective projections as well?  How to define the shadow map bounds when this is projected in perspective - clip space?
+	if (light.Type == LightType::Directional && m_perform_light_space_texel_snapping)
+	{
+		// Calculate the view transform in TEXEL space, i.e if SM res of 2000 texels for world bounds of 1000 units -> (scale(2,2,2) * view)
+		float sm_texel_size = static_cast<float>(m_shadow_map_config[static_cast<unsigned int>(m_current_shadow_map_size)].TexelSize);
+		float texels_per_world_unit = sm_texel_size / OrthographicShadowMapProjectionBound();
+		XMMATRIX view_scaled = XMMatrixMultiply(XMMatrixScaling(texels_per_world_unit, texels_per_world_unit, texels_per_world_unit), view);
+		
+		// Transform the frustum centre point into light-texel space using this view matrix, and round XY coordinates 
+		// down to the  nearest whole texel
+		XMVECTOR fcentre_light_texel = XMVector3TransformCoord(r_frustum_centre_point, view_scaled);
+		fcentre_light_texel = XMVectorSelect(XMVectorFloor(fcentre_light_texel), fcentre_light_texel, VCTRL_0011);
+	
+		// Transform the adjusted frustum centre back into world space, then use it to derive a new camera position and consequently a new view matrix
+		r_frustum_centre_point = XMVector3TransformCoord(fcentre_light_texel, XMMatrixInverse(NULL, view_scaled));
+
+		CalculateLightPositionAndOrientation(light);		// Will be calculated based on the new frustum centre point
+		view = CameraView::View(m_active_sm_light_position, m_active_sm_light_orientation);
+	}
+
+	return view;
+}
+
 
 // Calculate transform matrix for the given light
 // TODO: This can be cached and only recalculated on display/view plane/aspect/FOV change, if needed
@@ -660,7 +682,7 @@ XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 	switch (light.Type)
 	{
 		case LightType::Directional:
-			return CameraProjection::Orthographic(XMFLOAT2(r_frustum_longest_diagonal_mag.F(), r_frustum_longest_diagonal_mag.F()), 
+			return CameraProjection::Orthographic(XMFLOAT2(OrthographicShadowMapProjectionBound(), OrthographicShadowMapProjectionBound()), 
 				m_lightspace_view_neardist.F(), r_lightspace_view_fardist.F());
 
 		case LightType::Spotlight:
@@ -670,6 +692,12 @@ XMMATRIX ShadowManagerComponent::LightProjMatrix(const LightData & light) const
 		default:
 			return CameraProjection::Perspective(rd->GetFOV(), rd->GetAspectRatio(), rd->GetNearClipDistance(), rd->GetFarClipDistance());
 	}
+}
+
+// Returns one bound of the current light frustum if constructed as an orthographic projection (ortho bounds are a cube)
+float ShadowManagerComponent::OrthographicShadowMapProjectionBound(void) const
+{
+	return r_frustum_longest_diagonal_mag.F();
 }
 
 // Determines whether a render instance intersects with the given light object
@@ -827,7 +855,7 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 			}
 			else if (command.Parameter(1) == "capture")
 			{
-				if (command.ParameterCount() >= 3 && command.ParameterAsInt(2) >= 0)
+				if (command.ParameterCount() > 2 && command.ParameterAsInt(2) >= 0)
 				{
 					EnableShadowMapCapture(command.ParameterAsInt(2));
 					command.SetSuccessOutput(concat("Enabling shadow map buffer capture for light index ")(command.ParameterAsInt(2)).str());
@@ -841,7 +869,7 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 			}
 			else if (command.Parameter(1) == "nearscale")
 			{
-				if (command.ParameterCount() >= 3)
+				if (command.ParameterCount() > 2)
 				{
 					float scale = command.ParameterAsFloat(2);
 					if (scale >= 0.0f && scale < 1000.0f) 
@@ -863,7 +891,7 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 			}
 			else if (command.Parameter(1) == "getconfig")
 			{
-				if (command.ParameterCount() >= 3)
+				if (command.ParameterCount() > 2)
 				{
 					unsigned int index = static_cast<unsigned int>(command.ParameterAsInt(2));
 					if (index < SMSize::_SMCOUNT)
@@ -889,6 +917,19 @@ bool ShadowManagerComponent::ProcessConsoleCommand(GameConsoleCommand & command)
 				else
 				{
 					command.SetFailureOutput("Usage: getconfig <ConfigID|TexelSize>");
+				}
+				return true;
+			}
+			else if (command.Parameter(1) == "texelsnap")
+			{
+				if (command.ParameterCount() > 2)
+				{
+					SetLightSpaceTexelMappingState(command.ParameterAsBool(2));
+					command.SetSuccessOutput(concat("Light-space texel snapping is now ")(IsLightSpaceTexelMappingActive() ? "enabled" : "disabled").str());
+				}
+				else
+				{
+					command.SetSuccessOutput(concat("Light space texel mapping is currently ")(IsLightSpaceTexelMappingActive() ? "enabled" : "disabled").str());
 				}
 				return true;
 			}
