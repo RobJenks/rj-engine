@@ -18,22 +18,22 @@
 *.dds filter=lfs diff=lfs merge=lfs -text
 *.psd filter=lfs diff=lfs merge=lfs -text
 
-# Compiled Object files
+# Compiled object files
 *.slo binary
 *.lo binary
 *.o binary
 *.obj binary
 
-# Precompiled Headers
+# Precompiled headers
 *.gch binary
 *.pch binary
 
-# Compiled Dynamic libraries
+# Compiled dynamic libraries
 *.so binary
 *.dylib binary
 *.dll binary
 
-# Compiled Static libraries
+# Compiled static libraries
 *.lai binary
 *.la binary
 *.a binary

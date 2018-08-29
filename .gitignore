@@ -54,7 +54,7 @@
 **/x64/Release/*
 **/x64/Test/*
 
-# Exclude debug, release & any other intermediate build directories
+# Exclude debug, release and any other intermediate build directories
 /.vs/*
 /Debug/*
 /Release/*
