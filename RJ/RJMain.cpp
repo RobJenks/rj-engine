@@ -2740,7 +2740,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		{
 			if (attach && active)
 			{
-				active->SetPosition(Game::Engine->GetCamera()->GetPosition());
+				active->SetPosition(XMVectorSubtract(Game::Engine->GetCamera()->GetPosition(), XMVectorSetY(NULL_VECTOR, 0.0f)));
 				active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
 
 				/*XMMATRIX om = XMMatrixLookAtLH(Game::Engine->GetCamera()->GetPosition(),
@@ -2797,3 +2797,4 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+

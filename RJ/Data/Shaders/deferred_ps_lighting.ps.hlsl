@@ -33,7 +33,7 @@ static const float LIGHTING_NOISE_STRENGTH = 0.1f;
 float4 SHADER_ENTRY(SHADER_INPUT IN) : SV_Target0
 {
 	// All calculations are performed in view space
-	float4 eyePos = { 0, 0, 0, 1 };
+	static const float4 eyePos = { 0, 0, 0, 1 };
 
 	// Read all non-depth GBuffer information for this fragment
 	int2 texCoord = IN.position.xy - C_Jitter.xy;
