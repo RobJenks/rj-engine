@@ -6,6 +6,7 @@
 #include "GameDataExtern.h"
 #include "DataInput.h"
 #include "CoreEngine.h"
+#include "CameraProjection.h"
 #include "Shaders.h"
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
@@ -54,23 +55,6 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_projection_unjittered(ID_MATRIX), 
 	m_invproj(ID_MATRIX), 
 	m_orthographic(ID_MATRIX),
-
-	m_standard_vs(NULL), 
-	m_standard_ps(NULL),
-	m_quad_vs(NULL), 
-	m_deferred_geometry_ps(NULL), 
-	m_deferred_lighting_ps(NULL),
-	m_texture_vs(NULL), 
-	m_texture_ps(NULL), 
-	m_sdf_decal_direct_vs(NULL), 
-	m_sdf_decal_deferred_vs(NULL), 
-	m_sdf_decal_direct_ps(NULL), 
-	m_sdf_decal_deferred_ps(NULL),
-	m_post_motionblur_tilegen_ps(NULL), 
-	m_post_motionblur_neighbour_ps(NULL), 
-	m_post_motionblur_gather_ps(NULL), 
-	m_post_temporal_aa(NULL), 
-	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
 	m_sampler_linearrepeat(NULL), 
@@ -599,40 +583,47 @@ Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 Result RenderDeviceDX11::InitialiseShaderResources(void)
 {
 	// Shader definitions
-	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
+	std::vector<std::tuple<std::string, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*, const ShaderMacros::MacroData>> shader_resources
 	{
 		// Standard shaders
-		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL }, 
+		{ Shaders::StandardVertexShader, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ Shaders::StandardPixelShader, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Full-screen quad rendering shader for minimal screen-space rendering overhead
-		{ &m_quad_vs, Shader::Type::VertexShader, Shaders::FullScreenQuadVertexShader, "Shaders\\vs_quad.vs.hlsl", "latest", &m_fullscreen_quad_input_layout }, 
+		{ Shaders::FullScreenQuadVertexShader, Shader::Type::VertexShader, Shaders::FullScreenQuadVertexShader, "Shaders\\vs_quad.vs.hlsl", "latest", &m_fullscreen_quad_input_layout, ShaderMacros::NONE },
 
 		// Deferred rendering shaders
-		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },
-		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL },
+		{ Shaders::DeferredGeometryPixelShader, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ Shaders::DeferredLightingPixelShader, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Basic texture/UI rendering shaders
-		{ &m_texture_vs, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout },
-		{ &m_texture_ps, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL },
+		{ Shaders::BasicTextureVertexShader, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ Shaders::BasicTexturePixelShader, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Signed-distance-field decal rendering shaders
-		{ &m_sdf_decal_direct_vs, Shader::Type::VertexShader, Shaders::SDFDecalDirectVertexShader, "Shaders\\vs_decal_sdf_direct.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_sdf_decal_deferred_vs, Shader::Type::VertexShader, Shaders::SDFDecalDeferredVertexShader, "Shaders\\vs_decal_sdf_deferred.vs.hlsl", "latest", &m_standard_input_layout },
-		{ &m_sdf_decal_direct_ps, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL }, 
-		{ &m_sdf_decal_deferred_ps, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL },
+		{ Shaders::SDFDecalDirectVertexShader, Shader::Type::VertexShader, Shaders::SDFDecalDirectVertexShader, "Shaders\\vs_decal_sdf_direct.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ Shaders::SDFDecalDeferredVertexShader, Shader::Type::VertexShader, Shaders::SDFDecalDeferredVertexShader, "Shaders\\vs_decal_sdf_deferred.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ Shaders::SDFDecalDirectPixelShader, Shader::Type::PixelShader, Shaders::SDFDecalDirectPixelShader, "Shaders\\ps_decal_sdf_direct.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ Shaders::SDFDecalDeferredPixelShader, Shader::Type::PixelShader, Shaders::SDFDecalDeferredPixelShader, "Shaders\\ps_decal_sdf_deferred.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+
+		// Shadow mapping shaders
+		{ Shaders::ShadowMappingVertexShader, Shader::Type::VertexShader, Shaders::ShadowMappingVertexShader, "Shaders\\vs_shadowmap.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+
+		// Deferred lighting shaders (vs-standard, deferred-light-pass-2) for shadow-mapped lights
+		{ Shaders::StandardVertexShaderShadowMapped, Shader::Type::VertexShader, Shaders::StandardVertexShaderShadowMapped, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout, {{"SHADER_SHADOWMAPPED",""}} },
+		{ Shaders::DeferredLightingPixelShaderShadowMapped, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShaderShadowMapped, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL, {{ "SHADER_SHADOWMAPPED","" }} },
 
 		// Post-process motion blur rendering shaders
-		{ &m_post_motionblur_tilegen_ps, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL },
-		{ &m_post_motionblur_neighbour_ps, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL },
-		{ &m_post_motionblur_gather_ps, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL },
+		{ Shaders::MotionBlurTileGen, Shader::Type::PixelShader, Shaders::MotionBlurTileGen, "Shaders\\ps_post_motionblur_tilegen.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ Shaders::MotionBlurNeighbourhood, Shader::Type::PixelShader, Shaders::MotionBlurNeighbourhood, "Shaders\\ps_post_motionblur_neighbour.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ Shaders::MotionBlurGather, Shader::Type::PixelShader, Shaders::MotionBlurGather, "Shaders\\ps_post_motionblur_gather.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Post-process temporal anti-aliasing shaders
-		{ &m_post_temporal_aa, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL },
+		{ Shaders::TemporalReprojection, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Debug-only shaders
 #ifdef _DEBUG
-		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL },
+		{ Shaders::DeferredLightingDebug, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 #endif
 
 	};
@@ -641,7 +632,10 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	Game::Log << LOG_INFO << "Loading all shader resources (" << shader_resources.size() << ")\n";
 	for (auto & shader : shader_resources)
 	{
-		Result result = Assets.InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), std::get<4>(shader), std::get<5>(shader));
+		// Perform shader initialisation
+		ShaderDX11 * new_shader = NULL;
+		Result result = Assets.InitialiseExternalShaderResource(&new_shader, std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), 
+																             std::get<4>(shader), std::get<5>(shader), std::get<6>(shader));
 		if (result != ErrorCodes::NoError)
 		{
 			Game::Log << LOG_ERROR << "Fatal error: shader initialisation failed, cannot recover from errors (res:" << result << ")\n";
@@ -692,6 +686,12 @@ Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 	m_sampler_pointrepeat = Assets.CreateSamplerState(SamplerStates::PointRepeatSampler);
 	m_sampler_pointrepeat->SetFilter(SamplerState::MinFilter::MinNearest, SamplerState::MagFilter::MagNearest, SamplerState::MipFilter::MipNearest);
 	m_sampler_pointrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
+
+	m_sampler_pcfdepth = Assets.CreateSamplerState(SamplerStates::PCFDepthSampler);
+	m_sampler_pcfdepth->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
+	m_sampler_pcfdepth->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
+	m_sampler_pcfdepth->SetCompareMode(SamplerState::CompareMode::CompareRefToTexture);
+	m_sampler_pcfdepth->SetCompareFunction(SamplerState::CompareFunc::LessEqual);
 
 
 	Game::Log << LOG_INFO << "Sample state definitions initialised\n";
@@ -766,6 +766,9 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 	// created and associated with the default viewport
 	UpdatePrimaryViewportSize(m_displaysize_f);
 
+	// Also update the the primary view frustum
+	RecalculatePrimaryViewFrustum();
+
 }
 
 // Update the primary viewport; this will propogate to all resources which have already been 
@@ -807,6 +810,7 @@ void RenderDeviceDX11::SetFOV(float fov)
 	m_halffovtan = tanf(fov * 0.5f);
 
 	RecalculateProjectionMatrix();
+	RecalculatePrimaryViewFrustum();
 }
 
 void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
@@ -818,6 +822,7 @@ void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
 
 	RecalculateProjectionMatrix();
 	RecalculateOrthographicMatrix();
+	RecalculatePrimaryViewFrustum();
 }
 
 void RenderDeviceDX11::SetSampleDesc(UINT count, UINT quality)
@@ -850,6 +855,18 @@ Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthStencilBufferFo
 	);
 }
 
+// Return configuration for the primary render target buffers
+Texture::TextureFormat RenderDeviceDX11::PrimaryRenderTargetDepthOnlyBufferFormat(void) const
+{
+	return Texture::TextureFormat
+	(
+		Texture::Components::Depth,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		0, 0, 0, 0, 24, 0
+	);
+}
+
 void RenderDeviceDX11::CalculateFrameFrustumJitter(void)
 {
 	if (FrustumJitterEnabled())
@@ -864,7 +881,7 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
 
 	// Base projection matrix
-	m_projection_unjittered = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+	m_projection_unjittered = CameraProjection::Perspective(m_fov, m_aspectratio, m_screen_near, m_screen_far);
 
 	// Apply frustum jitter if enabled
 	if (FrustumJitterEnabled())
@@ -882,7 +899,13 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 
 void RenderDeviceDX11::RecalculateOrthographicMatrix(void)
 {
-	m_orthographic = XMMatrixOrthographicLH((float)m_displaysize.x, (float)m_displaysize.y, m_screen_near, m_screen_far);
+	m_orthographic = CameraProjection::Orthographic(m_displaysize_f, m_screen_near, m_screen_far);
+}
+
+void RenderDeviceDX11::RecalculatePrimaryViewFrustum(void)
+{
+	auto *frustum = Game::Engine->GetViewFrustrum();
+	if (frustum) frustum->InitialiseAsViewFrustum(GetProjectionMatrixUnjittered(), m_screen_far, m_fov, m_aspectratio);
 }
 
 // Verify the render device is in a good state and report errors if not
@@ -1072,6 +1095,29 @@ bool RenderDeviceDX11::ProcessConsoleCommand(GameConsoleCommand & command)
 				command.SetSuccessOutput(concat("Frustum jitter scale == ")(m_frustum_jitter.RawPtr->GetJitterScale()).str());
 			}
 			return true;
+		}
+	}
+	else if (command.InputCommand == "depth_planes")
+	{
+		std::string cmd = command.Parameter(0);
+		float dpnear = command.ParameterAsFloat(1);
+		float dpfar = command.ParameterAsFloat(2);
+
+		if (cmd == "get") {
+			command.SetSuccessOutput(concat("Depth plane configuration: { d_near=")(GetNearClipDistance())(", d_far=")(GetFarClipDistance())(" }").str());
+			return true;
+		}
+		else if (cmd == "set") {
+			if (dpnear <= 0.0f || dpfar <= 0.0f || dpnear > 1e9f || dpfar > 1e9f || dpnear >= dpfar) {
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidDepthPlaneConfiguration,
+					concat("Invalid depth plane configuration (d_near=")(dpnear)(", d_far=")(dpfar)(")").str());
+				return true;
+			}
+			else {
+				SetDepthPlanes(dpnear, dpfar);
+				command.SetSuccessOutput(concat("Depth plane configuration updated to { d_near=")(GetNearClipDistance())(", d_far=")(GetFarClipDistance())(" }").str());
+				return true;
+			}
 		}
 	}
 

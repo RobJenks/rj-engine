@@ -11,6 +11,10 @@ struct RM_Instance
 	static const RM_SortKey			SORT_KEY_RENDER_FIRST;
 	static const RM_SortKey			SORT_KEY_RENDER_LAST;
 
+	// Instance bit-flags
+	static const _uint32			INSTANCE_FLAG_SHADOW_CASTER = (1 << 0);
+
+
 	// Structure data (loaded from common vertex definitions)
 	PerInstanceData
 
@@ -82,7 +86,7 @@ struct RM_Instance
 
 	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld) noexcept
 		:
-	Flags(0U)
+		Flags(0U)
 	{
 		XMStoreFloat4x4(&Transform, world);
 		XMStoreFloat4x4(&LastTransform, lastworld);

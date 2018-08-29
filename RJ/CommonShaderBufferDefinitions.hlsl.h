@@ -16,10 +16,10 @@ Texture2D BumpTexture           : register(t6);
 Texture2D OpacityTexture        : register(t7);
 
 // Sampler states that may be bound to the shader execution
-sampler LinearRepeatSampler     : register(s0);
-sampler LinearClampSampler      : register(s1);
-sampler PointRepeatSampler		: register(s2); 
-sampler PointClampSampler		: register(s3);
-
+SamplerState LinearRepeatSampler		: register(s0);
+SamplerState LinearClampSampler			: register(s1);
+SamplerState PointRepeatSampler			: register(s2);
+SamplerState PointClampSampler			: register(s3);
+SamplerComparisonState PCFDepthSampler	: register(s4);
 
 #endif

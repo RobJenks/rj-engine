@@ -107,6 +107,8 @@ public:
 		RenderTerrainBoxes,
 		RenderNavNetwork,
 		RenderObjectIdentifiers,
+		RenderFrustum, 
+		RenderCachedFrustum, 
 		_RFLAG_COUNT
 	};
 
@@ -270,35 +272,43 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void RJ_XM_CALLCONV			RenderModel(Model *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(Model *model, const FXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(Model *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void			RenderModel(Model *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position, float bounding_radius)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, std::move(
-			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_InstanceMetadata(position, bounding_radius))
+		);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
@@ -355,6 +365,9 @@ public:
 	void RJ_XM_CALLCONV						RenderMaterialToScreen(	MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, 
 																	float rotation = 0.0f, float opacity = 1.0f, float zorder = 0.0f);
 
+	// Return a constant reference to the primary render queue
+	CMPINLINE const RenderQueue &			GetRenderQueue(void) const { return m_renderqueue; }
+
 	// Primitive topology is managed by the render queue in an attempt to minimise state changes
 	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
 	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
@@ -378,6 +391,8 @@ public:
 	void DebugRenderEnvironmentNavNetwork(void);
 	void DebugRenderObjectIdentifiers(void);
 	void DebugRenderPortalTraversal(void);
+	void DebugRenderFrustum(bool update_cache);
+	void DebugUpdateFrustumRenderCache(void);
 
 	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
@@ -641,8 +656,8 @@ private:
 	// Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
 	// overrides any default material specified in the model buffer.  A material of NULL will use the default 
 	// material in the model buffer
-	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance);
-	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance);
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata);
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, Model *model, MaterialDX11 *material, RM_Instance && instance, RM_InstanceMetadata && metadata);
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
@@ -758,6 +773,7 @@ private:
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
 								m_debug_renderobjid_text;						// Vector of text objects for debug render object identifiers
+	AXMVECTOR					m_debug_frustum_render[8];
 
 	// Counter for allowable render device failures before application will consider it unrecoverable and terminate
 	unsigned int				m_render_device_failure_count;

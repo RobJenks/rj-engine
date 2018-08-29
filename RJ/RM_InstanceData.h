@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "RM_Instance.h"
+#include "RM_InstanceMetadata.h"
 class ModelBuffer;
 
 // Instance collection & supporting data for a particular model in the render queue
@@ -12,8 +13,13 @@ struct RM_InstanceData
 
 	// Structure data
 	std::vector<RM_Instance>			InstanceData;
+	std::vector<RM_InstanceMetadata>	InstanceMetadata;
 	std::vector<RM_Instance>::size_type	CurrentInstanceCount;
 	std::vector<RM_Instance>::size_type	InstanceCapacity;
+
+	// The number of instances that are shadow-casting in this collection (will be 0 to N-1 in the collection)
+	std::vector<RM_Instance>::size_type	ShadowCasterCount;
+
 
 	// TODO: Change operation of RQ optimiser and timeouts
 	int									TimeoutCounter;
@@ -23,7 +29,8 @@ struct RM_InstanceData
 		: 
 		CurrentInstanceCount(0U), 
 		InstanceCapacity(0U), 
-		TimeoutCounter(0) 
+		TimeoutCounter(0), 
+		ShadowCasterCount(0U)
 	{
 		InitialiseCapacity(RENDER_QUEUE_INITIAL_INSTANCE_SLOT_ALLOCATION);
 	}
@@ -36,9 +43,11 @@ struct RM_InstanceData
 
 		// Increase both the capacity and size of the vector
 		InstanceData.reserve(initial_capacity);
+		InstanceMetadata.reserve(initial_capacity);
 		for (std::vector<RM_Instance>::size_type i = 0U; i < initial_capacity; ++i)
 		{
 			InstanceData.emplace_back(std::move(RM_Instance()));
+			InstanceMetadata.emplace_back(std::move(RM_InstanceMetadata()));
 		}
 
 		InstanceCapacity = initial_capacity;
@@ -48,11 +57,12 @@ struct RM_InstanceData
 	CMPINLINE void						ExtendCapacity(void)
 	{
 		InstanceData.emplace_back(std::move(RM_Instance()));
+		InstanceMetadata.emplace_back(std::move(RM_InstanceMetadata()));
 		++InstanceCapacity;
 	}
 
 	// Add a new instance for rendering
-	void								NewInstance(RM_Instance && instance);
+	void								NewInstance(RM_Instance && instance, RM_InstanceMetadata && metadata);
 
 	// Reset the instance collection ready for the next frame
 	void								Reset(void);
@@ -71,9 +81,11 @@ struct RM_InstanceData
 	CMPINLINE							RM_InstanceData(RM_InstanceData && other) noexcept
 		:
 		InstanceData(std::move(other.InstanceData)), 
+		InstanceMetadata(std::move(other.InstanceMetadata)), 
 		CurrentInstanceCount(other.CurrentInstanceCount), 
 		InstanceCapacity(other.InstanceCapacity), 
-		TimeoutCounter(other.TimeoutCounter)
+		TimeoutCounter(other.TimeoutCounter), 
+		ShadowCasterCount(other.ShadowCasterCount)
 	{
 	}
 
@@ -81,9 +93,11 @@ struct RM_InstanceData
 	CMPINLINE RM_InstanceData &			RM_InstanceData::operator=(RM_InstanceData && other) noexcept
 	{
 		InstanceData = std::move(other.InstanceData);
+		InstanceMetadata = std::move(other.InstanceMetadata);
 		CurrentInstanceCount = other.CurrentInstanceCount;
 		InstanceCapacity = other.InstanceCapacity;
 		TimeoutCounter = other.TimeoutCounter;
+		ShadowCasterCount = other.ShadowCasterCount;
 		return *this;
 	}
 

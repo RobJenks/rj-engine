@@ -1,0 +1,25 @@
+{
+    "rdocCaptureSettings": 1,
+    "settings": {
+        "autoStart": false,
+        "commandLine": "",
+        "environment": [
+        ],
+        "executable": "C:\\Users\\robje\\Documents\\Visual Studio 2017\\Projects\\RJ\\x64\\Debug\\RJ.exe",
+        "inject": false,
+        "options": {
+            "allowFullscreen": false,
+            "allowVSync": true,
+            "apiValidation": false,
+            "captureAllCmdLists": false,
+            "captureCallstacks": false,
+            "captureCallstacksOnlyDraws": false,
+            "debugOutputMute": true,
+            "delayForDebugger": 0,
+            "hookIntoChildren": false,
+            "refAllResources": false,
+            "verifyMapWrites": false
+        },
+        "workingDir": "C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ"
+    }
+}

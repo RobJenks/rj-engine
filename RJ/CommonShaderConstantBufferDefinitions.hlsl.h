@@ -5,16 +5,22 @@
 #include "../Definitions/MaterialData.hlsl.h"
 
 // Holds standard per-frame data such as view/projection transforms
+// NOTE: view/proj etc. are populated for LIGHT rendering, so in some cases (e.g. for
+// directional lights) they will NOT be equivalent to camera view/proj.  Distinguish camera view/proj
+// from light equivalents in buffer if needed in future
 CBUFFER FrameDataBuffer REGISTER(b0)
 {
 	RJ_ROW_MAJOR_MATRIX View;
 	RJ_ROW_MAJOR_MATRIX Projection;
 	RJ_ROW_MAJOR_MATRIX ViewProjection;
+	RJ_ROW_MAJOR_MATRIX InvView;
 	RJ_ROW_MAJOR_MATRIX InvProjection;
 	RJ_ROW_MAJOR_MATRIX PriorFrameViewProjection;
 
 	RJ_ROW_MAJOR_MATRIX ProjectionUnjittered;
 	RJ_ROW_MAJOR_MATRIX PriorFrameViewProjectionUnjittered;
+
+	RJ_ROW_MAJOR_MATRIX CameraInverseViewProjection;
 
 	float2 ScreenDimensions;
 	float2 padding;

@@ -8,11 +8,18 @@ const size_t RM_InstanceData::RENDER_QUEUE_INITIAL_INSTANCE_SLOT_ALLOCATION = 32
 
 
 // Add a new instance for rendering
-void RM_InstanceData::NewInstance(RM_Instance && instance)
+void RM_InstanceData::NewInstance(RM_Instance && instance, RM_InstanceMetadata && metadata)
 {
 	if (CurrentInstanceCount == InstanceCapacity) ExtendCapacity();
 
-	InstanceData[CurrentInstanceCount] = std::move(instance);
+	if (CheckBit_Single(instance.Flags, RM_Instance::INSTANCE_FLAG_SHADOW_CASTER))
+	{
+		++ShadowCasterCount;
+	}
+
+	InstanceData[CurrentInstanceCount] = std::move(instance);	
+	InstanceMetadata[CurrentInstanceCount] = std::move(metadata);
+
 	++CurrentInstanceCount;
 }
 
@@ -24,11 +31,15 @@ void RM_InstanceData::SortInstances(void)
 {
 	// Sort only in the range [begin(), begin()+count) rather than to end(), since we
 	// are only using a portion of the vector and leaving the rest allocated between frames
-	std::sort(InstanceData.begin(), InstanceData.begin() + CurrentInstanceCount);
+	//std::sort(InstanceData.begin(), InstanceData.begin() + CurrentInstanceCount);
+
+	// TODO: Sort method is not currently used.  Will require different mechanism if this is re-enabled in order
+	// to keep instance data and metadata in sync
 }
 
 // Reset the instance collection ready for the next frame
 void RM_InstanceData::Reset(void)
 {
 	CurrentInstanceCount = 0U;
+	ShadowCasterCount = 0U;
 }

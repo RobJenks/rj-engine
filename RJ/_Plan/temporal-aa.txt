@@ -1,0 +1,31 @@
+- Unjitter screen-space texcoords [333]
+
+- Find closest (least depth) pixel in the 3x3 nighbourhood [349]
+- Get SS Velocity and linear depth from GBuffer
+
+- Perform temporal reprojection -> temporal_colour [358]
+-- Sample (unjittered) colour buffer data at (uv) -> {texel0} [216]
+-- Sample (already-unjittered) previous texture at (uv - ss_velocity) -> {texel1}
+  
+-- Calculate min/max colour of pixel neighbourhood using 4-tap varying [260]
+--- Determine screen space velocity in texels [266]
+--- Calculate min-max-support (?) and use to determine uv sampling offset [269]
+--- Sample colour buffer at four points based on this offset [273]
+--- Determine min/max of samples within this neighbourhood [278]
+--- Clip {texel1} to these min/max bounds via AABB-clipping approximation [300]
+
+-- Calculate luminance of {texel0} and {texel1} rgb colour [310]
+-- Determine change in luminance between texels and calc lerp between min/max feedback -> K [313]
+-- Return lerp between new and old texel colour based on K [319]
+
+- Store returned temporal reprojection colour as the "to-buffer" value [361]
+
+- Look up motion blur neighbourhood-max for the current texel [365]
+- Calculate a 'trust' value between 0.0 and 1.0 based on velocity (lower = more trust) [374]
+- Look up final motion blur colour at unjittered coord [377]
+
+- Store "to-screen" value as lerp between {temporal} and {motionblur} colour, based on trust value [382]
+
+- Add noise to both "to-screen" and "to-buffer" values, and output both to RTs [392]
+
+

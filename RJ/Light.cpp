@@ -2,6 +2,9 @@
 #include "FastMath.h"
 #include "Light.h"
 #include "GameConsoleCommand.h"
+#include "CoreEngine.h"
+#include "ShadowManagerComponent.h"
+
 
 // Initialise static variables
 Light::LightID Light::GlobalLightIDCount = 0U;
@@ -68,6 +71,13 @@ Light::~Light(void)
 }
 
 
+// Determines whether the given light type is valid
+bool Light::IsValidLightType(LightType type)
+{
+	int index = static_cast<int>(type);
+	return (index >= 0 && index < static_cast<int>(LightType::_LightTypeCount));
+}
+
 // Translate a light type value to its string representation.  Defaults to "Directional" if the value is not recognised
 std::string Light::TranslateLightTypeToString(LightType type)
 {
@@ -90,6 +100,7 @@ LightType Light::TranslateLightTypeFromString(std::string type)
 	else											return LightType::Point;
 }
 
+
 // Process a debug command from the console.  "Light" objects are not part of the object hierarchy, but 
 // members of that hierarchy will invokve this method when asked to perform lighting-related actions
 void Light::ProcessDebugCommand(GameConsoleCommand & command)
@@ -102,6 +113,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(IsActive)
 	REGISTER_DEBUG_ACCESSOR_FN(GetID)
 	REGISTER_DEBUG_ACCESSOR_FN(GetType)
+	REGISTER_DEBUG_ACCESSOR_FN(GetFlags)
 	REGISTER_DEBUG_ACCESSOR_FN(GetPositionWS)
 	REGISTER_DEBUG_ACCESSOR_FN(GetDirectionWS)
 	REGISTER_DEBUG_ACCESSOR_FN(GetPositionVS)
@@ -111,12 +123,15 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetIntensity)
 	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightAngle)
 	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuation)
+	REGISTER_DEBUG_ACCESSOR_FN(IsShadowMapped)
+	REGISTER_DEBUG_ACCESSOR_FN(GetShadowMapConfig)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(Activate)
 	REGISTER_DEBUG_FN(Deactivate)
 	REGISTER_DEBUG_FN(SetIsActive, command.ParameterAsBool(3))
 	REGISTER_DEBUG_FN(SetType, (LightType)command.ParameterAsInt(3))
+	REGISTER_DEBUG_FN(SetFlags, (command.ParameterAsInt(3) < 0 ? GetFlags() : static_cast<unsigned int>(command.ParameterAsInt(3))))
 	REGISTER_DEBUG_FN(SetPositionWS, XMFLOAT4(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5), 0.0f))
 	REGISTER_DEBUG_FN(SetDirectionWS, XMFLOAT4(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5), 0.0f))
 	REGISTER_DEBUG_FN(SetPositionVS, XMFLOAT4(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5), 0.0f))
@@ -129,6 +144,10 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetAttenuationConstant, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetAttenuationLinear, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetAttenuationQuadratic, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(EnableShadowMapping)
+	REGISTER_DEBUG_FN(DisableShadowMapping)
+	REGISTER_DEBUG_FN(SetShadowMappingState, command.ParameterAsBool(3))
+	REGISTER_DEBUG_FN(SetShadowMapConfig, (static_cast<unsigned int>(command.ParameterAsInt(3)) < ShadowManagerComponent::SMSize::_SMCOUNT ? static_cast<unsigned int>(command.ParameterAsInt(3)) : GetShadowMapConfig()))
 }
 
 

@@ -4,6 +4,7 @@
 #include "SimpleShip.h"
 #include "Player.h"
 #include "CoreEngine.h"
+#include "CameraView.h"
 #include "CameraPath.h"
 
 #include "CameraClass.h"
@@ -112,20 +113,13 @@ void CameraClass::ConstructCameraFromPositionData(const FXMVECTOR position, cons
 void CameraClass::CalculateViewMatrixFromPositionData(	const FXMVECTOR position, const FXMVECTOR orientation, 
 														XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const
 {
-	// Inverse view matrix = (rot_matrix * trans_matrix)
-	// View matrix = (inv_view_matrix)^-1
-	outInverseViewMatrix = XMMatrixMultiply(XMMatrixRotationQuaternion(orientation), XMMatrixTranslationFromVector(position));
-	outViewMatrix = XMMatrixInverse(NULL, outInverseViewMatrix);
+	CameraView::ViewAndInverse(position, orientation, outViewMatrix, outInverseViewMatrix);
 }
 
 void CameraClass::CalculateViewMatrixFromPositionData(	const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offset_matrix,
 														XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const 
 {
-	// Inverse view matrix = (cam_offset_matrix * rot_matrix * trans_matrix)
-	// View matrix = (inv_view_matrix)^-1
-	outInverseViewMatrix = XMMatrixMultiply(offset_matrix, XMMatrixMultiply(
-		XMMatrixRotationQuaternion(orientation), XMMatrixTranslationFromVector(position)));
-	outViewMatrix = XMMatrixInverse(NULL, outInverseViewMatrix);
+	CameraView::ViewAndInverseWithOffset(position, orientation, offset_matrix, outViewMatrix, outInverseViewMatrix);
 }
 
 void CameraClass::DecomposeViewMatrix(void)

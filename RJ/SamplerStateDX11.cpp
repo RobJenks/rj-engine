@@ -62,6 +62,17 @@ void SamplerStateDX11::GetWrapMode(WrapMode& u, WrapMode& v, WrapMode& w) const
 	w = m_WrapModeW;
 }
 
+void SamplerStateDX11::SetCompareMode(CompareMode compareMode)
+{
+	m_CompareMode = compareMode;
+	m_isdirty = true;
+}
+
+SamplerState::CompareMode SamplerStateDX11::GetCompareMode(void) const
+{
+	return m_CompareMode;
+}
+
 void SamplerStateDX11::SetCompareFunction(CompareFunc compareFunc)
 {
 	m_CompareFunc = compareFunc;

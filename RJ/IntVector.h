@@ -19,7 +19,7 @@ struct IntegralVector2
 	IntegralVector2 Abs(void) const { return IntegralVector2(std::abs(x), std::abs(y)); }
 	bool IsZeroVector(void) { return (x == 0 && y == 0); }
 	XMFLOAT2 ToFloat(void) const { return XMFLOAT2(static_cast<float>(x), static_cast<float>(y)); }
-	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << "]"; return s.str(); }
+	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << "]"; return s.str(); }
 
 	IntegralVector2& operator +=(const IntegralVector2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
 	IntegralVector2& operator -=(const IntegralVector2& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }

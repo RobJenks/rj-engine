@@ -30,4 +30,9 @@ public:
 
 	static const std::string TemporalReprojection;
 
+	static const std::string ShadowMappingVertexShader;
+
+	static const std::string Shaders::StandardVertexShaderShadowMapped;
+	static const std::string Shaders::DeferredLightingPixelShaderShadowMapped;
+
 };

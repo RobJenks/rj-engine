@@ -36,8 +36,11 @@ CBUFFER DeferredRendererDebugRenderingData
 	// Render mode; either multiple views, or a composite created by all views rendering one UV set
 	unsigned int C_debug_render_mode;
 
+	// Depth scaling exponent for rendering of DSV debug views
+	float C_debug_depth_scaling_exponent;
+
 	/* Padding to keep CB to 16-byte boundaries */
-	//uint# __def_debug_padding;
+	uint3 __def_debug_padding;
 
 	// State of each potential debug view; only those != 0 will be rendered
 	DeferredRendererDebugRenderViewData C_debug_view[16];

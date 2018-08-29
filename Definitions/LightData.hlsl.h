@@ -18,13 +18,16 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 	{
 		Point = 0, 
 		Spotlight = 1, 
-		Directional = 2
+		Directional = 2, 
+
+		_LightTypeCount = 3
 	};
 #else
 #	define LightType int
 #	define LightType::Point 0
 #	define LightType::Spotlight 1
 #	define LightType::Directional 2
+#	define LightType::_LightTypeCount 3
 #endif
 
 	// Attenuation parameters
@@ -55,6 +58,18 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 #		endif
 	};
 
+	// Lighting flags
+	static const _uint32		LIGHT_FLAG_ENABLED					= (1 << 0);
+	static const _uint32		LIGHT_FLAG_SHADOW_MAP				= (1 << 1);
+
+	// Default lighting state
+	static const _uint32		LIGHT_FLAG_DEFAULTS = 
+	(
+		LIGHT_FLAG_ENABLED    
+		/* | ... | ... */
+	);
+
+
 	// Primary structure holding light data
 	struct LightData
 	{
@@ -69,14 +84,17 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 		float4					Colour;								// Light colour.  Incorporates diffuse + specular components; we don't currently differentiate
 		//------------------------------------------ ( 16 bytes )
 		LightType				Type;								// The type of light being rendered
-		_bool					Enabled;							// Disabled light will be skipped entirely during lighting calculations
+		_uint32					Flags;								// As per LIGHT_FLAG_*
 		float					Range;								// Range at which light is fully-attenuated and no longer has any effect
 		float					Intensity;							// Overall intensity of the light
 		//------------------------------------------ ( 16 bytes )
 		float					SpotlightAngle;						// Spotlight angle (radians).  Must be in the range [0 PI].  Relevant to spotlights only
 		AttenuationData			Attenuation;						// Light attenuation as a function of distance
 		//------------------------------------------ ( 16 bytes )
-		//------------------------------------------ ( 16 * 7 = 112 bytes)
+		int						ShadowMapConfig;					// Shadow map config index, if SM is enabled; default 0, which will use the default per-light config
+		float3					_LightDataPadding;
+		//------------------------------------------ ( 16 bytes )
+		//------------------------------------------ ( 16 * 8 = 128 bytes)
 
 
 		// Constructor for use within CPP classes
@@ -88,10 +106,11 @@ static const unsigned int LIGHT_RENDER_LIMIT = 512U;
 			, DirectionVS(0, 0, 1, 0)
 			, Colour(1, 1, 1, 1)
 			, Type(LightType::Point)
-			, Enabled(TRUE)
+			, Flags(LIGHT_FLAG_DEFAULTS)
 			, Range(100.0f)
 			, Intensity(1.0f)
 			, SpotlightAngle(0.7854) // == PI/4 == 45 degrees
+			, ShadowMapConfig(0)
 		{}
 #endif
 

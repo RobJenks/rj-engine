@@ -76,10 +76,14 @@ public:
 	// Check whether the given OBB lies within the frustum
 	bool								CheckOBB(const OrientedBoundingBox & obb) const;
 
+	// Determine the world-space coordinates of the frustum corners.  Relevant ONLY for a view frustum
+	void								DetermineWorldSpaceCorners(XMVECTOR(&pOutVertices)[8]) const;
+
 	// Return auxilliary data on the view frustum
 	CMPINLINE float						GetNearClipPlaneDistance(void) const { return m_clip_near; }
 	CMPINLINE float						GetFarClipPlaneDistance(void) const { return m_clip_far; }
-	CMPINLINE XMMATRIX					GetFrustumProjectionMatrix(void) const { return m_frustrumproj; }
+	CMPINLINE XMMATRIX					GetFrustumProjectionMatrix(void) const { return m_proj; }
+	CMPINLINE XMMATRIX					GetFrustumViewProjectionMatrix(void) const { return m_viewproj; }
 
 	// Destructor
 	~Frustum(void);
@@ -98,7 +102,8 @@ private:
 
 	// Other auxilliary frustum data
 	float								m_clip_near, m_clip_far;
-	AXMMATRIX							m_frustrumproj;				// Frustrum-specific proj matrix, preacalculated at initialisation
+	AXMMATRIX							m_proj;						// Frustrum-specific proj matrix, preacalculated at initialisation
+	AXMMATRIX							m_viewproj;					// View-projection for the frustum, calculated on each ConstructFrustum
 
 	// Temporary storage for construction of cuboid vertices during visibility testing
 	static AXMVECTOR_P					m_working_cuboidvertices[8];

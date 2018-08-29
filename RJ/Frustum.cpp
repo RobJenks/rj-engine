@@ -64,7 +64,7 @@ Result RJ_XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projectio
 		float r = m_clip_far / (m_clip_far - m_clip_near);
 		fproj._33 = r;
 		fproj._43 = -r * m_clip_near;
-	m_frustrumproj = XMLoadFloat4x4(&fproj);
+	m_proj = XMLoadFloat4x4(&fproj);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -75,7 +75,7 @@ void Frustum::CopyViewFrustumData(const Frustum & view_frustum)
 {
 	m_clip_near = view_frustum.GetNearClipPlaneDistance();
 	m_clip_far = view_frustum.GetFarClipPlaneDistance();
-	m_frustrumproj = view_frustum.GetFrustumProjectionMatrix();
+	m_proj = view_frustum.GetFrustumProjectionMatrix();
 }
 
 // Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
@@ -84,9 +84,10 @@ void Frustum::CopyViewFrustumData(const Frustum & view_frustum)
 void RJ_XM_CALLCONV Frustum::ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
 {
 	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix
+	// Store both the viewproj and its inverse for runtime use
 	XMFLOAT4X4 matrix;
-	XMMATRIX fproj_view = XMMatrixMultiply(view, m_frustrumproj);
-	XMStoreFloat4x4(&matrix, fproj_view);
+	m_viewproj = XMMatrixMultiply(view, m_proj);
+	XMStoreFloat4x4(&matrix, m_viewproj);
 
 	// Calculate near plane of frustum.
 	SetPlane(Frustum::NEAR_PLANE, XMPlaneNormalize(XMVectorSet(matrix._14 + matrix._13,
@@ -246,6 +247,22 @@ bool Frustum::CheckOBB(const OrientedBoundingBox & obb) const
 
 	// No vertex is visible
 	return false;
+}
+
+// Determine the world-space coordinates of the frustum corners.  Relevant ONLY for a view frustum
+void Frustum::DetermineWorldSpaceCorners(XMVECTOR(&pOutVertices)[8]) const
+{
+	static const XMVECTOR ndc_coords[8] = 
+	{
+		{ -1, 1, 0 }, { 1, 1, 0 }, { 1, -1, 0 }, { -1, -1, 0 }, 
+		{ -1, 1, 1 }, { 1, 1, 1 }, { 1, -1, 1 }, { -1, -1, 1 }
+	};
+
+	XMMATRIX inv_viewproj = XMMatrixInverse(NULL, m_viewproj);
+	for (int i = 0; i < 8; ++i)
+	{
+		pOutVertices[i] = XMVector3TransformCoord(ndc_coords[i], inv_viewproj);
+	}
 }
 
 

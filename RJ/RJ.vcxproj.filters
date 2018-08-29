@@ -949,6 +949,21 @@
     <ClCompile Include="PostProcessTemporalAA.cpp">
       <Filter>Engine\Rendering\DirectX11\Postprocess\Temporal AA</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowManagerComponent.cpp">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
+    </ClCompile>
+    <ClCompile Include="IntersectionTests.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraProjection.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraView.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewport.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2220,6 +2235,24 @@
     <ClInclude Include="..\Definitions\CppHLSLLocalisation.hlsl.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowManagerComponent.h">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RM_InstanceMetadata.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="IntersectionTests.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraProjection.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraView.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorisedFloat.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2603,6 +2636,9 @@
     <Filter Include="HLSL\Support">
       <UniqueIdentifier>{b4d3ce65-2a40-4704-9bd0-b1bf00017ea6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\ShadowManager">
+      <UniqueIdentifier>{7e1016cb-a877-4d6e-b66d-48cf2cc06753}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2643,8 +2679,18 @@
     <None Include="Data\Shaders\velocity_calculations.hlsl">
       <Filter>HLSL\Support</Filter>
     </None>
-    <None Include="Data\Shaders\temporal_aa_calculations.hlsl" />
-    <None Include="Data\Shaders\temporal_aa_resources.hlsl" />
+    <None Include="Data\Shaders\temporal_aa_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\temporal_aa_resources.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\shadowmap_resources.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
+    <None Include="Data\Shaders\shadowmap_calculations.hlsl">
+      <Filter>HLSL\Support</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
@@ -2696,6 +2742,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Data\Shaders\ps_post_temporal.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vs_shadowmap.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

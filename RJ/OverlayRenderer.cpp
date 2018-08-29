@@ -139,7 +139,7 @@ void OverlayRenderer::SetNodeSpinSpeed(float speed)
 void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModel(m_models[(int)colour], world, world.r[3]);
+	Game::Engine->RenderModel(m_models[(int)colour], world, world.r[3], 100.0f);	// TEMP radius since not known
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
@@ -154,7 +154,7 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderLineFlat(const FXMMATRIX world, const
 {
 	// Add a request to the core engine to render this line
 	//Game::Engine->RenderModelFlat(&m_models[RenderColour::RC_None]->Data, position, colour_alpha, world);
-	Game::Engine->RenderModel(m_models[RenderColour::RC_LightBlue], world, position);		// TODO: Temporary, fix this
+	Game::Engine->RenderModel(m_models[RenderColour::RC_LightBlue], world, position, 100.0f); // TEMP radius since not known
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
@@ -162,7 +162,7 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRe
 {
 	// Scale the current world matrix and pass it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixScaling(thickness, thickness, length), world);
-	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3]);
+	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3], length);
 }
 
 // Method to add a line for rendering.  Does all calculation of required world matrix to generate the line between two points
@@ -190,19 +190,19 @@ void OverlayRenderer::RenderLineFlat(const FXMVECTOR pt1, const FXMVECTOR pt2, c
 // Determines the world matrix required to transform a line model into the correct position, given only
 // the coordinates of each line end point.  Also optionally accepts a line length parameter to avoid 
 // the SQRT otherwise required for calculating the line length.
-void OverlayRenderer::DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVECTOR pt1, const FXMVECTOR pt2, float thickness, float length)
+void OverlayRenderer::DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVECTOR pt1, const FXMVECTOR pt2, float thickness, float & optionalOutLength)
 {
 	// Take the vector difference of the two points
 	XMVECTOR vdiff = XMVectorSubtract(pt2, pt1);
 
 	// If the length is not specified, calculate it now via aa * bb = cc
-	if (length <= 0.0f) 
+	if (optionalOutLength <= 0.0f) 
 	{
-		length = XMVectorGetX(XMVector3Length(vdiff));
+		optionalOutLength = XMVectorGetX(XMVector3Length(vdiff));
 	}
 
 	// Start with a scaling matrix that will set both the line length and thickness in the same operation
-	XMMATRIX scale = XMMatrixScaling(thickness, thickness, length);
+	XMMATRIX scale = XMMatrixScaling(thickness, thickness, optionalOutLength);
 
 	// Now determine the quaternion rotation from the basis vector to the desired heading difference, and apply via rotation matrix
 	XMMATRIX rot = XMMatrixRotationQuaternion(QuaternionBetweenVectors(BASIS_VECTOR, vdiff));
@@ -431,7 +431,7 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, Overlay
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3]);
+	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3], max(max(xSize, ySize), zSize) * 0.5f);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
@@ -445,7 +445,8 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, Overlay
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3]);
+	XMFLOAT3 fsize; XMStoreFloat3(&fsize, size);
+	Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3], max(max(fsize.x, fsize.y), fsize.z) * 0.5f);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes alpha blending.
@@ -475,7 +476,7 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float x
 
 	// Scale & translate the current world matrix before passing it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None], colour, mworld, mworld.r[3]);
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None], colour, mworld, mworld.r[3], max(max(xSize, ySize), zSize) * 0.5f);
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes 
@@ -511,7 +512,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 
 		// Scale & translate the current world matrix before passing it to the engine rendering method
 		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
-		Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3]);
+		Game::Engine->RenderModel(m_models[(int)colour], mworld, mworld.r[3], max(max(xSize, ySize), zSize) * 0.5f);
 	}
 }
 

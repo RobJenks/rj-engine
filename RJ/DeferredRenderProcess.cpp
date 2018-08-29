@@ -11,6 +11,7 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "Model.h"
+#include "ShadowManagerComponent.h"
 #include "FrustumJitterProcess.h"
 #include "PostProcessMotionBlur.h"
 #include "PostProcessTemporalAA.h"
@@ -19,42 +20,53 @@
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
 
-/* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
+/* Info: known problem.  If an object is rendered in the deferred LIGHTING phase with textures assigned in its material, 
    those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
    only be rendered in a small upper-left corner square corresponding to the dimensions of the material texture.  If it 
    becomes necessary to allow textures light volume models in future, need to ensure the slots for material textures and 
    GBuffer textures do not overlap */
 
 
+// Initialise static data
+const float DeferredRenderProcess::DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT = 6.0f;
+
+
+// Constructor
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
-	m_vs(NULL),
-	m_vs_quad(NULL), 
+	m_vs{ NULL, NULL },
+	m_vs_quad(NULL),
 	m_ps_geometry(NULL),
-	m_ps_lighting(NULL),
+	m_ps_lighting{ NULL, NULL },
 	m_ps_debug(NULL),
-	m_depth_only_rt(NULL),
-	m_colour_buffer(NULL), 
-	m_colour_rt(NULL), 
+	m_def_dsv_tx(NULL),
+	m_def_dsv_rt(NULL),
+	m_light_dsv_tx(NULL),
+	m_light_dsv_rt(NULL),
+	m_colour_buffer(NULL),
+	m_colour_rt(NULL),
 	m_cb_frame(NULL),
 	m_cb_lightindex(NULL),
 	m_cb_deferred(NULL),
 
 	m_pipeline_geometry(NULL),
 	m_pipeline_lighting_pass1(NULL),
-	m_pipeline_lighting_pass2(NULL),
-	m_pipeline_lighting_directional(NULL),
+	m_pipeline_lighting_pass2{ NULL, NULL },
+	m_pipeline_lighting_directional{ NULL, NULL },
 	m_pipeline_transparency(NULL),
 	m_pipeline_debug_rendering(NULL),
 
-	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_noisetexture(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_noisedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_vs_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_vs_light_shadowmap_data(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_geometry_deferreddata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_deferreddata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_framedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER }, 
+	m_param_ps_light_lightdata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_lightindexdata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_noisetexture{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_noisedata{ ShaderDX11::INVALID_SHADER_PARAMETER, ShaderDX11::INVALID_SHADER_PARAMETER },
+	m_param_ps_light_shadowmap(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_shadowmap_data(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
 	m_model_sphere(NULL),
@@ -63,18 +75,20 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_transform_fullscreen_quad(ID_MATRIX),
 	m_transform_fullscreen_quad_farplane(ID_MATRIX),
 	m_frame_buffer_state(FrameBufferState::Unknown),
-	
-	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE), 
 
-	m_velocity_k(2U), 
-	m_exposure(1.0f), 
-	m_motion_samples(16U), 
-	m_motion_max_sample_tap_distance(16U), 
+	m_render_noise_method(NoiseGenerator::INVALID_NOISE_RESOURCE),
 
-	m_post_processing_components({ 0 }), 
+	m_velocity_k(2U),
+	m_exposure(1.0f),
+	m_motion_samples(16U),
+	m_motion_max_sample_tap_distance(16U),
+
+	m_post_processing_components({ 0 }),
 
 	m_debug_render_active_view_count(0U),
-	m_cb_debug(NULL)
+	m_cb_debug(NULL), 
+	m_debug_depth_scaling_exponent(DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT), 
+	m_debug_output_mode(DEF_DEBUG_RENDER_VIEWS)
 {
 	SetName( RenderProcess::Name<DeferredRenderProcess>() );
 
@@ -90,6 +104,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseTransparentRenderingPipelines();
 	InitialiseDebugRenderingPipelines();
 
+	InitialiseShadowManager();
 	InitialisePostProcessingComponents();
 }
 
@@ -125,8 +140,11 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
-	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
+	m_vs[SM_DISABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
+	if (m_vs[SM_DISABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
+
+	m_vs[SM_ENABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShaderShadowMapped);
+	if (m_vs[SM_ENABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_sm]\n";
 
 	m_vs_quad = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::FullScreenQuadVertexShader);
 	if (m_vs_quad == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs_q]\n";
@@ -134,25 +152,52 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
 	if (m_ps_geometry == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_g]\n";
 
-	m_ps_lighting = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShader);
-	if (m_ps_lighting == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
+	m_ps_lighting[SM_DISABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShader);
+	if (m_ps_lighting[SM_DISABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
 
-#ifdef _DEBUG
+	m_ps_lighting[SM_ENABLED] = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShaderShadowMapped);
+	if (m_ps_lighting[SM_ENABLED] == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l_sm]\n";
+
 	m_ps_debug = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingDebug);
 	if (m_ps_debug == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering debug shader resources [ps_d]\n";
+
+	InitialiseShaderParameterBindings();
+}
+
+void DeferredRenderProcess::InitialiseShaderParameterBindings(void)
+{
+	/* Determine indices into the shader parameter sets */
+
+	/// Geometry-PS
+	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName); 
+
+	const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		/// VS
+		m_param_vs_framedata[SM] = AttemptRetrievalOfShaderParameter(m_vs[SM], FrameDataBufferName);
+
+		/// Lighting-PS
+		m_param_ps_light_deferreddata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], DeferredRenderingParamBufferName);
+		m_param_ps_light_framedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], FrameDataBufferName);
+		m_param_ps_light_lightdata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], LightBufferName);
+		m_param_ps_light_lightindexdata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], LightIndexBufferName);
+		m_param_ps_light_noisetexture[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], NoiseTextureDataName);
+		m_param_ps_light_noisedata[SM] = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM], NoiseDataBufferName);
+	}
+
+	/// SM-specific parameters
+	m_param_vs_light_shadowmap_data = AttemptRetrievalOfShaderParameter(m_vs[SM_ENABLED], ShadowMappedLightBufferName);
+	m_param_ps_light_shadowmap = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM_ENABLED], ShadowMapTextureName);
+	m_param_ps_light_shadowmap_data = AttemptRetrievalOfShaderParameter(m_ps_lighting[SM_ENABLED], ShadowMappedLightBufferName);
+
+#ifdef _DEBUG
+	/// Debug
 	m_param_ps_debug_debugdata = AttemptRetrievalOfShaderParameter(m_ps_debug, DeferredRendererDebugRenderingDataName);
 #endif
 
-	// Ensure we have valid indices into the shader parameter sets
-	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
-	m_param_ps_geometry_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_geometry, DeferredRenderingParamBufferName);
-	m_param_ps_light_deferreddata = AttemptRetrievalOfShaderParameter(m_ps_lighting, DeferredRenderingParamBufferName);
-	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
-	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
-	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
-	m_param_ps_light_noisetexture = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseTextureDataName);
-	m_param_ps_light_noisedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, NoiseDataBufferName);
 }
+
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
 {
@@ -161,9 +206,9 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	UINTVECTOR2 displaysize = Game::Engine->GetRenderDevice()->GetDisplaySize().Convert<UINT>();
 
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", displaysize.Convert<int>());
-	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
-		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
+	m_def_dsv_tx = Game::Engine->GetAssets().CreateTexture2D("Deferred_DSV", displaysize.x, displaysize.y);
+	m_def_dsv_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DSV", displaysize.Convert<int>());
+	m_def_dsv_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_def_dsv_tx);
 
 	// Colour render target will contain all colour buffer data; this is generally the primary render output before post-processing
 	Texture::TextureFormat primary_colour_buffer_format = Game::Engine->GetRenderDevice()->PrimaryRenderTargetColourBufferFormat();
@@ -171,12 +216,20 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	m_colour_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Colour", displaysize.Convert<int>());
 	m_colour_rt->AttachTexture(RenderTarget::AttachmentPoint::Color0, m_colour_buffer);
 
+	// Light-space DSV for cascaded shadow mapping
+	m_light_dsv_tx = Game::Engine->GetAssets().CreateTexture2D("Deferred_Light_DSV", displaysize.x, displaysize.y);
+	m_light_dsv_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_Light_DSV", displaysize.Convert<int>());
+	m_light_dsv_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_light_dsv_tx);
+
 
 	// Assert that all objects were created as expected
 	std::vector<std::tuple<std::string, void**>> components = { 
-		{ "depth-only render target", (void**)&m_depth_only_rt }, 
+		{ "depth-stencil buffer", (void**)&m_light_dsv_tx }, 
+		{ "depth-stencil render target", (void**)&m_def_dsv_rt }, 
 		{ "primary colour buffer", (void**)&m_colour_buffer }, 
-		{ "primary colour render target", (void**)&m_colour_rt }
+		{ "primary colour render target", (void**)&m_colour_rt }, 
+		{ "light-space DSV buffer", (void**)&m_light_dsv_tx }, 
+		{ "light-space DSV render target", (void**)&m_light_dsv_rt }
 	};
 
 	// Verify each component in turn and report issues
@@ -206,16 +259,18 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering standard buffer resources\n";
 
-	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
-	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
-	m_cb_deferred = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
-	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
+	auto & assets = Game::Engine->GetRenderDevice()->Assets;
+
+	m_cb_frame = assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
+	m_cb_lightindex = assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
+	m_cb_deferred = assets.CreateConstantBuffer<DeferredRenderingParamBuffer>(DeferredRenderingParamBufferName, m_cb_deferred_data.RawPtr);
+	m_cb_debug = assets.CreateConstantBuffer<DeferredRendererDebugRenderingData>(DeferredRendererDebugRenderingDataName, m_cb_debug_data.RawPtr);
 }
 
 void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
 {
 	// GBuffer textures will be bound as shader resource view to all lighting (not geometry) pixel shaders
-	std::vector<ShaderDX11*> shaders = { &m_ps_lighting, &m_ps_debug };
+	std::vector<ShaderDX11*> shaders = { m_ps_lighting[SM_DISABLED], m_ps_lighting[SM_ENABLED], m_ps_debug };
 
 	// Mapping from resource names to GBuffer components
 	std::vector<std::tuple<std::string, TextureDX11*>> resource_mapping = {
@@ -272,7 +327,7 @@ XMMATRIX DeferredRenderProcess::CalculateFullScreenQuadRenderingTransform(const 
 {
 	return XMMatrixMultiply(
 		XMMatrixScaling(dimensions.x, dimensions.y, 1.0f),
-		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
+		XMMatrixTranslation(0.0f, 0.0f, 10.0f)	// TODO (SM): Remove z translation?
 	);
 }
 
@@ -288,7 +343,7 @@ void DeferredRenderProcess::InitialiseGeometryPipelines(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [g]\n";
 
 	m_pipeline_geometry = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Geometry");
-	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs);
+	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs[SM_DISABLED]);
 	m_pipeline_geometry->SetShader(Shader::Type::PixelShader, m_ps_geometry);
 	m_pipeline_geometry->SetRenderTarget(GBuffer.RenderTarget);
 
@@ -308,8 +363,8 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 
 	// First pass will only render depth information to an off-screen buffer
 	m_pipeline_lighting_pass1 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass1");
-	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_pass1->SetRenderTarget(m_depth_only_rt);
+	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs[SM_DISABLED]);
+	m_pipeline_lighting_pass1->SetRenderTarget(m_def_dsv_rt);
 
 	// Perform culling of back faces
 	m_pipeline_lighting_pass1->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
@@ -331,58 +386,76 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 // Lighting pass 2: render lit pixels
 void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 {
-	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [l2]\n";
+	// We will initialise pipelines for both shadow-mapped and normal rendering
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	static const std::string PIPELINE_ID[2] = { "l2", "l2_sm" };
+	static const std::string PIPELINE_NAME[2] = { "Deferred_Lighting_Pass2", "Deferred_Lighting_Pass2_SM" };
 
-	// Second pass will render lighting information to the primary RT itself
-	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass2");
-	m_pipeline_lighting_pass2->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_pass2->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_pass2->SetRenderTarget(m_colour_rt);
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [" << PIPELINE_ID[SM] << "]\n";
 
-	// Perform culling of front faces since we want to render only back faces of the light volume
-	m_pipeline_lighting_pass2->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
-	m_pipeline_lighting_pass2->GetRasterizerState().SetDepthClipEnabled(false);
+		// Second pass will render lighting information to the primary RT itself
+		m_pipeline_lighting_pass2[SM] = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState(PIPELINE_NAME[SM]);
+		m_pipeline_lighting_pass2[SM]->SetShader(Shader::Type::VertexShader, m_vs[SM]);
+		m_pipeline_lighting_pass2[SM]->SetShader(Shader::Type::PixelShader, m_ps_lighting[SM]);
+		m_pipeline_lighting_pass2[SM]->SetRenderTarget(m_colour_rt);
 
-	// All light rendering will be additive
-	m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
+		// Perform culling of front faces since we want to render only back faces of the light volume
+		m_pipeline_lighting_pass2[SM]->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Front);
+		m_pipeline_lighting_pass2[SM]->GetRasterizerState().SetDepthClipEnabled(false);
 
-	// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
-	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);
-	m_pipeline_lighting_pass2->GetDepthStencilState().SetDepthMode(depthMode);
+		// All light rendering will be additive
+		m_pipeline_lighting_pass2[SM]->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
-	// Enable stencil operations, keep on pass ( == 1, i.e. not decremented/unmarked in pass1)
-	DepthStencilState::StencilMode stencilMode(true);
-	DepthStencilState::FaceOperation faceOperation;
-	faceOperation.StencilFunction = DepthStencilState::CompareFunction::Equal;
-	stencilMode.StencilReference = 1U;
-	stencilMode.BackFace = faceOperation;
-	m_pipeline_lighting_pass2->GetDepthStencilState().SetStencilMode(stencilMode);
+		// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
+		DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);
+		m_pipeline_lighting_pass2[SM]->GetDepthStencilState().SetDepthMode(depthMode);
+
+		// Enable stencil operations, keep on pass ( == 1, i.e. not decremented/unmarked in pass1)
+		DepthStencilState::StencilMode stencilMode(true);
+		DepthStencilState::FaceOperation faceOperation;
+		faceOperation.StencilFunction = DepthStencilState::CompareFunction::Equal;
+		stencilMode.StencilReference = 1U;
+		stencilMode.BackFace = faceOperation;
+		m_pipeline_lighting_pass2[SM]->GetDepthStencilState().SetStencilMode(stencilMode);
+	}
 }
 
 // Directional lights can be rendered in a single pass, rather than the default two-pass deferred lighting calculation
 void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 {
-	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [ld]\n";
+	// We will initialise pipelines for both shadow-mapped and normal rendering
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+	static const std::string PIPELINE_ID[2] = { "ld", "ld_sm" };
+	static const std::string PIPELINE_NAME[2] = { "Deferred_Lighting_Directional", "Deferred_Lighting_Directional_SM" };
 
-	// Directional lighting pass will use a single full-screen quad at the far clip plane.  All pixels 
-	// forward of the plane will be lit using the same deferred lighting PS
-	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Directional");
-	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
-	m_pipeline_lighting_directional->SetRenderTarget(m_colour_rt);
-	m_pipeline_lighting_directional->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
-	m_pipeline_lighting_directional->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [" << PIPELINE_ID[SM] << "]\n";
 
-	// Enable depth testing (pass all pixels in front of the far plane), disable writes to the depth buffer
-	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Greater);
-	m_pipeline_lighting_directional->GetDepthStencilState().SetDepthMode(depthMode);
+		// Directional lighting pass will use a single full-screen quad at the far clip plane.  All pixels 
+		// forward of the plane will be lit using the same deferred lighting PS
+		m_pipeline_lighting_directional[SM] = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState(PIPELINE_NAME[SM]);
+		m_pipeline_lighting_directional[SM]->SetShader(Shader::Type::VertexShader, m_vs[SM]);
+		m_pipeline_lighting_directional[SM]->SetShader(Shader::Type::PixelShader, m_ps_lighting[SM]);
+		m_pipeline_lighting_directional[SM]->SetRenderTarget(m_colour_rt);
+		m_pipeline_lighting_directional[SM]->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
+		m_pipeline_lighting_directional[SM]->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
+		// Enable depth testing (pass all pixels in front of the far plane), disable writes to the depth buffer
+		DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Greater);
+		m_pipeline_lighting_directional[SM]->GetDepthStencilState().SetDepthMode(depthMode);
+	}
+	
 	// Also initialise the fullscreen quad transform for rendering at the far plane
+	// TODO: will not currently react to changes of the far depth plane distance
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_transform_fullscreen_quad_farplane = XMMatrixMultiply(
 		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, Game::Engine->GetRenderDevice()->GetFarClipDistance())
 	);
+
 }
 
 void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
@@ -422,15 +495,22 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_debug_srv_unbind = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };	
 }
 
+void DeferredRenderProcess::InitialiseShadowManager(void)
+{
+	Game::Log << LOG_INFO << "Initialising shadow manager components\n";
+
+	m_shadow_manager = new ShadowManagerComponent(this);
+}
+
 void DeferredRenderProcess::InitialisePostProcessingComponents(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering post-process components\n";
 
 	// Screen-space pixel neighbourhood motion blur
-	m_post_motionblur = ManagedPtr<PostProcessMotionBlur>(new PostProcessMotionBlur(this));
-	m_post_temporal_aa = ManagedPtr<PostProcessTemporalAA>(new PostProcessTemporalAA(this));
+	m_post_motionblur = new PostProcessMotionBlur(this);
+	m_post_temporal_aa = new PostProcessTemporalAA(this);
 
-	// Also maintain a collection of base post processing components
+	// Also maintain a collection of base post-processing components
 	m_post_processing_components = 
 	{ 
 		m_post_motionblur.RawPtr, 
@@ -454,7 +534,8 @@ void DeferredRenderProcess::BeginFrame(void)
 {
 	/*
 		1. Initialise per-frame data
-		2. Clear GBuffer render target
+		2. Clear deferred and GBuffer render targets
+		3. Delegate to child BeginFrame methods where applicable
 	*/
 
 	/* 1. Initialise per-frame data */
@@ -465,8 +546,11 @@ void DeferredRenderProcess::BeginFrame(void)
 	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 
-	/* 3. Clear all deferred render targets */
+	/* 2. Clear all deferred render targets */
 	m_colour_rt->Clear(ClearFlags::Colour, NULL_FLOAT4);
+
+	/* 3. Perform shadow mapping frame initialisation */
+	m_shadow_manager.RawPtr->BeginFrame();
 }
 
 // Perform all rendering of the frame
@@ -553,16 +637,21 @@ void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
 	// Store the new state
 	SetFrameBufferState(FrameBufferState::Normal);
 
-	// Frame data buffer
+	/* Frame data buffer */
+
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
+	m_cb_frame_data.RawPtr->InvView = Game::Engine->GetRenderInverseViewMatrixF();
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 
 	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
+	// Camera-specific, independent of normal/fullscreen rendering
+	m_cb_frame_data.RawPtr->CameraInverseViewProjection = Game::Engine->GetRenderInverseViewProjectionMatrixF();
 
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
@@ -576,12 +665,16 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;															// View matrix == identity
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();					// Proj matrix == orthographic
 	m_cb_frame_data.RawPtr->ViewProjection = Game::Engine->GetRenderOrthographicMatrixF();				// ViewProj matrix == (orthographic * ID) == orthographic
+	m_cb_frame_data.RawPtr->InvView = ID_MATRIX_F;														// Inv view == inv(ID) == ID
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseOrthographicMatrixF();		// Inv proj == inv orthographic
 	m_cb_frame_data.RawPtr->PriorFrameViewProjection = Game::Engine->GetRenderOrthographicMatrixF();	// Prior ViewProj == ThisViewProj == orthographic
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 
 	m_cb_frame_data.RawPtr->ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
 	m_cb_frame_data.RawPtr->PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
+
+	// Camera-specific, independent of normal/fullscreen rendering
+	m_cb_frame_data.RawPtr->CameraInverseViewProjection = Game::Engine->GetRenderInverseViewProjectionMatrixF();
 
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
 }
@@ -623,7 +716,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 	PopulateFrameBuffer(FrameBufferState::Normal);
 
 	// Bind required buffer resources to shader parameters
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM_DISABLED], GetCommonFrameDataBuffer());
 	m_pipeline_geometry->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_geometry_deferreddata, m_cb_deferred);
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
@@ -639,8 +732,6 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 void DeferredRenderProcess::PerformDeferredLighting(void)
 {
-	XMMATRIX transform;
-
 	// Bind required buffer resources to each pipeline
 	BindDeferredLightingShaderResources();
 
@@ -652,7 +743,7 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 	{
 		// Only process active lights
 		const auto & light = lights[i];
-		if (!light.Enabled) continue;
+		if (!CheckBit_Single(light.Flags, LIGHT_FLAG_ENABLED)) continue;
 
 		// Update the light index buffer
 		m_cb_lightindex_data.RawPtr->LightIndex = i;
@@ -666,26 +757,107 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		switch (light.Type)
 		{
 			case LightType::Point:
-				PopulateFrameBuffer(FrameBufferState::Normal);
-				transform = LightSource::CalculatePointLightTransform(light);
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
+				RenderPointLight(i, light);
 				break;
 
 			case LightType::Spotlight:
-				PopulateFrameBuffer(FrameBufferState::Normal);
-				transform = LightSource::CalculateSpotlightTransform(light);
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
+				RenderSpotLight(i, light);
 				break;
 
 			case LightType::Directional:
-				PopulateFrameBuffer(FrameBufferState::Fullscreen);
-				RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
+				RenderDirectionalLight(i, light);
 				break;
 		}
 	}
+}
 
+
+void DeferredRenderProcess::RenderPointLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Normal);
+
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
+
+	// Two-pass render pipeline
+	XMMATRIX transform = LightSource::CalculatePointLightTransform(light);
+	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2[SM], m_model_sphere, transform);
+}
+
+void DeferredRenderProcess::RenderSpotLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Normal);
+
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_pass2[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
+
+	// Two-pass render pipeline
+	XMMATRIX transform = LightSource::CalculateSpotlightTransform(light);
+	RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
+	RenderLightPipeline(m_pipeline_lighting_pass2[SM], m_model_cone, transform);
+}
+
+void DeferredRenderProcess::RenderDirectionalLight(unsigned int light_index, const LightData & light)
+{
+	PopulateFrameBuffer(FrameBufferState::Fullscreen);
+
+	// Perform shadow mapping and bind SM resources to the pipeline, if applicable
+	SM_STATE SM = GetShadowMappingState(light);
+	PerformShadowMapping(light_index, light, m_pipeline_lighting_directional[SM_ENABLED], 
+		m_param_vs_light_shadowmap_data, m_param_ps_light_shadowmap, m_param_ps_light_shadowmap_data);
+
+	// Single-pass render pipeline
+	RenderLightPipeline(m_pipeline_lighting_directional[SM], m_model_quad, m_transform_fullscreen_quad_farplane);
+}
+
+DeferredRenderProcess::SM_STATE DeferredRenderProcess::GetShadowMappingState(const LightData & light)
+{
+	return (CheckBit_Single(light.Flags, LIGHT_FLAG_SHADOW_MAP) ? SM_ENABLED : SM_DISABLED);
+}
+
+void DeferredRenderProcess::PerformShadowMapping(unsigned int light_index, const LightData & light, PipelineStateDX11 *pipeline, 
+												 ShaderDX11::ShaderParameterIndex param_vs_data, ShaderDX11::ShaderParameterIndex param_ps_sm, 
+												 ShaderDX11::ShaderParameterIndex param_ps_data)
+{
+	if (GetShadowMappingState(light) == SM_ENABLED)
+	{
+		RenderShadowMap(light_index, light);
+		BindShadowMapResources(pipeline, param_vs_data, param_ps_sm, param_ps_data);
+	}
+	else
+	{
+		UnbindShadowMapResources(pipeline, param_vs_data, param_ps_sm, param_ps_data);
+	}
+}
+
+void DeferredRenderProcess::RenderShadowMap(unsigned int light_index, const LightData & light)
+{
+	m_shadow_manager.RawPtr->ExecuteLightSpaceRenderPass(light_index, light);
+}
+
+void DeferredRenderProcess::BindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data, 
+												   ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data)
+{
+	assert(pipeline);
+
+	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, m_shadow_manager.RawPtr->GetActiveShadowMap());
+}
+
+void DeferredRenderProcess::UnbindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+													 ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data)
+{
+	assert(pipeline);
+
+	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, static_cast<ConstantBufferDX11*>(NULL));
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, static_cast<ConstantBufferDX11*>(NULL));
+	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, static_cast<TextureDX11*>(NULL));
 }
 
 
@@ -695,29 +867,41 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	// TODO: Required for all pipelines when shader/buffer is the same?  E.g. all pipelines use the same frame data param in the same VS
 	// TODO: Required every frame?  Only setting buffer pointer in shader.  May only be required on shader reload in case param indices change
 
+	// Bind for both regular and shadow-mapped pipeline versions
+	static const SM_STATE SM_OPTIONS[2] = { SM_DISABLED, SM_ENABLED };
+
 	// Lighting pass 1 is VS-only and does not output fragments
-	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM_DISABLED], GetCommonFrameDataBuffer());
 
-	// Lighting pass 2 uses both VS and PS
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	// Lighting pass 2 and Directional light pipelines both support shadow mapping
+	for (SM_STATE SM : SM_OPTIONS)
+	{
+		// Lighting pass 2 uses both VS and PS
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata[SM], m_cb_lightindex);
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata[SM], Game::Engine->LightingManager->GetLightDataBuffer());
+		m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata[SM], Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
 
-	// Directional lighting pass uses both VS and PS
-	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata, GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata, m_cb_lightindex);
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata, Game::Engine->LightingManager->GetLightDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata, Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+		// Directional lighting pass uses both VS and PS
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::VertexShader)->SetParameterData(m_param_vs_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_framedata[SM], GetCommonFrameDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightindexdata[SM], m_cb_lightindex);
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_lightdata[SM], Game::Engine->LightingManager->GetLightDataBuffer());
+		m_pipeline_lighting_directional[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisedata[SM], Game::Engine->GetNoiseGenerator()->GetActiveNoiseBuffer());
+	}
+	m_pipeline_lighting_pass2[SM_ENABLED]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));			// Set per shadow-casting light
+	m_pipeline_lighting_directional[SM_ENABLED]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_shadowmap, static_cast<TextureDX11*>(NULL));	// Set per shadow-casting light
 
 	// Bind the required noise resources to PS lighting shaders
 	Game::Engine->GetNoiseGenerator()->BindNoiseResources(m_render_noise_method);
 	TextureDX11 *noiseresource = Game::Engine->GetNoiseGenerator()->GetActiveNoiseResource();
 	if (noiseresource)
 	{
-		m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisetexture, noiseresource);
+		for (SM_STATE SM : SM_OPTIONS)
+		{
+			m_pipeline_lighting_pass2[SM]->GetShader(Shader::Type::PixelShader)->SetParameterData(m_param_ps_light_noisetexture[SM], noiseresource);
+		}
 	}
 }
 
@@ -796,6 +980,7 @@ const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>
 	{ "motion_tilegen", DebugRenderMode::MotionBlurTileGen }, 
 	{ "motion_neighbourhood", DebugRenderMode::MotionBlurNeighbourhood }, 
 	{ "motion_final", DebugRenderMode::MotionBlurFinal }, 
+	{ "shadowmap", DebugRenderMode::ShadowMap }, 
 	{ "final", DebugRenderMode::Final }
 };
 
@@ -823,6 +1008,7 @@ int DeferredRenderProcess::GetHlslDebugMode(DebugRenderMode render_mode) const
 			return DEF_DEBUG_STATE_DISABLED;
 
 		case DebugRenderMode::Depth:
+		case DebugRenderMode::ShadowMap:
 			return DEF_DEBUG_STATE_ENABLED_DEPTH;
 
 		case DebugRenderMode::Velocity:
@@ -848,6 +1034,7 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 		case DebugRenderMode::MotionBlurTileGen:		return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetTileGenerationPhaseResult() : NULL);
 		case DebugRenderMode::MotionBlurNeighbourhood:	return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetNeighbourhoodDeterminationResult() : NULL);
 		case DebugRenderMode::MotionBlurFinal:			return (m_post_motionblur.RawPtr ? m_post_motionblur.RawPtr->GetRenderedOutput() : NULL);
+		case DebugRenderMode::ShadowMap:				return (m_shadow_manager.RawPtr->GetDebugShadowMapBufferCapture());
 
 		// Final backbuffer output 
 		case DebugRenderMode::Final:					return m_final_colour_buffer;
@@ -859,17 +1046,31 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 
 void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode)
 {
-	// Set general buffer data
-	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+	// Maximum of 16 views (4x4)
 	unsigned int viewcount = (std::min)(static_cast<unsigned int>(render_modes.size()), 16U);
-	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
-	m_cb_debug_data.RawPtr->C_debug_view_count = viewcount;
-	m_cb_debug_data.RawPtr->C_debug_render_mode = output_mode;
-
 
 	// Store a copy of this data for per-frame updates
 	m_debug_render_modes.clear();
 	m_debug_render_modes.insert(m_debug_render_modes.begin(), render_modes.begin(), (render_modes.begin() + viewcount));
+
+	m_debug_output_mode = output_mode;
+
+	// Update the debug shader buffer based on this new information
+	UpdateDebugRenderingBuffers();
+}
+
+void DeferredRenderProcess::UpdateDebugRenderingBuffers(void)
+{
+	// Set general buffer data
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeU();
+	size_t viewcount = m_debug_render_modes.size();
+	assert(viewcount <= 16U);
+
+	m_cb_debug_data.RawPtr->C_debug_buffer_size = XMUINT2(displaysize.x, displaysize.y);
+	m_cb_debug_data.RawPtr->C_debug_view_count = static_cast<unsigned int>(viewcount);
+	m_cb_debug_data.RawPtr->C_debug_render_mode = m_debug_output_mode;
+	m_cb_debug_data.RawPtr->C_debug_depth_scaling_exponent = GetDebugDepthRenderingExponent();
+
 
 	// Vector will hold pointers to the relevant texture resources.  Allocate here but reassign resources
 	// per-frame in the debug rendering method, since resource locations may change
@@ -880,14 +1081,14 @@ void DeferredRenderProcess::SetDebugRenderingState(const std::vector<DebugRender
 	int last_valid_view = -1;
 	for (unsigned int i = 0U; i < 16U; ++i)
 	{
-		if (i >= viewcount || render_modes[i] == DebugRenderMode::None)
+		if (i >= viewcount || m_debug_render_modes[i] == DebugRenderMode::None)
 		{
 			m_cb_debug_data.RawPtr->C_debug_view[i].state = DEF_DEBUG_STATE_DISABLED;
 		}
 		else
 		{
 			last_valid_view = static_cast<int>(i);
-			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(render_modes[i]);
+			m_cb_debug_data.RawPtr->C_debug_view[i].state = GetHlslDebugMode(m_debug_render_modes[i]);
 		}
 	}
 
@@ -960,6 +1161,12 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	return true;
 }
 
+void DeferredRenderProcess::SetDebugDepthRenderingExponent(float exp)
+{
+	m_debug_depth_scaling_exponent = exp;
+	UpdateDebugRenderingBuffers();
+}
+
 // Return a pointer to the final colour buffer for this render process.  This may be the immediately-rendered colour
 // buffer, the post-processed colour buffer or the debug rendering output, depending on our current state
 TextureDX11 * DeferredRenderProcess::GetFinalColourBuffer(void)
@@ -1007,6 +1214,25 @@ bool DeferredRenderProcess::ProcessConsoleCommand(GameConsoleCommand & command)
 			command.SetSuccessOutput(concat("Enabled debug rendering with ")(m_debug_render_active_view_count)(" redirected render target buffers").str());
 		}
 
+		return true;
+	}
+	else if (command.InputCommand == "debug_depth_exp")
+	{
+		if (command.ParameterCount() >= 1U)
+		{
+			float exp = command.ParameterAsFloat(0);
+			if (exp <= 0.0f) {
+				command.SetFailureOutput("Debug depth rendering exponent must be positive and non-zero");
+			}
+			else {
+				SetDebugDepthRenderingExponent(exp);
+				command.SetSuccessOutput(concat("Debug depth rendering exponent updated to ")(GetDebugDepthRenderingExponent()).str());
+			}
+		}
+		else
+		{
+			command.SetSuccessOutput(concat("Debug depth rendering exponent is ")(GetDebugDepthRenderingExponent()).str());
+		}
 		return true;
 	}
 	else if (command.InputCommand == "defrend_setnoise")

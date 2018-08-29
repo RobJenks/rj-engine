@@ -642,38 +642,21 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
-		for (auto & obj : objects)
-		{
-			if (obj()->GetObjectType() == iObject::ObjectType::LightSourceObject)
-			{
-				LightSource *ls = (LightSource*)obj();
-				if (ls->GetLight().GetType() == LightType::Directional)
-				{
-					if (b[DIK_LALT])
-					{
-						ls->LightObject().Toggle();
-						Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
-						break;
-					}
-					else if (b[DIK_LSHIFT])
-					{
-						ls->LightObject().ChangeIntensity(+0.1f);
-						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
-						break;
-					}
-					else if (b[DIK_LCONTROL])
-					{
-						ls->LightObject().ChangeIntensity(-0.1f);
-						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
-						break;
-					}
-				}
-			}
-		}
-
+		ss()->SetPositionAndOrientation(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetY(NULL_VECTOR, cs()->GetSizeF().y)), NULL_VECTOR), ID_QUATERNION);
+		LightSource *syslight = (LightSource*)Game::GetObjectByInstanceCode("syslight");
+		syslight->SetOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		syslight->LightObject().SetIntensity(0.7f);
+		syslight->LightObject().EnableShadowMapping();
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("shadow map size 1280 720"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("post motion disable"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("post temporal-aa disable"));
 		Game::Keyboard.LockKey(DIK_U);
 	}
+
+	if (b[DIK_L])
+	{
+	}
+
 	if (b[DIK_J])
 	{
 		if (!b[DIK_LSHIFT])	ActivateDebugPortalRenderingTest(Game::CurrentPlayer->GetActor());
@@ -749,54 +732,62 @@ void RJMain::ProcessKeyboardInput(void)
 		//Game::Keyboard.LockKey(DIK_MINUS);
 	}
 
+	// DIK_EQUALS
+	static const int TN = 4;
+	static Terrain *t[TN] = { 0 };
+	static bool obj_eq_rotate = false;
+	if (obj_eq_rotate)
+	{
+		static const float ROT_SPEED = PI;
+		float speed = (ROT_SPEED * Game::TimeFactor);
+
+		for (int i = 0; i < TN; ++i)
+		{
+			if (t[i]) t[i]->ChangeOrientation(XMQuaternionRotationRollPitchYaw(
+				((float)(((i + 1) * 17) % 7)) * 0.1f * speed,
+				((float)(((i + 1) * 17) % 4)) * 0.1f * speed,
+				((float)(((i + 1) * 17) % 10)) * 0.1f * speed
+			));
+		}
+
+	}
 	if (b[DIK_EQUALS])
 	{
-		static Terrain *t = NULL; static Terrain *t2 = NULL;
-		if (!t)
+		static int tx = 0;
+
+		if (!b[DIK_LSHIFT] && !b[DIK_LCONTROL])
 		{
-			t = Terrain::Create("tmp_terrain_cone");
-			t2 = Terrain::Create("tmp_terrain_cone");
+			bool create = (t[tx] == NULL);
+			
+			if (create) t[tx] = Terrain::Create("tmp_terrain_cone");
 
-			auto *actor = Game::CurrentPlayer->GetActor();
-			auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(-3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
-			auto envpos2 = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSet(3.0f, 0.0f, 1.0f, 0.0f), actor->GetOrientationMatrix()));
+			static const XMVECTOR offset_scale = XMVectorReplicate(2.5f);
+			auto pos = XMVectorMultiplyAdd(Game::Engine->GetCamera()->GetCameraHeading(), offset_scale, Game::Engine->GetCamera()->GetPosition());
 
-			t->SetPosition(envpos);
-			t->SetOrientation(ID_QUATERNION);
-			t->SetExtent(XMVectorReplicate(0.5f));
+			t[tx]->SetPosition(XMVector3TransformCoord(pos, cs()->GetInverseZeroPointWorldMatrix()));
+			t[tx]->SetOrientation(ID_QUATERNION);
+			t[tx]->SetExtent(XMVectorReplicate(0.5f));
 
-			cs()->AddTerrainObject(t);
-			cs()->AddTerrainObject(t2);
+			if (create) cs()->AddTerrainObject(t[tx]);
 
-			t2->SetPosition(envpos2);
-			t2->SetOrientation(ID_QUATERNION);
-			t2->SetExtent(XMVectorReplicate(0.5f));
-
-			return;
+			Game::Log << LOG_DEBUG << "Obj " << tx << " moved to " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
+				XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 		}
-		
-
-		if (t)
+		else if (b[DIK_LSHIFT] && !b[DIK_LCONTROL])
 		{
-			if (b[DIK_LSHIFT])
-			{
-				Game::Log << LOG_DEBUG << "Pos: " << Vector4ToString(t->GetPosition()) << "\n";
-			}
-			else if (b[DIK_LCONTROL])
-			{
-				Game::Log << LOG_DEBUG << "Moving to: " << Vector4ToString(t->GetPosition()) << "\n";
-				Game::CurrentPlayer->GetActor()->SetEnvironmentPosition(t->GetEnvironmentPosition());
-			}
+			if (t[tx])
+				Game::Log << LOG_DEBUG << "Obj " << tx << " left at " << Vector3ToString(t[tx]->GetPosition()) << ", world = " << Vector3ToString(
+					XMVector3TransformCoord(t[tx]->GetPosition(), cs()->GetZeroPointWorldMatrix())) << "\n";
 			else
-			{
-				auto *actor = Game::CurrentPlayer->GetActor();
-				auto envpos = XMVectorAdd(actor->GetEnvironmentPosition(), XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 1.0f), actor->GetOrientationMatrix()));
-
-				Game::Log << LOG_DEBUG << "Before: " << Vector4ToString(t->GetPosition()) << "\n";
-				t->SetPosition(envpos);
-				Game::Log << LOG_DEBUG << "After: " << Vector4ToString(t->GetPosition()) << "\n";
-			}
+				Game::Log << LOG_DEBUG << "Obj " << tx << " skipped; does not exist yet\n";
 		}
+		else if (b[DIK_LCONTROL] && !b[DIK_LSHIFT]) 
+		{
+			obj_eq_rotate = !obj_eq_rotate;
+			Game::Log << LOG_DEBUG << "Obj rotation set to " << obj_eq_rotate << "\n";
+		}
+
+		tx = ((tx + 1) % TN);
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
@@ -1041,6 +1032,8 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 			Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
 			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
+
+			Game::Console.ProcessRawCommand(GameConsoleCommand("obj plight light setshadowmappingstate true"));
 
 			((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(1.0f);
 
@@ -2499,8 +2492,9 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->OverrideInstanceCode("syslight");
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
-		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
+	// TODO (SM): temporary; directional light should not have a position, is just at (0, 0, 0)
+	l->SetPositionAndOrientation(XMVectorAdd(cs()->GetPosition(), XMVectorScale(XMVectorSubtract(ss()->GetPosition(), cs()->GetPosition()), 0.25f)), // x% of the way along the vector from (cs -> ss)
+		QuaternionBetweenVectors(FORWARD_VECTOR, XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
 	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
 	l->LightObject().SetIntensity(0.25f);
 
@@ -2520,7 +2514,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	player_light->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
 	player_light->LightObject().SetIntensity(16.0f);
-	player_light->LightObject().SetRange(5.0f);
+	player_light->LightObject().SetRange(20.0f);
 	player_light->LightObject().SetAttenuation(AttenuationData(0.0f, 0.6f, 0.4));
 	//player_light->LightObject().Deactivate();
 	lt2 = player_light;
@@ -2733,15 +2727,26 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		// Tmp: Update player spotlight position and orientation to match camera
-		LightSource *lights[2] = { lt(), lt2() };
+		static bool attach = true;
+		if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+		{
+			attach = !attach;
+			Game::Log << LOG_DEBUG << "Setting attachment to " << attach << "\n";
+			Game::Keyboard.LockKey(DIK_CAPSLOCK);
+		}
+
+		LightSource *lights[2] = { lt2() };
 		for (LightSource *active : lights)
 		{
-			active->SetPosition(Game::Engine->GetCamera()->GetPosition());
-			active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
-			if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+			if (attach && active)
 			{
-				active->LightObject().SetRange(active->LightObject().GetRange() < 100.0f ? 200.0f : 20.0f);
-				Game::Keyboard.LockKey(DIK_CAPSLOCK);
+				active->SetPosition(XMVectorSubtract(Game::Engine->GetCamera()->GetPosition(), XMVectorSetY(NULL_VECTOR, 0.0f)));
+				active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
+
+				/*XMMATRIX om = XMMatrixLookAtLH(Game::Engine->GetCamera()->GetPosition(),
+					XMVectorAdd(Game::Engine->GetCamera()->GetPosition(), Game::Engine->GetCamera()->GetCameraHeading()),
+					XMVectorSetY(NULL_VECTOR, -1.0f));
+				active->SetOrientation(XMQuaternionRotationMatrix(om));*/
 			}
 		}
 

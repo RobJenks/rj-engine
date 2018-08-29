@@ -31,9 +31,11 @@ public:
 	Shader::Type GetType() const;
 
 	// Load shader data
-	bool LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, const std::string& entryPoint, 
-								const std::string& profile, const InputLayoutDesc *input_layout = NULL);
-	bool LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout = NULL);
+	bool LoadShaderFromString(  const std::string & name, Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, const std::string& entryPoint,
+								const std::string& profile, const InputLayoutDesc *input_layout = NULL, 
+								const ShaderMacros::MacroData & macros = ShaderMacros::NONE);
+	bool LoadShaderFromFile(const std::string & name, Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, const std::string& profile, 
+							const InputLayoutDesc *input_layout = NULL, const ShaderMacros::MacroData & macros = ShaderMacros::NONE);
 
 	// Initialise any shader parameters that can be assigned prior to rendering
 	Result							InitialisePreAssignableParameters(void);
@@ -100,6 +102,7 @@ private:
 	ID3D11ComputeShader	*				m_cs;
 
 	// Key shader parameters
+	std::string							m_name;					// Unique per shader
 	ShaderParameterSet					m_parameters;			// Linear collection of parameters
 	ShaderParameterMapping				m_parameter_mapping;	// Mapping from parameter name to parameter set index
 	const InputLayoutDesc *				m_inputlayout_desc;		// Application description of the shader input layout (for VS only)
@@ -108,6 +111,7 @@ private:
 	std::wstring						m_filename; 
 	std::string							m_entrypoint;
 	std::string							m_profile;
+	ShaderMacros::MacroData				m_macros;
 	
 	// Slot indices for key data types
 	SlotID								m_slot_material;		// Slot for the material constant buffer data

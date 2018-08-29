@@ -333,6 +333,10 @@ namespace ErrorCodes {
 	const Result		PostProcessAlreadyInDesiredState				= 1522;
 	const Result		PostProcessCommandNotSupported					= 1523;
 	const Result		PostProcessComponentDoesNotExist				= 1524;
+	const Result		InvalidDepthPlaneConfiguration					= 1525;
+	const Result		InvalidShadowMapBufferSize						= 1526;
+	const Result		InvalidShadowMapNearScaleFactor					= 1527;
+
 
 	// External data read/write errors									(2000-2199)
 	const Result		FileDoesNotExist								= 2000;
@@ -673,6 +677,7 @@ namespace ErrorCodes {
 	const Result		ObjectTypeCannotAcceptDebugCommands				= 5610;
 	const Result		CommandParameterIsNotValid						= 5611;
 	const Result		ConsoleCommandHasInvalidSyntax					= 5612;
+	const Result		ConsoleCommandGeneralFailure					= 5613;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

@@ -54,12 +54,8 @@ public:
 	// Determines the world matrix required to transform a line model into the correct position, given only
 	// the coordinates of each line end point.  Also optionally accepts a line length parameter to avoid 
 	// the SQRT otherwise required for calculating the line length.
-	void				DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVECTOR pt1, const FXMVECTOR pt2, float thickness, float length);
-	CMPINLINE void		DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVECTOR pt1, const FXMVECTOR pt2, float thickness)
-	{
-		// If we don't know the line length, pass -1.0f and the method will derive it via a SQRT on the line vertices
-		DetermineLineWorldMatrix(outMatrix, pt1, pt2, thickness, -1.0f);
-	}
+	void				DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVECTOR pt1, const FXMVECTOR pt2, float thickness, float & optionalOutLength);
+	
 
 	// Method to add a line for rendering.  Does all calculation of required world matrix to generate the line between two points.  If 
 	// 'length' is given as <= 0 then the length will be calculated automatically (via a sqrt, so avoid if possible)

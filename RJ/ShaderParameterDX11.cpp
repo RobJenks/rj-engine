@@ -25,7 +25,6 @@ ShaderParameterDX11::ShaderParameterDX11(Type type, const std::string & name, Sh
 void ShaderParameterDX11::Set(ConstantBufferDX11 *buffer)
 {
 	assert(m_type == Type::ConstantBuffer);
-	assert(buffer != NULL);
 	m_cbuffer = buffer;
 }
 
@@ -33,7 +32,6 @@ void ShaderParameterDX11::Set(ConstantBufferDX11 *buffer)
 void ShaderParameterDX11::Set(StructuredBufferDX11 *buffer)
 {
 	assert(m_type == Type::StructuredBuffer);
-	assert(buffer != NULL);
 	m_sbuffer = buffer;
 }
 
@@ -41,7 +39,6 @@ void ShaderParameterDX11::Set(StructuredBufferDX11 *buffer)
 void ShaderParameterDX11::Set(TextureDX11 *texture)
 {
 	assert(m_type == Type::Texture);
-	assert(texture != NULL);
 	m_texture = texture;
 }
 
@@ -49,7 +46,6 @@ void ShaderParameterDX11::Set(TextureDX11 *texture)
 void ShaderParameterDX11::Set(SamplerStateDX11 *sampler)
 {
 	assert(m_type == Type::Sampler);
-	assert(sampler != NULL);
 	m_sampler = sampler;
 }
 

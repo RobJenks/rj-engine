@@ -8,12 +8,14 @@
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "Data/Shaders/DeferredRendererDebugRenderingData.hlsl"
+#include "Data/Shaders/shadowmap_resources.hlsl"
 #include "LightData.hlsl.h"
 #include "ModelInstance.h"
 #include "iAcceptsConsoleCommands.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
+class ShadowManagerComponent;
 class PostProcessComponent;
 class PostProcessMotionBlur;
 class PostProcessTemporalAA;
@@ -25,6 +27,7 @@ public:
 	// Possible debug rendering modes
 	enum class DebugRenderMode { None = 0, Diffuse, Specular, Normal, Velocity, Depth, 
 								 MotionBlurTileGen, MotionBlurNeighbourhood, MotionBlurFinal, 
+								 ShadowMap, 
 								 /* ... */						 
 								 Final};
 
@@ -94,6 +97,23 @@ protected:
 	void PopulateDeferredRenderingParamBuffer(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
+
+	void RenderPointLight(unsigned int light_index, const LightData & light);
+	void RenderSpotLight(unsigned int light_index, const LightData & light);
+	void RenderDirectionalLight(unsigned int light_index, const LightData & light);
+
+	// Shadow mapping
+	typedef unsigned int SM_STATE;
+	void PerformShadowMapping(unsigned int light_index, const LightData & light, PipelineStateDX11 *pipeline,
+							  ShaderDX11::ShaderParameterIndex param_vs_data, ShaderDX11::ShaderParameterIndex param_ps_sm,
+							  ShaderDX11::ShaderParameterIndex param_ps_data);
+	void RenderShadowMap(unsigned int light_index, const LightData & light);
+	void BindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+								ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data);
+	void UnbindShadowMapResources(PipelineStateDX11 *pipeline, ShaderDX11::ShaderParameterIndex param_vs_data,
+								  ShaderDX11::ShaderParameterIndex param_ps_sm, ShaderDX11::ShaderParameterIndex param_ps_data);
+	SM_STATE GetShadowMappingState(const LightData & light);
+
 	void RenderTransparency(void);
 	void PerformPostProcessing(void);
 
@@ -113,24 +133,34 @@ protected:
 
 private:
 
+	// Define shadow-mapped and regular versions of key deferred rendering shaders
+	static const SM_STATE SM_DISABLED = 0U;
+	static const SM_STATE SM_ENABLED = 1U;
+
 	// Deferred rendering shaders
-	ShaderDX11 *		m_vs;
+	ShaderDX11 *		m_vs[2];			// [2] for optional shadow mapping
 	ShaderDX11 *		m_vs_quad;
 	ShaderDX11 *		m_ps_geometry;
-	ShaderDX11 *		m_ps_lighting;
+	ShaderDX11 *		m_ps_lighting[2];	// [2] for optional shadow mapping
 	ShaderDX11 *		m_ps_debug;
 
 	// Render pipelines
 	PipelineStateDX11 * m_pipeline_geometry;
 	PipelineStateDX11 * m_pipeline_lighting_pass1;
-	PipelineStateDX11 * m_pipeline_lighting_pass2;
-	PipelineStateDX11 *	m_pipeline_lighting_directional;
+	PipelineStateDX11 * m_pipeline_lighting_pass2[2];			// [2] for optional shadow mapping
+	PipelineStateDX11 *	m_pipeline_lighting_directional[2];		// [2] for optional shadow mapping
 	PipelineStateDX11 * m_pipeline_transparency;
 	PipelineStateDX11 * m_pipeline_debug_rendering;
 
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
-	RenderTargetDX11 *	m_depth_only_rt;
-	RenderTargetDX11 *	m_colour_rt;
+	TextureDX11 *		m_def_dsv_tx;			// Depth/stencil texture for view-space deferred rendering
+	RenderTargetDX11 *	m_def_dsv_rt;			// RT for view-space deferred rendering with only depth/stencil bindings
+
+	TextureDX11 *		m_light_dsv_tx;			// Depth/stencil texture for light-space rendering
+	RenderTargetDX11 *	m_light_dsv_rt;			// RT for light-space rendering with only depth/stencil bindings
+
+
+	RenderTargetDX11 *	m_colour_rt;			// Colour buffer RT after all render process rendering, but before any post-processing.  Owned by this render process.
 	TextureDX11 *		m_colour_buffer;		// Colour buffer after all render process rendering, but before any post-processing.  Owned by this render process.
 
 	// Pointer to the final colour buffer following all rendering and post-processing.  This buffer may be 
@@ -146,7 +176,9 @@ private:
 	ConstantBufferDX11 *						m_cb_lightindex;			// Compiled CB
 	ManagedPtr<DeferredRenderingParamBuffer>	m_cb_deferred_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *						m_cb_deferred;				// Compiled CB
-
+	
+	// Shadow mapping components
+	ManagedPtr<ShadowManagerComponent>			m_shadow_manager;
 
 	// Post-processing components
 	ManagedPtr<PostProcessMotionBlur>			m_post_motionblur;
@@ -171,18 +203,22 @@ private:
 	unsigned int							m_motion_max_sample_tap_distance;
 
 	// Indices of required shader parameters
-	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_vs_light_shadowmap_data;	// No [2] since this is only relevant for SM_ENABLED
 	ShaderDX11::ShaderParameterIndex		m_param_ps_geometry_deferreddata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_deferreddata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisetexture[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_noisedata[2];
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap;			// No [2] since this is only relevant for SM_ENABLED
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_shadowmap_data;	// No [2] since this is only relevant for SM_ENABLED
 	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
 	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
+	void InitialiseShaderParameterBindings(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseGBuffer(void); 
 	void InitialiseStandardBuffers(void);
@@ -196,6 +232,7 @@ private:
 	void InitialiseDeferredDirectionalLightingPipeline(void);
 	void InitialiseTransparentRenderingPipelines(void);
 	void InitialiseDebugRenderingPipelines(void);
+	void InitialiseShadowManager(void);
 	void InitialisePostProcessingComponents(void);
 
 	// Bind shader resources required for the deferred lighting stage
@@ -212,19 +249,25 @@ private:
 	TextureDX11 *									GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
 	int												GetHlslDebugMode(DebugRenderMode render_mode) const;
 	void											SetDebugRenderingState(const std::vector<DebugRenderMode> & render_modes, unsigned int output_mode);
-	bool											DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
+	void											UpdateDebugRenderingBuffers(void);
+	CMPINLINE bool									DebugRenderingIsEnabled(void) const { return (m_debug_render_active_view_count != 0U); }
 	std::vector<DebugRenderMode>					ProcessDebugRenderModeString(const std::vector<std::string> & render_modes, unsigned int & outDebugRenderType);
-	
+	CMPINLINE float									GetDebugDepthRenderingExponent(void) const { return m_debug_depth_scaling_exponent; }
+	void											SetDebugDepthRenderingExponent(float exp);
 	
 	// Returns the list of supported debug render modes, mapped (StringCode -> Mode)
 	static const std::vector<std::pair<std::string, DeferredRenderProcess::DebugRenderMode>> SupportedDebugRenderModes;
 	
 
 	unsigned int									m_debug_render_active_view_count;
+	unsigned int									m_debug_output_mode;
 	std::vector<DebugRenderMode>					m_debug_render_modes;
 	std::vector<ID3D11ShaderResourceView*>			m_debug_srvs;
 	std::vector<ID3D11ShaderResourceView*>			m_debug_srv_unbind;
 	ManagedPtr<DeferredRendererDebugRenderingData>	m_cb_debug_data;
 	ConstantBufferDX11 *							m_cb_debug;
+
+	static const float								DEBUG_DEFAULT_DEPTH_SCALING_EXPONENT;
+	float											m_debug_depth_scaling_exponent;
 	
 };
