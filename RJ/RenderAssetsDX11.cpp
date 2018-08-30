@@ -3,6 +3,7 @@
 #include "GameDataExtern.h"
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
+#include "GameConsoleCommand.h"
 
 
 // Initialise static data
@@ -33,6 +34,41 @@ void RenderAssetsDX11::InitialiseDefaultAssets(void)
 }
 
 
+// Virtual inherited method to accept a command from the console
+bool RenderAssetsDX11::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	// Asset commands: InputCmd == "asset", Param(0) == <asset-class>", Param(1) == [ <asset-name> | [ * | "all" ] ]
+	if (command.InputCommand == "asset" && command.ParameterCount() >= 2 &&				
+		command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
+	{
+		std::string type = command.Parameter(0);	
+		std::string name = command.Parameter(1);
+		StrLowerC(type);
+
+		// Broadcast to entire asset classes, or specific items within the class
+		if (name == "*" || name == "all")
+		{
+			if (type == "shader")		BROADCAST_DEBUG_COMMAND_TO_ASSET_CLASS(ShaderDX11, command)
+			/// elseif ...others
+		}
+		else
+		{
+			if (type == "shader")		PROPOGATE_DEBUG_COMMAND_TO_ASSET(ShaderDX11, name, command)
+			/// elseif ...others
+		}
+		
+
+		/* Verify whether the target assets did process this command */
+		return (command.OutputStatus != GameConsoleCommand::CommandResult::NotExecuted);
+	}
+
+	return false;
+}
+
+// Destructor
+RenderAssetsDX11::~RenderAssetsDX11(void)
+{
+}
 
 
 

@@ -7,6 +7,7 @@
 #include "ErrorCodes.h"
 #include "Logging.h"
 #include "ManagedPtr.h"
+#include "iAcceptsConsoleCommands.h"
 #include "Shader.h"
 #include "InputLayoutDesc.h"
 #include "CPUGraphicsResourceAccess.h"
@@ -25,7 +26,7 @@
 // Compiler flag which enables more verbose reporting of asset errors in debug mode
 #define PERFORM_ASSET_ERROR_LOGGING
 
-class RenderAssetsDX11
+class RenderAssetsDX11 : public iAcceptsConsoleCommands
 {
 public:
 
@@ -49,6 +50,19 @@ public:
 	void											InitialiseDefaultAssets(void);
 
 
+	// Virtual inherited method to accept a command from the console
+	bool											ProcessConsoleCommand(GameConsoleCommand & command);
+
+	// Destructor
+	~RenderAssetsDX11(void);
+
+	// Propogate console commands to specific assets or asset classes
+#	define PROPOGATE_DEBUG_COMMAND_TO_ASSET(TClass, asset_name, command) { if (AssetExists<TClass>(asset_name)) { GetAsset<TClass>(asset_name)->ProcessCommand(command); } }
+#	define BROADCAST_DEBUG_COMMAND_TO_ASSET_CLASS(TClass, command) { for (auto & x : GetAssetData<TClass>()) { x.second->ProcessCommand(command); } }
+
+
+
+	// Retrieve asset data
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
 	CMPINLINE const SamplerStateCollection &		GetSamplerStates(void) const { return m_samplers; }
 	CMPINLINE const RenderTargetCollection &		GetRenderTargets(void) const { return m_rendertargets; }

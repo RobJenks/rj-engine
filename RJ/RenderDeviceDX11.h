@@ -137,6 +137,8 @@ public:
 	Result											ReloadMaterial(const std::string & material);
 	void											ReloadAllMaterials(void);
 
+	void											ReinitialiseRenderProcessesForShaderReload(void);
+
 	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
 	// The number of samples to be taken for multi-sample textures

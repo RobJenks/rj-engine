@@ -9,6 +9,7 @@
 #include "ShaderParameterDX11.h"
 #include "ShaderMacros.h"
 #include "InputLayoutDesc.h"
+struct GameConsoleCommand;
 
 // Debug flag which, when set, will silently ignore shader data bindings to invalid parameters.  Allows more
 // in-depth shader debugging since it does not matter if parameters are optimised out by the HLSL compiler
@@ -76,6 +77,16 @@ public:
 
 	// Validate the shader resource bindings and report any errors
 	bool ValidateShader(void);
+
+	// Shader macros
+	std::string						GetShaderMacroString(void) const;
+	void							SetMacro(const std::string & key, const std::string & value);
+	void							DeleteMacro(const std::string & key);
+	void							ClearMacros(void);
+
+	// Process a debug command that was propogated from the render asset manager
+	bool							ProcessCommand(GameConsoleCommand & command);
+
 
 private:
 

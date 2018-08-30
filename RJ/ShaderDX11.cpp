@@ -6,6 +6,7 @@
 #include "Logging.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
+#include "GameConsoleCommand.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 
 
@@ -507,6 +508,83 @@ bool ShaderDX11::ValidateShader(void)
 
 	return ( valid_type && valid_binary && invalid_params == 0U );
 }
+
+// Shader macros
+std::string ShaderDX11::GetShaderMacroString(void) const
+{
+	concat str("");
+	size_t processed = 0; size_t size = m_macros.size();
+
+	for (const auto & entry : m_macros)
+	{
+		str(entry.first)("=")(entry.second)((++processed == size) ? "" : ", ");
+	}
+
+	return str.str();
+}
+
+// Shader macros
+void ShaderDX11::SetMacro(const std::string & key, const std::string & value)
+{
+	m_macros[key] = value;
+}
+
+// Shader macros
+void ShaderDX11::DeleteMacro(const std::string & key)
+{
+	m_macros.erase(key);
+}
+
+// Shader macros
+void ShaderDX11::ClearMacros(void)
+{
+	m_macros.clear();
+}
+
+
+// Process a debug command that was propogated from the render asset manager
+bool ShaderDX11::ProcessCommand(GameConsoleCommand & command)
+{
+	// Asset commands: InputCmd == "asset", Param(0) == <asset-class>", Param(1) == [ <asset-name> | [ * | "all" ] ], Param(2+) == <actual-commands>
+	if (command.Parameter(2) == "reload")
+	{
+		Game::Log << LOG_INFO << "Reloading shader bytecode for \"" << m_name << "\"\n";
+		Reload();
+		Game::Engine->GetRenderDevice()->ReinitialiseRenderProcessesForShaderReload();
+		command.SetSuccessOutput(concat("Reloaded shader \"")(m_name)("\"").str());
+		return true;
+	}
+	else if (command.Parameter(2) == "macro")
+	{
+		if (command.Parameter(3) == "set" && command.ParameterCount() >= 6)
+		{
+			SetMacro(command.Parameter(4), command.Parameter(5));
+			command.SetSuccessOutput(concat("Shader \"")(m_name)("\" macro \"")(command.Parameter(4))("\" set to \"")(command.Parameter(5))("\"").str());
+		}
+		else if (command.Parameter(3) == "delete" && command.ParameterCount() >= 5)
+		{
+			DeleteMacro(command.Parameter(4));
+			command.SetSuccessOutput(concat("Shader \"")(m_name)("\" macro \"")(command.Parameter(4))("\" was deleted").str());
+		}
+		else if (command.Parameter(3) == "purge")
+		{
+			ClearMacros();
+			command.SetSuccessOutput(concat("Shader \"")(m_name)("\": all macro data purged").str());
+		}
+		else if (command.Parameter(3) == "list")
+		{
+			command.SetSuccessOutput(concat("Shader \"")(m_name)("\" macro set: { ")(GetShaderMacroString())(" }").str());
+		}
+		else
+		{
+			command.SetFailureOutput(concat("Unknown shader macro command \"")(command.Parameter(3))("\"").str());
+		}
+		return true;
+	}
+
+	return false;
+}
+
 
 
 // Determine DXGI format
