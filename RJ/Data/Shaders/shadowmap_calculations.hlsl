@@ -6,18 +6,32 @@
 #include "DeferredRenderingBuffers.hlsl"
 
 // Macros controlling shadow-map features
-#define SHADER_SHADOWMAP_PCF				PCF_ADAPTIVE_DISC_5		/* Determines the PCF kernel that will be used */
-#define SHADER_APPLY_PCF_KERNEL_WEIGHTS		1						/* Determines whether PCF kernel values will be weighted on a per-tap basis*/
-#define SHADER_PCF_KERNEL_SCALE				3						/* Scale factor applied to all PCF kernel offsets (integral recommended since offset is int2 of texels)*/
+#ifndef SHADER_SHADOWMAP_PCF
+#	define SHADER_SHADOWMAP_PCF					PCF_ADAPTIVE_DISC_5		/* Determines the PCF kernel that will be used */
+#endif
+
+#ifndef SHADER_APPLY_PCF_KERNEL_WEIGHTS
+#	define SHADER_APPLY_PCF_KERNEL_WEIGHTS		1						/* Determines whether PCF kernel values will be weighted on a per-tap basis*/
+#endif
+
+#ifndef SHADER_PCF_KERNEL_SCALE	
+#	define SHADER_PCF_KERNEL_SCALE				3						/* Scale factor applied to all PCF kernel offsets (integral recommended since offset is int2 of texels)*/
+#endif
 
 // Constant epsilon bias allowed between shadow map and projected camera distance calculation
-static const float SHADOWMAP_PROJECTION_EPSILON = 0.01f;
+#ifndef SHADOWMAP_PROJECTION_EPSILON
+#	define SHADOWMAP_PROJECTION_EPSILON 0.01f
+#endif
 
 // Degree of shadowing applied to occluded pixels
-static const float SHADOW_SHADING_FACTOR = 0.75f;
+#ifndef SHADOW_SHADING_FACTOR
+#	define SHADOW_SHADING_FACTOR 0.75f
+#endif
 
 // Allowable epsilon when determining whether to early-exit from an adaptive kernel at approx 0% or 100% shadow
-static const float PCF_ADAPTIVE_KERNEL_EPSILON = 0.00001f;
+#ifndef PCF_ADAPTIVE_KERNEL_EPSILON
+#	define PCF_ADAPTIVE_KERNEL_EPSILON 0.00001f
+#endif
 
 
 // Calculate the transformation of the given camera UV space coordinate into the current light shadow map space

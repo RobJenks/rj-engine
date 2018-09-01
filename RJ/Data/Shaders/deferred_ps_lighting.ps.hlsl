@@ -22,10 +22,14 @@
 #endif
 
 // Injectable compile-time macros for debug rendering
-#define DEBUG_RENDER_PCF	0
+#ifndef DEBUG_RENDER_PCF
+#	define DEBUG_RENDER_PCF	0
+#endif
 
 // Determines the relative strength of generated noise when modulating the calculated lighting values
-static const float LIGHTING_NOISE_STRENGTH = 0.1f;
+#ifndef LIGHTING_NOISE_STRENGTH
+#	define LIGHTING_NOISE_STRENGTH 0.1f
+#endif
 
 
 // Pixel shader that generates the G-Buffer
