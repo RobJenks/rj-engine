@@ -4,6 +4,7 @@
 #define __TerrainDefinitionH__
 
 #include "CompilerSettings.h"
+#include "InstanceFlags.h"
 class Model;
 class ArticulatedModel;
 
@@ -16,7 +17,7 @@ public:
 	// Default construtor; initialises all fields to default values
 	TerrainDefinition(void) : 
 		m_model(NULL), m_defaultextent(NULL_FLOAT3), m_destructible(false), m_maxhealth(1.0f), 
-		m_mass(1.0f), m_hardness(1.0f)
+		m_mass(1.0f), m_hardness(1.0f), m_instanceflags(InstanceFlags::DEFAULT_INSTANCE_FLAGS)
 	{
 	}
 
@@ -46,6 +47,10 @@ public:
 	CMPINLINE float							GetHardness(void) const				{ return m_hardness; }
 	CMPINLINE void							SetHardness(float h)				{ m_hardness = max(h, Game::C_EPSILON); }
 
+	// Default instance flags for all instances of this terrain definition
+	CMPINLINE InstanceFlags::Type			GetInstanceFlags(void) const		{ return m_instanceflags;  }
+
+
 	// Shutdown method - not required for this class
 	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
@@ -64,6 +69,7 @@ protected:
 	float									m_mass;							// Mass of the entire terrain object
 	float									m_hardness;						// Approximation to object density, used primarily in collision calculations
 
+	InstanceFlags::Type						m_instanceflags;				// Default instance flags for all instances of this terrain definition
 };
 
 

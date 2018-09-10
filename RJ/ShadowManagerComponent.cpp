@@ -5,6 +5,7 @@
 #include "RM_ModelDataCollection.h"
 #include "RM_MaterialInstanceMapping.h"
 #include "RM_InstanceData.h"
+#include "InstanceFlags.h"
 #include "Light.h"
 #include "CameraView.h"
 #include "CameraProjection.h"
@@ -512,7 +513,7 @@ void ShadowManagerComponent::ExecuteLightSpaceRenderPass(unsigned int light_inde
 					{
 						const auto & inst = matdata.InstanceCollection.InstanceData[ix];
 						
-						if (!CheckBit_Single(inst.Flags, RM_Instance::INSTANCE_FLAG_SHADOW_CASTER)) continue;
+						if (!CheckBit_Single(inst.Flags, InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER)) continue;
 						if (!InstanceIntersectsLightFrustum(matdata.InstanceCollection.InstanceMetadata[ix], light)) continue;
 
 						m_instances[rendercount] = RM_Instance(inst);

@@ -7,6 +7,7 @@
 #include "FiringArc.h"
 #include "ArticulatedModel.h"
 #include "ObjectReference.h"
+#include "InstanceFlags.h"
 #include "iSpaceObject.h"
 class ProjectileLauncher;
 
@@ -67,6 +68,9 @@ public:
 
 	// Retrieve a pointer to the articulated model for this turret
 	CMPINLINE ArticulatedModel *	GetArticulatedModel(void)								{ return m_articulatedmodel; }
+
+	// Instance rendering flags for this object
+	CMPINLINE InstanceFlags::Type	GetInstanceFlags(void) const							{ return m_instanceflags; }
 
 	// Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 
 	// returns an errorcode and the model is defaulted to NULL
@@ -272,6 +276,10 @@ protected:
 
 	// Articulated model for this turret
 	ArticulatedModel *				m_articulatedmodel;
+
+	// Instance rendering flags for this object
+	// TODO: Should consolidate this into some kind of 'renderable' component, if switching to an ECS-type model
+	InstanceFlags::Type				m_instanceflags;
 
 	// Array of projectile launchers attached to this turret
 	ProjectileLauncher *			m_launchers;				// Array of launcher objects arrached to the turret

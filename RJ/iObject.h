@@ -24,6 +24,7 @@
 #include "AudioParameters.h"
 #include "GameConsoleCommand.h"
 #include "ModelInstance.h"
+#include "InstanceFlags.h"
 class ArticulatedModel;
 struct BasicProjectile;
 
@@ -283,6 +284,9 @@ public:
 	// Flag indicating whether the object has been rendered this frame
 	CMPINLINE bool							IsRendered(void) const				{ return m_rendered.IsSet(); }
 	CMPINLINE void							MarkAsRendered(void)				{ m_rendered.Set(); }
+
+	// Return the instance-rendering flags for this object
+	CMPINLINE InstanceFlags::Type			GetInstanceFlags(void) const		{ return m_instanceflags; }
 
 	// Virtual shutdown method that must be implemented by all objects
 	virtual void							Shutdown(void);
@@ -572,6 +576,8 @@ protected:
 	FrameFlag							m_currentlyvisible;				// Flag indicating whether the object is visible (prior frame); use to avoid render-related updates when object is not visible
 	FrameFlag							m_rendered;						// Flag indicating whether the object was rendered this frame
 	
+	InstanceFlags::Type					m_instanceflags;				// Instance-rendering flags for this object (see InstanceFlags::*)
+
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;
 

@@ -23,7 +23,7 @@ DecalRenderingParams::DecalRenderingParams(const TextureDX11 * texture, const XM
 // Add a new instance for rendering
 void DecalRenderingParams::AddInstance(const FXMMATRIX world, const XMFLOAT4 & uv_shift_scale)
 {
-	m_instances.push_back(RM_Instance(world, RM_Instance::SORT_KEY_RENDER_LAST, uv_shift_scale));
+	m_instances.push_back(RM_Instance(world, RM_Instance::SORT_KEY_RENDER_LAST, uv_shift_scale, InstanceFlags::DEFAULT_INSTANCE_FLAGS));
 }
 
 

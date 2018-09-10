@@ -67,6 +67,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_worldmatrix = ID_MATRIX;
 	m_definition = NULL;
 	m_classtype = D::TileClass::Unknown;
+	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_mass = 1.0f;
 	m_hardness = 1.0f;
 	m_aggregatehealth = 1.0f;

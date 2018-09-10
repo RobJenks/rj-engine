@@ -2253,6 +2253,9 @@
     <ClInclude Include="VectorisedFloat.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="InstanceFlags.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

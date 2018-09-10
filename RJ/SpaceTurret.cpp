@@ -31,6 +31,7 @@ SpaceTurret::SpaceTurret(void)
 	m_orientation = m_invorient = ID_QUATERNION;
 	m_worldmatrix = ID_MATRIX;
 	m_articulatedmodel = NULL;
+	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_turretstatus = TurretStatus::Idle;
 	m_atrest = true;
 	m_isfixed = false;

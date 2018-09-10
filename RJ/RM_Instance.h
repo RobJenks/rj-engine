@@ -2,6 +2,7 @@
 
 #include "GameVarsExtern.h"
 #include "DX11_Core.h"
+#include "InstanceFlags.h"
 #include "../Definitions/VertexDefinitions.hlsl.h"
 
 // Structure of a single instance in the instancing model.  No special alignement requirements
@@ -11,64 +12,68 @@ struct RM_Instance
 	static const RM_SortKey			SORT_KEY_RENDER_FIRST;
 	static const RM_SortKey			SORT_KEY_RENDER_LAST;
 
-	// Instance bit-flags
-	static const _uint32			INSTANCE_FLAG_SHADOW_CASTER = (1 << 0);
-
-
 	// Structure data (loaded from common vertex definitions)
 	PerInstanceData
 
 	/* Constructors to define new instances in different rendering scenarios */
 	CMPINLINE RM_Instance(void) noexcept 
 		:
-		Flags(0U)
+		Flags(InstanceFlags::DEFAULT_INSTANCE_FLAGS)
 	{}
 	
 	// Unsorted instance; will be sorted near the start of the queue and rendered approximately first (possible adding overdraw)
 	CMPINLINE RM_Instance(XMFLOAT4X4 && world) noexcept
 		:
-		Flags(0U), 
+		Flags(InstanceFlags::DEFAULT_INSTANCE_FLAGS), 
 		Transform(world), 
 		LastTransform(world), 
 		SortKey(SORT_KEY_RENDER_FIRST)
 	{}
 
-	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld) noexcept
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
+		Transform(world),
+		LastTransform(world),
+		SortKey(SORT_KEY_RENDER_FIRST)
+	{}
+
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, InstanceFlags::Type flags) noexcept
+		:
+		Flags(flags),
 		Transform(world),
 		LastTransform(lastworld), 
 		SortKey(SORT_KEY_RENDER_FIRST)
 	{}
 
-	CMPINLINE RM_Instance(XMFLOAT4X4 && world, RM_SortKey sort_key) noexcept
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, RM_SortKey sort_key, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		Transform(world), 
 		LastTransform(world), 
 		SortKey(sort_key)
 	{}
 
-	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key) noexcept
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		Transform(world),
 		LastTransform(lastworld),
 		SortKey(sort_key)
 	{}
 
-	CMPINLINE RM_Instance(XMFLOAT4X4 && world, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, RM_SortKey sort_key, const XMFLOAT4 & highlight, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		Transform(world),
 		LastTransform(world), 
 		SortKey(sort_key), 
 		Highlight(highlight)
 	{}
 
-	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+	CMPINLINE RM_Instance(XMFLOAT4X4 && world, XMFLOAT4X4 && lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight, InstanceFlags::Type flags) noexcept
 		:
-	Flags(0U),
+		Flags(flags),
 		Transform(world),
 		LastTransform(lastworld),
 		SortKey(sort_key),
@@ -78,41 +83,49 @@ struct RM_Instance
 
 	CMPINLINE RM_Instance(const FXMMATRIX world) noexcept
 		:
-		Flags(0U)
+		Flags(InstanceFlags::DEFAULT_INSTANCE_FLAGS)
 	{
 		XMStoreFloat4x4(&Transform, world);
 		LastTransform = Transform;
 	}
 
-	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld) noexcept
+	CMPINLINE RM_Instance(const FXMMATRIX world, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U)
+		Flags(flags)
+	{
+		XMStoreFloat4x4(&Transform, world);
+		LastTransform = Transform;
+	}
+
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, InstanceFlags::Type flags) noexcept
+		:
+		Flags(flags)
 	{
 		XMStoreFloat4x4(&Transform, world);
 		XMStoreFloat4x4(&LastTransform, lastworld);
 	}
 
-	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key) noexcept
+	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		SortKey(sort_key)
 	{
 		XMStoreFloat4x4(&Transform, world);
 		LastTransform = Transform;
 	}
 
-	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key) noexcept
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		SortKey(sort_key)
 	{
 		XMStoreFloat4x4(&Transform, world);
 		XMStoreFloat4x4(&LastTransform, lastworld);
 	}
 
-	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key, const XMFLOAT4 & highlight, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		SortKey(sort_key),
 		Highlight(highlight)
 	{
@@ -120,9 +133,9 @@ struct RM_Instance
 		LastTransform = Transform;
 	}
 
-	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+	CMPINLINE RM_Instance(const FXMMATRIX world, const CXMMATRIX lastworld, RM_SortKey sort_key, const XMFLOAT4 & highlight, InstanceFlags::Type flags) noexcept
 		:
-		Flags(0U),
+		Flags(flags),
 		SortKey(sort_key),
 		Highlight(highlight)
 	{

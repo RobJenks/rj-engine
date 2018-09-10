@@ -276,7 +276,7 @@ public:
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
-			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), InstanceFlags::DEFAULT_INSTANCE_FLAGS)), 
 			std::move(RM_InstanceMetadata(position, bounding_radius))
 		);
 	}
@@ -286,7 +286,7 @@ public:
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, NULL, 
-			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position))), 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), InstanceFlags::DEFAULT_INSTANCE_FLAGS)),
 			std::move(RM_InstanceMetadata(position, bounding_radius))
 		);
 	}
@@ -296,7 +296,7 @@ public:
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
-			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight, InstanceFlags::DEFAULT_INSTANCE_FLAGS)),
 			std::move(RM_InstanceMetadata(position, bounding_radius))
 		);
 	}
@@ -306,7 +306,7 @@ public:
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, NULL, 
-			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)), 
+			std::move(RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight, InstanceFlags::DEFAULT_INSTANCE_FLAGS)),
 			std::move(RM_InstanceMetadata(position, bounding_radius))
 		);
 	}

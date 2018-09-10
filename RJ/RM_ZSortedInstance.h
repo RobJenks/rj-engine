@@ -17,7 +17,7 @@ struct RM_ZSortedInstance
 
 	// Constructors
 	CMPINLINE RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world) noexcept :
-		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, RM_Instance::CalculateSortKey((float)key)))) { }
+		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, RM_Instance::CalculateSortKey((float)key), InstanceFlags::DEFAULT_INSTANCE_FLAGS))) { }
 
 	CMPINLINE RM_ZSortedInstance(int key, ModelBuffer *model, RM_Instance && instance) noexcept :
 		Key(key), ModelPtr(model), Item(std::move(instance)) { }

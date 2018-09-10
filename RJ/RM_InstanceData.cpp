@@ -1,4 +1,5 @@
 #include "ModelBuffer.h"
+#include "InstanceFlags.h"
 #include "RM_InstanceData.h"
 
 
@@ -12,7 +13,7 @@ void RM_InstanceData::NewInstance(RM_Instance && instance, RM_InstanceMetadata &
 {
 	if (CurrentInstanceCount == InstanceCapacity) ExtendCapacity();
 
-	if (CheckBit_Single(instance.Flags, RM_Instance::INSTANCE_FLAG_SHADOW_CASTER))
+	if (CheckBit_Single(instance.Flags, InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER))
 	{
 		++ShadowCasterCount;
 	}

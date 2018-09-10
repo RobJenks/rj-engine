@@ -971,6 +971,7 @@
     <ClInclude Include="iDataObjectEnvironment.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="IndexBufferDX11.h" />
+    <ClInclude Include="InstanceFlags.h" />
     <ClInclude Include="InstanceProperties.hlsl.h" />
     <ClInclude Include="IntersectionTests.h" />
     <ClInclude Include="IntVector.h" />

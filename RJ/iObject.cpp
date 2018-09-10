@@ -49,6 +49,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_faction = Faction::NullFaction;
 	m_simulationhub = false;
 	m_visible = true;
+	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_position = NULL_VECTOR;
 	m_positionf = NULL_FLOAT3;
 	m_orientation = ID_QUATERNION;
