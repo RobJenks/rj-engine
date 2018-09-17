@@ -11,6 +11,7 @@
 #include "BasicProjectileDefinition.h"
 #include "CoreEngine.h"
 #include "AudioManager.h"
+#include "ShadowSettings.h"
 #include "BasicRay.h"
 #include "OverlayRenderer.h"
 #include "GameConsoleCommand.h"
@@ -49,7 +50,6 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_faction = Faction::NullFaction;
 	m_simulationhub = false;
 	m_visible = true;
-	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_position = NULL_VECTOR;
 	m_positionf = NULL_FLOAT3;
 	m_orientation = ID_QUATERNION;
@@ -171,6 +171,9 @@ void iObject::SetModel(Model *model)
 
 	// Attempt to default the model to our object size, maintaining proportions if not equal between the two
 	m_model.SetSize(GetSize());
+
+	// Raise the geometry change event since we have switched out the entire model
+	GeometryChanged();
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 
@@ -397,6 +400,9 @@ void iObject::SetSize(const FXMVECTOR size, bool preserve_proportions)
 	{
 		CollisionOBB.UpdateExtentFromSize(m_size);
 	}
+
+	// Raise the geometry-changed event for this object, given that the size of the geometry will have changed
+	GeometryChanged();
 }
 
 // We can set the object size with a single parameter; the largest object dimension will be scaled
@@ -418,6 +424,21 @@ void iObject::SetSize(float max_dimension)
 	// in the scale diagonal of the world matrix
 	XMMATRIX world = m_model.GetWorldMatrix();
 	SetSize(XMVectorSet(XMVectorGetX(world.r[0]), XMVectorGetY(world.r[1]), XMVectorGetZ(world.r[2]), 0.0f));
+}
+
+// Event raised when the geometry for this object changes
+void iObject::GeometryChanged(void)
+{
+	// Update shadow-casting state based on the new object geometry
+	// TODO: Should have a "HasArticulatedModel / HasStaticModel" property for this, like with terrain
+	if (GetArticulatedModel()) {
+		SetShadowCastingState(ShadowSettings::ShouldCastShadows(GetArticulatedModel(), GetCollisionSphereRadius()));
+	}
+	else {
+		SetShadowCastingState(ShadowSettings::ShouldCastShadows(GetModel(), GetCollisionSphereRadius()));
+	}
+
+	// Other factors...
 }
 
 // Set a new collision sphere radius, recalcuating all derived fieds

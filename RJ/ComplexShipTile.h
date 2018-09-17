@@ -212,7 +212,7 @@ public:
 	void								CopyBasicProperties(const ComplexShipTile & source);
 
 	// Instance rendering flags for this object
-	CMPINLINE InstanceFlags::Type		GetInstanceFlags(void) const						{ return m_instanceflags; }
+	InstanceFlags						InstanceFlags;
 
 	// Mass of the tile
 	CMPINLINE float						GetMass(void) const									{ return m_mass; }
@@ -369,11 +369,14 @@ public:
 
 	// Set the single model data for this tile.  Should not be used directly by callers; model should be instantiated via either
 	// SetSingleModel() or SetMultipleModels()
-	CMPINLINE void						SetModel(Model *m) { m_model.SetModel(m); }
+	void								SetModel(Model *m);
 
 	// Set the flag indicating whether this tile uses a compound or single model set.  Should not be used directly by callers; model 
 	// should be instantiated via either SetSingleModel() or SetMultipleModels()
 	CMPINLINE void						SetHasCompoundModel(bool compound) { m_multiplemodels = compound; }
+
+	// Update instance rendering flags based on the current tile configuration
+	void								DetermineInstanceRenderingFlags(void);
 
 	// Returns a value indicating whether or not this is a primary tile.  Based on the underlying tile class
 	bool								IsPrimaryTile(void);
@@ -479,9 +482,6 @@ protected:
 	bool						m_multiplemodels;
 	ModelInstance				m_model;
 	CompoundElementModel		m_models;
-
-	// Instance rendering flags for this object
-	InstanceFlags::Type			m_instanceflags;
 
 	// Flag indicating whether the tile has been rendered this frame
 	FrameFlag					m_rendered;

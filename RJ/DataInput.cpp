@@ -1865,6 +1865,10 @@ Result IO::Data::LoadTerrainDefinition(TiXmlElement *node)
 			const char *cstr = child->GetText();
 			def->SetMaxHealth((float)atof(cstr));
 		}
+		else if (key == "instanceflags")
+		{
+			def->InstanceFlags = LoadInstanceFlags(child);
+		}
 	}
 
 	// Make sure we have all mandatory data
@@ -2174,6 +2178,29 @@ VariableSizeValue IO::Data::LoadSizeValue(TiXmlElement *node)
 		bool exact = IO::GetBoolAttribute(node, "exact", false);
 		return VariableSizeValue(IO::GetVector3FromAttr(node), exact);
 	}
+}
+
+// Load a set of instance-rendering flags, including a set of meta-flags which indicate which flags were actually loaded (and which are defaulted)
+InstanceFlags IO::Data::LoadInstanceFlags(TiXmlElement *node)
+{
+	InstanceFlags flags;
+	if (!node) return flags;
+
+	// Get required data from the node attributes
+	std::string key, val; HashVal hash;
+	for (TiXmlAttribute *attr = node->FirstAttribute(); attr; attr = attr->Next())
+	{
+		// Get and hash the attribute key
+		key = attr->Name(); StrLowerC(key);
+		val = attr->Value();
+		hash = HashString(key);
+
+		// Set values based on this hash
+		InstanceFlags::Type flag = InstanceFlags::ParseFromName(hash);
+		if (flag != InstanceFlags::INSTANCE_FLAG_NONE) flags.SetFlagState(flag, (val == "true"));
+	}
+
+	return flags;
 }
 
 // Load a single view portal definition and return it

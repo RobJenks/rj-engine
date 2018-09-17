@@ -16,6 +16,7 @@
 #include "CollisionSpatialDataF.h"
 #include "VariableSizeValue.h"
 #include "AudioParameters.h"
+#include "InstanceFlags.h"
 class iStaticObject;
 class iActiveObject;
 class iSpaceObject;
@@ -152,6 +153,9 @@ namespace IO { namespace Data
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 	// 'obb' is the node to be updated
 	void LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBoundingBox & obb, bool isroot);
+
+	// Load a set of instance-rendering flags, including a set of meta-flags which indicate which flags were actually loaded (and which are defaulted)
+	InstanceFlags LoadInstanceFlags(TiXmlElement *node);
 
 	// Load a set of collision spatial data.  Returns a flag indicating whether the data could be loaded
 	CollisionSpatialDataF LoadCollisionSpatialData(TiXmlElement *node);

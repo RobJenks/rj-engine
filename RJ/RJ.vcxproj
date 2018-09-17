@@ -529,6 +529,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="IndexBufferDX11.cpp" />
     <ClCompile Include="InputLayoutDesc.cpp" />
+    <ClCompile Include="InstanceFlags.cpp" />
     <ClCompile Include="IntersectionTests.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
@@ -620,6 +621,7 @@
     <ClCompile Include="ShaderParameterDX11.cpp" />
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ShadowManagerComponent.cpp" />
+    <ClCompile Include="ShadowSettings.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
@@ -627,6 +629,7 @@
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="StructuredBufferDX11.cpp" />
+    <ClCompile Include="TerrainDefinition.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureDX11.cpp" />
@@ -1137,6 +1140,7 @@
     <ClInclude Include="ShaderRenderPredicate.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="ShadowManagerComponent.h" />
+    <ClInclude Include="ShadowSettings.h" />
     <ClInclude Include="SimulatedEnvironmentCollision.h" />
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />

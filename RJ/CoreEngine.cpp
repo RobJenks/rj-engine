@@ -1487,7 +1487,7 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		if (alpha < Game::C_EPSILON) return;			
 
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), 
-			std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), object->GetInstanceFlags())), object->GetPosition());
+			std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), object->InstanceFlags.Flags)), object->GetPosition());
 	}
 	else
 	{
@@ -1495,14 +1495,14 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), NULL, 
 				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), 
-					RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour(), object->GetInstanceFlags())), 
+					RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour(), object->InstanceFlags.Flags)), 
 				std::move(RM_InstanceMetadata(object->GetPosition(), object->GetCollisionSphereRadius()))
 			);
 		}
 		else
 		{
 			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), NULL, 
-				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->GetInstanceFlags())),
+				std::move(RM_Instance(object->GetWorldMatrix(), object->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->InstanceFlags.Flags)),
 				std::move(RM_InstanceMetadata(object->GetPosition(), object->GetCollisionSphereRadius()))
 			);
 		}
@@ -1522,7 +1522,7 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 	
     // Cache data for efficiency
     int n = model->GetComponentCount();
-	InstanceFlags::Type instanceflags = object->GetInstanceFlags();
+	InstanceFlags::Type instanceflags = object->InstanceFlags.Flags;
 
 	// Add this object to the render queue for the relevant shader
 	if (object->Fade.AlphaIsActive())
@@ -1818,7 +1818,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
 				auto inst = RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))), 
-					terrain_def->GetInstanceFlags());
+					terrain_def->InstanceFlags.Flags);
 				auto worldpos = XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix());
 
 				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
@@ -1843,7 +1843,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
 
 				int n = model->GetComponentCount();
-				InstanceFlags::Type instanceflags = (terrain_def != NULL ? terrain_def->GetInstanceFlags() : InstanceFlags::DEFAULT_INSTANCE_FLAGS);
+				InstanceFlags::Type instanceflags = (terrain_def != NULL ? terrain_def->InstanceFlags.Flags : InstanceFlags::DEFAULT_INSTANCE_FLAGS);
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
@@ -2132,14 +2132,16 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			if (terrain->IsDestroyed()) continue;
 
 			terrain_def = terrain->GetDefinition();
-			if (terrain_def && terrain_def->HasModel())
+			if (!terrain_def) continue;
+		
+			if (terrain_def->HasModel())
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL, 
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(), NULL,
 					std::move(RM_Instance(XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-						RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))), 
-						terrain_def->GetInstanceFlags())), 
+						RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))),
+						terrain_def->InstanceFlags.Flags)),
 					std::move(RM_InstanceMetadata(terrain->GetPosition(), terrain->GetCollisionSphereRadius()))
 				);
 
@@ -2160,12 +2162,12 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
 
 				int n = model->GetComponentCount();
-				InstanceFlags::Type instanceflags = terrain_def->GetInstanceFlags();
+				InstanceFlags::Type instanceflags = terrain_def->InstanceFlags.Flags;
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
 					auto comp = (*component);
-					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL, 
+					SubmitForRendering(RenderQueueShader::RM_LightShader, comp->Model.GetModel(), NULL,
 						std::move(RM_Instance(comp->GetWorldMatrix(), comp->GetLastWorldMatrix(), RM_Instance::CalculateSortKey(comp->GetPosition()), instanceflags)),
 						std::move(RM_InstanceMetadata(metadata))
 					);
@@ -2175,8 +2177,6 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				terrain->MarkAsRendered();
 				++m_renderinfo.TerrainRenderCount;
 			}
-
-			
 		}
 	});
 }
@@ -2230,7 +2230,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (alpha < Game::C_EPSILON) return;
 
 				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel().GetModel(), std::move(
-					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), tile->GetInstanceFlags())), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
+					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), tile->InstanceFlags.Flags)), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
 			{
@@ -2239,7 +2239,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
 					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel().GetModel(), NULL, 
 						std::move(RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight,		// Position can be taken from trans. components of world matrix (_41 to _43)
-							tile->GetInstanceFlags())),	
+							tile->InstanceFlags.Flags)),	
 						std::move(RM_InstanceMetadata(world.r[3], tile->GetBoundingSphereRadius()))
 					);			
 				}
@@ -2247,7 +2247,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				{
 					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel().GetModel(), NULL, 
 						std::move(RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), 				// Position can be taken from trans. components of world matrix (_41 to _43)
-							tile->GetInstanceFlags())),				
+							tile->InstanceFlags.Flags)),				
 						std::move(RM_InstanceMetadata(world.r[3], tile->GetBoundingSphereRadius()))
 					);						
 				}
@@ -2263,7 +2263,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		if (tile->Fade.AlphaIsActive()) { fade = true; alpha = tile->Fade.GetFadeAlpha(); }
 
 		// Iterate through all models to be rendered
-		InstanceFlags::Type instanceflags = tile->GetInstanceFlags();
+		InstanceFlags::Type instanceflags = tile->InstanceFlags.Flags;
 		for (auto & item : tile->GetCompoundModelSet().GetModels())
 		{	
 			// Calculate the full world transformation for this item
@@ -2338,7 +2338,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 				turret = (*it);
 				model = turret->GetArticulatedModel(); if (!model) continue;
 				n = model->GetComponentCount();
-				InstanceFlags::Type instanceflags = turret->GetInstanceFlags();
+				InstanceFlags::Type instanceflags = turret->InstanceFlags.Flags;
 
 				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
 				turret->DetermineWorldMatrix();
@@ -2373,7 +2373,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					turret = (*it);
 					model = turret->GetArticulatedModel(); if (!model) continue;
 					n = model->GetComponentCount();
-					InstanceFlags::Type instanceflags = turret->GetInstanceFlags();
+					InstanceFlags::Type instanceflags = turret->InstanceFlags.Flags;
 
 					// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
 					turret->DetermineWorldMatrix();
@@ -2408,7 +2408,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					turret = (*it);
 					model = turret->GetArticulatedModel(); if (!model) continue;
 					n = model->GetComponentCount();
-					InstanceFlags::Type instanceflags = turret->GetInstanceFlags();
+					InstanceFlags::Type instanceflags = turret->InstanceFlags.Flags;
 
 					// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
 					turret->DetermineWorldMatrix();

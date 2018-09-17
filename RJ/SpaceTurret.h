@@ -70,11 +70,12 @@ public:
 	CMPINLINE ArticulatedModel *	GetArticulatedModel(void)								{ return m_articulatedmodel; }
 
 	// Instance rendering flags for this object
-	CMPINLINE InstanceFlags::Type	GetInstanceFlags(void) const							{ return m_instanceflags; }
+	InstanceFlags					InstanceFlags;
 
 	// Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 
 	// returns an errorcode and the model is defaulted to NULL
 	Result							SetArticulatedModel(ArticulatedModel *model);
+	Result							SetArticulatedModelInternal(ArticulatedModel *model);
 
 	// Gets/sets the relative position of the turret on its parent object
 	CMPINLINE XMVECTOR				GetRelativePosition(void) const							{ return m_relativepos; }
@@ -276,10 +277,6 @@ protected:
 
 	// Articulated model for this turret
 	ArticulatedModel *				m_articulatedmodel;
-
-	// Instance rendering flags for this object
-	// TODO: Should consolidate this into some kind of 'renderable' component, if switching to an ECS-type model
-	InstanceFlags::Type				m_instanceflags;
 
 	// Array of projectile launchers attached to this turret
 	ProjectileLauncher *			m_launchers;				// Array of launcher objects arrached to the turret

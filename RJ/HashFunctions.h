@@ -357,6 +357,8 @@ namespace HashedStrings
 	DefineHash(H_SpaceWidth, "spacewidth");
 	DefineHash(H_GlyphScaleFactor, "glyphscalefactor");
 	DefineHash(H_NoiseResource, "noiseresource");
+	DefineHash(H_ShadowCaster, "shadowcaster");
+
 
 }
 

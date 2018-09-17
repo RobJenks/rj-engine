@@ -5,6 +5,7 @@
 
 #include "CompilerSettings.h"
 #include "InstanceFlags.h"
+#include "FastMath.h"
 class Model;
 class ArticulatedModel;
 
@@ -17,7 +18,7 @@ public:
 	// Default construtor; initialises all fields to default values
 	TerrainDefinition(void) : 
 		m_model(NULL), m_defaultextent(NULL_FLOAT3), m_destructible(false), m_maxhealth(1.0f), 
-		m_mass(1.0f), m_hardness(1.0f), m_instanceflags(InstanceFlags::DEFAULT_INSTANCE_FLAGS)
+		m_mass(1.0f), m_hardness(1.0f)
 	{
 	}
 
@@ -27,13 +28,13 @@ public:
 
 	// Returns or sets a reference to the renderable model associated with this terrain
 	CMPINLINE Model *						GetModel(void) const				{ return m_model; }
-	CMPINLINE void							SetModel(Model *m)					{ m_model = m; }
-	
 	CMPINLINE bool							HasModel(void) const				{ return (m_model != NULL); }
+	void									SetModel(Model *m);
+
 
 	// Returns or sets the default extent for a terrain object of this type
 	CMPINLINE XMFLOAT3						GetDefaultExtent(void) const		{ return m_defaultextent; }
-	CMPINLINE void							SetDefaultExtent(const XMFLOAT3 & e){ m_defaultextent = e; }
+	void									SetDefaultExtent(const XMFLOAT3 & e);
 
 	// Returns data on whether/how the terrain is destructible
 	CMPINLINE bool							IsDestructible(void) const			{ return m_destructible; }
@@ -48,7 +49,7 @@ public:
 	CMPINLINE void							SetHardness(float h)				{ m_hardness = max(h, Game::C_EPSILON); }
 
 	// Default instance flags for all instances of this terrain definition
-	CMPINLINE InstanceFlags::Type			GetInstanceFlags(void) const		{ return m_instanceflags;  }
+	InstanceFlags							InstanceFlags;
 
 
 	// Shutdown method - not required for this class
@@ -69,7 +70,11 @@ protected:
 	float									m_mass;							// Mass of the entire terrain object
 	float									m_hardness;						// Approximation to object density, used primarily in collision calculations
 
-	InstanceFlags::Type						m_instanceflags;				// Default instance flags for all instances of this terrain definition
+protected:
+
+	// Recalculate instance rendering flags after a change to a relevant field
+	void									DetermineInstanceRenderingFlags(void);
+
 };
 
 

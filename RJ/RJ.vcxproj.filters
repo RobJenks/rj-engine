@@ -964,6 +964,15 @@
     <ClCompile Include="Viewport.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowSettings.cpp">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
+    </ClCompile>
+    <ClCompile Include="InstanceFlags.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainDefinition.cpp">
+      <Filter>Objects\Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2255,6 +2264,9 @@
     </ClInclude>
     <ClInclude Include="InstanceFlags.h">
       <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowSettings.h">
+      <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

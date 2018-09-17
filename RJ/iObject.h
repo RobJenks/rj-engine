@@ -285,8 +285,12 @@ public:
 	CMPINLINE bool							IsRendered(void) const				{ return m_rendered.IsSet(); }
 	CMPINLINE void							MarkAsRendered(void)				{ m_rendered.Set(); }
 
-	// Return the instance-rendering flags for this object
-	CMPINLINE InstanceFlags::Type			GetInstanceFlags(void) const		{ return m_instanceflags; }
+	// Instance-rendering flags for this object
+	InstanceFlags							InstanceFlags;
+
+	// Indicates whether this object is a shadow-caster
+	CMPINLINE bool							IsShadowCaster(void) const					{ return InstanceFlags.GetFlag(InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER); }
+	CMPINLINE void							SetShadowCastingState(bool shadow_caster)	{ InstanceFlags.SetFlag(InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER); }
 
 	// Virtual shutdown method that must be implemented by all objects
 	virtual void							Shutdown(void);
@@ -361,6 +365,9 @@ public:
 	// Query or set the visibility-testing mode for this object
 	CMPINLINE VisibilityTestingModeType		GetVisibilityTestingMode(void) const						{ return m_visibilitytestingmode; }
 	CMPINLINE void							SetVisibilityTestingMode(VisibilityTestingModeType mode)	{ m_visibilitytestingmode = mode; }
+
+	// Event raised when the geometry for this object changes
+	void									GeometryChanged(void);
 
 	// Ambient audio for the object
 	CMPINLINE AudioParameters				GetAmbientAudio(void) const									{ return m_ambient_audio; }
@@ -576,7 +583,6 @@ protected:
 	FrameFlag							m_currentlyvisible;				// Flag indicating whether the object is visible (prior frame); use to avoid render-related updates when object is not visible
 	FrameFlag							m_rendered;						// Flag indicating whether the object was rendered this frame
 	
-	InstanceFlags::Type					m_instanceflags;				// Instance-rendering flags for this object (see InstanceFlags::*)
 
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;

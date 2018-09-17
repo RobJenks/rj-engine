@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "Model.h"
 #include "ModelInstance.h"
+#include "InstanceFlags.h"
 #include "iObject.h"
 #include "iSpaceObjectEnvironment.h"
 #include "TerrainDefinition.h"

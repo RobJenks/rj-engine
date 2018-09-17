@@ -29,6 +29,7 @@
 #include "DataInput.h"
 #include "DataOutput.h"
 #include "iSpaceObjectEnvironment.h"
+#include "ShadowSettings.h"
 
 #if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
 	long ComplexShipTile::inst_con = 0;
@@ -67,7 +68,6 @@ ComplexShipTile::ComplexShipTile(void)
 	m_worldmatrix = ID_MATRIX;
 	m_definition = NULL;
 	m_classtype = D::TileClass::Unknown;
-	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_mass = 1.0f;
 	m_hardness = 1.0f;
 	m_aggregatehealth = 1.0f;
@@ -1010,6 +1010,24 @@ void ComplexShipTile::SetMultipleModels(void)
 	// Reset and deallocate any existing compound model data
 	m_models = CompoundElementModel(GetElementSize().Convert<UINT>());
 
+}
+
+// Set the single model data for this tile.  Should not be used directly by callers; model should be instantiated via either
+// SetSingleModel() or SetMultipleModels()
+void ComplexShipTile::SetModel(Model *m) 
+{
+	m_model.SetModel(m);
+
+	DetermineInstanceRenderingFlags();
+}
+
+// Update instance rendering flags based on the current tile configuration
+void ComplexShipTile::DetermineInstanceRenderingFlags(void)
+{
+	// Shadow casting state: if we either have a non-null single model, or are just defined to have
+	// multiple models (for simplicity).  Tiles will always be large enough to make shadows necessary, unless
+	// they have a null model
+	InstanceFlags.SetFlagState(InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER, HasCompoundModel() || GetModel().GetModel() != NULL);
 }
 
 // Static method to look up a tile definition and create a new tile based upon it

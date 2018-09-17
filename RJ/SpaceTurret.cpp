@@ -31,7 +31,6 @@ SpaceTurret::SpaceTurret(void)
 	m_orientation = m_invorient = ID_QUATERNION;
 	m_worldmatrix = ID_MATRIX;
 	m_articulatedmodel = NULL;
-	m_instanceflags = InstanceFlags::DEFAULT_INSTANCE_FLAGS;
 	m_turretstatus = TurretStatus::Idle;
 	m_atrest = true;
 	m_isfixed = false;
@@ -224,6 +223,15 @@ void SpaceTurret::ForceNewTargetAnalysis(void)
 // Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 
 // returns an errorcode and the model is defaulted to NULL
 Result SpaceTurret::SetArticulatedModel(ArticulatedModel *model)
+{
+	Result result = SetArticulatedModelInternal(model);
+
+	InstanceFlags.SetFlagState(InstanceFlags::INSTANCE_FLAG_SHADOW_CASTER, m_articulatedmodel != NULL);
+
+	return result;
+}
+
+Result SpaceTurret::SetArticulatedModelInternal(ArticulatedModel *model)
 {
 	// If the model is NULL then simply set it and return success
 	if (!model)
