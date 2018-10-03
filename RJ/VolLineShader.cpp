@@ -307,7 +307,7 @@ ModelBuffer * VolLineShader::CreateLineModel(MaterialDX11 *render_material)
 	// Create the base vertex and index data
 	XMFLOAT3 *v = new XMFLOAT3[1] { XMFLOAT3(0.0f, 0.0f, 0.0f) }; 
 	UINT32 *i = new UINT32[1] { 0U }; 
-
+	
 	// Initialise the base model using this data
 	ModelBuffer *buffer = new ModelBuffer((const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT32), 1U, render_material);
 	if (!buffer) { delete(v); delete(i); delete(buffer); return NULL; }

@@ -69,6 +69,8 @@ public:
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
 	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
 
+	CMPINLINE TextureDX11 *							GetPrimaryColourBuffer(void) { return m_primary_colour; }
+	CMPINLINE TextureDX11 *							GetPrimaryDSVBuffer(void) { return m_primary_dsv; }
 	CMPINLINE RenderTargetDX11 *					GetPrimaryRenderTarget(void) { return m_rendertarget; }
 	CMPINLINE ID3D11Texture2D * 					GetBackBuffer(void) { return m_backbuffer; }
 
@@ -160,6 +162,9 @@ private:
 	Rendering::RenderDeviceContextType *	m_devicecontext;
 	Rendering::SwapChainInterfaceType *		m_swapchain;
 	ID3D11Texture2D *						m_backbuffer;
+
+	TextureDX11 *							m_primary_colour;
+	TextureDX11 *							m_primary_dsv;
 	RenderTargetDX11 *						m_rendertarget;
 
 	std::string								m_devicename;

@@ -64,6 +64,7 @@ protected:
 
 
 // Set the active primary render process
+// Note: the header file for TRenderProcess must be included in the code file where ActivateRenderProcess<TRenderProcess>(...) is called
 template <class TRenderProcess>
 void RenderDevice::ActivateRenderProcess(RenderProcess::RenderProcessClass process_type)
 {

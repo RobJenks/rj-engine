@@ -31,4 +31,12 @@ public:
 		CMPINLINE const bool operator()(const RM_ModelDataCollection & shader) const { return CheckBit_Any(shader.Flags, static_cast<ShaderFlags>(ShaderFlag::ShaderTypeUI)); }
 	};
 
+
+	/* Renders only volumetric line components */
+	class RenderVolumetricLine
+	{
+	public:
+		CMPINLINE const bool operator()(const RM_ModelDataCollection & shader) const { return CheckBit_Any(shader.Flags, static_cast<ShaderFlags>(ShaderFlag::ShaderTypeVolumetricLine)); }
+	};
+
 };

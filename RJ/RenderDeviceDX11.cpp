@@ -36,6 +36,8 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_devicecontext(NULL),
 	m_swapchain(NULL), 
 	m_backbuffer(NULL), 
+	m_primary_colour(NULL), 
+	m_primary_dsv(NULL), 
 	m_rendertarget(NULL), 
 	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN),
 	m_debuglayer(NULL),
@@ -543,15 +545,15 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 
 	// Initialise depth/stencil buffer
 	Texture::TextureFormat depthStencilTextureFormat = PrimaryRenderTargetDepthStencilBufferFormat();
-	TextureDX11 *depthStencilTexture = Assets.CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
+	m_primary_dsv = Assets.CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
 
 	// Initialise colour buffer (Color0)
 	Texture::TextureFormat colorTextureFormat = PrimaryRenderTargetColourBufferFormat();
-	TextureDX11 *colorTexture = Assets.CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
+	m_primary_colour = Assets.CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
 
 	// Bind colour and depth/stencil to the primary render target
-	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, colorTexture);
-	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, depthStencilTexture);
+	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, m_primary_colour);
+	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, m_primary_dsv);
 
 	Game::Log << LOG_INFO << "Initialised primary render target successfully\n";
 	return ErrorCodes::NoError;
@@ -620,6 +622,11 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 
 		// Post-process temporal anti-aliasing shaders
 		{ Shaders::TemporalReprojection, Shader::Type::PixelShader, Shaders::TemporalReprojection, "Shaders\\ps_post_temporal.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
+
+		// Volumetric line rendering shaders
+		{ Shaders::VolumetricLineVertexShader, Shader::Type::VertexShader, Shaders::VolumetricLineVertexShader, "Shaders\\vs_vol_line.vs.hlsl", "latest", &m_standard_input_layout, ShaderMacros::NONE },
+		{ Shaders::VolumetricLineGeometryShader, Shader::Type::GeometryShader, Shaders::VolumetricLineGeometryShader, "Shaders\\gs_vol_line.gs.hlsl", "latest", NULL, ShaderMacros::NONE },
+		{ Shaders::VolumetricLinePixelShader, Shader::Type::PixelShader, Shaders::VolumetricLinePixelShader, "Shaders\\ps_vol_line.ps.hlsl", "latest", NULL, ShaderMacros::NONE },
 
 		// Debug-only shaders
 #ifdef _DEBUG

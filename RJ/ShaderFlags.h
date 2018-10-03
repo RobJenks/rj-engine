@@ -9,6 +9,7 @@ typedef unsigned int ShaderFlags;
 enum class ShaderFlag : ShaderFlags
 {
 	ShaderTypeGeometry			= (1 << 0),
-	ShaderTypeUI				= (1 << 1)
+	ShaderTypeUI				= (1 << 1), 
+	ShaderTypeVolumetricLine	= (1 << 2)
 };
 

@@ -15,11 +15,14 @@
 #	define TEXTURE2D_T(T) struct
 #	define TEXTURE2DARRAY struct
 #	define TEXTURE2DARRAY_T(T) struct
+#	define SAMPLERSTATE struct
+#	define SAMPLERCOMPARISONSTATE struct
 #	define REGISTER(x) 
 #	define ALIGNED16(T) : public ALIGN16<T>
 
 #	define RJ_ROW_MAJOR_MATRIX DirectX::XMFLOAT4X4
 #	define RJ_SEMANTIC(sem) 
+#	define RJ_REGISTER(reg)
 
 	typedef DirectX::XMFLOAT2 float2;
 	typedef DirectX::XMFLOAT3 float3;
@@ -41,11 +44,14 @@
 #	define TEXTURE2D_T(T) Texture2D<T>
 #	define TEXTURE2DARRAY Texture2DArray
 #	define TEXTURE2DARRAY_T(T) Texture2DArray<T>
+#	define SAMPLERSTATE SamplerState
+#	define SAMPLERCOMPARISONSTATE SamplerComparisonState
 #	define REGISTER(x) : register(x)
 #	define ALIGNED16(T)
 
 #	define RJ_ROW_MAJOR_MATRIX row_major float4x4
 #	define RJ_SEMANTIC(sem) : sem
+#	define RJ_REGISTER(reg) : reg
 
 	typedef uint _uint32;
 	typedef int _bool;							// We must use BOOL/int for bool values when crossing CPU/GPU border since sizeof(bool) in HLSL == 1, sizeof(bool) in C++ == 4

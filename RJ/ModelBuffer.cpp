@@ -40,7 +40,7 @@ ModelBuffer::ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && i
 // buffer matching the vertex buffer length, using the standard index format
 ModelBuffer::ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material) noexcept
 	:
-	VertexBuffer(*ppVertexdata, vertexsize, vertexcount), 
+	VertexBuffer(*ppVertexdata, vertexcount, vertexsize), 
 	IndexBuffer(vertexcount), 
 	Material(material)
 {

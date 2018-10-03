@@ -75,6 +75,10 @@ public:
 	// Deallocates all static data used in volumetric line rendering
 	static void						ShutdownStaticData(void);
 
+	static const ModelBuffer		CreateBaseLineModel(void);
+	static const ModelBuffer		BaseLineModel;
+	static ModelBuffer *			LineModel(void);
+
 	// Returns a model appropriate for rendering volumetric lines with the specified material, or for pure
 	// non-textured volumetric lines if render_material == NULL
 	static ModelBuffer *			LineModel(MaterialDX11 *render_material);

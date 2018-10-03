@@ -19,6 +19,9 @@ void RenderDevice::Render(void)
 	// Perform primary rendering of all scene geometry through the active render process
 	ExecuteRenderProcess(RenderProcess::RenderProcessClass::Primary);
 
+	// Perform specialised volumetric line rendering
+	ExecuteRenderProcess(RenderProcess::RenderProcessClass::VolumetricLine);
+
 	// Perform UI and other orthographic/textured rendering
 	ExecuteRenderProcess(RenderProcess::RenderProcessClass::UI);
 

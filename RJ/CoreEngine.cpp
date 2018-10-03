@@ -6,6 +6,7 @@
 #include "Logging.h"
 #include "RJMain.h"
 #include "DeferredRenderProcess.h"
+#include "VolumetricLineRenderProcess.h"
 #include "SDFDecalRenderProcess.h"
 #include "UIRenderProcess.h"
 #include "Profiler.h"
@@ -85,6 +86,7 @@
 template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
 template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderNonTransparent>(PipelineStateDX11*);
 
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderVolumetricLine, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
 template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderUI, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
 
 // Default constructor
@@ -118,6 +120,7 @@ CoreEngine::CoreEngine(void)
 	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
 	m_hwnd( NULL ),
 	m_vsync( false ), 
+	m_gbuffer(NULL), 
 	m_render_device_failure_count(0U), 
 	m_screen_space_adjustment(NULL_VECTOR), 
 	m_screen_space_adjustment_f(NULL_FLOAT2), 
@@ -247,6 +250,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Overlay renderer initialised\n";
 	
+	// Initialise any resources required for volumetric line rendering
+	res = InitialiseVolumetricLineRendering();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Volumtric line rendering initialised\n";
+
 	// Initialise the rendering noise generator
 	res = InitialiseNoiseGenerator();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -264,6 +272,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 
 	// Activate the required render processes for this configuration
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>(RenderProcess::RenderProcessClass::Primary);
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<VolumetricLineRenderProcess>(RenderProcess::RenderProcessClass::VolumetricLine);
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<SDFDecalRenderProcess>(RenderProcess::RenderProcessClass::Decal);
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<UIRenderProcess>(RenderProcess::RenderProcessClass::UI);
 
@@ -326,6 +335,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
 	ShutdownOverlayRenderer();
+	ShutdownVolumetricLineRendering();
 	ShutdownNoiseGenerator();
 	ShutdownRenderQueue();
 	ShutdownEnvironmentRendering();
@@ -402,7 +412,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	m_renderqueueshaders[RenderQueueShader::RM_LightFlatHighlightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
-		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST, (ShaderFlags)ShaderFlag::ShaderTypeVolumetricLine);
 
 	// TODO: DEBUG: Remove variants on the light shader
 	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
@@ -642,6 +652,13 @@ Result CoreEngine::InitialiseOverlayRenderer(void)
 	return ErrorCodes::NoError;
 }
 
+Result CoreEngine::InitialiseVolumetricLineRendering()
+{
+	VolumetricLine::InitialiseStaticData();
+
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseNoiseGenerator(void)
 {
 	m_noisegenerator = new NoiseGenerator();
@@ -789,6 +806,10 @@ void CoreEngine::ShutdownOverlayRenderer(void)
 		m_overlayrenderer->Shutdown();
 		SafeDelete(m_overlayrenderer);
 	}
+}
+
+void CoreEngine::ShutdownVolumetricLineRendering(void)
+{
 }
 
 void CoreEngine::ShutdownNoiseGenerator(void)
@@ -1058,6 +1079,21 @@ XMFLOAT2 CoreEngine::AdjustIntoLinearScreenSpace(XMFLOAT2 location, XMFLOAT2 siz
 {
 	const XMFLOAT2 & adjust = ScreenSpaceAdjustmentF();
 	return XMFLOAT2(adjust.x + location.x + (size.x * 0.5f), adjust.y - (location.y + (size.y * 0.5f)));
+}
+
+// Notify the core engine of an update to the GBuffer, which may be consumed by downstream render processes
+void CoreEngine::NotifyGBufferUpdate(DeferredGBuffer *gbuffer)
+{
+	assert(gbuffer != NULL);
+
+	m_gbuffer = gbuffer;
+}
+
+// Return a reference to the application GBuffer, which is updated by a primary render process and 
+// provided to the core engine after creation each frame
+DeferredGBuffer * CoreEngine::GetGBufferReference(void)
+{
+	return m_gbuffer;
 }
 
 // Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
@@ -1606,6 +1642,9 @@ void CoreEngine::RenderAllSystemObjects(SpaceSystem & system)
 			}
 		}
 	}
+
+	// Render the system projectile set
+	RenderProjectileSet(system.Projectiles);
 
 	// Now perform any post-processing.  Render all actors that have been queued up during rendering inside space environments, 
 	// so that we only need to change actor-specific engine states once per frame (instead of every time a model is rendered in the collection above)
@@ -2444,7 +2483,7 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 	// Make sure the collection is active (which guarantees that it contains >0 projectiles)
 	if (!projectiles.Active) return;
 
-	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered projectile set [")(projectiles.GetActiveProjectileCount())("]").str(), 
+	//RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered projectile set [")(projectiles.GetActiveProjectileCount())("]").str(), 
 	{
 		// Iterate through each element of the projectile set
 		for (std::vector<BasicProjectile>::size_type i = 0; i <= projectiles.LiveIndex; ++i)
@@ -2456,7 +2495,7 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 			// Submit directly for rendering using an instance generated from this projectile and the cached model/texture data in the projectile definition
 			SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, std::move(proj.GenerateRenderInstance()), proj.Position);
 		}
-	});
+	}//);
 }
 
 // Rendering method for skinned models
@@ -2480,7 +2519,12 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	//m.Params = line.Params;		// TODO: need to re-enable this
 	
 	// Submit to the render queue
-	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), std::move(m), line.P1);
+	//SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), std::move(m), line.P1);
+	// TODO: probably need to switch back to / implement z-sorted
+	// TODO: once working, switch VolLineShader::LineModel(line.RenderMaterial) for a single model with diff material passed in the submission call.  Saves a hash lookup in LineModel()
+	//SubmitForRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), NULL, std::move(m), RM_InstanceMetadata());
+	SubmitForRendering(RenderQueueShader::RM_VolLineShader, VolumetricLine::DefaultModel(), NULL, std::move(m), RM_InstanceMetadata());
+
 }
 
 // Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)

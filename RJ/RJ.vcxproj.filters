@@ -973,6 +973,9 @@
     <ClCompile Include="TerrainDefinition.cpp">
       <Filter>Objects\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="VolumetricLineRenderProcess.cpp">
+      <Filter>Engine\Rendering\DirectX11\Render Processes\VolumetricLine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2268,6 +2271,12 @@
     <ClInclude Include="ShadowSettings.h">
       <Filter>Engine\Rendering\DirectX11\ShadowManager</Filter>
     </ClInclude>
+    <ClInclude Include="VolumetricLineRenderProcess.h">
+      <Filter>Engine\Rendering\DirectX11\Render Processes\VolumetricLine</Filter>
+    </ClInclude>
+    <ClInclude Include="VolumetricLineRenderingCommonData.hlsl.h">
+      <Filter>HLSL\Common\VolumetricLine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2654,6 +2663,12 @@
     <Filter Include="Engine\Rendering\DirectX11\ShadowManager">
       <UniqueIdentifier>{7e1016cb-a877-4d6e-b66d-48cf2cc06753}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Render Processes\VolumetricLine">
+      <UniqueIdentifier>{dbe8702d-a6b9-43b1-b5c1-8003859689ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Common\VolumetricLine">
+      <UniqueIdentifier>{60c47ab6-9970-4b03-8012-2c6eb4fb33bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2760,6 +2775,18 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_shadowmap.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\gs_vol_line.gs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_vol_line.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vs_vol_line.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_vol_line_tex.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

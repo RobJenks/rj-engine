@@ -676,6 +676,7 @@
     <ClCompile Include="MissileLauncher.cpp" />
     <ClCompile Include="VariableSizeValue.cpp" />
     <ClCompile Include="Viewport.cpp" />
+    <ClCompile Include="VolumetricLineRenderProcess.cpp" />
     <ClCompile Include="__OLD_Model.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
@@ -1211,6 +1212,8 @@
     <ClInclude Include="MissileLauncher.h" />
     <ClInclude Include="VariableSizeValue.h" />
     <ClInclude Include="VectorisedFloat.h" />
+    <ClInclude Include="VolumetricLineRenderingCommonData.hlsl.h" />
+    <ClInclude Include="VolumetricLineRenderProcess.h" />
     <ClInclude Include="__OLD_Model.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
@@ -1341,6 +1344,22 @@
     <None Include="Object Hierarchy.cd" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Data\Shaders\vs_vol_line.vs.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">VS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\ps_vol_line_tex.ps.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Vol_Line_Tex</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">PS_Vol_Line_Tex</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Vol_Line_Tex</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl">
       <FileType>Document</FileType>
     </None>
@@ -1433,6 +1452,14 @@
     <None Include="Data\Shaders\motion_blur_resources.hlsl">
       <FileType>Document</FileType>
     </None>
+    <FxCompile Include="Data\Shaders\gs_vol_line.gs.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">GS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">GS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Geometry</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+    </FxCompile>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
@@ -1569,6 +1596,14 @@
     <None Include="Data\Shaders\shadowmap_resources.hlsl">
       <FileType>Document</FileType>
     </None>
+    <FxCompile Include="Data\Shaders\ps_vol_line.ps.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">PS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_Vol_Line</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Data\Shaders\vs_basic_texture.vs.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS_Basic_Texture</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

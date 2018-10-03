@@ -44,6 +44,7 @@ class Frustum;
 class Light;
 class LightingManagerObject;
 class DecalRenderingManager;
+class DeferredGBuffer;
 class FontShader;
 class AudioManager;
 class TextRenderer;
@@ -205,6 +206,12 @@ public:
 	// queue items multiple times through e.g. different shader pipelines
 	void					ClearRenderQueue(void);
 
+	// Notify the core engine of an update to the GBuffer, which may be consumed by downstream render processes
+	void					NotifyGBufferUpdate(DeferredGBuffer *gbuffer);
+
+	// Return a reference to the application GBuffer, which is updated by a primary render process and 
+	// provided to the core engine after creation each frame
+	DeferredGBuffer *		GetGBufferReference(void);
 
 	// Method to render the system region
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SystemRegion, 
@@ -533,6 +540,7 @@ private:
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
 	Result					InitialiseOverlayRenderer(void);
+	Result					InitialiseVolumetricLineRendering();
 	Result					InitialiseNoiseGenerator(void); 
 	Result					InitialiseEnvironmentRendering(void);
 
@@ -553,6 +561,7 @@ private:
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
 	void					ShutdownOverlayRenderer(void);
+	void					ShutdownVolumetricLineRendering();
 	void					ShutdownNoiseGenerator(void);
 	void					ShutdownEnvironmentRendering(void);
 
@@ -746,6 +755,10 @@ private:
 
 	// Vector of flags that determine special rendering states/effects
 	std::vector<bool>		m_renderflags;
+
+	// Core engine maintains a pointer to the active GBuffer, which is provided by the generating render 
+	// process (generally a DeferredRenderProcess or similar) each frame
+	DeferredGBuffer *		m_gbuffer;
 
 	// Cached & precalculated fields used for rendering an environment
 	AXMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment

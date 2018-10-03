@@ -14,7 +14,7 @@ struct GameConsoleCommand;
 // Debug flag which, when set, will silently ignore shader data bindings to invalid parameters.  Allows more
 // in-depth shader debugging since it does not matter if parameters are optimised out by the HLSL compiler
 // between hot-loads.  Only allowed during debug builds
-#define DEBUG_SHADER_RELAXED_BINDINGS
+//#define DEBUG_SHADER_RELAXED_BINDINGS
 
 
 class ShaderDX11 : public Shader

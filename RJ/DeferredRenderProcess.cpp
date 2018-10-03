@@ -119,7 +119,7 @@ void DeferredRenderProcess::PerformPostDataLoadInitialisation(void)
 	InitialiseRenderingDependencies();
 }
 
-// Response to a change in shader configuration or a reload of shader bytecode
+// Respond to a change in shader configuration or a reload of shader bytecode
 void DeferredRenderProcess::ShadersReloaded(void)
 {
 	Game::Log << LOG_INFO << "Reinitialising deferred render processes following shader reload\n";
@@ -605,7 +605,8 @@ void DeferredRenderProcess::RenderFrame(void)
 // End the frame; perform any post-render cleanup for the render process
 void DeferredRenderProcess::EndFrame(void)
 {
-	
+	// Notify the core engine that an updated GBuffer is available for other render processes
+	Game::Engine->NotifyGBufferUpdate(&GBuffer);
 }
 
 // TODO: Should make sure lights are sorted in future, so that directional lights come at the end of the light array, 
@@ -845,7 +846,7 @@ void DeferredRenderProcess::BindShadowMapResources(PipelineStateDX11 *pipeline, 
 {
 	assert(pipeline);
 
-	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
+	//pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
 	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, m_shadow_manager.RawPtr->GetShadowMappedLightDataBuffer());
 	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, m_shadow_manager.RawPtr->GetActiveShadowMap());
 }
@@ -855,7 +856,7 @@ void DeferredRenderProcess::UnbindShadowMapResources(PipelineStateDX11 *pipeline
 {
 	assert(pipeline);
 
-	pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, static_cast<ConstantBufferDX11*>(NULL));
+	//pipeline->GetShader(Shader::Type::VertexShader)->SetParameterData(param_vs_data, static_cast<ConstantBufferDX11*>(NULL));
 	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_data, static_cast<ConstantBufferDX11*>(NULL));
 	pipeline->GetShader(Shader::Type::PixelShader)->SetParameterData(param_ps_sm, static_cast<TextureDX11*>(NULL));
 }

@@ -3,10 +3,13 @@
 #ifndef __VolumetricLineH__
 #define __VolumetricLineH__
 
+#include <memory>
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
 #include "FastMath.h"
+#include "../Definitions/VertexDefinitions.hlsl.h"
 class MaterialDX11;
+class ModelBuffer;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -76,6 +79,12 @@ struct VolumetricLine : public ALIGN16<VolumetricLine>
 	// Retrieve or set the line radius
 	CMPINLINE float								GetLineRadius(void) const				{ return Params.x; }
 	CMPINLINE void								SetLineRadius(float radius)				{ Params.x = radius; }
+
+	// Static provider for vertex and other model data
+	static void										InitialiseStaticData(void);
+	static std::unique_ptr<Vertex_Standard>			SPDefaultVertex;
+	static std::unique_ptr<ModelBuffer>				SPDefaultModel;
+	static ModelBuffer *							DefaultModel(void);
 };
 
 

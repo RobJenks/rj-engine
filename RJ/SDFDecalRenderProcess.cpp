@@ -120,7 +120,7 @@ void SDFDecalRenderProcess::InitialisePipelines(void)
 {
 	// Direct rendering pipeline
 	Game::Log << LOG_INFO << "Initialising SDF decal rendering pipeline [dir]\n";
-	m_pipeline_direct= Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("SDF_Decal_Rendering_Direct");
+	m_pipeline_direct = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("SDF_Decal_Rendering_Direct");
 	m_pipeline_direct->SetShader(Shader::Type::VertexShader, m_vs_direct);
 	m_pipeline_direct->SetShader(Shader::Type::PixelShader, m_ps_direct);
 	m_pipeline_direct->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());

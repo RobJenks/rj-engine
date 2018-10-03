@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "ShaderDX11.h"
 class DeferredRenderProcess;
+class VolumetricLineRenderProcess;
 class SDFDecalRenderProcess;
 class UIRenderProcess;
 
@@ -13,6 +14,7 @@ public:
 	enum class RenderProcessClass : size_t
 	{
 		Primary = 0U,
+		VolumetricLine, 
 		UI,
 		Decal,
 		_COUNT
@@ -51,6 +53,7 @@ protected:
 // Static method which returns the name of a given render process; all render processes should be registered here
 template <class T>		constexpr const char * RenderProcess::Name(void) { return "<unknown>"; }
 template <>				constexpr const char * RenderProcess::Name<DeferredRenderProcess>(void) { return STRING(DeferredRenderProcess); }
+template <>				constexpr const char * RenderProcess::Name<VolumetricLineRenderProcess>(void) { return STRING(VolumetricLineRenderProcess); }
 template <>				constexpr const char * RenderProcess::Name<SDFDecalRenderProcess>(void) { return STRING(SDFDecalRenderProcess); }
 template <>				constexpr const char * RenderProcess::Name<UIRenderProcess>(void) { return STRING(UIRenderProcess); }
 

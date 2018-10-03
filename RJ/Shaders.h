@@ -32,7 +32,11 @@ public:
 
 	static const std::string ShadowMappingVertexShader;
 
-	static const std::string Shaders::StandardVertexShaderShadowMapped;
-	static const std::string Shaders::DeferredLightingPixelShaderShadowMapped;
+	static const std::string StandardVertexShaderShadowMapped;
+	static const std::string DeferredLightingPixelShaderShadowMapped;
+
+	static const std::string VolumetricLineVertexShader;
+	static const std::string VolumetricLineGeometryShader;
+	static const std::string VolumetricLinePixelShader;
 
 };

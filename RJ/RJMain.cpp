@@ -2750,48 +2750,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			}
 		}
 
-		/*auto pos = Game::CurrentPlayer->GetActor()->GetPosition();
-
-		auto View = Game::Engine->GetRenderViewMatrixF();
-		auto Projection = Game::Engine->GetRenderProjectionMatrixF();
-		auto ViewProjection = Game::Engine->GetRenderViewProjectionMatrixF();
-		auto InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
-		auto PriorFrameViewProjection = Game::Engine->GetPriorFrameViewProjectionMatrixF();
-		auto ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
-
-		auto ProjectionUnjittered = Game::Engine->GetRenderProjectionMatrixUnjitteredF();
-		auto PriorFrameViewProjectionUnjittered = Game::Engine->GetPriorFrameViewProjectionMatrixUnjitteredF();
-
-		auto * tile = cs()->FindTileAtLocation(Game::CurrentPlayer->GetActor()->GetElementLocation());
-
-		Game::Log << LOG_DEBUG << "Pos: " << Vector4ToString(pos)
-			<< ", View: " << tp(pos, View)
-			<< ", Proj: " << tp(pos, Projection)
-			<< ", ViewProj: " << tp(pos, ViewProjection)
-			<< ", LastViewProj: " << tp(pos, PriorFrameViewProjection)
-			<< ", UProj: " << tp(pos, ProjectionUnjittered)
-			<< ", LastUViewProj: " << tp(pos, PriorFrameViewProjectionUnjittered)
-			<< "\n";*/
-
-		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
-/*		auto renderinfo = Game::Engine->GetRenderInfo();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: Draw Calls: %zu, Instances: %zu, ZSortedInstances: %zu, SkinnedInstances: %zu [%s %s %s %s %s %s ]",
-			renderinfo.DrawCalls, renderinfo.InstanceCount, renderinfo.InstanceCountZSorted, renderinfo.InstanceCountSkinnedModel,
-			(renderinfo.ShipRenderCount == 0 ? "" : concat(" S.Ship = ")(renderinfo.ShipRenderCount).str().c_str()),
-			(renderinfo.ComplexShipRenderCount == 0 ? "" : concat(" C.Ship = ")(renderinfo.ComplexShipRenderCount).str().c_str()),
-			(renderinfo.ComplexShipSectionRenderCount == 0 ? "" : concat(" CS.Sec = ")(renderinfo.ComplexShipSectionRenderCount).str().c_str()),
-			(renderinfo.ComplexShipTileRenderCount == 0 ? "" : concat(" CS.Tile = ")(renderinfo.ComplexShipTileRenderCount).str().c_str()),
-			(renderinfo.ActorRenderCount == 0 ? "" : concat(" Actor = ")(renderinfo.ActorRenderCount).str().c_str()),
-			(renderinfo.TerrainRenderCount == 0 ? "" : concat(" Terrain = ")(renderinfo.TerrainRenderCount).str().c_str())
-		);
-		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";*/
-		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
-
-		//lt2()->SetModel(Model::GetModel("spotlight_cone_model"));
-		//lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
-		//lt()->SetSize(XMVectorReplicate(45.0f));
-		//Game::Engine->RenderObject(lt2());
-
+		Game::Engine->RenderVolumetricLine(VolumetricLine(ss()->GetPosition(), cs()->GetPosition(), XMFLOAT4(1, 0, 0, 1), 10.0f, Game::Engine->GetAssets().GetMaterial("debug_material")));
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
