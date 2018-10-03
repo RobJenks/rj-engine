@@ -1,7 +1,8 @@
 #include "ALIGN16.h"
-#include <allocators>
 
 #ifdef ALIGN16_ENABLED
+
+#include <memory_resource>
 
 // Static allocation method along 16-byte word boundaries
 template <typename T>

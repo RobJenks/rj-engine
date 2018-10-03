@@ -2048,6 +2048,8 @@ bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection_Debug(cons
 	if (intersection)
 	{
 		(*ppOutClosestCollider) = OBBIntersectionResult.OBB;
+
+#pragma warning(suppress: 4834)	// Suppress [[nodiscard]] ignored warning
 		std::remove(outIntersectingLeaves.begin(), outIntersectingLeaves.end(), OBBIntersectionResult.OBB);
 	}
 
