@@ -2,7 +2,7 @@
 
 #include <filesystem>
 #include "../Definitions/ByteString.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 
 class FileUtils

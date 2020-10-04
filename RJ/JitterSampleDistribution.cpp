@@ -25,7 +25,7 @@ float JitterSampleDistribution::HaltonSequence(int prime, int index /* Cannot be
 	{
 		f /= prime;
 		r += f * (i % prime);
-		i = static_cast<int>( std::floor(i / static_cast<float>(prime)) );
+		i = static_cast<int>( floor(i / static_cast<float>(prime)) );
 	}
 	return r;
 }

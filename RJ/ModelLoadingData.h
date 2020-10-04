@@ -3,7 +3,7 @@
 #include <string>
 #include <filesystem>
 #include "CompilerSettings.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 
 struct ModelLoadingData

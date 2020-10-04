@@ -9,7 +9,7 @@
 #include "IndexBufferDX11.h"
 #include "MaterialDX11.h"
 #include "Model.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // Initialise static data
 Model::ModelCollection Model::Models;

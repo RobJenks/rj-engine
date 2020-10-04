@@ -52,7 +52,7 @@ class Damage;
 class DamageSet;
 class DamageResistance;
 class DamageResistanceSet;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data 

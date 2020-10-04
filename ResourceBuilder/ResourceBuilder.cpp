@@ -5,7 +5,7 @@
 #include <sstream>
 #include "ResourceBuilderUtil.h"
 #include "ResourceBuilder.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // Initialise static variables
 const std::string ResourceBuilder::DEFAULT_MODEL_PIPELINE_CONFIG = "./ResourceBuilderDefaultModelPipelineConfig.txt";
@@ -93,7 +93,7 @@ void ResourceBuilder::ExecuteModelPipeline(void)
 	std::cout << "Project base data directory is \"" << base_dir.string() << "\"\n";
 
 	std::vector<fs::path> files;
-	for (auto & entry : fs::recursive_directory_iterator(base_dir, fs::v1::directory_options::follow_directory_symlink))
+	for (auto & entry : fs::recursive_directory_iterator(base_dir, fs::directory_options::follow_directory_symlink))
 	{
 		fs::path file(entry.path());
 		if (fs::is_directory(file)) continue;

@@ -11,7 +11,7 @@
 
 
 // TODO: VS2017 is still implementing as exp branch; convert to std library once available
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // Initialise static data
 ShaderDX11::ShaderParameterIndex ShaderDX11::INVALID_SHADER_PARAMETER = (std::numeric_limits<ShaderParameterIndex>::max)();
