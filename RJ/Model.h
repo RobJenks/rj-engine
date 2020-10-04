@@ -6,7 +6,7 @@
 #include "ModelBuffer.h"
 #include "ModelLoadingData.h"
 #include "CollisionSpatialDataF.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 class Model
 {

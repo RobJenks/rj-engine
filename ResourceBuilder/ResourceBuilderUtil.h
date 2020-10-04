@@ -2,7 +2,7 @@
 
 #include <string>
 #include <filesystem>
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 
 class ResourceBuilderUtil

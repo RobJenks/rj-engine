@@ -48,8 +48,8 @@ ModelSizeProperties	ModelSizeProperties::Calculate(const ModelData & model)
 	for (unsigned int i = 0U; i < model.VertexCount; ++i)
 	{
 		const auto & p = model.VertexData[i].position;
-		min_bounds = XMFLOAT3(std::fmin(min_bounds.x, p.x), fmin(min_bounds.y, p.y), fmin(min_bounds.z, p.z));
-		max_bounds = XMFLOAT3(std::fmax(max_bounds.x, p.x), fmax(max_bounds.y, p.y), fmax(max_bounds.z, p.z));
+		min_bounds = XMFLOAT3(fmin(min_bounds.x, p.x), fmin(min_bounds.y, p.y), fmin(min_bounds.z, p.z));
+		max_bounds = XMFLOAT3(fmax(max_bounds.x, p.x), fmax(max_bounds.y, p.y), fmax(max_bounds.z, p.z));
 	}
 
 	// Update other derived data

@@ -5,7 +5,7 @@
 #include <filesystem>
 #include "../Definitions/ByteString.h"
 using namespace DirectX;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 #define FLOAT2_STR(_float2)		"[" << _float2.x << ", " << _float2.y << "]"
 #define FLOAT3_STR(_float3)		"[" << _float3.x << ", " << _float3.y << ", " << _float3.z << "]"

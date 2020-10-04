@@ -1504,7 +1504,7 @@ Result RJMain::InitialiseGameDataDependencies(void)
 	// Derive other required application paths
 	// TODO: Reverted back to main data directory for now; copy to ImageContent to be set up via VStudio image pipeline
 	//D::IMAGE_DATA_S = std::string(Game::ExePath + "\\Data\\ImageContent\\Data\\");
-	D::IMAGE_DATA_S =  std::string("C:\\Users\\robje\\Documents\\Visual Studio 2017\\Projects\\RJ\\RJ\\Data\\");
+	D::IMAGE_DATA_S = std::string(D::DATA);
 	D::IMAGE_DATA = D::IMAGE_DATA_S.c_str();
 
 	// Make sure paths are valid

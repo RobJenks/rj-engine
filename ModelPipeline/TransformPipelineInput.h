@@ -5,7 +5,7 @@
 #include <filesystem>
 #include "TransformerComponent.h"
 #include "../Definitions/ModelData.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 
 // Input transform may return multiple ModelData objects, each of which will be pushed through the pipeline independently

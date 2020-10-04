@@ -3,7 +3,7 @@
 #include <string>
 #include <filesystem>
 #include "../Definitions/ModelData.h"
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 
 class ObjFormatIntegration
